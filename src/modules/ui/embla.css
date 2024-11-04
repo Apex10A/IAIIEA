@@ -1,0 +1,62 @@
+.embla {
+  position: relative;
+  overflow: hidden;
+}
+
+.embla__viewport {
+  overflow: hidden;
+  width: 100%;
+  height: 100%; /* Full screen height */
+}
+
+.embla__container {
+  display: flex;
+  height: 100%; /* Full screen height */
+}
+
+.embla__slide {
+  position: relative;
+  width: 100%;
+  height: 100%; /* Full screen height */
+  flex-shrink: 0;
+}
+
+.embla__slide__number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 5rem;
+  color: white;
+}
+
+.embla {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .embla__viewport {
+    overflow: hidden;
+    width: 100%;
+    height: 100%; /* Full screen height */
+  }
+  
+  .embla__container {
+    display: flex;
+    height: 100%; /* Full screen height */
+  }
+  
+  .embla__slide {
+    position: relative;
+    width: 100%;
+    height: 100%; /* Full screen height */
+    flex-shrink: 0;
+  }
+  
+  .embla__slide__number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    color: white;
+  }
+  

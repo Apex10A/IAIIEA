@@ -1,0 +1,67 @@
+.embla {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .embla__viewport {
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .embla__container {
+    display: flex;
+    will-change: transform;
+  }
+  
+  .embla__slide {
+    position: relative;
+    flex: 0 0 50%;
+    min-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  *{
+    box-sizing: border-box;
+    /*add the other browsers here too*/
+  }
+
+  html, body{
+     padding: 0;
+     margin: 0;
+  }
+
+  .embla {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .embla__viewport {
+    overflow: hidden;
+    width: 100%;
+    height: 100%; /* Full screen height */
+  }
+  
+  .embla__container {
+    display: flex;
+    height: 100%; /* Full screen height */
+  }
+  
+  .embla__slide {
+    position: relative;
+    width: 100%;
+    height: 100%; /* Full screen height */
+    flex-shrink: 0;
+  }
+  
+  .embla__slide__number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    color: white;
+  }
+ 
+ 
+ 
+  

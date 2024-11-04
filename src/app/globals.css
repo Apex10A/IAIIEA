@@ -19,3 +19,12 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.background {
+  background-image: url('/icons/Landing page.png'); /* Corrected path */
+  width: 100%;
+  min-height: 100vh; /* Ensures the background covers the entire viewport */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

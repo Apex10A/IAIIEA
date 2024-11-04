@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 
-const conference = () => {
+const Conference = () => {
 
     return (
         <div>
-            
+            <h1>sks</h1>
         </div>
     );
 };
 
-export default conference;
+export default Conference;

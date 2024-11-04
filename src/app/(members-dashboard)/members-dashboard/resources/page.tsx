@@ -1,9 +1,15 @@
+"use client"
 import React, {useState} from 'react'
 import Link from 'next/link'
 import ButtonProp from '../notification/button'
 
+
 const Page = () => {
     const [selectedSection, setSelectedSection] = useState<'Conference resources' | 'Seminar resources'>('Conference resources');
+
+const handleSectionChange = (section: 'Conference resources' | 'Seminar resources') => {
+  setSelectedSection(section);
+};
     
   return (
     <div>
@@ -12,9 +18,9 @@ const Page = () => {
         </div>
         <div> 
             <div>
-            <div>
+            {/* <div>
             <ButtonProp options={['Conference resources', 'Seminar resources']} selectedSection={selectedSection} setSelectedSection={setSelectedSection} />
-            </div>
+            </div> */}
             </div>
 {selectedSection === 'Conference resources' ? (
             <div className='my-5 flex items-center gap-10'>

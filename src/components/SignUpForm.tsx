@@ -80,7 +80,7 @@ export const SignUpForm = () => {
       f_name: '',
       m_name: '',
       l_name: '',
-      type: "individual",
+      type: "Individual",
       profession: "professor",
       phone: '',
       email: '',
@@ -134,7 +134,6 @@ export const SignUpForm = () => {
           router.push("/dashboard")
         } else {
           // Handle additional Clerk verification steps if needed
-          const { emailAddressId } = clerkResult.verifications.emailAddress
           await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
           router.push('/verify-email')
         }

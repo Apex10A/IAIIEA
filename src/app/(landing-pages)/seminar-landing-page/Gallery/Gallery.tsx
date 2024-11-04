@@ -1,22 +1,16 @@
-import React from 'react'
-import GallerySlider from "./GallerySlider"
-import Image from "@/assets/auth/images/iaiieaBg.png"; // Importing image path
+import React from 'react';
+import GallerySlider from "./GallerySlider";
+import Image from "@/assets/auth/images/iaiieaBg.png"; // StaticImageData import
+import { StaticImageData } from 'next/image'; // Import StaticImageData type
 
-const imageList = [
-  Image, // Using the image path
-  Image,
-  Image,
-];
+const imageList: StaticImageData[] = [Image, Image, Image]; // Use StaticImageData[]
 
-const Gallery = () => {
+const Gallery: React.FC = () => {
   return (
-    <div className='flex flex-col items-center justify-center min-h-[600px]'>
-        <div>
-            <h1 className='text-[48px] font-[500] text-[#0B142F]'>Gallery</h1>
-        </div>
-        <GallerySlider images={imageList}/>
+    <div>
+      <GallerySlider images={imageList} />
     </div>
-  )
-}
+  );
+};
 
-export default Gallery
+export default Gallery;

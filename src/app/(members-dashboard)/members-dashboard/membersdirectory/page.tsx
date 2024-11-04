@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from 'react';
 import ButtonProp from '../notification/button';
 import IAIIEAmembers from './IAIIEAmembers/page'
@@ -53,13 +54,13 @@ const Page = () => {
         </p>
       </div>
 
-      <div>
+      {/* <div>
         <ButtonProp
           options={['IAIIEA members', 'Event speakers', 'Conference participants', 'Volunteers', 'Workshop participants']}
           selectedSection={selectedSection}
           setSelectedSection={setSelectedSection}
         />
-      </div>
+      </div> */}
 
       <div className='py-10'>
         

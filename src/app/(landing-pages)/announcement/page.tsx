@@ -1,12 +1,21 @@
 import React from 'react'
-import Notification from "@/app/(members-dashboard)/notification/Notification"
 
-const page = () => {
+const Page = () => {
   return (
-    <div>
-        
-    </div>
+    <div>page</div>
   )
 }
 
-export default page
+export default Page
+// import React from 'react'
+// import Notification from "@/app/(members-dashboard)/notification/Notification"
+
+// const page = () => {
+//   return (
+//     <div>
+        
+//     </div>
+//   )
+// }
+
+// export default page

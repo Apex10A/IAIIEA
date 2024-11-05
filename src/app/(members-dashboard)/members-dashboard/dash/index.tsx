@@ -1,48 +1,50 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { DashboardContent } from '../DashboardContent';
 
-// Define interface for user data
 interface UserDataType {
   f_name: string;
   registration: string;
 }
 
-// Define props interface for DashboardContent
-interface DashboardContentProps {
-  user: UserDataType;
-}
-
-const DashboardContent: React.FC<DashboardContentProps> = ({ }) => {
-  // Your DashboardContent implementation
-  return <div>Dashboard Content</div>
-}
-
 export default function DashboardPage() {
-  const { user, isLoaded } = useUser()
-  const router = useRouter()
-  const [userData, setUserData] = useState<UserDataType | null>(null)
+  const router = useRouter();
+  const [userData, setUserData] = useState<UserDataType | null>(null);
 
   useEffect(() => {
-    if (!isLoaded) return // Wait for Clerk to load user data
-    
-    if (!user) {
-      // Use router.push instead of RedirectToSignIn
-      // router.push('/login')
-    } else {
-      // Set user data once user is available
-      setUserData({
-        f_name: user.firstName || '',
-        registration: (user.publicMetadata.registration as string) || '',
-      })
-    }
-  }, [user, isLoaded, router])
+    // Check for token in localStorage
+    const token = localStorage.getItem('access_token');
+    const storedUserData = localStorage.getItem('user_data');
 
-  if (!isLoaded || !userData) {
-    return <p>Loading...</p> // Show loading while waiting for user data
+    if (!token) {
+      router.push('/login'); // Redirect to login if no token
+    } else {
+      if (storedUserData) {
+        try {
+          const parsedData = JSON.parse(storedUserData);
+          setUserData({
+            f_name: parsedData.f_name || 'User',
+            registration: parsedData.registration || '',
+          });
+        } catch (error) {
+          console.error('Error parsing stored user data:', error);
+          router.push('/login'); // Redirect to login if parsing fails
+        }
+      } else {
+        router.push('/login'); // Redirect if no user data found
+      }
+    }
+  }, [router]);
+
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg text-gray-600">Loading...</p>
+      </div>
+    );
   }
 
-  return <DashboardContent user={userData} />
+  return <DashboardContent user={userData} />;
 }

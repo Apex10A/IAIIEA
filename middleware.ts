@@ -1,12 +1,28 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default clerkMiddleware();
+export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
+  const isPublicPath = path === '/login' || path === '/register' || path === '/'
+  
+  const token = request.cookies.get('token')?.value || ''
 
+  if (isPublicPath && token) {
+    return NextResponse.redirect(new URL('/members-dashboard', request.url))
+  }
+
+  if (!isPublicPath && !token) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+}
+
+// Add your protected routes
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
-  ],
-};
+    '/members-dashboard',
+    '/members-dashboard/:path*',
+    '/login',
+    '/register'
+  ]
+}

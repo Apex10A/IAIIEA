@@ -1,56 +1,58 @@
-"use client"
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
-import SearchIcon from '../../../assets/landingpage/svg/VectorFour';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/modules/ui/avatar';
-import { Settings, LogOut, Menu, Search } from 'lucide-react';
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuLabel,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-// } from '@/components/ui/dropdown-menu';
+import { Menu, Search, Settings, LogOut } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/modules/ui/avatar';
 
-// interface User {
-//   f_name?: string;
-//   l_name?: string;
-//   image_url?: string;
-//   email?: string;
-//   role?: 'admin' | 'user';
-// }
-// { user }: { user: User }
+interface User {
+  f_name?: string;
+  l_name?: string;
+  image_url?: string;
+  email?: string;
+  role?: 'admin' | 'user';
+}
+
 const DashboardHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Simulating fetching user data from localStorage
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    } else {
+      router.push('/login'); // Redirect to login if no user data
+    }
+  }, [router]);
+
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   return (
     <>
       {/* Header */}
       <div className="fixed w-full bg-[#0E1A3D] z-40 py-3">
-        {/* Main Header Content */}
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-4">
-          <div className="flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] lg:max-w-full mx-auto px-4 md:px-8 py-4">
+          <div className="flex items-center justify-between  px-auto md:px-14">
             {/* Logo */}
-            <div className="flex-shrink-0">
-              <Link href="/" className="block w-[120px] md:w-auto">
-                <Image src={Logo} alt="Logo" priority className="w-full h-auto" />
-              </Link>
-            </div>
+            <Link href="/" className="block w-[120px] md:w-[160px]">
+              <Image src={Logo} alt="Logo" priority className="w-full h-auto" />
+            </Link>
 
             {/* Desktop Search */}
             <div className="hidden md:flex flex-1 max-w-xl mx-4 relative">
-              <div className="absolute top-1/2 -translate-y-1/2 left-3">
-                <SearchIcon />
-              </div>
               <input 
                 type="search" 
                 placeholder="Search for movies, music, shows" 
                 className="w-full bg-white rounded-3xl px-10 py-3 outline-none"
               />
+              <Search className="absolute top-1/2 -translate-y-1/2 left-3" />
             </div>
 
             {/* Mobile Menu Button */}
@@ -62,110 +64,63 @@ const DashboardHeader = () => {
             </button>
 
             {/* Profile Dropdown */}
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-2 md:gap-3 cursor-pointer">
-                  <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                    <AvatarImage
-                      src={user?.image_url}
-                      alt={user?.f_name || 'User'}
-                    />
-                    <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
-                      {user?.f_name?.charAt(0) || user?.email?.charAt(0) || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden md:flex flex-col">
-                    <span className="text-sm font-medium text-white">
-                      {user?.f_name} {user?.l_name}
+            <div className="relative">
+              <div 
+                onClick={toggleDropdown}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                {user && (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                      <AvatarImage
+                        src={user.image_url || '/default-avatar.png'}
+                        alt={user.f_name || 'User'}
+                      />
+                      <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
+                        {user.f_name?.charAt(0) || user.email?.charAt(0) || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:inline text-white">
+                      {user.f_name} {user.l_name}
                     </span>
                   </div>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="p-0">
-                  <div className="p-4 bg-gray-50">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage
-                          src={user?.image_url}
-                          alt={user?.f_name || 'User'}
-                        />
-                        <AvatarFallback className="bg-yellow-200 py-2 px-2 uppercase text-[#0E1A3D] font-bold">
-                          <p className='text-2xl'>{user?.f_name?.charAt(0) || user?.email?.charAt(0) || '?'}</p>
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          {user?.f_name} {user?.l_name}
-                        </h4>
-                        <span className="text-sm text-gray-500 capitalize">
-                          {user?.role || 'user'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link 
-                    href="/members-dashboard/settings" 
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Settings size={18} />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    window.location.href = '/api/auth/signout';
-                  }}
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                >
-                  <LogOut size={18} className="mr-2" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
-          </div>
-
-          {/* Mobile Search - Only visible when search is toggled */}
-          {isSearchVisible && (
-            <div className="md:hidden mt-4 px-2">
-              <div className="relative">
-                <div className="absolute top-1/2 -translate-y-1/2 left-3">
-                  <SearchIcon />
-                </div>
-                <input 
-                  type="search" 
-                  placeholder="Search for movies, music, shows" 
-                  className="w-full bg-white rounded-3xl px-10 py-2.5 outline-none"
-                />
+                )}
               </div>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2">
+                  <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <Settings size={18} className="inline-block mr-2" />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('user_data');
+                      router.push('/login');
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                  >
+                    <LogOut size={18} className="inline-block mr-2" />
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-[#0E1A3D] border-t border-gray-700">
             <div className="px-4 py-3">
-              <button 
-                onClick={() => setIsSearchVisible(!isSearchVisible)}
-                className="flex items-center gap-2 text-white w-full py-2"
-              >
-                <Search size={20} />
-                <span>Search</span>
-              </button>
-              <Link 
-                href="/dashboard/settings"
-                className="flex items-center gap-2 text-white w-full py-2"
-              >
+              <Link href="/dashboard/settings" className="flex items-center gap-2 text-white w-full py-2">
                 <Settings size={20} />
                 <span>Settings</span>
               </Link>
               <button 
                 onClick={() => {
-                  window.location.href = '/api/auth/signout';
+                  localStorage.removeItem('user_data');
+                  router.push('/login');
                 }}
                 className="flex items-center gap-2 text-red-400 w-full py-2"
               >
@@ -177,15 +132,7 @@ const DashboardHeader = () => {
         )}
       </div>
 
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-30"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Spacer to prevent content from being hidden under fixed header */}
+      {/* Spacer */}
       <div className="h-16 md:h-20" />
     </>
   );

@@ -4,22 +4,39 @@ import Logo from "@/assets/auth/images/IAIIEA Logo I.png";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { FiChevronDown, FiChevronUp, FiX } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiX, FiUser, FiLogOut } from "react-icons/fi";
 import "../../../app/globals.css";
 import { Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    // Check for user data in localStorage when component mounts
+    const storedUserData = localStorage.getItem("user_data");
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_data");
+    setUserData(null);
+    router.push("/");
+  };
 
   const closeAllDropdowns = () => {
     setActiveDropdown(null);
+    setIsUserMenuOpen(false);
   };
 
   const handleDropdownClick = (dropdown: string) => {
@@ -27,7 +44,12 @@ const Header = () => {
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    if (
+      dropdownRef.current && 
+      !dropdownRef.current.contains(event.target as Node) &&
+      userMenuRef.current && 
+      !userMenuRef.current.contains(event.target as Node)
+    ) {
       closeAllDropdowns();
     }
   };
@@ -47,7 +69,7 @@ const Header = () => {
   const dropdownContent = {
     members: [
       { title: "How to join", description: "Discover how to become a valued member", link: "/registerTwo", image: "/Head.png" },
-      { title: "Login", description: "Access exclusive educational events and resources", link: "/sign-in", image: "/HeadTwo.png" }
+      { title: "Login", description: "Access exclusive educational events and resources", link: "/login", image: "/HeadTwo.png" }
     ],
     programmes: [
       { title: "Conference", description: "Meet industry experts in live interactive sessions", link: "/conference-Registration", image: "/Head.png" },
@@ -58,6 +80,33 @@ const Header = () => {
       { title: "News", description: "Find out happenings in the educational industry", link: "/gallery/news", image: "/HeadTwo.png" }
     ]
   };
+
+  const renderUserMenu = () => (
+    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+      <div className="px-4 py-2 border-b">
+        <p className="text-sm font-medium text-gray-900">{userData?.name}</p>
+        <p className="text-xs text-gray-500">{userData?.email}</p>
+      </div>
+      <Link
+        href="/members-dashboard"
+        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        Dashboard
+      </Link>
+      <Link
+        href="/profile"
+        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        Profile Settings
+      </Link>
+      <button
+        onClick={handleLogout}
+        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+      >
+        Sign out
+      </button>
+    </div>
+  );
 
   const renderDropdownMenu = (type: keyof typeof dropdownContent) => {
     return (
@@ -92,6 +141,7 @@ const Header = () => {
         </div>
 
         <div className="flex flex-col p-5 space-y-4">
+          {/* Mobile menu items */}
           <Link
             href="/"
             className={`text-gray-300 py-2 ${pathname === "/" ? "text-yellow-500" : ""}`}
@@ -104,7 +154,9 @@ const Header = () => {
             <div key={key}>
               <button
                 onClick={() => handleDropdownClick(key)}
-                className={`flex items-center justify-between w-full text-gray-300 py-2 ${activeDropdown === key ? "text-yellow-500" : ""}`}
+                className={`flex items-center justify-between w-full text-gray-300 py-2 ${
+                  activeDropdown === key ? "text-yellow-500" : ""
+                }`}
               >
                 <span className="capitalize">{key}</span>
                 {activeDropdown === key ? <FiChevronUp /> : <FiChevronDown />}
@@ -135,14 +187,32 @@ const Header = () => {
           </Link>
 
           <div className="mt-4">
-            {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+            {userData ? (
+              <div className="space-y-2">
+                <div className="text-gray-300 border-t pt-4">
+                  <p className="font-medium">{userData.name}</p>
+                  <p className="text-sm">{userData.email}</p>
+                </div>
+                <Link href="/members-dashboard" className="block text-gray-300 py-2">
+                  Dashboard
+                </Link>
+                <Link href="/profile" className="block text-gray-300 py-2">
+                  Profile Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left text-red-400 py-2 flex items-center gap-2"
+                >
+                  <FiLogOut size={18} />
+                  Sign out
+                </button>
+              </div>
             ) : (
-              <SignInButton mode="modal">
+              <Link href="/login" onClick={toggleMobileMenu}>
                 <button className="w-full bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]">
                   Login
                 </button>
-              </SignInButton>
+              </Link>
             )}
           </div>
         </div>
@@ -206,21 +276,26 @@ const Header = () => {
               </Link>
             </div>
 
-            <div>
-              {/* {isSignedIn ? (
-                <UserButton afterSignOutUrl="/" />
+            <div className="relative" ref={userMenuRef}>
+              {userData ? (
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 text-gray-300 hover:text-white"
+                >
+                  <div className="w-14 h-14 rounded-full bg-[#D5B93C] flex items-center justify-center">
+                    <FiUser size={20} />
+                  </div>
+                  <span>{userData.name}</span>
+                  {isUserMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
+                </button>
               ) : (
-                <SignInButton mode="modal">
+                <Link href="/login">
                   <button className="bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]">
                     Login
                   </button>
-                </SignInButton>
-              )} */}
-                 <Link href="/login" onClick={toggleMobileMenu}>
-                <button className="w-full bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C] mt-4">
-                  Login
-                </button>
-              </Link>
+                </Link>
+              )}
+              {isUserMenuOpen && userData && renderUserMenu()}
             </div>
           </div>
         </div>

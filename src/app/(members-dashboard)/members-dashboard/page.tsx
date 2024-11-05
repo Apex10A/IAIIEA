@@ -1,15 +1,11 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
-import { useUser, RedirectToSignIn } from '@clerk/clerk-react';
 import { useRouter } from 'next/navigation';
-// import { Lock } from 'lucide-react';
 
 // Components
 import Sidebar from '@/components/layout/sidebar/page';
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
-// import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-// import { Button } from '@/components/ui/button';
 
 // Pages
 import Dashboard from "@/app/(members-dashboard)/members-dashboard/dash/index";
@@ -23,21 +19,17 @@ import Forum from "@/app/(members-dashboard)/members-dashboard/forum/page";
 
 // TypeScript interfaces
 interface UserData {
-  status: string;
-  message: string;
-  data: {
-    token: string;
-    user_data: {
-      f_name: string;
-      l_name: string;
-      m_name: string;
-      phone: string;
-      email: string;
-      registration: string;
-      membership_due_date: string;
-    };
-    pending_payments: any[];
+  token: string;
+  user_data: {
+    f_name: string;
+    l_name: string;
+    m_name: string;
+    phone: string;
+    email: string;
+    registration: string;
+    membership_due_date: string;
   };
+  pending_payments: any[];
 }
 
 interface ComponentMap {
@@ -49,35 +41,19 @@ const DashboardLayout: React.FC = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const router = useRouter();
-  const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    if (isLoaded) {
-      if (!user) {
-        // RedirectToSignIn();
-      } else {
-        setUserData({
-          status: "success",
-          message: "User data retrieved",
-          data: {
-            token: "",
-            user_data: {
-              f_name: user.firstName || '',
-              l_name: user.lastName || '',
-              m_name: "",
-              phone: user.primaryPhoneNumber?.phoneNumber || '',  // Fixed here
-              email: user.primaryEmailAddress?.emailAddress || '', // Also fixed email for consistency
-              registration: "complete",
-              membership_due_date: ""
-            },
-            pending_payments: []
-          }
-        });
-      }
-    }
-  }, [user, isLoaded]);
+    // Check for token in localStorage
+    const token = localStorage.getItem('access_token');
+    const user = localStorage.getItem('user_data');
 
-  // Rest of the component remains the same
+    if (token && user) {
+      setUserData(JSON.parse(user));
+    } else {
+      router.push('/login');
+    }
+  }, [router]);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -91,13 +67,13 @@ const DashboardLayout: React.FC = () => {
       'Members Directory': <MembersDirectory />,
       Resources: <IAIIEAResources />,
       Gallery: <Gallery />,
-      Forum: <Forum />
+      Forum: <Forum />,
     };
 
     return components[activeComponent] || <Dashboard />;
   };
 
-  if (!isLoaded) {
+  if (!userData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -137,9 +113,7 @@ const DashboardLayout: React.FC = () => {
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 md:z-0`}
         >
-          <Sidebar
-            setActiveComponent={setActiveComponent}
-          />
+          <Sidebar setActiveComponent={setActiveComponent} />
         </div>
 
         {isSidebarOpen && (
@@ -150,9 +124,7 @@ const DashboardLayout: React.FC = () => {
         )}
 
         <div className="flex-grow pt-32 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
-            {renderComponent()}
-          </div>
+          <div className="max-w-7xl mx-auto">{renderComponent()}</div>
         </div>
       </div>
     </div>

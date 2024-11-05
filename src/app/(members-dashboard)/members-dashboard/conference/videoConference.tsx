@@ -1,73 +1,112 @@
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { Play } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import ReactPlayer from 'react-player';
+import { Play, Pause, Volume2, Maximize, Settings } from 'lucide-react';
 
 const CustomMediaPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoId = 'NP5QrQsIRqM';
+  const [progress, setProgress] = useState(0);
+  const playerRef = useRef(null);
+  const videoUrl = 'https://www.youtube.com/watch?v=NP5QrQsIRqM';
+
+  const handleProgress = (state: { played: number; }) => {
+    setProgress(state.played * 100);
+  };
+
+  const togglePlayPause = () => {
+    setIsPlaying((prev) => !prev);
+  };
 
   return (
-    <div className='py-10'>
-        <div>
-        <h1 className='text-[35px] text-[#0B142F] font-[700] opacity-[0.8] pb-2'>Conference Resources</h1>
-    </div>
-    <div className="max-w-[600px]">
-      <div className="relative">
-        <div className="absolute z-[20] bottom-5 right-5">
-          <button className="bg-[#f2e9c3] px-3 py-2 rounded-md font-[600] text-[18px]">
-            1:12:00
-          </button>
-        </div>
-        
-        <div className="absolute z-[20] top-7 right-0">
-          <button className="bg-[#f2e9c3] px-5 py-3 rounded-l-[30px] font-[500] text-[18px]">
-            Video resources
-          </button>
-        </div>
-
-        {/* Video/Thumbnail Container */}
-        <div className="relative w-full aspect-video bg-black">
-          {!isPlaying ? (
-            <>
-              <Image 
-                src="/Meeting.png"
-                alt="Video thumbnail" 
-                width={600}
-                height={400}
-                className="w-full h-full object-cover"
+    <div className="py-10">
+      <h1 className="text-3xl text-gray-900 font-bold opacity-80 pb-2">
+        Conference Resources
+      </h1>
+      
+      <div className="max-w-2xl">
+        <div className="relative">
+          <div className="relative w-full aspect-video bg-black rounded-t-xl overflow-hidden">
+            {/* Wrapper div to control iframe visibility */}
+            <div className="relative w-full h-full">
+              <ReactPlayer
+                ref={playerRef}
+                url={videoUrl}
+                playing={isPlaying}
+                width="100%"
+                height="100%"
+                onProgress={handleProgress}
+                controls={false}
+                config={{
+                  youtube: {
+                    playerVars: {
+                      modestbranding: 1,
+                      rel: 0,
+                      controls: 0,
+                      showinfo: 0,
+                      iv_load_policy: 3,
+                      disablekb: 1
+                    },
+                    embedOptions: {
+                      controls: 0
+                    }
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
               />
-              <button 
-                onClick={() => setIsPlaying(true)}
-                className="absolute inset-0 m-auto w-16 h-16 bg-white/80 rounded-full flex items-center justify-center hover:bg-white/90 transition-colors"
-              >
-                <Play size={32} className="text-black ml-1" />
-              </button>
-            </>
-          ) : (
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute top-0 left-0 w-full h-full"
-            />
-          )}
+              
+              {/* Overlay to hide YouTube elements */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-16 bg-black" /> {/* Hide top bar */}
+                <div className="absolute bottom-16 right-0 w-24 h-24 bg-black" /> {/* Hide logo */}
+              </div>
+            </div>
+
+            {/* Custom Controls */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent">
+              {/* Progress Bar */}
+              <div className="w-full h-1 bg-white/30">
+                <div 
+                  className="h-full bg-white transition-all duration-300 ease-out"
+                  style={{ width: `${progress}%` }} 
+                />
+              </div>
+              
+              {/* Controls Bar */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <button 
+                  onClick={togglePlayPause}
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  {isPlaying ? 
+                    <Pause size={24} className="text-white" /> : 
+                    <Play size={24} className="text-white" />
+                  }
+                </button>
+                
+                {/* Time Display - Optional */}
+                <div className="text-white text-sm ml-4">
+                  {Math.floor(progress * 1.12)} min
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border rounded-b-xl px-7 pt-3 pb-8">
+            <h2 className="text-gray-900 text-2xl font-medium">
+              Strategic Thinking for Effective Spiritual and Secular Leadership.
+              <span className="block text-lg text-gray-700 mt-1">
+                Talk Presented by Dr Mike Egbayelo, PhD, FCIS, FICBC, FIMC
+              </span>
+            </h2>
+            <button className="font-semibold text-blue-600 hover:text-blue-700 underline pt-3">
+              Listen to audio version
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className="bg-[#fff] border rounded-b-2xl px-7 pt-3 pb-8 max-w-[600px]">
-        <p className="text-[#0B142F] text-[24px] font-[500] max-w-xl pt-3 pb-2">
-          Strategic Thinking for Effective Spiritual and Secular Leadership. 
-          Talk Presented by Dr Mike Egbayelo, PhD,FCIS, FICBC, FIMC
-        </p>
-        <button className="font-[600] underline pt-3">
-          Audio listen
-        </button>
-      </div>
-    </div>
     </div>
   );
 };

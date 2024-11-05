@@ -81,7 +81,7 @@ const EmblaCarousel: React.FC<PropType> = ({ options, autoPlayInterval = 5000 })
                   <h1 className="text-4xl sm:text-5xl lg:text-[80px] text-center lg:text-left font-semibold text-white leading-tight lg:leading-[1.2]">
                     <span className="text-[#D5B93C]">Innovating</span> assessment practices to better support education.
                   </h1>
-                  <Link href="/members-Registration">
+                  <Link href="/register">
                     <button className="bg-[#D5B93C] hover:bg-[#c4aa36] transition-colors py-3 lg:py-4 px-6 lg:px-8 text-[#203a87] text-base lg:text-xl font-semibold tracking-wider uppercase w-[80%] block sm:w-auto mx-auto lg:mx-0 mt-10 rounded-md shadow-lg hover:shadow-xl">
                       Become a member
                     </button>
@@ -140,15 +140,15 @@ const EmblaCarousel: React.FC<PropType> = ({ options, autoPlayInterval = 5000 })
                   <h1 className="text-4xl sm:text-5xl lg:text-[80px] font-semibold text-white leading-tight">
                     Conference 2024
                   </h1>
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     <p className="text-base lg:text-xl text-white/70">
-                      UBEC Digital Resource Centre, Opposite Next Gen (Cash and Carry) Supermarket, Mabushi, Jahi District, Abuja. Nigeria. West Africa.
+                    UBEC Digital Resource Centre Kado-Kuchi, Jahi District, Abuja
                     </p>
                     <p className="text-base lg:text-xl text-white/70">
                       Mon, Nov 2 - Fri, Nov 8
                     </p>
                   </div>
-                  <Link href="/conference-Registration">
+                  <Link href="/register">
                     <button className="bg-[#D5B93C] hover:bg-[#c4aa36] transition-colors py-3 lg:py-4 px-6 lg:px-8 text-[#203a87] text-base lg:text-xl font-semibold tracking-wider uppercase w-full sm:w-auto rounded-md shadow-lg hover:shadow-xl mt-10">
                       Register for conference
                     </button>
@@ -202,7 +202,7 @@ const EmblaCarousel: React.FC<PropType> = ({ options, autoPlayInterval = 5000 })
         </div>
 
         {/* Navigation and Play/Pause */}
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <button
             onClick={toggleAutoPlay}
             className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-md text-white hover:bg-white/20 transition-colors"
@@ -229,7 +229,7 @@ const EmblaCarousel: React.FC<PropType> = ({ options, autoPlayInterval = 5000 })
               className="p-2 bg-white/10 backdrop-blur-sm rounded-md text-white hover:bg-white/20 transition-colors disabled:opacity-50"
             />
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

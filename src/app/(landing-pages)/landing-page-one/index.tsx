@@ -91,7 +91,7 @@ const index: React.FC = () => {
        <div>
        <CarouselLandingPage/>
        </div>
-    <div className='md:px-14 px-10 min-h-screen flex justify-center'>
+    <div className='md:px-14 px-10 md:min-h-screen py-14 flex justify-center bg-[#fff] '>
     <div className='lg:flex items-center justify-between gap-20'>
         <div className='flex items-center justify-between'>
         <div className=' transform '>
@@ -122,7 +122,7 @@ const index: React.FC = () => {
     </div>
     </div>
     <div>
-      <div className='flex lg:px-14 px-10 flex-col items-center justify-center min-h-screen pb-10'>
+      <div className='flex lg:px-14 px-10 flex-col items-center justify-center min-h-screen pb-10 bg-[#fff]'>
         <div>
           <h1 className='text-[40px] lg:text-[60px] max-w-2xl mb-7 font-[600] text-[#0B142F] leading-[60px]'>Publications</h1>
         </div>
@@ -153,7 +153,7 @@ const index: React.FC = () => {
         </div>
       </div>
     </div>
-    <div className='lg:flex md:px-14 px-5 flex-col min-h-screen  py-10 lg:py-20 bg-[#E9EBF3]'>
+    <div className='lg:flex md:px-14 px-5 flex-col min-h-screen py-10 lg:py-20 bg-[#E9EBF3]'>
         <div className='flex items-center justify-center mb-10'>
             <h1 className='text-[40px] lg:text-[60px] max-w-2xl font-[500] text-[#0B142F] leading-[60px] pb-3'>Events</h1>
         </div>

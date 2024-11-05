@@ -177,9 +177,11 @@ const Page: React.FC = () => {
         </h2>
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <p className="text-base md:text-lg">You can access the live event from here</p>
-          <button className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto">
+         <Link href='https://us06web.zoom.us/j/84732263237?pwd=dS4rtkyZnhRdAhvpOOrU5SjFbTbIWH.1'>
+         <button className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto">
             Join in
           </button>
+         </Link>
         </div>
       </div>
 
@@ -190,7 +192,7 @@ const Page: React.FC = () => {
         </h2>
         <div className="text-base md:text-lg space-x-2">
           <span>Complete the</span>
-          <Link href="/members-dashboard/conference-evaluation" className="underline">
+          <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline">
             conference evaluation form
           </Link>
           <span>to</span>

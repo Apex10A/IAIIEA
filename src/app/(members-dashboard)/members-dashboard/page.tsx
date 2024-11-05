@@ -83,8 +83,8 @@ const DashboardLayout: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#f9faff] overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white">
+    <div className="h-screen flex flex-col  overflow-hidden">
+      <div className="fixed top-0 left-0 right-0 z-50 ">
         <DashboardHeader />
       </div>
 

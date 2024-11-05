@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { DashboardContent } from '../DashboardContent';
 
 interface UserDataType {
-  f_name: string;
+  name: string;
   registration: string;
 }
 
@@ -25,7 +25,7 @@ export default function DashboardPage() {
         try {
           const parsedData = JSON.parse(storedUserData);
           setUserData({
-            f_name: parsedData.f_name || 'User',
+            name: parsedData.name || 'User',
             registration: parsedData.registration || '',
           });
         } catch (error) {

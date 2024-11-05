@@ -9,7 +9,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
   return (
     <div className="p-6 bg-[#F9FAFF]">
       <h1 className="text-5xl font-bold">
-        Welcome on board, {user.f_name} 👋
+        Welcome on board, {user.name} 👋
       </h1>
       <div className="bg-white rounded-lg shadow p-6 mt-4">
         <p className="text-gray-600">

@@ -1,4 +1,4 @@
 export interface UserDataType {
-    f_name: string;
+    name: string;
     registration: string;
   }

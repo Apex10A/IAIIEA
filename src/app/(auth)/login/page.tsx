@@ -11,26 +11,52 @@ import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [defaultInpType, setDefaultInpType] = useState<"text" | "password">("password");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
+  // Email validation
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  // Phone number validation
+  const isValidPhoneNumber = (phone: string) => {
+    return /^\d{10,15}$/.test(phone.replace(/[-()\s]/g, ''));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validate email
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    // Validate phone number
+    if (!isValidPhoneNumber(phoneNumber)) {
+      setError("Please enter a valid phone number (10-15 digits)");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${API_URL}/conference/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: JSON.stringify({ uid: identifier, password }),
+        body: JSON.stringify({ 
+          email: email.toLowerCase().trim(), 
+          password: phoneNumber.replace(/[-()\s]/g, '') // Remove any formatting from phone number
+        }),
       });
 
       const data = await response.json();
@@ -84,13 +110,13 @@ export default function LoginPage() {
             <div className="grid gap-2">
               <div className="space-y-2">
                 <label className="font-medium text-[#1A1A1A] text-sm">
-                  Email Address or Membership ID
+                  Email Address
                 </label>
                 <input
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="Email or Membership ID"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
                   className="w-full p-2 border rounded-md"
                   required
                   disabled={isLoading}
@@ -99,14 +125,18 @@ export default function LoginPage() {
 
               <div className="space-y-2">
                 <label className="font-medium text-[#1A1A1A] text-sm">
-                  Password
+                  Phone Number
                 </label>
                 <div className="relative w-full">
                   <input
                     type={defaultInpType}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="*******"
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      // Only allow numbers and common phone number formatting characters
+                      const value = e.target.value.replace(/[^\d-()\s]/g, '');
+                      setPhoneNumber(value);
+                    }}
+                    placeholder="Enter your phone number"
                     className="w-full p-2 border rounded-md"
                     required
                     disabled={isLoading}
@@ -128,7 +158,7 @@ export default function LoginPage() {
                 </div>
                 <div className="text-right">
                   <Link href="/reset-password" className="text-xs text-brand-primary font-bold">
-                    Forgot Password?
+                    Forgot Phone Number?
                   </Link>
                 </div>
               </div>
@@ -136,7 +166,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 mt-4 rounded-md bg-[#203A87] text-white"
-                disabled={!identifier || !password || isLoading}
+                disabled={!email || !phoneNumber || isLoading}
               >
                 {isLoading ? "LOGGING IN..." : "LOGIN"}
               </Button>

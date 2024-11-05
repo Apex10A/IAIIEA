@@ -363,7 +363,7 @@ export default function RegisterPage() {
                       <Input
                         id="postal"
                         type="text"
-                        placeholder="John"
+                        placeholder="1234"
                         required
                         {...field}
                         disabled={isLoading}

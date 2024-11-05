@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    output: 'standalone', // Creates a standalone build
+    images: {
+      domains: ['iaiiea.org'], // Add your domain
+    },
+  };
+  
+  export default nextConfig;
+  

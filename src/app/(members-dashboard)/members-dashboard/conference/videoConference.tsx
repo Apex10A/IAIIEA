@@ -17,7 +17,7 @@ const CustomMediaPlayer = () => {
   };
 
   return (
-    <div className="py-10">
+    <div className="py-10  bg-[#F9FAFF]">
       <h1 className="text-3xl text-gray-900 font-bold opacity-80 pb-2">
         Conference Resources
       </h1>

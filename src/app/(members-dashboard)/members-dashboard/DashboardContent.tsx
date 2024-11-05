@@ -7,7 +7,7 @@ interface DashboardContentProps {
 
 export const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
   return (
-    <div className="p-6">
+    <div className="p-6 bg-[#F9FAFF]">
       <h1 className="text-5xl font-bold">
         Welcome on board, {user.f_name} 👋
       </h1>

@@ -70,7 +70,7 @@ const Page: React.FC = () => {
   );
 
   const renderConferencePortal = () => (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-[#F9FAFF]">
       {/* Conference Information */}
       <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
         <h1 className="text-2xl md:text-3xl text-[#0B142F] font-medium">2024 CONFERENCE</h1>

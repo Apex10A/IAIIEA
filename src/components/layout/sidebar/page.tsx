@@ -165,7 +165,7 @@ const Sidebar = ({
         className={`
           ${getSidebarWidth()} 
           ${sidebarMode === 'mobile' ? getMobileSidebarClasses() : ''}
-          border border-[#CACAC9] 
+          border border-[#CACAC9] bg-[#F9FAFF]
           h-screen top-24 p-5 pt-8 
           relative duration-300 
           flex items-center justify-center 

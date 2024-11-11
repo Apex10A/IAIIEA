@@ -14,7 +14,6 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<UserDataType | null>(null);
 
   useEffect(() => {
-    // Check for token in localStorage
     const token = localStorage.getItem('access_token');
     const storedUserData = localStorage.getItem('user_data');
 

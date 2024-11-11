@@ -1,80 +1,127 @@
 import React from 'react';
-import Link from 'next/link';
+import { Download } from 'lucide-react';
 import Image from 'next/image';
-import { Link as LinkIcon, Download } from 'lucide-react';
 
 const DocumentGrid = () => {
   const documents = [
     {
-      icon: <LinkIcon size={150} />,
-      title: "Use of Digital Item Bank Platform for Development of Paper and Online Assessments Dr. Mohamed Abdel-Latif",
-      type: "link",
-      pages: null,
-      size: null,
-      date: null,
+      title: "AI in Assessment: Helping Hand or Pandora's Box",
+      pages: "41 pages",
+      size: "11.6MB",
+      date: "07/11/2024",
+      downloadUrl: "/pdfResources/One.pptx"
     },
     {
-      icon: <Image src="/FilePpt.svg" width={150} height={150} alt="PPT icon" />,
-      title: "Use of Digital Item Bank Platform for Development of Paper and Online Assessments Dr. Mohamed Abdel-Latif",
-      type: "ppt",
-      pages: "24 pages",
-      size: "12MB",
+      title: "AI in Educational Assessment The Cybersecurity Perspective by Faith Ariyo",
+      pages: "12 pages",
+      size: "18.9MB",
       date: "12/07/2024",
+      downloadUrl: "/pdfResources/Two.pptx"
     },
     {
-      icon: <Image src="/MicrosoftWordLogo.svg" width={150} height={150} alt="Word icon" />,
-      title: "Use of Digital Item Bank Platform for Development of Paper and Online Assessments Dr. Mohamed Abdel-Latif",
-      type: "word",
-      pages: "15 pages",
-      size: "8MB",
-      date: "12/07/2024",
+      title: "Application of Artificial Intelligence in Research Writing by Christian I Amuche",
+      pages: "32 pages",
+      size: "87.5KB",
+      date: "15/07/2024",
+      downloadUrl: "/pdfResources/Three.pptx"
     },
     {
-      icon: <Image src="/FilePdf.svg" width={150} height={150} alt="PDF icon" />,
-      title: "Use of Digital Item Bank Platform for Development of Paper and Online Assessments Dr. Mohamed Abdel-Latif",
-      type: "pdf",
-      pages: "18 pages",
-      size: "10MB",
-      date: "12/07/2024",
+      title: "Enhance Large-Scale Educational Assessment Practices with the Advances in Artificial by Hong Jiao",
+      pages: "28 pages",
+      size: "10.2MB",
+      date: "18/07/2024",
+      downloadUrl: "/pdfResources/four.pdf"
     },
+    {
+      title: "Introduction to Big Data, Artificial Intelligence and Digitalised Assessment by Akinyele Ariyo",
+      pages: "35 pages",
+      size: "13.1MB",
+      date: "20/07/2024",
+      downloadUrl: "/pdfResources/Five.pptx"
+    },
+    {
+      title: "Leveraging Big Data Analysis and Artificial Intelligence By Phebe Veronica Jatau",
+      pages: "45 pages",
+      size: "14.5MB",
+      date: "22/07/2024",
+      downloadUrl: "/pdfResources/fiverr.pptx"
+    },
+    {
+      title: "Leveraging Big Data Analytics (BDA) and Artificial Intelligence (AI) for Ensuring Quality and Access in UBE Smart Schools in Nigeria by Dr. Hafsat Lawal Kontagora",
+      pages: "38 pages",
+      size: "11.8MB",
+      date: "25/07/2024",
+      downloadUrl: "/pdfResources/Seven.pptx"
+    },
+    {
+      title: "Psychometrics Fundamentals",
+      pages: "42 pages",
+      size: "12.7MB",
+      date: "28/07/2024",
+      downloadUrl: "/pdfResources/Eight.pptx"
+    },
+    {
+      title: "PRESENTATION by TONGSTON IAIIEA",
+      pages: "30 pages",
+      size: "10.5MB",
+      date: "30/07/2024",
+      downloadUrl: "/pdfResources/Nine.pptx"
+    },
+    {
+      title: "Thinking Outside the Box 1",
+      pages: "36 pages",
+      size: "409.44KB",
+      date: "01/08/2024",
+      downloadUrl: "/pdfResources/Ten.pptx"
+    }
   ];
 
-  const handleDownload = (type: string) => {
-    console.log(`Downloading ${type} document`);
+  const handleDownload = (downloadUrl: string, title: string) => {
+    // In a real application, you would implement the actual download logic here
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${title}.pptx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="grid md:grid-cols-2 grid-cols-1 gap-5">
+    <div className="grid md:grid-cols-3 grid-cols-1 gap-5">
       {documents.map((doc, index) => (
         <div key={index} className="flex items-center">
-          <div className="bg-[#E9EBF3] rounded-l-3xl px-3 py-3">
+          {/* <div className="bg-[#E9EBF3] rounded-l-3xl px-3 py-3">
             <div className="w-[150px] h-[150px] flex items-center justify-center">
-              {doc.icon}
+            <Image src="/FilePpt.svg" width={100} height={100} alt="PPT icon" />,
             </div>
-          </div>
-          <div className="bg-[#F5F4F3] rounded-r-3xl pl-5 py-3 h-[175px] max-w-[500px] flex flex-col justify-between">
+          </div> */}
+          <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3  w-full max-w-[500px] flex flex-col justify-between">
             <div>
-              <p className="font-semibold pb-3 text-xl">{doc.title}</p>
-              <Link href="/" className="max-w-[300px] underline">
-                Link{'->'}
-              </Link>
+              <p className="font-semibold pb-3 text-md ">{doc.title}</p>
+              {/* <a 
+                href={doc.downloadUrl} 
+                className="text-blue-600 hover:text-blue-800 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Presentation
+              </a> */}
             </div>
-           
-            {doc.pages && (
-              <div className="flex items-center gap-2">
-                <p>{doc.pages}</p>
-                <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                <p>{doc.size}</p>
-                <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                <p>{doc.date}</p>
-                <button
-                  onClick={() => handleDownload(doc.type)}
-                  className="ml-auto mr-4 p-1 hover:bg-gray-200 rounded-full transition-colors"
-                >
-                  <Download size={20} />
-                </button>
-              </div>
-            )}
+            
+            <div className="flex items-center gap-2">
+              <p>{doc.pages}</p>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <p>{doc.size}</p>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <p>{doc.date}</p>
+              <button
+                onClick={() => handleDownload(doc.downloadUrl, doc.title)}
+                className="ml-auto mr-4 p-2 hover:bg-gray-200 rounded-full transition-colors"
+                aria-label={`Download ${doc.title}`}
+              >
+                <Download size={20} />
+              </button>
+            </div>
           </div>
         </div>
       ))}

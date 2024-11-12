@@ -39,7 +39,7 @@ export default function DashboardPage() {
 
   if (!userData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <p className="text-lg text-gray-600">Loading...</p>
       </div>
     );

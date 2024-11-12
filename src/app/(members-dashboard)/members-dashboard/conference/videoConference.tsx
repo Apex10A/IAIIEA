@@ -22,7 +22,7 @@ const CustomMediaPlayer = () => {
         Conference Resources
       </h1>
       
-      <div className="max-w-2xl">
+      <div className="max-w-2xl">s
         <div className="relative">
           <div className="relative w-full aspect-video bg-black rounded-t-xl overflow-hidden">
             {/* Wrapper div to control iframe visibility */}

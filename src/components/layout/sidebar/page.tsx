@@ -110,9 +110,9 @@ const Sidebar = ({
     
     return `
       text-[16px] md:text-[18px] font-[500] flex items-center justify-between 
-      py-2 px-2 md:px-3 rounded-md cursor-pointer md:mx-3 
+      py-2 px-2 md:px-3 rounded-md cursor-pointer md:mx-3 text-black
       ${isActive 
-        ? 'bg-[#0E1A3D] text-[#EBEFFD]' 
+        ? 'bg-[#0E1A3D] text-[#EBEFFD] text-white' 
         : 'text-blue hover:bg-[#0E1A3D] hover:text-[#cfc8c8]'}
       ${sidebarMode === 'mobile' ? 'text-[16px]' : ''}
     `;

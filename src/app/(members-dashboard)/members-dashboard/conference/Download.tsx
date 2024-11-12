@@ -87,7 +87,7 @@ const DocumentGrid = () => {
   };
 
   return (
-    <div className="grid md:grid-cols-3 grid-cols-1 gap-5">
+    <div className="grid md:grid-cols-3 grid-cols-1 gap-5 py-10">
       {documents.map((doc, index) => (
         <div key={index} className="flex items-center">
           {/* <div className="bg-[#E9EBF3] rounded-l-3xl px-3 py-3">
@@ -97,7 +97,7 @@ const DocumentGrid = () => {
           </div> */}
           <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3  w-full max-w-[500px] flex flex-col justify-between">
             <div>
-              <p className="font-semibold pb-3 text-md ">{doc.title}</p>
+              <p className="font-semibold pb-3 text-[16px] md:text-[18px] ">{doc.title}</p>
               {/* <a 
                 href={doc.downloadUrl} 
                 className="text-blue-600 hover:text-blue-800 underline"
@@ -109,14 +109,14 @@ const DocumentGrid = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <p>{doc.pages}</p>
+              <p className='text-[16px] md:text-[18px]'>{doc.pages}</p>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <p>{doc.size}</p>
+              <p className='text-[16px] md:text-[18px]'>{doc.size}</p>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <p>{doc.date}</p>
+              <p className='text-[16px] md:text-[18px]'>{doc.date}</p>
               <button
                 onClick={() => handleDownload(doc.downloadUrl, doc.title)}
-                className="ml-auto mr-4 p-2 hover:bg-gray-200 rounded-full transition-colors"
+                className="ml-auto mr-4 p-2 text-[16px] md:text-[18px] hover:bg-gray-200 rounded-full transition-colors"
                 aria-label={`Download ${doc.title}`}
               >
                 <Download size={20} />

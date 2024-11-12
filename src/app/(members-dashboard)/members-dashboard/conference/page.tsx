@@ -60,7 +60,7 @@ const Page: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType>('Conference Portal');
 
   const renderResources = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 py-10">
       <Breadcrumb paths={['Home', 'Conference Portal', 'Conference Resources']} />
       <div className="mt-10">
         <VideoConference/>
@@ -83,7 +83,7 @@ const Page: React.FC = () => {
       </div>
 
       {/* Conference Header */}
-      <div className="py-4 md:py-6">
+      <div className="py-2 md:py-4">
         <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
           Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence
         </h1>
@@ -209,9 +209,9 @@ const Page: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 md:px-6">
-      <div className="py-6 md:py-10">
+      {/* <div className="py-6 md:py-10">
         <Breadcrumb paths={['Home', 'Conference Portal']} />
-      </div>
+      </div> */}
 
       <ButtonProp 
         options={['Conference Portal', 'Conference Directory']} 

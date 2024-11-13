@@ -214,11 +214,11 @@ const Sidebar = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className='flex flex-col justify-between items-center h-full mt-10 w-full'
+              className='flex flex-col justify-between items-center h-full mt-5 md:mt-10 w-full'
             >
               <div className='w-full'>
                 <ul>
-                  <div className='leading-[40px] flex flex-col gap-5'>
+                  <div className='leading-[40px] flex flex-col gap-3 md:gap-5'>
                   {menuItems.map((item) => {
   const IconComponent = item.icon;
   

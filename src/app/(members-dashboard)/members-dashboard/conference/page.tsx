@@ -25,7 +25,7 @@ type SectionType = 'Conference Portal' | 'Conference Directory' | 'Conference Re
 
 // Reusable components
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ paths }) => (
-  <p className="text-base md:text-xl">
+  <p className="text-base md:text-xl text-black">
     {paths.map((path, index) => (
       <span key={index}>
         {index > 0 && ' > '}

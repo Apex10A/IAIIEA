@@ -97,7 +97,7 @@ const DocumentGrid = () => {
           </div> */}
           <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3  w-full max-w-[500px] flex flex-col justify-between">
             <div>
-              <p className="font-semibold pb-3 text-[16px] md:text-[18px] ">{doc.title}</p>
+              <p className="font-semibold pb-3 text-[16px] md:text-[18px] text-black">{doc.title}</p>
               {/* <a 
                 href={doc.downloadUrl} 
                 className="text-blue-600 hover:text-blue-800 underline"
@@ -109,14 +109,14 @@ const DocumentGrid = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <p className='text-[16px] md:text-[18px]'>{doc.pages}</p>
+              <p className='text-[16px] md:text-[18px] text-black'>{doc.pages}</p>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <p className='text-[16px] md:text-[18px]'>{doc.size}</p>
+              <p className='text-[16px] md:text-[18px] text-black'>{doc.size}</p>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <p className='text-[16px] md:text-[18px]'>{doc.date}</p>
+              <p className='text-[16px] md:text-[18px] text-black'>{doc.date}</p>
               <button
                 onClick={() => handleDownload(doc.downloadUrl, doc.title)}
-                className="ml-auto mr-4 p-2 text-[16px] md:text-[18px] hover:bg-gray-200 rounded-full transition-colors"
+                className="ml-auto mr-4 p-2 text-[16px] md:text-[18px] text-black hover:bg-gray-200 rounded-full transition-colors"
                 aria-label={`Download ${doc.title}`}
               >
                 <Download size={20} />

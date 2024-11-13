@@ -56,7 +56,8 @@ const DashboardHeader = () => {
             </div>
 
             {/* Mobile Menu Button */}
-            <button 
+           <div className='flex gap-5'>
+           <button 
               className="md:hidden p-2 text-white"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -106,6 +107,7 @@ const DashboardHeader = () => {
                 </div>
               )}
             </div>
+           </div>
           </div>
         </div>
 

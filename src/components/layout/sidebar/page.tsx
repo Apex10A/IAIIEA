@@ -20,10 +20,10 @@ import "../../../app/index.css";
 
 const menuItems = [
   { name: 'Dashboard', icon: HomeIcon },
-  { name: 'Payment', icon: BagIcon },
+  // { name: 'Payment', icon: BagIcon },
   { name: 'Announcement', icon: NotificationIcon },
   { name: 'Conference Portal', icon: BagIcon },
-  { name: 'Seminars/webinars', icon: CalendarIcon },
+  // { name: 'Seminars/webinars', icon: CalendarIcon },
   { name: 'Members directory', icon: BagIcon },
   { name: 'IAIIEA resources', icon: BagIcon },
   { name: 'Gallery', icon: BagIcon },
@@ -109,7 +109,7 @@ const Sidebar = ({
     const isActive = activeComponent === component;
     
     return `
-      text-[16px] md:text-[18px] font-[500] flex items-center justify-between 
+      text-[15px] md:text-[18px] font-[500] flex items-center justify-between 
       py-2 px-2 md:px-3 rounded-md cursor-pointer md:mx-3 text-black
       ${isActive 
         ? 'bg-[#0E1A3D] text-[#EBEFFD] text-white' 
@@ -147,7 +147,7 @@ const Sidebar = ({
           md:hidden block"
         >
           <Menu 
-            className="text-blue cursor-pointer" 
+            className="text-black cursor-pointer" 
             onClick={() => setSidebarMode('mobile')} 
           />
         </div>
@@ -159,7 +159,7 @@ const Sidebar = ({
         animate={{ 
           width: sidebarMode === 'default' ? '23rem' : 
                  sidebarMode === 'mini' ? '5rem' : 
-                 sidebarMode === 'mobile' ? '16rem' : 0 
+                 sidebarMode === 'mobile' ? '18rem' : 0 
         }}
         transition={{ duration: 0.3 }}
         className={`
@@ -169,7 +169,7 @@ const Sidebar = ({
           h-screen top-24 p-5 pt-8 
           relative duration-300 
           flex items-center justify-center 
-          overflow-hidden
+          overflow-y-auto
           ${sidebarMode !== 'mobile' ? 'max-md:hidden' : ''}
         `}
       >
@@ -177,7 +177,7 @@ const Sidebar = ({
         {sidebarMode === 'mobile' && (
           <div className='absolute top-4 right-4 z-50'>
             <X 
-              className="text-blue cursor-pointer" 
+              className="text-black cursor-pointer" 
               onClick={() => setSidebarMode('closed')} 
             />
           </div>
@@ -188,19 +188,19 @@ const Sidebar = ({
           <div className='absolute top-4 right-4 z-50'>
             {sidebarMode === 'default' && (
               <ChevronsLeft 
-                className="text-blue cursor-pointer" 
+                className="text-black cursor-pointer" 
                 onClick={toggleSidebar} 
               />
             )}
             {sidebarMode === 'mini' && (
               <Menu 
-                className="text-blue cursor-pointer" 
+                className="text-black cursor-pointer" 
                 onClick={toggleSidebar} 
               />
             )}
             {sidebarMode === 'closed' && (
               <ChevronsRight 
-                className="text-blue cursor-pointer" 
+                className="text-black cursor-pointer" 
                 onClick={toggleSidebar} 
               />
             )}

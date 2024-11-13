@@ -49,7 +49,7 @@ const FoodCard: React.FC<FoodOption> = ({ image, title, alt }) => (
     </div>
     <div className="flex flex-col items-center p-4">
       <p className="text-xl md:text-2xl text-[#0B142F] font-medium py-2 text-center">{title}</p>
-      <button className="border px-5 py-3 font-semibold hover:bg-gray-50 transition-colors">
+      <button className="border px-5 py-3 font-semibold hover:bg-gray-50 transition-colors text-[#0B142F] text-[16px] md:text-[19px]">
         Select
       </button>
     </div>
@@ -114,16 +114,16 @@ const Page: React.FC = () => {
         <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
           Resources
         </h2>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <p className="text-lg md:text-xl">
+        <div className="flex flex-col text-[#0B142F] md:flex-row md:items-center justify-between gap-4">
+          <p className="text-lg md:text-xl text-[#0B142F]">
             View
-            <Link href="/" className="underline font-semibold ml-2">
+            <Link href="/" className="underline font-semibold ml-2 text-[#0B142F]">
               conference preceding
             </Link>
           </p>
           <button 
             onClick={() => setSelectedSection('Conference Resources')}
-            className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto"
+            className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-[70%] md:w-auto"
           >
             Resources
           </button>
@@ -151,7 +151,7 @@ const Page: React.FC = () => {
           <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
             Meal ticketing
           </h2>
-          <p className="text-base md:text-lg">
+          <p className="text-base md:text-lg text-[#0B142F]">
             This is the list of food currently available for the day. Select any food of your choice
           </p>
         </div>
@@ -175,7 +175,7 @@ const Page: React.FC = () => {
         <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
           Join event for virtual attendees
         </h2>
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 text-[#0B142F]">
           <p className="text-base md:text-lg">You can access the live event from here</p>
          <Link href='https://us06web.zoom.us/j/84732263237?pwd=dS4rtkyZnhRdAhvpOOrU5SjFbTbIWH.1'>
          <button className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto">
@@ -191,8 +191,8 @@ const Page: React.FC = () => {
           Certification
         </h2>
         <div className="text-base md:text-lg space-x-2">
-          <span>Complete the</span>
-          <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline">
+          <span className='text-[#0B142F]'>Complete the</span>
+          <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline text-[#0B142F]">
             conference evaluation form
           </Link>
           <span>to</span>

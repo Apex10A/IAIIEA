@@ -10,8 +10,8 @@ import {
 
 const BorderlessTable = () => {
   return (
-    <div className="w-full overflow-x-auto">
-      <Table className="min-w-[800px]"> {/* Adjust min-w-[800px] as needed */}
+    <div className="w-full overflow-x-auto text-black">
+      <Table className="min-w-[800px] text-black"> {/* Adjust min-w-[800px] as needed */}
         <TableHeader>
           <TableRow>
             <TableHead>Activities</TableHead>

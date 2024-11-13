@@ -9,7 +9,7 @@ const Table = React.forwardRef<
   <div className="relative min-w-full overflow-auto border-b ">
     <table
       ref={ref}
-      className={cn('w-full border rounded-[30px] caption-bottom text-sm', className)}
+      className={cn('w-full border rounded-[30px] text-black caption-bottom text-sm', className)}
       {...props}
     />
   </div>
@@ -20,7 +20,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn('[&_tr]:border-b', className)} {...props} />
+  <thead ref={ref} className={cn('[&_tr]:border-b text-black', className)} {...props} />
 ))
 TableHeader.displayName = 'TableHeader'
 
@@ -30,7 +30,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn('[&_tr:last-child]:border-0 ', className)}
+    className={cn('[&_tr:last-child]:border-0 text-black', className)}
     {...props}
   />
 ))
@@ -43,7 +43,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      'border-t bg-[#fff] font-medium [&>tr]:last:border-b-0 dark:bg-neutral-800/50',
+      'border-t bg-[#fff] font-medium [&>tr]:last:border-b-0 text-black dark:bg-neutral-800/50',
       className
     )}
     {...props}

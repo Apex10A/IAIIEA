@@ -95,12 +95,12 @@ const CustomMediaPlayer = () => {
           </div>
 
           <div className="bg-white border rounded-b-xl px-7 pt-4 pb-8">
-            <h2 className="text-gray-900 text-xl md:text-2xl font-medium">
+            <h1 className="text-gray-900 text-xl md:text-2xl ">
               Strategic Thinking for Effective Spiritual and Secular Leadership.
-              <span className="block text-lg text-gray-700 mt-1">
+              <span className="block text-lg text-gray-700 mt-3">
                 <p className='text-[16px] md:text-[18px]'>Talk Presented by Dr Mike Egbayelo, PhD, FCIS, FICBC, FIMC</p>
               </span>
-            </h2>
+            </h1>
             {/* <button className="font-semibold text-blue-600 hover:text-blue-700 underline pt-3">
               Listen to audio version
             </button> */}

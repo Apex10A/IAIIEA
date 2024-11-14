@@ -87,7 +87,11 @@ const DocumentGrid = () => {
   };
 
   return (
-    <div className="grid md:grid-cols-3 grid-cols-1 gap-5 py-10">
+    <div className='pt-5'>
+      <div>
+        <h1 className="text-2xl md:text-3xl font-semibold">Conference Documents</h1>
+      </div>
+    <div className="grid md:grid-cols-3 grid-cols-1 gap-5 pb-10 pt-5">
       {documents.map((doc, index) => (
         <div key={index} className="flex items-center">
           {/* <div className="bg-[#E9EBF3] rounded-l-3xl px-3 py-3">
@@ -109,14 +113,14 @@ const DocumentGrid = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <p className='text-[16px] md:text-[18px] text-black'>{doc.pages}</p>
+              <p className='opacity-[0.6] text-[14px] text-black'>{doc.pages}</p>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <p className='text-[16px] md:text-[18px] text-black'>{doc.size}</p>
+              <p className='opacity-[0.6] text-[14px] text-black'>{doc.size}</p>
               <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-              <p className='text-[16px] md:text-[18px] text-black'>{doc.date}</p>
+              <p className='text-[14px] opacity-[0.6] text-black'>{doc.date}</p>
               <button
                 onClick={() => handleDownload(doc.downloadUrl, doc.title)}
-                className="ml-auto mr-4 p-2 text-[16px] md:text-[18px] text-black hover:bg-gray-200 rounded-full transition-colors"
+                className="ml-auto mr-4 p-2 text-[16px] md:text-[18px] text-black bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
                 aria-label={`Download ${doc.title}`}
               >
                 <Download size={20} />
@@ -125,6 +129,7 @@ const DocumentGrid = () => {
           </div>
         </div>
       ))}
+    </div>
     </div>
   );
 };

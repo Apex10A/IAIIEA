@@ -112,8 +112,8 @@ const Sidebar = ({
       text-[15px] md:text-[18px] font-[500] flex items-center justify-between 
       py-2 px-2 md:px-3 rounded-md cursor-pointer md:mx-3 text-black
       ${isActive 
-        ? 'bg-[#0E1A3D] text-[#EBEFFD] text-white' 
-        : 'text-blue hover:bg-[#0E1A3D] hover:text-[#cfc8c8]'}
+        ? 'bg-gray-200 text-[#0E1A3D] ' 
+        : 'text-white hover:bg-[#0E1A3D] hover:text-[#cfc8c8]'}
       ${sidebarMode === 'mobile' ? 'text-[16px]' : ''}
     `;
   };
@@ -165,11 +165,11 @@ const Sidebar = ({
         className={`
           ${getSidebarWidth()} 
           ${sidebarMode === 'mobile' ? getMobileSidebarClasses() : ''}
-          border border-[#CACAC9] bg-[#F9FAFF]
+          border border-[#CACAC9] bg-[#0e1a3d]
           h-screen top-24 p-5 pt-8 
           relative duration-300 
           flex items-center justify-center 
-          overflow-y-auto
+          overflow-y-auto md:overflow-hidden
           ${sidebarMode !== 'mobile' ? 'max-md:hidden' : ''}
         `}
       >

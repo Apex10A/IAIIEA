@@ -61,7 +61,10 @@ const Page: React.FC = () => {
 
   const renderResources = () => (
     <div className="space-y-6 py-10">
-      <Breadcrumb paths={['Home', 'Conference Portal', 'Conference Resources']} />
+     <div className='bg-gray-200 px-5 py-3 mb-6'>
+        <h1 className='text-2xl'>Conference Portal {'>'} Conference Resources</h1>
+      </div>
+      {/* <Breadcrumb paths={['Home', 'Conference Portal', 'Conference Resources']} /> */}
       <div className="mt-10">
         <VideoConference/>
         <Document />
@@ -71,6 +74,9 @@ const Page: React.FC = () => {
 
   const renderConferencePortal = () => (
     <div className="space-y-8 bg-[#F9FAFF]">
+           <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
+        <h1 className='text-2xl'>Conference Portal</h1>
+      </div>
       {/* Conference Information */}
       <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
         <h1 className="text-2xl md:text-3xl text-[#0B142F] font-medium">2024 CONFERENCE</h1>
@@ -111,9 +117,9 @@ const Page: React.FC = () => {
 
       {/* Resources Section */}
       <div className="space-y-6">
-        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
           Resources
-        </h2>
+        </h1>
         <div className="flex flex-col text-[#0B142F] md:flex-row md:items-center justify-between gap-4">
           <p className="text-lg md:text-xl text-[#0B142F]">
             View
@@ -134,9 +140,9 @@ const Page: React.FC = () => {
 
       {/* Schedule Section */}
       <div className="space-y-4">
-        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
           Daily conference schedule
-        </h2>
+        </h1>
         <p className="text-base md:text-lg text-[#0B142F] opacity-80">
           Day 1: Monday 4th November 2024
         </p>
@@ -148,9 +154,9 @@ const Page: React.FC = () => {
       {/* Meal Ticketing */}
       <div className="space-y-6">
         <div className="space-y-2">
-          <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+          <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
             Meal ticketing
-          </h2>
+          </h1>
           <p className="text-base md:text-lg text-[#0B142F]">
             This is the list of food currently available for the day. Select any food of your choice
           </p>
@@ -209,10 +215,6 @@ const Page: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 md:px-6">
-      {/* <div className="py-6 md:py-10">
-        <Breadcrumb paths={['Home', 'Conference Portal']} />
-      </div> */}
-
       <ButtonProp 
         options={['Conference Portal', 'Conference Directory']} 
         selectedSection={selectedSection} 

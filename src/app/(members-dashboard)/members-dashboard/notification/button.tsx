@@ -9,7 +9,7 @@ interface ButtonPropProps {
 }
 
 const ButtonProp: React.FC<ButtonPropProps> = ({ options, selectedSection, setSelectedSection }) => (
-  <div>
+  <div className='flex'>
     {options.map((option) => (
       <button
         key={option}

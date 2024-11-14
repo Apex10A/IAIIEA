@@ -62,7 +62,7 @@ const Page: React.FC = () => {
   const renderResources = () => (
     <div className="space-y-6 py-10">
      <div className='bg-gray-200 px-5 py-3 mb-6'>
-        <h1 className='text-2xl'>Conference Portal {'>'} Conference Resources</h1>
+        <h1 className='text-lg text-black md:text-2xl'>Conference Portal {'>'} Resources</h1>
       </div>
       {/* <Breadcrumb paths={['Home', 'Conference Portal', 'Conference Resources']} /> */}
       <div className="mt-10">

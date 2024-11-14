@@ -89,7 +89,7 @@ const DocumentGrid = () => {
   return (
     <div className='pt-5'>
       <div>
-        <h1 className="text-2xl md:text-3xl font-semibold">Conference Documents</h1>
+        <h1 className="text-2xl md:text-3xl font-semibold text-black">Conference Documents</h1>
       </div>
     <div className="grid md:grid-cols-3 grid-cols-1 gap-5 pb-10 pt-5">
       {documents.map((doc, index) => (
@@ -99,7 +99,7 @@ const DocumentGrid = () => {
             <Image src="/FilePpt.svg" width={100} height={100} alt="PPT icon" />,
             </div>
           </div> */}
-          <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3  w-full max-w-[500px] flex flex-col justify-between">
+          <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3  w-full flex flex-col justify-between">
             <div>
               <p className="font-semibold pb-3 text-[16px] md:text-[18px] text-black">{doc.title}</p>
               {/* <a 

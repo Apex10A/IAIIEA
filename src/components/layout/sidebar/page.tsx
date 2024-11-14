@@ -131,8 +131,7 @@ const Sidebar = ({
   // Mobile overlay for sidebar
   const getMobileSidebarClasses = () => {
     return `
-      fixed top-0 left-0 h-full z-50 bg-[#0e1a3d]
-      bg-white shadow-lg 
+      fixed top-0 left-0 h-full z-50 bg-[#0e1a3d] shadow-lg 
       transition-transform duration-300 
       ${sidebarMode === 'mobile' ? 'translate-x-0' : '-translate-x-full'}
     `;
@@ -176,10 +175,10 @@ const Sidebar = ({
         {/* Mobile Close Button */}
         {sidebarMode === 'mobile' && (
           <div className='absolute top-4 right-4 z-50'>
-            <X 
+            {/* <X 
               className="text-black cursor-pointer" 
               onClick={() => setSidebarMode('closed')} 
-            />
+            /> */}
           </div>
         )}
 

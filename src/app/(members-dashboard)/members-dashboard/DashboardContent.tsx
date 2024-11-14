@@ -9,7 +9,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
   return (
     <div className="p-6 bg-[#F9FAFF]">
       <div className='bg-gray-200 px-5 py-3 mb-6'>
-        <h1 className='text-2xl text-black'>Dashboard</h1>
+        <h1 className='text-lg md:text-2xl text-black'>Dashboard</h1>
       </div>
       <h1 className=" text-3xl md:text-4xl font-bold text-black">
         Hi, {user.name} 👋

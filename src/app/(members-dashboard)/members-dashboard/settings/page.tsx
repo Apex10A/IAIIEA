@@ -158,7 +158,7 @@ const ProfileSettingsContent = () => {
   return (
     <article className="space-y-10 p-6">
        <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-2xl'>Settings</h1>
+        <h1 className='text-2xl text-black'>Settings</h1>
       </div>
       <div className="md:items-center flex md:flex-row flex-col justify-center md:justify-between items-center space-x-4">
         <div className="flex flex-col md:flex-row gap-4 md:gap-2 items-center relative">
@@ -228,8 +228,8 @@ const ProfileSettingsContent = () => {
       <form onSubmit={handleUpdateName}>
         <div className=" max-w-[400px] flex flex-col gap-[27px] md:w-[425px] p-[25px]">
           <div className="flex flex-col items-start">
-            <h4 className="text-[16px] md:text-[20px] font-bold">Contact details</h4>
-            <p className="text-[16px] md:text-[18px]">You can edit your name here.</p>
+            <h4 className="text-[16px] md:text-[20px] font-bold text-black">Contact details</h4>
+            <p className="text-[16px] md:text-[18px] text-black">You can edit your name here.</p>
           </div>
           <hr />
           <div className="flex flex-col">
@@ -246,11 +246,11 @@ const ProfileSettingsContent = () => {
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
               placeholder="Oliva Rhye"
-              className="placeholder:text-[16px] text-[16px] md:text-[17px] bg-white border-[1px] border-[#D0D5DD] focus:border-[1px] focus:border-[#94A3B8] focus:outline-none rounded-lg h-[40px] py-[10px] px-[16px]"
+              className="placeholder:text-[16px] text-[16px] md:text-[17px] bg-white border-[1px] border-[#D0D5DD] focus:border-[1px] focus:border-[#94A3B8] text-black focus:outline-none rounded-lg h-[40px] py-[10px] px-[16px]"
             />
           </div>
           <div className="flex flex-col">
-            <Label htmlFor="email" className="mb-2 text-[16px] md:text-[18px] font-medium">
+            <Label htmlFor="email" className="mb-2 text-[16px] md:text-[18px] font-medium text-black">
               Email
             </Label>
             <div className="relative">
@@ -268,7 +268,7 @@ const ProfileSettingsContent = () => {
           <div className="flex justify-start items-center">
             <button
               type="submit"
-              className="py-[8px] px-[14px] w-full md:w-[178px] border outline-none rounded-lg text-[16px] md:text-[17px] font-[500]"
+              className="py-[8px] px-[14px] w-full md:w-[178px] border border-[#D0D5DD] outline-none rounded-lg text-[16px] md:text-[17px] font-[500] text-black"
               disabled={updating}
             >
               {updating ? 'Saving...' : 'Save'}

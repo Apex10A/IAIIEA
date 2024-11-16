@@ -60,7 +60,7 @@ const Page: React.FC = () => {
   const renderConferencePortal = () => (
     <div className="space-y-8 bg-[#F9FAFF]">
            <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-2xl'>Seminar Portal</h1>
+        <h1 className='text-2xl text-[#0B142F]'>Seminar Portal</h1>
       </div>
       {/* Conference Information */}
       <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
@@ -123,47 +123,7 @@ const Page: React.FC = () => {
           </button>
         </div>
       </div>
-
       <hr />
-
-      {/* Schedule Section */}
-      <div className="space-y-4">
-        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
-          Daily conference schedule
-        </h1>
-        <p className="text-base md:text-lg text-[#0B142F] opacity-80">
-          Day 1: Monday 4th November 2024
-        </p>
-        {/* <BorderlessTable /> */}
-      </div>
-
-      <hr />
-
-      {/* Meal Ticketing */}
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
-            Meal ticketing
-          </h1>
-          <p className="text-base md:text-lg text-[#0B142F]">
-            This is the list of food currently available for the day. Select any food of your choice
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FoodCard 
-            image="/Jollof.png"
-            title="Nigerian Jollof"
-            alt="Jollof Rice"
-          />
-          <FoodCard 
-            image="/Egusi.png"
-            title="Egusi Soup"
-            alt="Egusi Soup"
-          />
-        </div>
-      </div>
-
       {/* Virtual Event Access */}
       <div className="space-y-4">
         <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
@@ -203,11 +163,11 @@ const Page: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 md:px-6">
-      <ButtonProp 
+      {/* <ButtonProp 
         options={['Conference Portal', 'Conference Directory']} 
         selectedSection={selectedSection} 
         setSelectedSection={setSelectedSection as (section: string) => void} 
-      />
+      /> */}
       
       {selectedSection === 'Conference Portal' && renderConferencePortal()}
       {/* {selectedSection === 'Conference Resources' && renderResources()}

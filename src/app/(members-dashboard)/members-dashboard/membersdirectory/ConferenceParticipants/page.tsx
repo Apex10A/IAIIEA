@@ -36,7 +36,7 @@ const Page = () => {
         </div>
         
       </div>
-      <p className='text-[16px] md:text-[18px] text-[#0B142F]'>See those who are already registered members</p>
+      <p className='text-[16px] md:text-[18px] text-[#0B142F]'>See those who have registered  for the conference</p>
 
       {/* Table for registered members */}
       <div className='mt-6 w-full overflow-x-auto text-black'>

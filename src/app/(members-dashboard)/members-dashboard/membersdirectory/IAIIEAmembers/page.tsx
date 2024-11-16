@@ -34,9 +34,9 @@ const Page = () => {
         <div>
           <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
         </div>
-        <div className='mt-3'>
+        {/* <div className='mt-3'>
           <button className='bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-[17px]'>Add Members</button>
-        </div>
+        </div> */}
       </div>
       <p className='text-[16px] md:text-[18px] text-[#0B142F]'>See those who are already registered members</p>
 

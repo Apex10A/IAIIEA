@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 // import ToggleButton from "@/app/(members-dashboard)/members-dashboard/payment/ToggleButton";
 import BorderlessTable from './BorderlessTable';
-import Conference from "@/modules/ui/conference";
+import RealConference from "@/modules/ui/RealConference";
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import Document from './Download';
 import VideoConference from "./videoConference"
@@ -75,7 +75,7 @@ const Page: React.FC = () => {
   const renderConferencePortal = () => (
     <div className="space-y-8 bg-[#F9FAFF]">
            <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-2xl'>Conference Portal</h1>
+        <h1 className='text-2xl text-[#0B142F]'>Conference Portal</h1>
       </div>
       {/* Conference Information */}
       <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
@@ -201,7 +201,7 @@ const Page: React.FC = () => {
           <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline text-[#0B142F]">
             conference evaluation form
           </Link>
-          <span>to</span>
+          <span className='text-[#0B142F]'>to</span>
           <Link href="/dashboard/conference-evaluation" className="text-[#0B142F]">
             access certificate
           </Link>
@@ -209,7 +209,7 @@ const Page: React.FC = () => {
       </div>
 
       {/* Conference Component */}
-      <Conference />
+      <RealConference />
     </div>
   );
 

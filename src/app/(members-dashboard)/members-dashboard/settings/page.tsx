@@ -157,8 +157,8 @@ const ProfileSettingsContent = () => {
 
   return (
     <article className="space-y-10 p-6">
-       <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-2xl text-black'>Settings</h1>
+       <div className='bg-gray-200 px-5 py-3 mb-6'>
+        <h1 className='text-lg md:text-2xl text-black'>Settings</h1>
       </div>
       <div className="md:items-center flex md:flex-row flex-col justify-center md:justify-between items-center space-x-4">
         <div className="flex flex-col md:flex-row gap-4 md:gap-2 items-center relative">
@@ -226,7 +226,7 @@ const ProfileSettingsContent = () => {
       <hr />
 
       <form onSubmit={handleUpdateName}>
-        <div className=" max-w-[400px] flex flex-col gap-[27px] md:w-[425px] p-[25px]">
+        <div className=" max-w-[400px] flex flex-col gap-[27px] md:w-[425px] px-[25px]">
           <div className="flex flex-col items-start">
             <h4 className="text-[16px] md:text-[20px] font-bold text-black">Contact details</h4>
             <p className="text-[16px] md:text-[18px] text-black">You can edit your name here.</p>

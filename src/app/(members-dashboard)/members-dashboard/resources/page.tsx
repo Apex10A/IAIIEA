@@ -53,8 +53,8 @@ const handleSectionChange = (section: 'Conference resources' | 'Seminar resource
                 </div>
             </div>
 ): (
-    <div>
-        <h1>sjkjksk</h1>
+    <div className='flex items-center justify-center h-[300px]'>
+        <p className='opacity-[0.7] text-2xl'>Subscribe for seminar premium to see this page</p>
     </div>
 )}
         </div>

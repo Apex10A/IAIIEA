@@ -5,7 +5,7 @@ const ConferenceCards = () => {
   const conferences = [
     {
       year: '2024',
-      title: 'Seminar 2024',
+      title: 'Conference 2024',
       description: 'Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence',
       date: 'Mon, Nov 2 - Fri, Nov 8',
       image: '/Meeting.png',
@@ -14,7 +14,7 @@ const ConferenceCards = () => {
     },
     {
       year: '2023',
-      title: 'Seminar 2023',
+      title: 'Conference 2023',
       description: 'Innovation in Educational Technology: Bridging the Digital Divide',
       date: 'Mon, Oct 15 - Fri, Oct 21',
       image: '/Meeting.png',
@@ -23,7 +23,7 @@ const ConferenceCards = () => {
     },
     {
       year: '2022',
-      title: 'Seminar 2022',
+      title: 'Conference  2022',
       description: 'Future of Education: Remote Learning and Digital Transformation',
       date: 'Mon, Sep 5 - Fri, Sep 11',
       image: '/Meeting.png',

@@ -6,8 +6,10 @@ import EventSpeakers from './EventSpeakers/page'
 import Volunteers from './Volunteers/page'
 import ConferenceParticipants from './ConferenceParticipants/page'
 import WorkshopParticipant from './WorkshopParticipants/page'
+import { SectionType } from '../notification/buttonTs'
+
 const Page = () => {
-  const [selectedSection, setSelectedSection] = useState<'IAIIEA members' | 'Event speakers' | 'Conference participants' | 'Volunteers' | 'Workshop participants'>('IAIIEA members');
+  const [selectedSection, setSelectedSection] = useState<SectionType>('IAIIEA members');
 
   const renderContent = () => {
     switch (selectedSection) {
@@ -47,20 +49,17 @@ const Page = () => {
   };
 
   return (
-    <div>
-      <div className='py-10'>
-        <p className='text-[18px]'>
-          Home {'>'} <span className='font-[600]'>Members Directory</span>
-        </p>
+    <div className='p-6'>
+      <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
+        <h1 className='text-2xl'>Members Directory</h1>
       </div>
-
-      {/* <div>
+      <div>
         <ButtonProp
           options={['IAIIEA members', 'Event speakers', 'Conference participants', 'Volunteers', 'Workshop participants']}
           selectedSection={selectedSection}
           setSelectedSection={setSelectedSection}
         />
-      </div> */}
+      </div>
 
       <div className='py-10'>
         

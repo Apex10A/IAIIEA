@@ -1,6 +1,5 @@
 import React from 'react';
-
-type SectionType = 'Conference Portal' | 'Conference Directory' | 'Conference Resources';
+import { SectionType } from './buttonTs';
 
 interface ButtonPropProps {
   options: SectionType[];

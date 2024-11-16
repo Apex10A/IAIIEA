@@ -29,20 +29,20 @@ const Page = () => {
   };
 
   return (
-    <div className='mx-14'>
+    <div className=''>
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
+          <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
         </div>
         <div className='mt-3'>
-          <button className='bg-[#203a87] font-semibold text-white px-5 py-3 rounded-[30px] text-[17px]'>Add Members</button>
+          <button className='bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-[17px]'>Add Members</button>
         </div>
       </div>
-      <p>See those who are already registered members</p>
+      <p className='text-[16px] md:text-[18px] text-[#0B142F]'>See those who are already registered members</p>
 
       {/* Table for registered members */}
-      <div className='mt-6'>
-        <Table>
+      <div className='mt-6 w-full overflow-x-auto text-black'>
+        <Table className='min-w-[800px] text-black'>
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>

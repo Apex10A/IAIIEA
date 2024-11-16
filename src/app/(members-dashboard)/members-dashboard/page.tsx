@@ -16,6 +16,8 @@ import MembersDirectory from "@/app/(members-dashboard)/members-dashboard/member
 import IAIIEAResources from '@/app/(members-dashboard)/members-dashboard/resources/page';
 import Gallery from '@/app/(members-dashboard)/members-dashboard/gallery/page';
 import Forum from "@/app/(members-dashboard)/members-dashboard/forum/page";
+import Payment from "@/app/(members-dashboard)/members-dashboard/payment/Payment"
+import  Settings from '@/app/(members-dashboard)/members-dashboard/settings/page' 
 
 // TypeScript interfaces
 interface UserData {
@@ -62,12 +64,14 @@ const DashboardLayout: React.FC = () => {
     const components: ComponentMap = {
       Dashboard: <Dashboard />,
       Announcement: <Announcement />,
+      'Payment' : <Payment/>,
       'Conference Portal': <ConferencePortal />,
-      'Seminars/Webinars': <SeminarsWebinars />,
+      'Seminars / Webinars': <SeminarsWebinars />,
       'Members Directory': <MembersDirectory />,
-      Resources: <IAIIEAResources />,
+      'IAIIEA resources': <IAIIEAResources />,
       Gallery: <Gallery />,
       Forum: <Forum />,
+      Settings: <Settings/>
     };
 
     return components[activeComponent] || <Dashboard />;

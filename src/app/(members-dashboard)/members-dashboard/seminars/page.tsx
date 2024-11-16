@@ -1,205 +1,223 @@
 "use client"
 import React, { useState } from 'react';
-import { FiChevronRight } from 'react-icons/fi';
+import Image from 'next/image';
+import Link from 'next/link';
+// import ToggleButton from "@/app/(members-dashboard)/members-dashboard/payment/ToggleButton";
+// import BorderlessTable from './BorderlessTable';
+import Conference from "@/modules/ui/conference";
+import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 
-const Page = () => {
-  const [currentStep, setCurrentStep] = useState(1); // Controls current step (1, 2, or 3)
-  const [selectedSection, setSelectedSection] = useState<'Seminar' | 'CreateEvent'>('CreateEvent'); // Default to Create Event
 
-  const handleNext = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
-  };
+// TypeScript interfaces
+interface FoodOption {
+  image: string;
+  title: string;
+  alt: string;
+}
 
-  const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
+interface BreadcrumbProps {
+  paths: string[];
+}
 
-  // Handler to go back to the seminar section
-  const handleBackToSeminar = () => {
-    setSelectedSection('Seminar');
-    setCurrentStep(1); // Reset the form steps when switching back
-  };
+// Component types
+type SectionType = 'Conference Portal' | 'Conference Directory' | 'Conference Resources';
 
-  // Handler for changing the section to multi-step event creation
-  const handleCreateEventClick = () => {
-    setSelectedSection('CreateEvent');
-  };
+// Reusable components
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ paths }) => (
+  <p className="text-base md:text-xl text-black">
+    {paths.map((path, index) => (
+      <span key={index}>
+        {index > 0 && ' > '}
+        <span className={index === paths.length - 1 ? 'font-semibold' : ''}>
+          {path}
+        </span>
+      </span>
+    ))}
+  </p>
+);
 
-  // Progress bar component
-  const renderProgressBar = () => {
-    return (
-      <div className="flex w-[30%] justify-between mb-6">
-        <div className={`w-[30%] rounded-2xl h-1 ${currentStep >= 1 ? 'bg-[#203A87]' : 'bg-gray-300'}`}></div>
-        <div className={`w-[30%] rounded-2xl h-1 ${currentStep >= 2 ? 'bg-[#203A87]' : 'bg-gray-300'}`}></div>
-        <div className={`w-[30%] rounded-2xl h-1 ${currentStep >= 3 ? 'bg-[#203A87]' : 'bg-gray-300'}`}></div>
+const FoodCard: React.FC<FoodOption> = ({ image, title, alt }) => (
+  <div className="border rounded-lg overflow-hidden w-full md:w-[350px]">
+    <div className="relative w-full h-48 md:h-[250px]">
+      <Image 
+        src={image} 
+        alt={alt} 
+        fill 
+        className="object-cover"
+      />
+    </div>
+    <div className="flex flex-col items-center p-4">
+      <p className="text-xl md:text-2xl text-[#0B142F] font-medium py-2 text-center">{title}</p>
+      <button className="border px-5 py-3 font-semibold hover:bg-gray-50 transition-colors text-[#0B142F] text-[16px] md:text-[19px]">
+        Select
+      </button>
+    </div>
+  </div>
+);
+
+const Page: React.FC = () => {
+  const [selectedSection, setSelectedSection] = useState<SectionType>('Conference Portal');
+  const renderConferencePortal = () => (
+    <div className="space-y-8 bg-[#F9FAFF]">
+           <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
+        <h1 className='text-2xl'>Seminar Portal</h1>
       </div>
-    );
-  };
+      {/* Conference Information */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
+        <h1 className="text-2xl md:text-3xl text-[#0B142F] font-medium">2024 SEMINAR</h1>
+        <div className="text-[16px] md:text-xl text-[#0B142F]">
+          100+ people registered
+          <Link href="/" className="underline font-medium ml-2">
+            access participant directory
+          </Link>
+        </div>
+      </div>
 
-  // Render the step form based on the currentStep value
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className='max-w-[60%]'>
-            <h2 className="text-[24px] font-[600] mb-4">Create Event</h2>
-            <div>
-              <p className="text-[18px] font-[500] pb-2">Event Type</p>
-              <input 
-                type="text" 
-                placeholder="Select event type" 
-                className="input-field border px-5 py-3 rounded-[30px] w-full  mb-4"
-              />
-            </div>
-            <div className='flex items-center justify-between'>
-              <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handleBackToSeminar}>Cancel</p>
-              <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handleNext}>Next</p>
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div className='max-w-[70%]'>
-            <div className='pt-10'>
-              <div>
-                <p className="text-[18px] font-[500] pb-2">Conference Title</p>
-                <input type="text" placeholder="Conference Title" className="input-field border px-5 py-3 rounded-[30px] w-full mb-4" />
-              </div>
-              <div className='py-3'>
-                <p className="text-[18px] font-[500] pb-2">theme</p>
-              <input type="text" placeholder="Theme" className="input-field border px-5 py-3 rounded-[30px] w-full mb-4" />
-              </div>
+      {/* Conference Header */}
+      <div className="py-2 md:py-4">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+          Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence
+        </h1>
+      </div>
 
-              <div>
-              <p className="text-[18px] font-[500] pb-2">location</p>
-              <input type="text" placeholder="Location" className="input-field border px-5 py-3 rounded-[30px] w-full mb-4" />
-              </div>
+      <hr />
 
-              <div className="flex justify-between mb-4 mt-4">
-                <div>
-                  <p className="text-[18px] font-[500] pb-2">start date</p>
-                <input type="date" placeholder="Start Date" className="border rounded-[30px] px-5 py-3 w-full" />
-                </div>
+      {/* Conference Date and Location */}
+      {/* <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Image src="/Calendar (1).svg" alt="Calendar" width={25} height={25} />
+          <p className="text-base md:text-lg text-[#0B142F] opacity-80">
+            Mon, Nov 2 - Fri, Nov 8 2024
+          </p>
+        </div>
+        <div className="flex items-start gap-2">
+          <Image src="/MapPin.svg" alt="Location" width={25} height={25} />
+          <p className="text-base md:text-lg text-[#0B142F] opacity-80 max-w-2xl">
+            UBEC Digital Resource Centre, Opposite Next Gen (Cash and Carry) Supermarket, Mabushi, Jahi District, Abuja. Nigeria. West Africa.
+          </p>
+        </div>
+      </div> */}
 
-               <div>
-                <p className="text-[18px] font-[500] pb-2">end date</p>
-               <input type="date" placeholder="End Date" className="border rounded-[30px] px-5 py-3 w-full" />
-               </div>
-              </div>
+      {/* <hr /> */}
 
-             <div>
-              <p className="text-[18px] font-[500] pb-2">sub-theme</p>
-             <input type="text" placeholder="Subtheme" className="input-field border rounded-[30px] px-5 py-3 w-full mb-4" />
-             </div>
+      {/* Resources Section */}
+      <div className="space-y-6">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+          Resources
+        </h1>
+        <div className="flex flex-col text-[#0B142F] md:flex-row md:items-center justify-between gap-4">
+         <div>
+         <p className="text-[16px] md:text-xl text-[#0B142F]">
+            View
+            <Link href="/" className="underline font-semibold ml-2 text-[#0B142F]">
+              seminar preceeding
+            </Link>
+          </p>
+          <p className='text-[16px] md:text-xl text-[#0B142F] pt-3'>Get the seminar resources by each speaker here</p>
+         </div>
+          <button 
+            onClick={() => setSelectedSection('Conference Resources')}
+            className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-[70%] md:w-auto"
+          >
+            Resources
+          </button>
+        </div>
+      </div>
 
-              <div>
-              <p className="text-[18px] font-[500] pb-2">workshop</p>
-              <input type="text" placeholder="Workshop" className="input-field border rounded-[30px] px-5 py-3 w-full mb-4" />
-              </div>
+      <hr />
 
-              <div>
-              <p className="text-[18px] font-[500] pb-2">important date</p>
-              <input type="text" placeholder="Important Date" className="input-field border rounded-[30px] px-5 py-3 w-full mb-4" />
-              </div>
+      {/* Schedule Section */}
+      <div className="space-y-4">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+          Daily conference schedule
+        </h1>
+        <p className="text-base md:text-lg text-[#0B142F] opacity-80">
+          Day 1: Monday 4th November 2024
+        </p>
+        {/* <BorderlessTable /> */}
+      </div>
 
-              <div>
-              <p className="text-[18px] font-[500] pb-2">call for paper flyer</p>
-              <input type="file" className="input-field border rounded-[30px] px-5 py-3 w-full mb-4 h-44" />
-              </div>
-            </div>
-            
-            <div className='flex items-center justify-between'>
-              <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handlePrevious}>Previous</p>
-              <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handleNext}>Next</p>
-            </div>
-          </div>
-        );
-      case 3:
-        return (
-          <div className='max-w-[70%]'>
-            <h2 className="text-[24px] font-[600] mb-4">Create Event</h2>
-            <div className="mb-4">
-              <label className="block font-medium mb-2">Picture gallery</label>
-              <input type="file" multiple className="border p-2 rounded w-full" />
-            </div>
-            <div className="mb-4">
-              <label className="block font-medium mb-2">Sponsors</label>
-              <input type="text" placeholder="Add sponsors" className="border p-2 rounded w-full" />
-            </div>
-            <div className="mb-4">
-              <label className="block font-medium mb-2">Videos</label>
-              <input type="file" multiple className="border p-2 rounded w-full" />
-            </div>
-            <div className="flex justify-between mb-4">
-              <input type="text" placeholder="Fees (Naira)" className="border p-2 rounded w-[48%]" />
-              <input type="text" placeholder="Fees (Dollars)" className="border p-2 rounded w-[48%]" />
-            </div>
-            <input type="text" placeholder="Package" className="input-field border p-2 rounded w-full mb-4" />
-            
-            <div className='flex items-center justify-between'>
-              <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handlePrevious}>Previous</p>
-              <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]'>Save</p>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
+      <hr />
+
+      {/* Meal Ticketing */}
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+            Meal ticketing
+          </h1>
+          <p className="text-base md:text-lg text-[#0B142F]">
+            This is the list of food currently available for the day. Select any food of your choice
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FoodCard 
+            image="/Jollof.png"
+            title="Nigerian Jollof"
+            alt="Jollof Rice"
+          />
+          <FoodCard 
+            image="/Egusi.png"
+            title="Egusi Soup"
+            alt="Egusi Soup"
+          />
+        </div>
+      </div>
+
+      {/* Virtual Event Access */}
+      <div className="space-y-4">
+        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+          Join event for virtual attendees
+        </h2>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 text-[#0B142F]">
+          <p className="text-base md:text-lg">You can access the live event from here</p>
+         <Link href='https://us06web.zoom.us/j/84732263237?pwd=dS4rtkyZnhRdAhvpOOrU5SjFbTbIWH.1'>
+         <button className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto">
+            Join in
+          </button>
+         </Link>
+        </div>
+      </div>
+
+      {/* Certification */}
+      <div className="space-y-4">
+        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+          Certification
+        </h2>
+        <div className="text-base md:text-lg space-x-2">
+          <span className='text-[#0B142F]'>Complete the</span>
+          <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline text-[#0B142F]">
+            conference evaluation form
+          </Link>
+          <span>to</span>
+          <Link href="/dashboard/conference-evaluation" className="text-[#0B142F]">
+            access certificate
+          </Link>
+        </div>
+      </div>
+
+      {/* Conference Component */}
+      <Conference />
+    </div>
+  );
 
   return (
-    <div>
-      <div className='py-10'>
-        <p className='text-[18px]'>
-          Home {'>'} <span className='font-[600]'>{selectedSection === 'Seminar' ? 'Seminar' : 'Create Event'}</span>
-        </p>
-      </div>
-
-      {selectedSection === 'Seminar' ? (
-        <>
-          <div className='border p-4 rounded-lg my-10'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <h3 className='text-[20px] font-[500]'>Start an instant virtual event</h3>
-              </div>
-              <div>
-                <p className='font-[600] text-[#203a87] text-[20px]'>Start</p>
-              </div>
-            </div>
-          </div>
-          <div className='border p-4 rounded-lg my-10'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <h3 className='text-[20px] font-[500]'>Schedule virtual events</h3>
-              </div>
-              <div>
-                <p className='font-[600] text-[#203a87] text-[20px]'>Schedule</p>
-              </div>
-            </div>
-          </div>
-          <div 
-            className='border p-4 rounded-lg my-10 cursor-pointer'
-            onClick={handleCreateEventClick}
-          >
-            <div className='flex items-center justify-between'>
-              <div>
-                <h3 className='text-[20px] font-[500]'>Create Events</h3>
-              </div>
-              <div>
-                <FiChevronRight />
-              </div>
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Render progress bar */}
-          {renderProgressBar()}
-
-          {/* Render the current step form */}
-          {renderStep()}
-        </>
-      )}
+    <div className="container mx-auto px-4 md:px-6">
+      <ButtonProp 
+        options={['Conference Portal', 'Conference Directory']} 
+        selectedSection={selectedSection} 
+        setSelectedSection={setSelectedSection as (section: string) => void} 
+      />
+      
+      {selectedSection === 'Conference Portal' && renderConferencePortal()}
+      {/* {selectedSection === 'Conference Resources' && renderResources()}
+      {selectedSection === 'Conference Directory' && (
+        <div className="py-5 px-5">
+          <h1 className="text-3xl md:text-5xl opacity-20 font-semibold">
+            Coming soon!!!
+          </h1>
+        </div>
+      )} */}
     </div>
   );
 };

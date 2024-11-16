@@ -20,7 +20,6 @@ const CustomMediaPlayer = () => {
   const playerRef = useRef<ReactPlayer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Replace with your Vimeo video URL
   const videoUrl = "https://vimeo.com/1029612847";
 
   const handleProgress = (state: ProgressState) => {

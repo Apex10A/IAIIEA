@@ -54,9 +54,9 @@ const DocumentGrid = () => {
       downloadUrl: "/pdfResources/Seven.pptx"
     },
     {
-      title: "Psychometrics Fundamentals",
+      title: "Leveraging Digital Resources and Big Data Analytics to Enhance Teaching, Learning and Assessment in the Nigeria Basic Education System By Bashir Galandanci",
       pages: "42 pages",
-      size: "12.7MB",
+      size: "37MB",
       date: "28/07/2024",
       downloadUrl: "/pdfResources/Eight.pptx"
     },
@@ -73,6 +73,34 @@ const DocumentGrid = () => {
       size: "409.44KB",
       date: "01/08/2024",
       downloadUrl: "/pdfResources/Ten.pptx"
+    },
+    {
+      title: "Assessment Dialogues in a Data-Driven World Rethinking Student Success By Tatiana Sango and Kate Kouch",
+      pages: "36 pages",
+      size: "409.44KB",
+      date: "01/08/2024",
+      downloadUrl: "/pdfResources/Eleven.pptx"
+    },
+    {
+      title: "Transforming Assessment in the Era of EduTech The CQ-Tech USA Perspective By Kashyap Puroit and Sanjeev Kanda",
+      pages: "36 pages",
+      size: "409.44KB",
+      date: "01/08/2024",
+      downloadUrl: "/pdfResources/Twelve.pptx"
+    },
+    {
+      title: "Welcome Address by the Executive Secretary UBEC",
+      pages: "36 pages",
+      size: "409.44KB",
+      date: "01/08/2024",
+      downloadUrl: "/pdfResources/Thirteen.pptx"
+    },
+    {
+      title: "Workshop III - Assessment Gourmet v 2",
+      pages: "36 pages",
+      size: "409.44KB",
+      date: "01/08/2024",
+      downloadUrl: "/pdfResources/Fourteen.pptx"
     }
   ];
 
@@ -91,7 +119,7 @@ const DocumentGrid = () => {
       <div>
         <h1 className="text-2xl md:text-3xl font-semibold text-black">Conference Documents</h1>
       </div>
-    <div className="grid md:grid-cols-3 grid-cols-1 gap-5 pb-10 pt-5">
+    <div className="grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 pb-10 pt-5">
       {documents.map((doc, index) => (
         <div key={index} className="flex items-center">
           {/* <div className="bg-[#E9EBF3] rounded-l-3xl px-3 py-3">
@@ -99,7 +127,7 @@ const DocumentGrid = () => {
             <Image src="/FilePpt.svg" width={100} height={100} alt="PPT icon" />,
             </div>
           </div> */}
-          <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3  w-full flex flex-col justify-between">
+          <div className="bg-[#fff] border rounded-r-3xl pl-5 py-3 px-3 w-full flex flex-col justify-between">
             <div>
               <p className="font-semibold pb-3 text-[16px] md:text-[18px] text-black">{doc.title}</p>
               {/* <a 

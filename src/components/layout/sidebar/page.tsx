@@ -20,11 +20,11 @@ import "../../../app/index.css";
 
 const menuItems = [
   { name: 'Dashboard', icon: HomeIcon },
-  // { name: 'Payment', icon: BagIcon },
+  { name: 'Payment', icon: BagIcon },
   { name: 'Announcement', icon: NotificationIcon },
   { name: 'Conference Portal', icon: BagIcon },
-  // { name: 'Seminars/webinars', icon: CalendarIcon },
-  { name: 'Members directory', icon: BagIcon },
+  { name: 'Seminars / Webinars', icon: CalendarIcon },
+  { name: 'Members Directory', icon: BagIcon },
   { name: 'IAIIEA resources', icon: BagIcon },
   { name: 'Gallery', icon: BagIcon },
   { name: 'Forum', icon: BagIcon },
@@ -187,19 +187,19 @@ const Sidebar = ({
           <div className='absolute top-4 right-4 z-50'>
             {sidebarMode === 'default' && (
               <ChevronsLeft 
-                className="text-black cursor-pointer" 
+                className="text-white cursor-pointer" 
                 onClick={toggleSidebar} 
               />
             )}
             {sidebarMode === 'mini' && (
               <Menu 
-                className="text-black cursor-pointer" 
+                className="text-white cursor-pointer" 
                 onClick={toggleSidebar} 
               />
             )}
             {sidebarMode === 'closed' && (
               <ChevronsRight 
-                className="text-black cursor-pointer" 
+                className="text-white cursor-pointer" 
                 onClick={toggleSidebar} 
               />
             )}

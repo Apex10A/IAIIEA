@@ -23,12 +23,11 @@ const DashboardHeader = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Simulating fetching user data from localStorage
     const userData = localStorage.getItem('user_data');
     if (userData) {
       setUser(JSON.parse(userData));
     } else {
-      router.push('/login'); // Redirect to login if no user data
+      router.push('/login');
     }
   }, [router]);
 
@@ -39,9 +38,9 @@ const DashboardHeader = () => {
       {/* Header */}
       <div className="fixed w-full bg-[#0E1A3D] z-40 py-3">
         <div className="max-w-[1440px] lg:max-w-full mx-auto px-4 md:px-8 py-4">
-          <div className="flex items-center justify-between  px-auto md:px-14">
+          <div className="flex items-center justify-between px-auto md:px-14">
             {/* Logo */}
-            <Link href="/" className="block w-[120px] md:w-[160px]">
+            <Link href="/" className="block w-[100px] md:w-[130px]">
               <Image src={Logo} alt="Logo" priority className="w-full h-auto" />
             </Link>
 
@@ -56,82 +55,81 @@ const DashboardHeader = () => {
             </div>
 
             {/* Mobile Menu Button */}
-           <div className='flex gap-5'>
-           <button 
-              className="md:hidden p-2 text-white"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <Menu size={24} />
-            </button>
-
-            {/* Profile Dropdown */}
-            <div className="relative">
-              <div 
-                onClick={toggleDropdown}
-                className="flex items-center gap-2 cursor-pointer"
+            <div className="flex gap-5 items-center">
+              <button 
+                className="md:hidden p-2 text-white"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
-                {user && (
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                      <AvatarImage
-                        src={user.image_url || '/default-avatar.png'}
-                        alt={user.f_name || 'User'}
-                      />
-                      <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
-                        {user.f_name?.charAt(0) || user.email?.charAt(0) || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden md:inline text-white">
-                      {user.f_name} {user.l_name}
-                    </span>
+                <Menu size={24} />
+              </button>
+
+              {/* Profile Dropdown */}
+              <div className="relative">
+                <div onClick={toggleDropdown} className="flex items-center gap-2 cursor-pointer">
+                  {user && (
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                        <AvatarImage
+                          src={user.image_url || '/default-avatar.png'}
+                          alt={user.f_name || 'User'}
+                        />
+                        <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
+                          {user.f_name?.charAt(0) || user.email?.charAt(0) || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="hidden md:inline text-white">
+                        {user.f_name} {user.l_name}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2">
+                    <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      <Settings size={18} className="inline-block mr-2" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('user_data');
+                        router.push('/login');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                    >
+                      <LogOut size={18} className="inline-block mr-2" />
+                      Logout
+                    </button>
                   </div>
                 )}
               </div>
-
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2">
-                  <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    <Settings size={18} className="inline-block mr-2" />
-                    Settings
-                  </Link>
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem('user_data');
-                      router.push('/login');
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
-                  >
-                    <LogOut size={18} className="inline-block mr-2" />
-                    Logout
-                  </button>
-                </div>
-              )}
             </div>
-           </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-[#0E1A3D] border-t border-gray-700">
-            <div className="px-4 py-3">
-              <Link href="/dashboard/settings" className="flex items-center gap-2 text-white w-full py-2">
-                <Settings size={20} />
-                <span>Settings</span>
-              </Link>
-              <button 
-                onClick={() => {
-                  localStorage.removeItem('user_data');
-                  router.push('/login');
-                }}
-                className="flex items-center gap-2 text-red-400 w-full py-2"
-              >
-                <LogOut size={20} />
-                <span>Logout</span>
-              </button>
-            </div>
+        {/* Mobile Menu with Transition */}
+        <div
+          className={`md:hidden bg-[#0E1A3D] border-t border-gray-700 transition-all duration-500 ${
+            isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+          }`}
+        >
+          <div className="px-4 py-3">
+            <Link href="/dashboard/settings" className="flex items-center gap-2 text-white w-full py-2">
+              <Settings size={20} />
+              <span>Settings</span>
+            </Link>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('user_data');
+                router.push('/login');
+              }}
+              className="flex items-center gap-2 text-red-400 w-full py-2"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Spacer */}

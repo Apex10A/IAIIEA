@@ -7,6 +7,7 @@ import Volunteers from './Volunteers/page'
 import ConferenceParticipants from './ConferenceParticipants/page'
 import WorkshopParticipant from './WorkshopParticipants/page'
 import { SectionType } from '../notification/buttonTs'
+import   PortalAccessWrapper   from '@/components/ProtectedRoute';
 
 const Page = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType>('IAIIEA members');
@@ -25,37 +26,38 @@ const Page = () => {
             <EventSpeakers/>
           </div>
         );
-      case 'Conference participants':
-        return (
-          <div>
-            <ConferenceParticipants/>
-          </div>
-        );
-      case 'Volunteers':
-        return (
-          <div>
-            <Volunteers/>
-          </div>
-        );
-      case 'Workshop participants':
-        return (
-          <div>
-            <WorkshopParticipant/>
-          </div>
-        );
+      // case 'Conference participants':
+      //   return (
+      //     <div>
+      //       <ConferenceParticipants/>
+      //     </div>
+      //   );
+      // case 'Volunteers':
+      //   return (
+      //     <div>
+      //       <Volunteers/>
+      //     </div>
+      //   );
+      // case 'Workshop participants':
+      //   return (
+      //     <div>
+      //       <WorkshopParticipant/>
+      //     </div>
+      //   );
       default:
         return null;
     }
   };
 
   return (
+    <PortalAccessWrapper portalType="membership">
     <div className='p-6'>
       <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
         <h1 className='text-2xl'>Members Directory</h1>
       </div>
       <div>
         <ButtonProp
-          options={['IAIIEA members', 'Event speakers', 'Conference participants', 'Volunteers', 'Workshop participants']}
+          options={['IAIIEA members', 'Event speakers']}
           selectedSection={selectedSection}
           setSelectedSection={setSelectedSection}
         />
@@ -68,6 +70,7 @@ const Page = () => {
         {renderContent()}
       </div>
     </div>
+    </PortalAccessWrapper>
   );
 };
 

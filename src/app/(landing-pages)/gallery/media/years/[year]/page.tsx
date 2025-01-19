@@ -1,39 +1,82 @@
-"use client"
-import { useParams } from 'next/navigation';
-import Image from 'next/image';
+"use client";
+
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+
+interface GalleryItem {
+  gallery_id: number;
+  date: string;
+  year: string;
+  caption: string;
+  image: string;
+}
 
 const YearPage = () => {
-  const { year } = useParams();  // Get the dynamic year from the URL
+  const { year } = useParams<{ year: string }>(); // Ensure TypeScript knows the `year` is a string
+  const [images, setImages] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const images = [
-    { id: 1, src: `/images/${year}/image1.png`, alt: `${year} Image 1` },
-    { id: 2, src: `/images/${year}/image2.png`, alt: `${year} Image 2` },
-    { id: 3, src: `/images/${year}/image3.png`, alt: `${year} Image 3` },
-  ];
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await fetch(
+          `https://iaiiea.org/api/sandbox/landing/gallery/${year}`
+        );
+        const data = await response.json();
+
+        if (response.ok && data.status === "success") {
+          setImages(data.data);
+        } else {
+          throw new Error(data.message || "Failed to fetch gallery images");
+        }
+      } catch (err: any) {
+        setError(err.message || "An unexpected error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (year) fetchGallery();
+  }, [year]);
 
   return (
-    <div className='flex items-center justify-center'>
-      <div className='absolute z-20'>
-        <p className='text-white text-[20px]'>Gallery {'>'} Media {'>'}<span className='text-yellow-500'> {year} Images</span> </p>
-      <h1 className='text-white font-[600] text-[40px] lg:text-[60px]'>{year} Images</h1>
+    <div className="px-4 lg:px-10 py-10 bg-[#0e1a3d] text-white">
+      {/* Header Section */}
+      <div className="text-center mb-10 mt-20">
+        <p className="text-yellow-500 text-sm md:text-base">
+          Gallery {'>'} Media {'>'} <span className="text-white">{year} Images</span>
+        </p>
+        <h1 className="font-bold text-3xl md:text-5xl">{year} Images</h1>
       </div>
-      <div className='w-full'>
-        <Image 
-          src='/thumbnail/Landing page (1).png' 
-          alt='Landing Page' 
-          className='z-0 max-h-[700px] object-cover'
-          layout="responsive" 
-          width={1000}  // Replace with the actual width of your image 
-          height={800}  // Replace with the actual height of your image
-        />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {images.map((image) => (
-          <div key={image.id} className="relative w-full h-64 overflow-hidden">
-            <Image src={image.src} alt={image.alt} fill className="object-cover" />
-          </div>
-        ))}
-      </div>
+
+      {/* Loading and Error Handling */}
+      {loading && <p className="text-center">Loading images...</p>}
+      {error && <p className="text-center text-red-500">Error: {error}</p>}
+
+      {/* Images Grid */}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {images.map((image) => (
+            <div
+              key={image.gallery_id}
+              className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg"
+            >
+              <Image
+                src={image.image}
+                alt={image.caption}
+                fill
+                className="object-cover transition-transform duration-300 ease-in-out hover:scale-110"
+              />
+              <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full p-2 text-sm">
+                <p>{image.caption}</p>
+                <p className="text-xs text-gray-300">{new Date(image.date).toLocaleDateString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

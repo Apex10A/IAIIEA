@@ -1,0 +1,1481 @@
+conference schedule - time shud be displaying clearly 
+members resources- 
+
+
+{
+    "status": "success",
+    "message": "Login successful",
+    "data": {
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzI5NzE4NzIsImV4cCI6MTc2NDUwNzg3MiwidWlkIjoiMzgiLCJ1c2VyX3R5cGUiOiJtZW1iZXIiLCJlbWFpbCI6IkFwZXgxNzc1MTFAZ21haWwuY29tIn0.S5CEPgPMBl3nKiT1WftWHa8ZyQJFHpEGitniMB-FR7Q",
+        "user_type": "member",
+        "user_data": {
+            "f_name": "zare",
+            "l_name": "Obed",
+            "m_name": "Oliwafemi",
+            "name": "zare Oliwafemi Obed",
+            "phone": "08012345678",
+            "email": "Apex177511@gmail.com",
+
+
+            "registration": "complete",
+            "membership_due_date": ""
+        },
+        "pending_payments": []
+    }
+}
+
+import React, { useState, useRef } from 'react';
+import ReactPlayer from 'react-player';
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from 'lucide-react';
+
+
+type ProgressState = {
+  played: number;
+  playedSeconds: number;
+};
+
+
+const CustomMediaPlayer = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [playedSeconds, setPlayedSeconds] = useState(0);
+  const playerRef = useRef<ReactPlayer>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const videoUrl = "https://vimeo.com/1029612847";
+
+  const handleProgress = (state: ProgressState) => {
+    if (state) {
+      setProgress(state.played * 100);
+      setPlayedSeconds(state.playedSeconds);
+    }
+  };
+
+  const handleDuration = (duration: number) => {
+    setDuration(duration);
+  };
+
+  // const handleProgress = (state: OnProgressProps) => {
+  //   if (state) {
+  //     setProgress(state.played * 100);
+  //     setPlayedSeconds(state.playedSeconds);
+  //   }
+  // };
+
+  // const handleDuration = (duration: number) => {
+  //   setDuration(duration);
+  // };
+
+  const togglePlayPause = () => {
+    setIsPlaying((prev) => !prev);
+  };
+
+  const toggleMute = () => {
+    setIsMuted((prev) => !prev);
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const seekTo = parseFloat(e.target.value) / 100;
+    setProgress(seekTo * 100);
+    playerRef.current?.seekTo(seekTo, 'seconds');
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const pad = (num: number) => (`0${Math.floor(num)}`).slice(-2);
+    const minutes = seconds / 60;
+    const hours = minutes / 60;
+    
+    if (hours >= 1) {
+      return `${pad(hours)}:${pad(minutes % 60)}:${pad(seconds % 60)}`;
+    }
+    return `${pad(minutes)}:${pad(seconds % 60)}`;
+  };
+  return (
+    <div className="py-10 bg-[#F9FAFF]">
+      <h1 className="text-2xl md:text-3xl text-gray-900 font-bold opacity-80 pb-2">
+        Conference Resources
+      </h1>
+      
+      <div className="max-w-2xl">
+        <div className="relative" ref={containerRef}>
+          <div className="relative w-full aspect-video bg-black rounded-t-xl overflow-hidden">
+            <div className="relative w-full h-full">
+              <ReactPlayer
+                ref={playerRef}
+                url={videoUrl}
+                playing={isPlaying}
+                volume={volume}
+                muted={isMuted}
+                width="100%"
+                height="100%"
+                onProgress={handleProgress}
+                onDuration={handleDuration}
+                controls={false}
+                config={{
+                  vimeo: {
+                    playerOptions: {
+                      controls: false,
+                      responsive: true,
+                      dnt: true,
+                      pip: false,
+                      portrait: false,
+                      title: false,
+                      byline: false,
+                      background: true
+                    }
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
+              />
+            </div>
+
+            {/* Custom Controls */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent">
+              {/* Progress Bar */}
+              <div className="w-full group">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={progress}
+                  onChange={handleSeek}
+                  className="w-full h-1 bg-white/30 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:opacity-0 group-hover:[&::-webkit-slider-thumb]:opacity-100"
+                />
+                <div 
+                  className="h-1 bg-white transition-all duration-300 ease-out relative -mt-1"
+                  style={{ width: `${progress}%` }} 
+                />
+              </div>
+              
+              {/* Controls Bar */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center space-x-4">
+                  {/* Play/Pause Button */}
+                  <button 
+                    onClick={togglePlayPause}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    {isPlaying ? 
+                      <Pause size={24} className="text-white" /> : 
+                      <Play size={24} className="text-white" />
+                    }
+                  </button>
+
+                  {/* Volume Controls */}
+                  <div className="flex items-center space-x-2 group">
+                    <button 
+                      onClick={toggleMute}
+                      className="hover:opacity-80 transition-opacity"
+                    >
+                      {isMuted || volume === 0 ? 
+                        <VolumeX size={24} className="text-white" /> : 
+                        <Volume2 size={24} className="text-white" />
+                      }
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      className="w-0 group-hover:w-20 transition-all duration-200 h-1 bg-white/30 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                    />
+                  </div>
+
+                  {/* Time Display */}
+                  <div className="text-white text-sm">
+                    {formatTime(playedSeconds)} / {formatTime(duration)}
+                  </div>
+                </div>
+
+                {/* Right Controls */}
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    {isFullscreen ? 
+                      <Minimize size={24} className="text-white" /> : 
+                      <Maximize size={24} className="text-white" />
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border rounded-b-xl px-7 pt-4 pb-8">
+            <h1 className="text-gray-900 text-xl md:text-2xl">
+              Strategic Thinking for Effective Spiritual and Secular Leadership.
+              <span className="block text-lg text-gray-700 mt-3">
+                <p className="text-[16px] md:text-[18px]">Talk Presented by Dr Mike Egbayelo, PhD, FCIS, FICBC, FIMC</p>
+              </span>
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CustomMediaPlayer;
+
+
+
+
+<div className='max-w-[70%]'>
+      <div>
+        <p className="text-[18px] font-[500] pb-2">Conference Title</p>
+        <input 
+          type="text" 
+          name="title"
+          value={conferenceDetails.title}
+          onChange={handleInputChange}
+          placeholder="Conference Title" 
+          className="input-field border px-5 py-3 rounded-[30px] w-full mb-4" 
+        />
+
+        <p className="text-[18px] font-[500] pb-2">Theme</p>
+        <input 
+          type="text" 
+          name="theme"
+          value={conferenceDetails.theme}
+          onChange={handleInputChange}
+          placeholder="Theme" 
+          className="input-field border px-5 py-3 rounded-[30px] w-full mb-4" 
+        />
+
+        <p className="text-[18px] font-[500] pb-2">Location</p>
+        <input 
+          type="text" 
+          name="venue"
+          value={conferenceDetails.venue}
+          onChange={handleInputChange}
+          placeholder="Location" 
+          className="input-field border px-5 py-3 rounded-[30px] w-full mb-4" 
+        />
+
+        <div className="flex justify-between mb-4 mt-4">
+          <div>
+            <p className="text-[18px] font-[500] pb-2">Start Date</p>
+            <input 
+              type="datetime-local" 
+              name="start"
+              value={conferenceDetails.start}
+              onChange={handleInputChange}
+              className="border rounded-[30px] px-5 py-3 w-full" 
+            />
+          </div>
+
+          <div>
+            <p className="text-[18px] font-[500] pb-2">End Date</p>
+            <input 
+              type="datetime-local" 
+              name="end"
+              value={conferenceDetails.end}
+              onChange={handleInputChange}
+              className="border rounded-[30px] px-5 py-3 w-full" 
+            />
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[18px] font-[500] pb-2">Sub-themes</p>
+          {conferenceDetails.subthemes.map((subtheme, index) => (
+            <input 
+              key={index}
+              type="text" 
+              value={subtheme}
+              onChange={(e) => handleArrayInputChange('subthemes', index, e.target.value)}
+              placeholder="Subtheme" 
+              className="input-field border rounded-[30px] px-5 py-3 w-full mb-4" 
+            />
+          ))}
+          <button 
+            onClick={() => handleAddArrayItem('subthemes')}
+            className="text-blue-500 mb-4"
+          >
+            Add Subtheme
+          </button>
+        </div>
+
+        <div>
+          <p className="text-[18px] font-[500] pb-2">Workshops</p>
+          {conferenceDetails.workshops.map((workshop, index) => (
+            <input 
+              key={index}
+              type="text" 
+              value={workshop}
+              onChange={(e) => handleArrayInputChange('workshops', index, e.target.value)}
+              placeholder="Workshop" 
+              className="input-field border rounded-[30px] px-5 py-3 w-full mb-4" 
+            />
+          ))}
+          <button 
+            onClick={() => handleAddArrayItem('workshops')}
+            className="text-blue-500 mb-4"
+          >
+            Add Workshop
+          </button>
+        </div>
+
+        <div>
+          <p className="text-[18px] font-[500] pb-2">Important Dates</p>
+          {Object.entries(conferenceDetails.importantDates).map(([key, value]) => (
+            <div key={key} className="mb-4">
+              <p>{key}</p>
+              <input 
+                type="date" 
+                value={value}
+                onChange={(e) => handleImportantDatesChange(key, e.target.value)}
+                className="input-field border rounded-[30px] px-5 py-3 w-full" 
+              />
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <p className="text-[18px] font-[500] pb-2">Call for Paper Flyer</p>
+          <input 
+            type="file" 
+            onChange={handleFileUpload}
+            className="input-field border rounded-[30px] px-5 py-3 w-full mb-4 h-44" 
+          />
+        </div>
+      </div>
+      
+      <div className='flex items-center justify-between'>
+        {/* <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handlePrevious}>Previous</p> */}
+        <p className='font-[600] text-[17px] cursor-pointer pt-4 text-[#0B142F]' onClick={handleSubmit}>Next</p>
+      </div>
+    </div>
+
+    const formData = new FormData();
+    formData.append('title', conferenceDetails.title);
+    formData.append('theme', conferenceDetails.theme);
+    formData.append('venue', conferenceDetails.venue);
+    formData.append('start', conferenceDetails.start);
+    formData.append('end', conferenceDetails.end);
+    formData.append('subthemes_input', JSON.stringify(conferenceDetails.subthemes.filter(Boolean)));
+    formData.append('workshops_input', JSON.stringify(conferenceDetails.workshops.filter(Boolean)));
+    formData.append('important_date', JSON.stringify(conferenceDetails.importantDates));
+    if (conferenceDetails.flyer) {
+      formData.append('flyer', conferenceDetails.flyer);
+    }
+
+     const [conferenceDetails, setConferenceDetails] = useState({
+    title: '',
+    theme: '',
+    venue: '',
+    start: '',
+    end: '',
+    subthemes: [''],
+    workshops: [''],
+    importantDates: {
+      'Abstract Submission': '',
+      'Full paper Submission': ''
+    },
+    flyer: null
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setConferenceDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleArrayInputChange = (field, index, value) => {
+    setConferenceDetails(prev => {
+      const updatedArray = [...prev[field]];
+      updatedArray[index] = value;
+      return { ...prev, [field]: updatedArray };
+    });
+  };
+
+  const handleAddArrayItem = (field) => {
+    setConferenceDetails(prev => ({
+      ...prev,
+      [field]: [...prev[field], '']
+    }));
+  };
+
+  const handleImportantDatesChange = (key, value) => {
+    setConferenceDetails(prev => ({
+      ...prev,
+      importantDates: {
+        ...prev.importantDates,
+        [key]: value
+      }
+    }));
+  };
+
+  const handleFileUpload = (e) => {
+    setConferenceDetails(prev => ({
+      ...prev,
+      flyer: e.target.files[0]
+    }));
+  };
+
+
+
+
+
+  import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { DateTimePickerWithPopover } from '@/components/ui/date-picker';
+// import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DynamicListInput } from './ordered-list';
+import { PaperFlyerUpload } from './paperFlyer';
+import { CalendarIcon, PlusIcon, TrashIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { useSession } from "next-auth/react";
+
+const EventCreationForm = () => {
+    const { data: session } = useSession();
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  // State for managing the entire form process
+  const [eventType, setEventType] = useState('');
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<FormData>({
+    // Conference specific fields
+    title: '',
+    theme: '',
+    start: null,
+    end: null,
+    subthemes_input: [''],
+    workshops_input: [''],
+    important_date: [''],
+    flyer: [],
+
+    // Seminar specific fields
+    venue: '',
+
+    // Pricing and packages
+    basic: {
+      naira: '',
+      usd: '',
+      package: ['']
+    },
+    premium: {
+      naira: '',
+      usd: '',
+      package: ['']
+    },
+    standard: {
+      naira: '',
+      usd: '',
+      package: ['']
+    },
+
+    // Speakers
+    speakers: [{ speaker_id: '', speaker_name: '', speaker_institution: '' }],
+    availableSpeakers: []
+  });
+  interface FormData {
+    title: string;
+    theme: string;
+    start: Date | null;
+    end: Date | null;
+    subthemes_input: string[];
+    workshops_input: string[];
+    important_date: string[];
+    flyer: File[];
+    venue: string;
+    // basic: PricingPackage;
+    // premium: PricingPackage;
+    // standard: PricingPackage;
+    speakers: SelectedSpeaker[];
+    availableSpeakers: Speaker[];
+  }
+  interface Speaker {
+    speaker_id: string;
+    speaker_name: string;
+    speaker_institution: string;
+    speaker_image: string;
+}
+interface SelectedSpeaker {
+  speaker_id?: string;
+  speaker_name?: string;
+  speaker_institution?: string;
+}
+
+  // Fetch speakers list
+  useEffect(() => {
+    const fetchSpeakers = async () => {
+      if (!bearerToken || currentStep !== 1) return;
+  
+      try {
+        const response = await fetch(`${API_URL}/admin/speakers_list`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${bearerToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch speakers');
+        }
+  
+        const { data } = await response.json();
+        console.log(data)
+        setFormData((prev) => ({
+          ...prev,
+          availableSpeakers: data || [],
+        }));
+      } catch (error) {
+        console.error('Error fetching speakers:', error);
+      }
+    };
+  
+    fetchSpeakers();
+  }, [currentStep, API_URL, bearerToken]);
+  
+
+  const renderSpeakersSection = () => (
+    <div>
+      <Label>Speakers</Label>
+      <div className="space-y-2">
+        {formData.speakers.map((speaker, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <Select
+              value={speaker.speaker_id || ''}
+              onValueChange={(value) => {
+                const selectedSpeaker = formData.availableSpeakers.find(
+                  (s) => s.speaker_id === value
+                );
+  
+                const updatedSpeakers = [...formData.speakers];
+                updatedSpeakers[index] = {
+                  speaker_id: value,
+                  speaker_name: selectedSpeaker?.speaker_name || '',
+                  speaker_institution: selectedSpeaker?.speaker_institution || '',
+                };
+  
+                setFormData((prev) => ({
+                  ...prev,
+                  speakers: updatedSpeakers,
+                }));
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Speaker" />
+              </SelectTrigger>
+              <SelectContent>
+                {formData.availableSpeakers.map((availableSpeaker) => (
+                  <SelectItem
+                    key={availableSpeaker.speaker_id}
+                    value={availableSpeaker.speaker_id}
+                  >
+                    {`${availableSpeaker.speaker_name} 
+                    `}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {index > 0 && (
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    speakers: prev.speakers.filter((_, i) => i !== index),
+                  }));
+                }}
+              >
+                <TrashIcon className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        ))}
+        <Button
+          variant="outline"
+          onClick={() => {
+            setFormData((prev) => ({
+              ...prev,
+              speakers: [
+                ...prev.speakers,
+                { speaker_id: '', speaker_name: '', speaker_institution: '' },
+              ],
+            }));
+          }}
+        >
+          <PlusIcon className="h-4 w-4 mr-2" /> Add Speaker
+        </Button>
+      </div>
+    </div>
+  );
+  
+  // Dynamic input handlers
+  const handleInputChange = (field: string, value: string) => {
+    // Handle nested object states for pricing
+    if (field.includes('_')) {
+      const [category, subField] = field.split('_');
+      setFormData(prev => ({
+        ...prev,
+        [category]: {
+          ...prev[category],
+          [subField]: value
+        }
+      }));
+    } else {
+      // Handle simple top-level fields
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };
+
+  const addSubtheme = () => {
+    setFormData(prev => ({
+      ...prev,
+      subthemes: [...prev.subthemes_input, '']
+    }));
+  };
+
+  const removeSubtheme = (index) => {
+    const newSubthemes = formData.subthemes_input.filter((_, i) => i !== index);
+    setFormData(prev => ({
+      ...prev,
+      subthemes: newSubthemes
+    }));
+  };
+
+  const handleSubthemeChange = (index, value) => {
+    const newSubthemes = [...formData.subthemes_input];
+    newSubthemes[index] = value;
+    setFormData(prev => ({
+      ...prev,
+      subthemes: newSubthemes
+    }));
+  };
+
+  // Similar methods for workshops, important dates, speakers, etc.
+
+  const handleNextStep = async () => {
+    // Validation and API submission logic
+    try {
+      let endpoint = '';
+      let payload = {};
+
+      if (eventType === 'conference') {
+        if (currentStep === 0) {
+          endpoint = `${API_URL}/admin/create_conference/1`;
+          payload = {
+            title: formData.title,
+            theme: formData.theme,
+            start: formData.start ? format(formData.start, "yyyy-MM-dd HH:mm:ss") : '',
+            end: formData.end ? format(formData.end, "yyyy-MM-dd HH:mm:ss") : '',
+            subthemes_input: formData.subthemes_input,
+            workshops_input: formData.workshops_input,
+            important_date: formData.important_date
+          };
+        } else if (currentStep === 1) {
+          endpoint = `${API_URL}/admin/create_conference/2`;
+          payload = {
+            token: formData.token, // From previous step's response
+            basic_naira: formData.basic.naira,
+            basic_usd: formData.basic.usd,
+            basic_package: formData.basic.package,
+            premium_naira: formData.premium.naira,
+            premium_usd: formData.premium.usd,
+            premium_package: formData.premium.package,
+            standard_naira: formData.standard.naira,
+            standard_usd: formData.standard.usd,
+            standard_package: formData.standard.package,
+            speakers: formData.speakers.map(speaker => ({
+              speaker_id: speaker.id,
+              occupation: speaker.occupation
+            }))
+          };
+        }
+      } else if (eventType === 'seminar') {
+        if (currentStep === 0) {
+          endpoint = `${API_URL}/admin/create_seminar/1`;
+          payload = {
+            title: formData.title,
+            theme: formData.theme,
+            venue: formData.venue,
+            start: formData.start ? format(formData.start, "yyyy-MM-dd HH:mm:ss") : '',
+            end: formData.end ? format(formData.end, "yyyy-MM-dd HH:mm:ss") : ''
+          };
+        } else if (currentStep === 1) {
+          endpoint = `${API_URL}/admin/create_seminar/2`;
+          payload = {
+            token: formData.token,
+            basic_naira: formData.basic.naira,
+            basic_usd: formData.basic.usd,
+            basic_package: formData.basic.package,
+            premium_naira: formData.premium.naira,
+            premium_usd: formData.premium.usd,
+            premium_package: formData.premium.package,
+            standard_naira: formData.standard.naira,
+            standard_usd: formData.standard.usd,
+            standard_package: formData.standard.package,
+            speakers: formData.speakers.map(speaker => ({
+              speaker_id: speaker.id,
+              occupation: speaker.occupation
+            }))
+          };
+        }
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${bearerToken}`,
+          // Add authentication token if required
+        },
+        body: JSON.stringify(payload)
+      });
+
+      
+      const result = await response.json();
+
+      if (currentStep === 0) {
+        // Store the token from the first step's response
+        setFormData(prev => ({
+          ...prev,
+          token: result.data.token // Access the token from the nested data object
+        }));
+      }
+  
+      setCurrentStep(prev => prev + 1);
+    } catch (error) {
+      console.error('Submission error', error);
+    }
+  };
+  const handleFlyerUpload = (files: File[]) => {
+    setFormData(prev => ({
+      ...prev,
+      flyers: files
+    }));
+  };
+
+  const renderStepContent = () => {
+    if (!eventType) {
+      return (
+        <div className="space-y-4">
+          <Select onValueChange={setEventType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose Event Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="conference">Conference</SelectItem>
+              <SelectItem value="seminar">Seminar</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
+
+    if (eventType === 'conference') {
+      if (currentStep === 0) {
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label>Title</Label>
+              <Input 
+                value={formData.title} 
+                onChange={(e) => handleInputChange('title', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Theme</Label>
+              <Input 
+                value={formData.theme} 
+                onChange={(e) => handleInputChange('theme', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Venue</Label>
+              <Input 
+                value={formData.venue} 
+                onChange={(e) => handleInputChange('venue', e.target.value)}
+              />
+            </div>
+          <div className=' flex items-center justify-between'>
+          <div>
+    <Label>Start Date</Label>
+    <DateTimePickerWithPopover
+      value={formData.start}
+      onChange={(date) => handleInputChange('start', date)}
+    />
+  </div>
+  <div>
+    <Label>End Date</Label>
+    <DateTimePickerWithPopover
+      value={formData.end}
+      onChange={(date) => handleInputChange('end', date)}
+    />
+  </div>
+          </div>
+            <div>
+
+            </div>
+            <DynamicListInput 
+            label="Subthemes"
+            items={formData.subthemes_input}
+            onItemsChange={(subthemes_input) => setFormData(prev => ({...prev, subthemes_input}))}
+            placeholder="Enter subtheme"
+          />
+
+          <DynamicListInput 
+            label="Workshops"
+            items={formData.workshops_input}
+            onItemsChange={(workshops_input) => setFormData(prev => ({...prev, workshops_input}))}
+            placeholder="Enter workshop"
+          />
+          <DynamicListInput 
+            label="Important Date"
+            items={formData.important_date}
+            onItemsChange={(important_date) => setFormData(prev => ({...prev, important_date}))}
+            placeholder="Enter important dates"
+          />
+            {/* Other form fields */}
+      <PaperFlyerUpload 
+        onFilesChange={handleFlyerUpload}
+        maxFiles={5}
+      />
+            {/* Date Pickers, Subthemes, Workshops, etc. would go here */}
+          </div>
+        );
+      } else if (currentStep === 1) {
+        return (
+          <div className="space-y-4">
+            {/* Pricing, Speakers, etc. would be rendered here */}
+          </div>
+        );
+      }
+    }
+
+    if (eventType === 'seminar') {
+      if (currentStep === 0) {
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label>Title</Label>
+              <Input 
+                value={formData.title} 
+                onChange={(e) => handleInputChange('title', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Theme</Label>
+              <Input 
+                value={formData.theme} 
+                onChange={(e) => handleInputChange('theme', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Venue</Label>
+              <Input 
+                value={formData.venue} 
+                onChange={(e) => handleInputChange('venue', e.target.value)}
+              />
+            </div>
+           <div className='flex items-center justify-between'>
+           <div>
+    <Label>Start Date</Label>
+    <DateTimePickerWithPopover
+      value={formData.start}
+      onChange={(date) => handleInputChange('start', date)}
+    />
+  </div>
+  <div>
+    <Label>End Date</Label>
+    <DateTimePickerWithPopover
+      value={formData.end}
+      onChange={(date) => handleInputChange('end', date)}
+    />
+  </div>
+           </div>
+          </div>
+        );
+      } else if (currentStep === 1) {
+        return (
+          <div className="space-y-4">
+            <div className='flex items-center justify-between gap-3'>
+            <div>
+              <Label>Basic Naira</Label>
+              <Input 
+                value={formData.basic.naira} 
+                onChange={(e) => handleInputChange('basic_naira', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Basic USD</Label>
+              <Input 
+                value={formData.basic.usd} 
+                onChange={(e) => handleInputChange('basic_usd', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Basic Package</Label>
+              <Input 
+                value={formData.basic.package} 
+                onChange={(e) => handleInputChange('basic_package', e.target.value)}
+              />
+            </div>
+            </div>
+            <div className='flex items-center justify-between gap-3'>
+            <div>
+              <Label>Premium Naira</Label>
+              <Input 
+                value={formData.premium.naira} 
+                onChange={(e) => handleInputChange('premium_naira', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Premium USD</Label>
+              <Input 
+                value={formData.premium.usd} 
+                onChange={(e) => handleInputChange('premium_usd', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Premium Package</Label>
+              <Input 
+                value={formData.premium.package} 
+                onChange={(e) => handleInputChange('premium_package', e.target.value)}
+              />
+            </div>
+            </div>
+            <div className='flex items-center justify-between gap-3'>
+            <div>
+              <Label>Standard Naira</Label>
+              <Input 
+                value={formData.standard.naira} 
+                onChange={(e) => handleInputChange('standard_naira', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Standard USD</Label>
+              <Input 
+                value={formData.standard.usd} 
+                onChange={(e) => handleInputChange('standard_usd', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Standard Package</Label>
+              <Input 
+                value={formData.standard.package} 
+                onChange={(e) => handleInputChange('standard_package', e.target.value)}
+              />
+            </div>
+            </div>
+            <div>
+            {/* <Label>Speakers</Label> */}
+            {renderSpeakersSection()}
+            </div>
+          </div>
+        );
+      }
+    }
+  };
+  
+
+  return (
+    <div className='p-6'>
+        <div className='bg-gray-200 px-5 py-3 mb-6 '>
+        <h1 className='text-2xl'>EVENTS</h1>
+      </div>
+      <Card className="w-full max-w-2xl bg-transparent shadow-none">
+      <CardHeader>
+        <CardTitle>
+         <p className='text-lg opacity-[0.8]'> {!eventType ? 'Select Event Type' : 
+           eventType === 'conference' ? 
+             (currentStep === 0 ? 'Conference Details' : 'Conference Pricing & Speakers') :
+             (currentStep === 0 ? 'Seminar Details' : 'Seminar Pricing & Speakers')
+          }</p>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div>
+        {renderStepContent()}
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        {currentStep > 0 && (
+          <Button 
+            variant="outline" 
+            onClick={() => setCurrentStep(prev => prev - 1)}
+          >
+            Previous
+          </Button>
+        )}
+        <Button onClick={handleNextStep} className='font-bold'>
+          {currentStep === 0 ? 'Next' : 'Submit'}
+        </Button>
+      </CardFooter>
+    </Card>
+    </div>
+  );
+};
+
+export default EventCreationForm;
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import PortalAccessWrapper  from '@/components/ProtectedRoute';
+import { v2 as cloudinary } from 'cloudinary';
+// Conference Type Definition
+interface Conference {
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: string;
+}
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Main Page Component
+const Page = () => {
+  const [conferences, setConferences] = useState<Conference[]>([]);
+  const [selectedGalleryYear, setSelectedGalleryYear] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Mapping of years to local images (you can update these paths)
+  const conferenceImages: {[key: string]: string} = {
+    '2024': '/AboutOne.jpg',
+    '2023': '/AboutTwo.jpg',
+    '2022': '/IAIIEA2022 20.JPG',
+    '2021': '/AboutTwo.jpg',
+    '2020': '/IAIIEA2020 4.JPG',
+    '2019': '/IAIIEA2019 2.JPG'
+  };
+
+  // Placeholder gallery images (replace with actual paths)
+  const galleryImages: {[key: string]: string[]} = {
+    '2024': [
+      '/AboutOne.jpg',
+      '/AboutTwo.jpg',
+      '/AboutThree.jpg'
+    ],
+    '2023': [
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094491/ka3mhymckwjpht5msgam.jpg",
+      'https://res.cloudinary.com/dsymioclv/image/upload/v1733094485/augvjuxww15o2zfb1874.jpg',
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094492/fzecvcrazxwhlwb3daio.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094491/zhua0qcyo6cmjbngvmad.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094488/mcfcdckcie8kdoh0j6p3.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094488/zj09vzfu52ktcz8h7rqb.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094488/fxpvyau9i17gqeenp9wk.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094488/hidp89bw3i3zdyhytotw.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094488/xtn95u85t6bhui0hqz1h.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094485/dwbp1jzg9jhaqtw7hbnf.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094485/imavkfoyzwvmfeqegajj.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094485/snenqfwin2flgntvyolc.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094486/egdbuw5hpgxsycpyd7aj.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094487/sa3o8saau6nv9aa8ijel.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094482/jr3suaqntmxlh3nr1wez.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094483/sljggvoi0dnjr3rjwwq0.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094483/cwxvzlhbyfolylp5jm0b.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094479/nz8q96fqxxt4mooklkna.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094481/yy9bnywlk3jt65nz0gbi.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094481/f5lyxnws8skdnji59nea.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094481/mv3035wiiqt5orgowq8y.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094481/uvu0sozbs7ztpqcrsrbf.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094482/blpuo5bfncsuq95udakc.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094478/lmha2hj2zajjazst60dd.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094478/vqyae4rua1fojxwrvevc.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094478/nbqtg0y8waamrqsbwydf.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094478/zqi6bgh1k8dcrktupf06.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094479/xw2scnqcaebvnwnp1z7c.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094476/x1abebqsbueppzap1au0.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094476/gxbtd6mnkxwv8ulvcpwa.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094476/cygctrmywx19mopdkfks.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094476/zcupevwx14ephtyx2cez.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094477/nqi9khjoazpy6skrrvad.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094477/bjtfyilr9rqxgkepkncd.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094478/lmha2hj2zajjazst60dd.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094473/btzffrh8uwr7ztq0aqnn.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094474/q1ldlop2rgtlqam3ylvp.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094474/abatro1kykpc1hyxk2ps.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094475/kwfkbaxyzteegnhe628t.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094475/xcohszfdmyrpylzj535j.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094476/x1abebqsbueppzap1au0.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094472/ktfluuzkgtjwgu7ff2ru.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094472/cwpafimuncuz0vqaqnd3.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094472/nuzu5eoo1oq7e6l86n5z.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094473/i5ngivl4pijuplfjyldj.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094473/btzffrh8uwr7ztq0aqnn.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094470/srbwe6rygbxhaztmool5.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094470/pfrmuddh3tn28n0b8api.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094471/gdtx7tdlfkwshmguopxu.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094467/ua3vw93hmb8gjz2a0rsb.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094468/c33kpme8aixz42yr92is.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094468/zaiuocszbz9ffe2efi4b.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094469/nbbjulyp3iwcsuvcthkd.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094469/pwp6pgr0fv2ouzwj0aj3.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094470/yfntgtjj5xqj5byudpi7.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094466/euisnejz8llxkejrwn7w.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094466/oqcu9rcx0witfnzn3n3g.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094466/frbxcqpqm3r1h0eexxpu.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094463/xvwr4tzenxusruumause.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094464/l1drlpj75jrpvriqs1i3.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094464/ryrluz7xlv1ybfexmboe.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094461/el92ccstt7lv3orgsjbw.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094463/nacp2ppdiqpepf8eujcq.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094463/rlo5fxwpb0ua5iz6iwtv.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094460/witjqfejnr1huhhorctd.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094460/hsgyaaz8qis9jdabviat.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094461/kj9yynfzaizwzsxxkiit.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733093344/cld-sample-5.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094459/yx8pjlgw1vgddxkswctk.jpg",
+      "https://res.cloudinary.com/dsymioclv/image/upload/v1733094459/pekggrtzxksoawcboesh.jpg,"
+      // Add more 2023 image URLs here when available
+    ],
+    // Other years remain the same
+  };
+ 
+  useEffect(() => {
+    const fetchConferences = async () => {
+      try {
+        
+        const response = await fetch(`${API_URL}/landing/events`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch conferences');
+        }
+        const result = await response.json();
+        setConferences(result.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load conferences');
+        setLoading(false);
+      }
+    };
+
+    fetchConferences();
+  }, []);
+
+  const handleViewGallery = (year: string) => {
+    setSelectedGalleryYear(year);
+  };
+
+  const handleCloseGallery = () => {
+    setSelectedGalleryYear(null);
+  };
+
+  // YearImage Component
+  const YearImage: React.FC<Conference> = ({ title, theme, date }) => {
+    const year = title.split(' ')[1];
+    const imageUrl = conferenceImages[year] || '/fallback-image.jpg';
+
+    return (
+      <div className="bg-white shadow-md rounded-lg overflow-hidden transition-transform hover:scale-105">
+        <Image 
+          src={imageUrl} 
+          alt={`${title} Conference`} 
+          width={300} 
+          height={200} 
+          className="w-full h-48 object-cover"
+        />
+        <div className="p-4 space-y-2">
+          <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
+          <p className="text-gray-600 line-clamp-2">{theme}</p>
+          <p className="text-sm text-gray-500">{date}</p>
+          <button 
+            onClick={() => handleViewGallery(year)}
+            className="w-full bg-[#0e1a3d] text-white py-2 rounded-md hover:bg-blue-900 transition-colors"
+          >
+            View Gallery
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Gallery View Component
+  const GalleryView: React.FC<{year: string}> = ({ year }) => {
+    const images = galleryImages[year] || [];
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-800">{year} Conference Gallery</h2>
+          <button 
+            onClick={handleCloseGallery} 
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+          >
+            Close Gallery
+          </button>
+        </div>
+        {images.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((image, index) => (
+              <div 
+                key={index} 
+                className="bg-white shadow-md rounded-lg overflow-hidden hover:scale-105 transition-transform"
+              >
+                <Image 
+                  src={image} 
+                  alt={`${year} Gallery Image ${index + 1}`}
+                  width={400}
+                  height={300}
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No gallery images available for this year.</p>
+        )}
+      </div>
+    );
+  };
+
+  // Render Loading State
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Render Error State
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        <p>{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Conference Gallery</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Explore our visual journey through past conferences. 
+          Discover moments of learning, collaboration, and innovation 
+          that have shaped our community over the years.
+        </p>
+      </div>
+
+      {selectedGalleryYear ? (
+        <GalleryView year={selectedGalleryYear} />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {conferences.map((conf) => (
+            <YearImage
+              key={conf.id}
+              {...conf}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Page;
+
+
+
+
+
+
+
+
+
+
+
+
+
+THIS IS THE ENDPOINT FOR FETCHING CREATED RESOURCES FOR SEMINAR /landing/seminar_details/1  THISIS HE ENDPOINT BODY {     "status": "success",     "message": "Operation successful",     "data": {         "id": 1,         "is_registered": false,         "title": "Seminar 2024",         "theme": "Effective classroom management systems and techniques for analog and  digital schools",         "venue": "",         "date": "September 06 To 06, 2024",         "start_date": "2024-09-06",         "start_time": "00:00:00",         "sub_theme": [             "Effective classroom management systems and techniques for analog and u00a0digitalu00a0schools"         ],         "work_shop": [             "Effective classroom management systems and techniques for analog and u00a0digitalu00a0schools"         ],         "speakers": [             {                 "name": "Akinyele O. Ariyo Ph.D.",                 "title": "President, International Association for Innovations in Educational Assessment,  Abuja.  Nigeria.",                 "picture": "https://iaiiea.org/speakers/IMG-20230825-WA0005.jpg"             }         ],         "payments": null,         "resources": []     } }  SO IT SEEMS NO RESOURCES HAS BEEN CRETAED. IF THERE ARE CONFERENCES CAN U DISPLAY THEM AND IF THERE ARE NOT, DISPLAY A MESSAGE SAYING NO REOURCES.
+
+
+
+
+
+this is my code and i want the add new conference to work so the endpoint are divided into 2 steps, the first step contains a form data, requires auth, this is the endpoit for the first step- /admin/create_conference/1 so the body contains title, theme, venue, start and end  (in this form 2024-12-31 13:00:00, 2025-01-31 16:30:00) , subthemes_input, workshops_input, important_date, flyer (this is an example of how it shud be   const [formData, setFormData] = useState({     // Conference specific fields     title: '',     theme: '',     start: null,     end: null,     subthemes_input: [''],     workshops_input: [''],     important_date: [''],     flyer: [],      // Seminar specific fields     venue: '',      // Pricing and packages          basic: {       naira: '',       usd: '',       package: ['']     },     premium: {       naira: '',       usd: '',       package: ['']     },     standard: {       naira: '',       usd: '',       package: ['']     },      // Speakers     speakers: [{}],     availableSpeakers: []   });            this is the endpoint for the step 2 
+
+
+this is my code and i want the add new conference to work so the endpoint are divided into 2 steps, the first step contains a form data, requires auth, this is the endpoit for the first step- /admin/create_conference/1 so the body contains title, theme, venue, start and end  (in this form 2024-12-31 13:00:00, 2025-01-31 16:30:00) , subthemes_input, workshops_input, important_date, flyer (this is an example of how it shud be   const [formData, setFormData] = useState({     // Conference specific fields     title: '',     theme: '',     start: null,     end: null,     subthemes_input: [''],     workshops_input: [''],     important_date: [''],     flyer: [],      // Seminar specific fields     venue: '',      // Pricing and packages          basic: {       naira: '',       usd: '',       package: ['']     },     premium: {       naira: '',       usd: '',       package: ['']     },     standard: {       naira: '',       usd: '',       package: ['']     },      // Speakers     speakers: [{}],     availableSpeakers: []   });            this is the endpoint for the step 2
+ (/admin/create_conference/2) and the body is a form data including token-Token from step1 response, gallery[]- to add multiple gallery images, sponsors[]- to add multiple sponsors images, videos[]- to add multiple video files, basic_naira, basic_usd, basic_package- (e.g ["Food","Accommodation"], description: List of packages as a JSON), premium_naira, premium_usd, premium_package- (e.g ["Food","Accommodation","Recordings"], List of packages as a JSON), standard_naira, standard_usd, standard_package- (e.g ["Food","Accommodation","Recordings","Jobs"], List of packages as a JSON) and speakers(which is a list of speakers to be added to the conference), this is the endpoint (/admin/speakers_list) so it shud be like a dropdown of all fetched spakers so i can chose which speaker i wanna add    this is an example of the response from fetching a conference {     "status": "success",     "message": "Operation successful",     "data": {         "id": 9,         "is_registered": false,         "title": "Conference Title",         "theme": "Conference Theme",         "venue": "Conference Location",         "date": "December 31, 2024 To January 31, 2025",         "start_date": "2024-12-31",         "start_time": "13:00:00",         "sub_theme": [             "Broad Based Curriculum Development for the 21st Century Skills.",             "Modern Trends in Educational Assessment in Artificial Intelligence Environment.",             "Inclusive Education and Educational Assessment"         ],         "work_shop": [             "Innovative Test Items Construction",             "Psychometrics Tools for Test Development"         ],     
+
+
+"important_date": [             "Abstract Submission 2023-05-01",             "Full paper Submission 2023-09-30"         ],         "flyer": "https://iaiiea.org/gallery/67896af967fedlight up.jpg",         "gallery": [],         "sponsors": [],         "videos": [],         "payments": {             "basic": {                 "virtual": {                     "usd": "10",                     "naira": "10000"                 },                 "physical": {                     "usd": "10",                     "naira": "10000"                 },                 "package": [                     "Food",                     "Accommodation"                 ]             },             "premium": {                 "virtual": {                     "usd": "20",                     "naira": "20000"                 },                 "physical": {                     "usd": "20",                     "naira": "20000"                 },                 "package": [                     "Food",                     "Accommodation",                     "Recordings"                 ]             },             "standard": {                 "virtual": {                     "usd": "50",                     "naira": "50000"                 },                 "physical": {                     "usd": "50",                     "naira": "50000"                 },                 "package": [                     "Food",                     "Accommodation",                     "Recordings",                     "Jobs"                 ]             }         },         "status": "Ongoing",         "resources": [],         "schedule": [],         "meals": [             {                 "meal_id": 3,                 "name": "zobo",                 "image": "https://iaiiea.org/meals/67869e0b85f32EmmafyLogo.png"             },             {                 "meal_id": 2,                 "name": "jsjsj",                 "image": "https://iaiiea.org/meals/6785a29c6dfaaimg_1.jpg"             },             {                 "meal_id": 1,                 "name": "Add, coke, youghurt",                 "image": "https://iaiiea.org/meals/"             }         ]     } }    so can u make it work, this is my AddFileModal page
+
+
+
+
+
+<div className="space-y-8 bg-[#F9FAFF]">
+           <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
+        <h1 className='text-2xl text-[#0B142F]'>Conference Portal</h1>
+      </div>
+      {/* Conference Information */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
+        <h1 className="text-2xl md:text-3xl text-[#0B142F] font-medium">{conference.title}</h1>
+        <div className="text-base md:text-xl text-[#0B142F]">
+          100+ people registered
+          <Link href="/" className="underline font-medium ml-2">
+            access participant directory
+          </Link>
+        </div>
+      </div>
+
+      {/* Conference Header */}
+      <div className="py-2 md:py-4">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+         {conference.theme}
+        </h1>
+      </div>
+
+      <hr />
+
+      {/* Conference Date and Location */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Image src="/Calendar (1).svg" alt="Calendar" width={25} height={25} />
+          <p className="text-base md:text-lg text-[#0B142F] opacity-80">
+            {conference.date}
+          </p>
+        </div>
+        <div className="flex items-start gap-2">
+          <Image src="/MapPin.svg" alt="Location" width={25} height={25} />
+          <p className="text-base md:text-lg text-[#0B142F] opacity-80 max-w-2xl">
+            {conference.venue}
+          </p>
+        </div>
+      </div>
+
+      <hr />
+
+
+      {/* Schedule Section */}
+      <div className="space-y-4">
+        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+          Daily conference schedule
+        </h1>
+        <p className="text-base md:text-lg text-[#0B142F] opacity-80">
+          Day 1: Monday 4th November 2024
+        </p>
+        <BorderlessTable />
+      </div>
+
+      <hr />
+
+      {/* Meal Ticketing */}
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
+            Meal ticketing
+          </h1>
+          <p className="text-base md:text-lg text-[#0B142F]">
+            This is the list of food currently available for the day. Select any food of your choice
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FoodCard 
+            image="/Jollof.png"
+            title="Nigerian Jollof"
+            alt="Jollof Rice"
+          />
+          <FoodCard 
+            image="/Egusi.png"
+            title="Egusi Soup"
+            alt="Egusi Soup"
+          />
+        </div>
+      </div>
+
+      {/* Virtual Event Access */}
+      <div className="space-y-4">
+        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+          Join event for virtual attendees
+        </h2>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 text-[#0B142F]">
+          <p className="text-base md:text-lg">You can access the live event from here</p>
+         <Link href='https://us06web.zoom.us/j/84732263237?pwd=dS4rtkyZnhRdAhvpOOrU5SjFbTbIWH.1'>
+         <button className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto">
+            Join in
+          </button>
+         </Link>
+        </div>
+      </div>
+
+      {/* Certification */}
+      <div className="space-y-4">
+        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
+          Certification
+        </h2>
+        <div className="text-base md:text-lg space-x-2">
+          <span className='text-[#0B142F]'>Complete the</span>
+          <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline text-[#0B142F]">
+            conference evaluation form
+          </Link>
+          <span className='text-[#0B142F]'>to</span>
+          <Link href="/dashboard/conference-evaluation" className="text-[#0B142F]">
+            access certificate
+          </Link>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+    <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-4">
+        <div className="flex-1">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{conference.title}</h3>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{conference.theme}</p>
+        </div>
+        <span className="bg-blue-100 text-blue-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
+          {resourceCount} {resourceCount === 1 ? 'Resource' : 'Resources'}
+        </span>
+      </div>
+      <div className="text-xs sm:text-sm text-gray-500">
+        <p className="mb-2">{conference.venue}</p>
+        <p>{conference.date}</p>
+      </div>

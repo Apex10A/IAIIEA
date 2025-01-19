@@ -5,6 +5,7 @@ import Image from 'next/image'
 import CarouselLandingPage from "./CarouselLandingPage"
 import Carousel from "@/modules/ui/carousel"
 import { EmblaOptionsType } from 'embla-carousel'
+import RealConference from "@/modules/ui/RealConference";
 
 interface Book {
     id: number
@@ -93,26 +94,26 @@ const index: React.FC = () => {
        </div>
     <div className='md:px-14 px-10 md:min-h-screen py-14 flex justify-center bg-[#fff] '>
     <div className='lg:flex items-center justify-between gap-20'>
-        <div className='flex items-center justify-between'>
-        <div className=' transform '>
-            <Image 
-             src='/Frame 15.svg'
-             alt=''
-             className=''
-             width={400}
-             height={400}
-            />
-            </div>
-            <div className='transform'>
-            <Image 
-             src='/Frame 15.svg'
-             alt=''
-             className=''
-             width={400}
-             height={400}
-            />
-            </div>
-        </div>
+    <div className='flex items-center justify-between space-x-6'>
+    <div className='transform transition-transform duration-300 hover:scale-105 shadow-lg rounded-lg overflow-hidden'>
+        <Image 
+         src='/AboutOne.jpg'
+         alt='Team Members'
+         className='object-cover'
+         width={400}
+         height={400}
+        />
+    </div>
+    <div className='transform transition-transform duration-300 hover:scale-105 shadow-lg rounded-lg overflow-hidden'>
+        <Image 
+         src='/AboutTwo.jpg'
+         alt='Team Members'
+         className='object-cover'
+         width={400}
+         height={400}
+        />
+    </div>
+</div>
         <div>
             <h1 className='text-[40px] lg:text-[60px] max-w-2xl font-[600] text-[#0B142F] leading-[60px] pb-3'>Who Are We</h1>
             <p className='text-[18px] text-[#0B142F] max-w-xl pb-3 opacity-[0.8]'>We&apos;re IAIIEA, your partner in educational excellence. 
@@ -157,42 +158,7 @@ const index: React.FC = () => {
         <div className='flex items-center justify-center mb-10'>
             <h1 className='text-[40px] lg:text-[60px] max-w-2xl font-[500] text-[#0B142F] leading-[60px] pb-3'>Events</h1>
         </div>
-        <div className='lg:flex gap-5 items-center justify-center'>
-        <div className=''>
-            <div className=''>
-                <Image  
-                  src='/Meeting.png'
-                  alt=''
-                  className=''
-                  width={600}
-                  height={400}
-                  />
-            </div>
-            <div className='bg-[#fff] border w-full rounded-b-2xl px-7 pt-3 pb-8'>
-                <h1 className='text-[#0B142F] text-[40px] font-[500]'>Conference 2024</h1>
-                <p className='text-[#0B142F] text-[19px] font-[500] max-w-xl'>Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence</p>
-                <p className='text-[#0B142F] text-[19px] font-[400] pt-2 pb-3'>Mon, Nov 2 -  Fri, Nov 8 </p>
-                <button className='bg-[#203A87] px-7 py-3 rounded-3xl text-[#fff] font-[500]'>Register</button>
-            </div>
-        </div>
-        <div className=''>
-            <div className=''>
-                <Image  
-                  src='/Meeting.png'
-                  alt=''
-                  className=''
-                  width={600}
-                  height={400}
-                  />
-            </div>
-            <div className='bg-[#fff] border w-full rounded-b-2xl px-7 pt-3 pb-8'>
-                <h1 className='text-[#0B142F] text-[40px] font-[500]'>Conference 2024</h1>
-                <p className='text-[#0B142F] text-[19px] font-[500] max-w-xl'>Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence</p>
-                <p className='text-[#0B142F] text-[19px] font-[400] pt-2 pb-3'>Mon, Nov 2 -  Fri, Nov 8 </p>
-                <button className='bg-[#203A87] px-7 py-3 rounded-3xl text-[#fff] font-[500]'>Register</button>
-            </div>
-        </div>
-        </div>
+        <RealConference/>
     </div>
     </div>
   )

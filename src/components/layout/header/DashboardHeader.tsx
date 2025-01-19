@@ -1,37 +1,89 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { signOut, useSession } from "next-auth/react";
+import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
 import { Menu, Search, Settings, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/modules/ui/avatar';
 
-interface User {
-  f_name?: string;
-  l_name?: string;
-  image_url?: string;
-  email?: string;
-  role?: 'admin' | 'user';
-}
-
 const DashboardHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user_data');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    } else {
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
       router.push('/login');
     }
-  }, [router]);
+  });
+  const router = useRouter();
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+
+  // Handle logout with NextAuth
+  const handleLogout = async () => {
+    await signOut({ 
+      redirect: true, 
+      callbackUrl: '/login' 
+    });
+  };
+
+  // Dropdown animation variants
+  const dropdownVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: -10,
+      scale: 0.95
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -10,
+      scale: 0.95,
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
+
+  // Mobile menu animation variants
+  const mobileMenuVariants = {
+    hidden: { 
+      height: 0,
+      opacity: 0
+    },
+    visible: { 
+      height: 'auto',
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut"
+      }
+    },
+    exit: { 
+      height: 0,
+      opacity: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  // If no session, return null or a loading state
+  if (!session?.user) return null;
 
   return (
     <>
@@ -66,70 +118,76 @@ const DashboardHeader = () => {
               {/* Profile Dropdown */}
               <div className="relative">
                 <div onClick={toggleDropdown} className="flex items-center gap-2 cursor-pointer">
-                  {user && (
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                        <AvatarImage
-                          src={user.image_url || '/default-avatar.png'}
-                          alt={user.f_name || 'User'}
-                        />
-                        <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
-                          {user.f_name?.charAt(0) || user.email?.charAt(0) || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="hidden md:inline text-white">
-                        {user.f_name} {user.l_name}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                      <AvatarImage
+                        src={session.user?.image || '/default-avatar.png'}
+                        alt={session.user?.name || 'User'}
+                      />
+                      <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
+                        {session.user?.name?.charAt(0) || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:inline text-white">
+                      {session.user?.name}
+                    </span>
+                  </div>
                 </div>
 
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2">
-                    <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <Settings size={18} className="inline-block mr-2" />
-                      Settings
-                    </Link>
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem('user_data');
-                        router.push('/login');
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div 
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2"
                     >
-                      <LogOut size={18} className="inline-block mr-2" />
-                      Logout
-                    </button>
-                  </div>
-                )}
+                      <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <Settings size={18} className="inline-block mr-2" />
+                        Settings
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                      >
+                        <LogOut size={18} className="inline-block mr-2" />
+                        Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu with Transition */}
-        <div
-          className={`md:hidden bg-[#0E1A3D] border-t border-gray-700 transition-all duration-500 ${
-            isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-          }`}
-        >
-          <div className="px-4 py-3">
-            <Link href="/dashboard/settings" className="flex items-center gap-2 text-white w-full py-2">
-              <Settings size={20} />
-              <span>Settings</span>
-            </Link>
-            <button 
-              onClick={() => {
-                localStorage.removeItem('user_data');
-                router.push('/login');
-              }}
-              className="flex items-center gap-2 text-red-400 w-full py-2"
+        {/* Mobile Menu with Framer Motion */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              variants={mobileMenuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="md:hidden bg-[#0E1A3D] border-t border-gray-700"
             >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
+              <div className="px-4 py-3">
+                <Link href="/members-dashboard/settings" className="flex items-center gap-2 text-white w-full py-2">
+                  <Settings size={20} />
+                  <span>Settings</span>
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-red-400 w-full py-2"
+                >
+                  <LogOut size={20} />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Spacer */}

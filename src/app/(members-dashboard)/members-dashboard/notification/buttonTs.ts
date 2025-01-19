@@ -10,6 +10,9 @@ export type SectionType =
   | 'Volunteers' 
   | 'job opportunity'
   | 'Announcement'
+  | 'Members resources'
+  | 'Payment History'
+  | 'Dues Settings'
   | 'Workshop participants';
 
   export type SectionState = {

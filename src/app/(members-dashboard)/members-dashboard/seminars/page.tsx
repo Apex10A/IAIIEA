@@ -6,7 +6,7 @@ import Link from 'next/link';
 // import BorderlessTable from './BorderlessTable';
 import Conference from "@/modules/ui/conference";
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
-
+import PortalAccessWrapper  from '@/components/ProtectedRoute';
 
 // TypeScript interfaces
 interface FoodOption {
@@ -58,6 +58,7 @@ const FoodCard: React.FC<FoodOption> = ({ image, title, alt }) => (
 const Page: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType>('Conference Portal');
   const renderConferencePortal = () => (
+    <PortalAccessWrapper portalType="webinar">
     <div className="space-y-8 bg-[#F9FAFF]">
            <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
         <h1 className='text-2xl text-[#0B142F]'>Seminar Portal</h1>
@@ -159,6 +160,7 @@ const Page: React.FC = () => {
       {/* Conference Component */}
       <Conference />
     </div>
+    </PortalAccessWrapper>
   );
 
   return (

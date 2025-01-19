@@ -1,237 +1,181 @@
-"use client"
-import React, { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-// import ToggleButton from "@/app/(members-dashboard)/members-dashboard/payment/ToggleButton";
-import BorderlessTable from './BorderlessTable';
-import RealConference from "@/modules/ui/RealConference";
-import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
-import Document from './Download';
-import VideoConference from "./videoConference"
+import React, { useState, useEffect } from 'react';
+import { Calendar, MapPin, X } from 'lucide-react';
+import Spinner from "@/app/spinner"
 
-// TypeScript interfaces
-interface FoodOption {
-  image: string;
-  title: string;
-  alt: string;
-}
+const ConferenceDashboard = () => {
+  const [conferences, setConferences] = useState([]);
+  const [selectedConference, setSelectedConference] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-interface BreadcrumbProps {
-  paths: string[];
-}
+  useEffect(() => {
+    fetchConferences();
+  }, []);
 
-// Component types
-type SectionType = 'Conference Portal' | 'Conference Directory' | 'Conference Resources';
+  const fetchConferences = async () => {
+    try {
+      const response = await fetch('https://iaiiea.org/api/sandbox/landing/events');
+      const data = await response.json();
+      setConferences(data.data || []);
+    } catch (error) {
+      console.error('Error fetching conferences:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-// Reusable components
-const Breadcrumb: React.FC<BreadcrumbProps> = ({ paths }) => (
-  <p className="text-base md:text-xl text-black">
-    {paths.map((path, index) => (
-      <span key={index}>
-        {index > 0 && ' > '}
-        <span className={index === paths.length - 1 ? 'font-semibold' : ''}>
-          {path}
-        </span>
-      </span>
-    ))}
-  </p>
-);
+  const fetchConferenceDetails = async (id) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`https://iaiiea.org/api/sandbox/landing/event_details/${id}`);
+      const data = await response.json();
+      setSelectedConference(data.data);
+    } catch (error) {
+      console.error('Error fetching conference details:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const FoodCard: React.FC<FoodOption> = ({ image, title, alt }) => (
-  <div className="border rounded-lg overflow-hidden w-full md:w-[350px]">
-    <div className="relative w-full h-48 md:h-[250px]">
-      <Image 
-        src={image} 
-        alt={alt} 
-        fill 
-        className="object-cover"
-      />
-    </div>
-    <div className="flex flex-col items-center p-4">
-      <p className="text-xl md:text-2xl text-[#0B142F] font-medium py-2 text-center">{title}</p>
-      <button className="border px-5 py-3 font-semibold hover:bg-gray-50 transition-colors text-[#0B142F] text-[16px] md:text-[19px]">
-        Select
+  // Conference Card Component
+  const ConferenceCard = ({ conference }) => (
+    <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+      <h2 className="text-xl font-semibold text-[#0B142F]">{conference.title}</h2>
+      <div className="flex items-center gap-2">
+        <Calendar className="w-5 h-5 text-gray-600" />
+        <p className="text-gray-600">{conference.date}</p>
+      </div>
+      <div className="flex items-start gap-2">
+        <MapPin className="w-5 h-5 text-gray-600" />
+        <p className="text-gray-600">{conference.venue}</p>
+      </div>
+      <button
+        onClick={() => fetchConferenceDetails(conference.id)}
+        className="bg-[#203a87] text-white px-6 py-2 rounded-full hover:bg-[#162a61] transition-colors w-full"
+      >
+        View Details
       </button>
     </div>
-  </div>
-);
+  );
 
-const Page: React.FC = () => {
-  const [selectedSection, setSelectedSection] = useState<SectionType>('Conference Portal');
-
-  const renderResources = () => (
-    <div className="space-y-6 py-10">
-     <div className='bg-gray-200 px-5 py-3 mb-6'>
-        <h1 className='text-lg text-black md:text-2xl'>Conference Portal {'>'} Resources</h1>
-      </div>
-      {/* <Breadcrumb paths={['Home', 'Conference Portal', 'Conference Resources']} /> */}
-      <div className="mt-10">
-        <VideoConference/>
-        <Document />
-      </div>
+  // Schedule Table Component
+  const ScheduleTable = ({ schedules }) => (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-2 text-left">Day</th>
+            <th className="px-4 py-2 text-left">Activity</th>
+            <th className="px-4 py-2 text-left">Facilitator</th>
+            <th className="px-4 py-2 text-left">Venue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {schedules.map((schedule) => (
+            <tr key={schedule.schedule_id} className="border-b">
+              <td className="px-4 py-2">{schedule.day}</td>
+              <td className="px-4 py-2">{schedule.activity}</td>
+              <td className="px-4 py-2">{schedule.facilitator}</td>
+              <td className="px-4 py-2">{schedule.venue}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 
-  const renderConferencePortal = () => (
-    <div className="space-y-8 bg-[#F9FAFF]">
-           <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-2xl text-[#0B142F]'>Conference Portal</h1>
-      </div>
-      {/* Conference Information */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between my-6 md:my-10 space-y-4 md:space-y-0">
-        <h1 className="text-2xl md:text-3xl text-[#0B142F] font-medium">2024 CONFERENCE</h1>
-        <div className="text-base md:text-xl text-[#0B142F]">
-          100+ people registered
-          <Link href="/" className="underline font-medium ml-2">
-            access participant directory
-          </Link>
+  // Meals Section Component
+  const MealsSection = ({ meals }) => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {meals.map((meal) => (
+        <div key={meal.meal_id} className="bg-white rounded-lg shadow-md overflow-hidden">
+          <img 
+            src={meal.image || "/api/placeholder/300/200"}
+            alt={meal.name}
+            className="w-full h-48 object-cover"
+          />
+          <div className="p-4">
+            <h3 className="text-lg font-semibold">{meal.name}</h3>
+          </div>
         </div>
-      </div>
+      ))}
+    </div>
+  );
 
-      {/* Conference Header */}
-      <div className="py-2 md:py-4">
-        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
-          Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence
-        </h1>
-      </div>
-
-      <hr />
-
-      {/* Conference Date and Location */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Image src="/Calendar (1).svg" alt="Calendar" width={25} height={25} />
-          <p className="text-base md:text-lg text-[#0B142F] opacity-80">
-            Mon, Nov 2 - Fri, Nov 8 2024
-          </p>
-        </div>
-        <div className="flex items-start gap-2">
-          <Image src="/MapPin.svg" alt="Location" width={25} height={25} />
-          <p className="text-base md:text-lg text-[#0B142F] opacity-80 max-w-2xl">
-            UBEC Digital Resource Centre, Opposite Next Gen (Cash and Carry) Supermarket, Mabushi, Jahi District, Abuja. Nigeria. West Africa.
-          </p>
-        </div>
-      </div>
-
-      <hr />
-
-      {/* Resources Section */}
-      <div className="space-y-6">
-        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
-          Resources
-        </h1>
-        <div className="flex flex-col text-[#0B142F] md:flex-row md:items-center justify-between gap-4">
-          <p className="text-lg md:text-xl text-[#0B142F]">
-            View
-            <Link href="/" className="underline font-semibold ml-2 text-[#0B142F]">
-              conference preceding
-            </Link>
-          </p>
-          <button 
-            onClick={() => setSelectedSection('Conference Resources')}
-            className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-[70%] md:w-auto"
+  // Conference Details Section
+  const ConferenceDetails = ({ conference }) => {
+    if (!conference.is_registered) {
+      return (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+          <p className="text-red-700">You must be registered for this conference to view its details.</p>
+          <button
+            onClick={() => setSelectedConference(null)}
+            className="mt-4 text-blue-600 hover:underline"
           >
-            Resources
+            Return to Conferences
           </button>
         </div>
-      </div>
+      );
+    }
 
-      <hr />
-
-      {/* Schedule Section */}
-      <div className="space-y-4">
-        <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
-          Daily conference schedule
-        </h1>
-        <p className="text-base md:text-lg text-[#0B142F] opacity-80">
-          Day 1: Monday 4th November 2024
-        </p>
-        <BorderlessTable />
-      </div>
-
-      <hr />
-
-      {/* Meal Ticketing */}
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-4xl text-[#0B142F] font-semibold leading-tight">
-            Meal ticketing
-          </h1>
-          <p className="text-base md:text-lg text-[#0B142F]">
-            This is the list of food currently available for the day. Select any food of your choice
-          </p>
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h1 className="text-3xl font-bold text-[#0B142F]">{conference.title}</h1>
+          <button 
+            onClick={() => setSelectedConference(null)}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FoodCard 
-            image="/Jollof.png"
-            title="Nigerian Jollof"
-            alt="Jollof Rice"
-          />
-          <FoodCard 
-            image="/Egusi.png"
-            title="Egusi Soup"
-            alt="Egusi Soup"
-          />
+        <p className="text-xl text-[#0B142F] mb-6">{conference.theme}</p>
+        
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar className="w-5 h-5 text-gray-600" />
+          <p className="text-gray-600">{conference.date}</p>
         </div>
-      </div>
-
-      {/* Virtual Event Access */}
-      <div className="space-y-4">
-        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
-          Join event for virtual attendees
-        </h2>
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 text-[#0B142F]">
-          <p className="text-base md:text-lg">You can access the live event from here</p>
-         <Link href='https://us06web.zoom.us/j/84732263237?pwd=dS4rtkyZnhRdAhvpOOrU5SjFbTbIWH.1'>
-         <button className="bg-[#203a87] text-white px-6 py-3 rounded-full text-base md:text-lg font-semibold hover:bg-[#162a61] transition-colors w-full md:w-auto">
-            Join in
-          </button>
-         </Link>
+        
+        <div className="flex items-start gap-2 mb-6">
+          <MapPin className="w-5 h-5 text-gray-600" />
+          <p className="text-gray-600">{conference.venue}</p>
         </div>
-      </div>
 
-      {/* Certification */}
-      <div className="space-y-4">
-        <h2 className="text-2xl md:text-4xl text-[#0B142F] font-bold opacity-80">
-          Certification
-        </h2>
-        <div className="text-base md:text-lg space-x-2">
-          <span className='text-[#0B142F]'>Complete the</span>
-          <Link href="https://docs.google.com/forms/d/e/1FAIpQLSehH3uyk-sucMxTaGr_fOASUuU6UrtGX-kqsODNlO9XmAoJQQ/viewform?usp=sharing" className="underline text-[#0B142F]">
-            conference evaluation form
-          </Link>
-          <span className='text-[#0B142F]'>to</span>
-          <Link href="/dashboard/conference-evaluation" className="text-[#0B142F]">
-            access certificate
-          </Link>
-        </div>
-      </div>
+        <h2 className="text-2xl font-semibold mb-4">Daily Conference Schedule</h2>
+        <ScheduleTable schedules={conference.schedule} />
 
-      {/* Conference Component */}
-      <RealConference />
-    </div>
-  );
+        <h2 className="text-2xl font-semibold mt-8 mb-4">Available Meals</h2>
+        <MealsSection meals={conference.meals} />
+      </div>
+    );
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <Spinner/>
+    </div>;
+  }
 
   return (
-    <div className="container mx-auto px-4 md:px-6">
-      <ButtonProp 
-        options={['Conference Portal', 'Conference Directory']} 
-        selectedSection={selectedSection} 
-        setSelectedSection={setSelectedSection as (section: string) => void} 
-      />
-      
-      {selectedSection === 'Conference Portal' && renderConferencePortal()}
-      {selectedSection === 'Conference Resources' && renderResources()}
-      {selectedSection === 'Conference Directory' && (
-        <div className="py-5 px-5">
-          <h1 className="text-3xl md:text-5xl opacity-20 font-semibold">
-            Coming soon!!!
-          </h1>
+    <div className="p-6 space-y-8">
+      <div className="bg-gray-200 px-5 py-3">
+        <h1 className="text-2xl text-[#0B142F]">Conference Portal</h1>
+      </div>
+
+      {selectedConference ? (
+        <ConferenceDetails conference={selectedConference} />
+      ) : (
+        <div>
+          <h2 className="text-2xl font-semibold mb-6">Available Conferences</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {conferences.map((conference) => (
+              <ConferenceCard key={conference.id} conference={conference} />
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-export default Page;
+export default ConferenceDashboard;

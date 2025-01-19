@@ -1,66 +1,144 @@
-import React from 'react'
-import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
+'use client';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { showToast } from '@/utils/toast';
 
-const page = () => {
-  return (
-    <div className='bg-[#0B142F] md:px-14 px-5 py-3 min-h-[300px] flex justify-between items-center'>
-        <div className=''>
-        <div className='text-[#fff]'>
-        <div>
-            <Link href="/" className='flex items-center w-full'>
-              <Image src='/IAIIEA II.png' alt="Logo" width={400} height={400}/>
-            </Link>
-          </div>
-        </div>
-        <div className='flex items-center gap-3'>
-            <p className='text-[#fff]'>+234803 429 2924,</p>
-            <p className='text-[#fff]'>+234904 420 0021,</p>
-            <p className='text-[#fff]'>+234816 565 2157</p>
-        </div> 
-        <div>
-            <p className='text-[#fff]'>Bwari, Abuja, Nigeria</p>
-        </div>
-        <div>
-            <p className='text-[#fff]'>info@iaiiea.org</p>
-        </div>
-        </div>
-
-        <div>
-            <div>
-                <p className='text-[#fff]'>Useful links</p>
-            </div>
-            <div className='flex gap-5'>
-            <div className='flex flex-col'>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-            </div>
-            <div className='flex flex-col'>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-                <Link href='/' className='text-[#fff]'>
-                  Home
-                </Link>
-            </div>
-            </div>
-        </div>
-    </div>
-  )
+interface WebData {
+  logo: string;
+  logo2: string;
+  short_name: string;
+  full_name: string;
+  phone_numbers: string[];
+  email: string;
+  address: string;
 }
 
-export default page
+const Footer = () => {
+  const [webData, setWebData] = useState<WebData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWebData = async () => {
+      try {
+        const response = await fetch('https://iaiiea.org/api/sandbox/landing/web_data');
+        if (!response.ok) throw new Error('Failed to fetch web data');
+        const result = await response.json();
+        setWebData(result.data);
+      } catch (error) {
+        showToast.error('Failed to load footer data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWebData();
+  }, []);
+
+  const usefulLinks = [
+    { title: 'Home', href: '/' },
+    { title: 'About Us', href: '/about' },
+    { title: 'Services', href: '/services' },
+    { title: 'Contact', href: '/contact' },
+  ];
+
+  const additionalLinks = [
+    { title: 'Privacy Policy', href: '/privacy' },
+    { title: 'Terms of Service', href: '/terms' },
+    { title: 'FAQ', href: '/faq' },
+  ];
+
+  return (
+    <footer className="bg-[#0B142F] text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Company Info Section */}
+          <div className="space-y-6">
+            <Link href="/" className="block">
+              {webData?.logo2 && (
+                <Image
+                  src={webData.logo2}
+                  alt={webData.short_name}
+                  width={200}
+                  height={80}
+                  className="w-auto h-20"
+                />
+              )}
+            </Link>
+            <div className="space-y-3">
+              <p className="text-sm font-medium">{webData?.full_name}</p>
+              <div className="space-y-2">
+                {webData?.phone_numbers?.[0].split(' ').map((phone, index) => (
+                  <p key={index} className="text-sm text-gray-300">
+                    {phone}
+                  </p>
+                ))}
+              </div>
+              <p className="text-sm text-gray-300">{webData?.address}</p>
+              <p className="text-sm text-gray-300">{webData?.email}</p>
+            </div>
+          </div>
+
+          {/* Useful Links Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Useful Links</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                {usefulLinks.map((link) => (
+                  <Link
+                    key={link.title}
+                    href={link.href}
+                    className="block text-sm text-gray-300 hover:text-white transition-colors"
+                  >
+                    {link.title}
+                  </Link>
+                ))}
+              </div>
+              <div className="space-y-3">
+                {additionalLinks.map((link) => (
+                  <Link
+                    key={link.title}
+                    href={link.href}
+                    className="block text-sm text-gray-300 hover:text-white transition-colors"
+                  >
+                    {link.title}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Newsletter Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Stay Updated</h3>
+            <p className="text-sm text-gray-300">
+              Subscribe to our newsletter for the latest updates and news.
+            </p>
+            <form className="space-y-3">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full px-4 py-2 bg-[#1a2544] border border-gray-600 rounded-md focus:outline-none focus:border-white"
+              />
+              <button
+                type="submit"
+                className="w-full px-4 py-2 bg-white text-[#0B142F] rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="mt-12 pt-8 border-t border-gray-700">
+          <p className="text-center text-sm text-gray-300">
+            © {new Date().getFullYear()} {webData?.short_name}. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

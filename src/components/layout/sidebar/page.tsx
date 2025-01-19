@@ -1,34 +1,75 @@
 "use client"; 
 
 import React, { useState, useEffect } from 'react';
-import { Lock, ChevronsLeft, ChevronsRight, Menu, X } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, Menu, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-// import { AiOutlineUser } from 'react-icons/ai';
-import { FaBars } from 'react-icons/fa';
 import HomeIcon from "../../../assets/landingpage/svg/HomeIcon";
 import NotificationIcon from "../../../assets/landingpage/svg/NotificationIcon";
 import BagIcon from "../../../assets/landingpage/svg/BagIcon";
+
+import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon'
+import PaymentIcon from '@/assets/sidebarIcons/PaymentIcon'
+import AnnouncementIcon from '@/assets/sidebarIcons/AnnouncementIcon'
+import GalleryIcon from '@/assets/sidebarIcons/GalleryIcon'
+import ConferenceIcon from '@/assets/sidebarIcons/ConferenceIcon'
+import SeminarIcon from '@/assets/sidebarIcons/SeminarIcon'
+import ResourcesIcon from '@/assets/sidebarIcons/ResourcesIcon'
+import ForumIcon from '@/assets/sidebarIcons/ForumIcon'
+import MembersIcon from '@/assets/sidebarIcons/MembersDirectoryIcon'
+
 import CalendarIcon from "../../../assets/landingpage/svg/CalendarIcon";
 import "../../../app/index.css";
 
-// Define menu items with their restriction status
-// type MenuItem = {
-//   name: string;
-//   icon: React.ComponentType;
-//   restricted: boolean;
-// };
-
-const menuItems = [
-  { name: 'Dashboard', icon: HomeIcon },
-  { name: 'Payment', icon: BagIcon },
-  { name: 'Announcement', icon: NotificationIcon },
-  { name: 'Conference Portal', icon: BagIcon },
-  { name: 'Seminars / Webinars', icon: CalendarIcon },
-  { name: 'Members Directory', icon: BagIcon },
-  { name: 'IAIIEA resources', icon: BagIcon },
-  { name: 'Gallery', icon: BagIcon },
-  { name: 'Forum', icon: BagIcon },
-  { name: 'Settings', icon: BagIcon },
+// Define main portal items and their sub-items
+const portalItems = [
+  { 
+    name: 'Dashboard', 
+    icon: DashboardIcon, 
+    requiredPortal: null,
+    subItems: []
+  },
+  { 
+    name: 'Payment', 
+    icon: PaymentIcon,
+    requiredPortal: null,
+    subItems: []
+  },
+  { 
+    name: 'Membership Portal', 
+    icon: MembersIcon,
+    requiredPortal: 'membership',
+    subItems: [
+      { name: 'Directory', requiredPortal: 'membership', icon: MembersIcon },
+      { name: 'Resources', requiredPortal: 'membership', icon: ResourcesIcon },
+      { name: 'Forum', requiredPortal: 'membership', icon: ForumIcon },
+      { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon }
+    ]
+  },
+  { 
+    name: 'Conference Portal', 
+    icon: ConferenceIcon,
+    requiredPortal: 'conference',
+    subItems: [
+      { name: 'Participants', requiredPortal: 'membership', icon: MembersIcon },
+      { name: 'Resources', requiredPortal: 'membership', icon: ResourcesIcon },
+      { name: 'Conferences', requiredPortal: 'membership', icon: ResourcesIcon },
+    ]
+  },
+  { 
+    name: 'Training Portal', 
+    icon: SeminarIcon,
+    requiredPortal: 'webinar',
+    subItems: [
+      { name: 'Seminar Directory', requiredPortal: 'membership', icon: MembersIcon },
+      { name: 'Seminar Resources', requiredPortal: 'membership', icon: ResourcesIcon },
+    ]
+  },
+  { 
+    name: 'Settings', 
+    icon: BagIcon,
+    requiredPortal: null,
+    subItems: []
+  }
 ];
 
 const Sidebar = ({ 
@@ -42,6 +83,11 @@ const Sidebar = ({
   const [activeComponent, setActive] = useState('Dashboard');
   const [sidebarMode, setSidebarMode] = useState<'default' | 'mini' | 'closed' | 'mobile'>('default');
   const [windowWidth, setWindowWidth] = useState<number>(0);
+  const [openPortals, setOpenPortals] = useState<{[key: string]: boolean}>({
+    'Membership Portal': false,
+    'Conference Portal': false,
+    'Seminars / Webinars': false
+  });
 
   // Handle responsive design
   useEffect(() => {
@@ -95,7 +141,16 @@ const Sidebar = ({
     }
   };
 
-  const handleComponentClick = (component: string) => {
+  const togglePortal = (portalName: string) => {
+    setOpenPortals(prev => ({
+      ...Object.fromEntries(
+        Object.entries(prev).map(([key]) => [key, false])
+      ),
+      [portalName]: !prev[portalName]
+    }));
+  };
+
+  const handleComponentClick = (component: string, isSubItem: boolean = false) => {
     setActive(component);
     setActiveComponent(component);
   
@@ -105,12 +160,15 @@ const Sidebar = ({
     }
   };
 
-  const getButtonClassName = (component: string) => {
+  const getButtonClassName = (component: string, isSubItem: boolean = false) => {
     const isActive = activeComponent === component;
     
     return `
-      text-[14px] md:text-[18px] font-[500] flex items-center justify-between 
-      py-1 md:py-2 px-2 md:px-3 rounded-md cursor-pointer md:mx-3 text-black
+      font-[500] flex items-end justify-center
+      ${isSubItem 
+        ? 'text-[16px] py-1 px-20 text-zinc-400 flex text-center ' 
+        : 'text-[14px] md:text-[18px] py-1 md:py-2 text-black'}
+      px-2 md:px-3 rounded-md cursor-pointer md:mx-3 
       ${isActive 
         ? 'bg-gray-200 text-[#0E1A3D] ' 
         : 'text-white hover:bg-[#0E1A3D] hover:text-[#cfc8c8]'}
@@ -171,16 +229,6 @@ const Sidebar = ({
           ${sidebarMode !== 'mobile' ? 'max-md:hidden' : ''}
         `}
       >
-        {/* Mobile Close Button */}
-        {sidebarMode === 'mobile' && (
-          <div className='absolute top-4 right-4 z-50'>
-            {/* <X 
-              className="text-black cursor-pointer" 
-              onClick={() => setSidebarMode('closed')} 
-            /> */}
-          </div>
-        )}
-
         {/* Sidebar Toggle Button for non-mobile views */}
         {sidebarMode !== 'mobile' && (
           <div className='absolute top-4 right-4 z-50'>
@@ -217,43 +265,81 @@ const Sidebar = ({
               <div className='w-full'>
                 <ul>
                   <div className='leading-[40px] flex flex-col gap-3 md:gap-5'>
-                  {menuItems.map((item) => {
+                  {portalItems.map((item) => {
   const IconComponent = item.icon;
-  
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+  const isPortalOpen = openPortals[item.name];
+  const isItemActive = activeComponent === item.name;
+
   return (
-    <motion.li
-      key={item.name}
-      whileHover={{ scale: sidebarMode === 'mini' ? 1.1 : 1 }}
-      className={`
-        ${getButtonClassName(item.name)}
-        ${sidebarMode === 'mini' ? 'flex justify-center items-center' : ''}
-      `}
-      onClick={() => handleComponentClick(item.name)}
-    >
-      <div className={`
-        flex items-center gap-x-4
-        ${sidebarMode === 'mini' ? 'w-full justify-center' : ''}
-      `}>
-        {sidebarMode === 'mini' ? (
-          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0E1A3D]">
-            <IconComponent />
-          </div>
-        ) : (
-          <IconComponent />
-        )}
-        {(sidebarMode === 'default' || sidebarMode === 'mobile') && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {item.name}
-          </motion.span>
-        )}
-      </div>
-    </motion.li>
-  );
-})}
+    <div key={item.name}>
+      <motion.li
+        className={`
+          ${getButtonClassName(item.name)}
+          ${sidebarMode === 'mini' ? 'flex justify-center items-center' : ''}
+        `}
+        onClick={() => {
+          hasSubItems 
+            ? togglePortal(item.name)
+            : handleComponentClick(item.name);
+        }}
+      >
+        <div className={`
+          flex items-center gap-x-4 w-full
+          ${sidebarMode === 'mini' ? 'justify-center' : 'justify-between'}
+        `}>
+          <div className="flex items-center gap-x-4">
+            {sidebarMode === 'mini' ? (
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0E1A3D]">
+                <IconComponent isActive={isItemActive} />
+              </div>
+            ) : (
+              <IconComponent isActive={isItemActive} />
+            )}
+                                {(sidebarMode === 'default' || sidebarMode === 'mobile') && (
+                                  <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                  >
+                                    {item.name}
+                                  </motion.span>
+                                )}
+                              </div>
+
+                              {/* Dropdown icon for portals with sub-items */}
+                              {hasSubItems && (sidebarMode === 'default' || sidebarMode === 'mobile') && (
+                                <div>
+                                  {isPortalOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                                </div>
+                              )}
+                            </div>
+                          </motion.li>
+
+                          {/* Dropdown Sub-Items */}
+                          {hasSubItems && isPortalOpen && (sidebarMode === 'default' || sidebarMode === 'mobile') && (
+                            <AnimatePresence>
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                {item.subItems.map((subItem) => (
+                                  <motion.li
+                                    key={subItem.name}
+                                    className={getButtonClassName(subItem.name, true)}
+                                    onClick={() => handleComponentClick(subItem.name, true)}
+                                  >
+                                    {subItem.name}
+                                  </motion.li>
+                                ))}
+                              </motion.div>
+                            </AnimatePresence>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </ul>
               </div>

@@ -1,44 +1,83 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+interface Conference {
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: string;
+  resources: any[];
+}
+
 const ConferenceCards = () => {
-  const conferences = [
-    {
-      year: '2024',
-      title: 'Conference 2024',
-      description: 'Transforming Learning and Assessment Through the Application of Big Data and Artificial Intelligence',
-      date: 'Mon, Nov 2 - Fri, Nov 8',
-      image: '/Meeting.png',
-      status: 'Completed',
-      bgColor: 'bg-blue-50'
-    },
-    {
-      year: '2023',
-      title: 'Conference 2023',
-      description: 'Innovation in Educational Technology: Bridging the Digital Divide',
-      date: 'Mon, Oct 15 - Fri, Oct 21',
-      image: '/Meeting.png',
-      status: 'Completed',
-      bgColor: 'bg-amber-50'
-    },
-    {
-      year: '2022',
-      title: 'Conference  2022',
-      description: 'Future of Education: Remote Learning and Digital Transformation',
-      date: 'Mon, Sep 5 - Fri, Sep 11',
-      image: '/Meeting.png',
-      status: 'Completed',
-      bgColor: 'bg-emerald-50'
-    }
-  ];
+  const [conferences, setConferences] = useState<Conference[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchConferences = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch conferences');
+        }
+
+        const data = await response.json();
+        
+        if (data.status === "success") {
+          setConferences(data.data);
+        } else {
+          throw new Error(data.message || 'Failed to fetch conferences');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchConferences();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <p className="text-lg">Loading conferences...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  // Function to get background color based on index
+  const getBgColor = (index: number) => {
+    const colors = ['bg-blue-50', 'bg-amber-50', 'bg-emerald-50'];
+    return colors[index % colors.length];
+  };
+
+  // Function to format date
+  const formatDate = (dateString: string) => {
+    const [datePart] = dateString.split('To').map(part => part.trim());
+    return datePart;
+  };
 
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {conferences.map((conference, index) => (
-          <div 
-            key={index}
-            className={`${conference.bgColor} rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
+          <div
+            key={conference.id}
+            className={`${getBgColor(index)} rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
           >
             <div className="relative">
               <div className="absolute z-20 bottom-5 left-5">
@@ -53,8 +92,8 @@ const ConferenceCards = () => {
                 </button>
               </div>
               <Image
-                src={conference.image}
-                alt={`Conference ${conference.year}`}
+                src="/Meeting.png"
+                alt={conference.title}
                 width={600}
                 height={400}
                 className="w-full h-[250px] object-cover"
@@ -62,25 +101,22 @@ const ConferenceCards = () => {
             </div>
             <div className="p-6">
               <div className="flex items-center justify-between mb-3">
-                <h1 className="text-[#0B142F] text-2xl lg:text-3xl font-semibold">
+                <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
                   {conference.title}
                 </h1>
                 <span className="text-[#203A87] font-bold text-lg">
-                  {conference.year}
+                  {conference.title.split(' ')[1]} {/* Extract year from title */}
                 </span>
               </div>
               <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
-                {conference.description}
+                {conference.theme}
               </p>
               <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
                 {conference.date}
               </p>
               <div className="flex items-center space-x-4">
-                <button className="bg-[#203A87] px-4 py-2 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0">
-                  Read More
-                </button>
-                <button className="border-2 border-[#203A87] px-4 py-2 rounded-lg text-[#203A87] font-medium hover:bg-[#203A87] hover:text-white transition-colors duration-300">
-                  Register
+                <button className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0">
+                  Make payment
                 </button>
               </div>
             </div>

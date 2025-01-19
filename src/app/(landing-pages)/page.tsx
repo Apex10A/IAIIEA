@@ -1,11 +1,15 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 import "@/app/index.css"
 import LandingPageOne from "@/app/(landing-pages)/landing-page-one/index"
 
-const page = () => {
+const Page = () => {
+
   return (
-    <div><LandingPageOne/></div>
+    <div>
+      <LandingPageOne/>
+    </div>
   )
 }
 
-export default page
+export default Page

@@ -1,19 +1,19 @@
 'use client'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { CiMail } from 'react-icons/ci'
-import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 
 interface UserData {
-  first_name: string
-  last_name: string
+  f_name: string
+  l_name: string
   email: string
-  image_url: string
+  image_url?: string
   id: string
   role: string[]
 }
@@ -21,50 +21,47 @@ interface UserData {
 const ProfileSettingsContent = () => {
   const { toast } = useToast()
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [updating, setUpdating] = useState(false)
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [image, setImage] = useState<File | Blob>()
-  const [uploadStatus, setUploadStatus] = useState('idle')
-  const [fullname, setFullname] = useState('')
-
-  // Load user data from localStorage on component mount
-  useEffect(() => {
-    const storedUserData = localStorage.getItem('user_data')
-    if (storedUserData) {
-      const parsedData = JSON.parse(storedUserData)
-      setUserData(parsedData)
-      setFullname(`${parsedData.first_name} ${parsedData.last_name}`)
-      setLoading(false)
-    } else {
+  const { data: session, status, update } = useSession({
+    required: true,
+    onUnauthenticated() {
       router.push('/login')
     }
-  }, [router])
+  })
+  
+  const [updating, setUpdating] = useState(false)
+  const [fullname, setFullname] = useState(
+    session?.user?.name || ''
+  )
+  const [image, setImage] = useState<File | Blob>()
+  const [uploadStatus, setUploadStatus] = useState('idle')
+
+  // If session is loading
+  if (status === 'loading') {
+    return (
+      <div className="text-[#ff502a] flex justify-center items-center text-2xl">
+        Loading
+      </div>
+    )
+  }
+
+  // Ensure we have a session
+  if (!session?.user) return null
 
   const handleUpdateName = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setUpdating(true)
 
-    const firstName = fullname.split(' ')[0]
-    const lastName = fullname.split(' ').slice(1).join(' ')
-
     try {
-      // Update in localStorage
-      if (userData) {
-        const updatedUserData = {
-          ...userData,
-          first_name: firstName,
-          last_name: lastName,
-        }
-        localStorage.setItem('user_data', JSON.stringify(updatedUserData))
-        setUserData(updatedUserData)
+      // Update session with new name
+      await update({
+        name: fullname
+      })
 
-        toast({
-          title: 'Profile Updated',
-          description: 'Your profile has been successfully updated.',
-          position: 'top-right',
-        })
-      }
+      toast({
+        title: 'Profile Updated',
+        description: 'Your profile has been successfully updated.',
+        position: 'top-right',
+      })
     } catch (error) {
       toast({
         title: 'Update Failed',
@@ -79,27 +76,22 @@ const ProfileSettingsContent = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0])
-      handleUpload(e.target.files[0])
+      const file = e.target.files[0]
+      setImage(file)
+      handleUpload(file)
     }
   }
 
   const handleRemovePhoto = async () => {
     try {
       setUploadStatus('deleting')
-      if (userData) {
-        const updatedUserData = {
-          ...userData,
-          image_url: '',
-        }
-        localStorage.setItem('user_data', JSON.stringify(updatedUserData))
-        setUserData(updatedUserData)
-
-        toast({
-          title: 'Profile Picture Removed',
-          description: 'Your profile picture has been successfully removed.',
-        })
-      }
+      // Implement photo removal logic
+      // This might involve calling an API to remove the profile picture
+      
+      toast({
+        title: 'Profile Picture Removed',
+        description: 'Your profile picture has been successfully removed.',
+      })
     } catch (error) {
       console.error('Error removing photo:', error)
       toast({
@@ -116,17 +108,10 @@ const ProfileSettingsContent = () => {
     setUploadStatus('uploading')
     try {
       // Implement your image upload logic here
-      // After successful upload, update the image_url in localStorage
-      // const uploadedImageUrl = await uploadImage(file)
-      // if (userData && uploadedImageUrl) {
-      //   const updatedUserData = {
-      //     ...userData,
-      //     image_url: uploadedImageUrl,
-      //   }
-      //   localStorage.setItem('user_data', JSON.stringify(updatedUserData))
-      //   setUserData(updatedUserData)
-      // }
-
+      // This would typically involve:
+      // 1. Uploading to a storage service (e.g., cloudinary, s3)
+      // 2. Updating the session with the new image URL
+      
       setUploadStatus('success')
       toast({
         title: 'Profile Picture Updated',
@@ -145,19 +130,9 @@ const ProfileSettingsContent = () => {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="text-[#ff502a] flex justify-center items-center text-2xl">
-        Loading
-      </div>
-    )
-  }
-
-  if (!userData) return null
-
   return (
     <article className="space-y-10 p-6">
-       <div className='bg-gray-200 px-5 py-3 mb-6'>
+      <div className='bg-gray-200 px-5 py-3 mb-6'>
         <h1 className='text-lg md:text-2xl text-black'>Settings</h1>
       </div>
       <div className="md:items-center flex md:flex-row flex-col justify-center md:justify-between items-center space-x-4">
@@ -165,11 +140,11 @@ const ProfileSettingsContent = () => {
           <div className="relative">
             <Avatar className="size-20 cursor-pointer md:size-30">
               <AvatarImage
-                src={userData.image_url || '/default-avatar.png'}
-                alt={userData.first_name || 'User'}
+                src={session.user.image || '/default-avatar.png'}
+                alt={session.user.name || 'User'}
               />
               <AvatarFallback className="bg-[#fef08a] uppercase cursor-pointer text-[#0e1a3d] font-bold text-[40px]">
-                {userData.first_name?.[0] || 'U'}
+                {session.user.name?.[0] || 'U'}
               </AvatarFallback>
             </Avatar>
 
@@ -187,9 +162,9 @@ const ProfileSettingsContent = () => {
           </div>
           <div className="flex flex-col items-center md:items-start pt-0 md:pt-2">
             <h3 className="text-[20px] md:text-[24px] font-bold text-[#101828]">
-              {`${userData.first_name} ${userData.last_name}`}
+              {session.user.name}
             </h3>
-            <p className='opacity-[0.7] italics'>{userData.email}</p>
+            <p className='opacity-[0.7] italics'>{session.user.email}</p>
           </div>
         </div>
 
@@ -259,7 +234,7 @@ const ProfileSettingsContent = () => {
                 disabled
                 type="email"
                 placeholder="olivia@untitledui.com"
-                value={userData.email || ''}
+                value={session.user.email || ''}
               />
               <CiMail className="text-[#D0D5DD] absolute inset-x-0 top-[6px] left-[-4px] w-[54px] h-[30px]" />
             </div>

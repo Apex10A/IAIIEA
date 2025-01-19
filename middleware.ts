@@ -1,28 +1,24 @@
-// middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
-export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname
-  const isPublicPath = path === '/login' || path === '/register' || path === '/'
-  
-  const token = request.cookies.get('token')?.value || ''
+export async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request })
+  const pathname = request.nextUrl.pathname
 
-  if (isPublicPath && token) {
-    return NextResponse.redirect(new URL('/members-dashboard', request.url))
+  // Check if the path requires authentication
+  const protectedPaths = ['/members-dashboard', '/members-dashboard/']
+
+  if (protectedPaths.includes(pathname)) {
+    if (!token) {
+      console.log('No token found, redirecting to login')
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
   }
 
-  if (!isPublicPath && !token) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
+  return NextResponse.next()
 }
 
-// Add your protected routes
 export const config = {
-  matcher: [
-    '/members-dashboard',
-    '/members-dashboard/:path*',
-    '/login',
-    '/register'
-  ]
+  matcher: ['/members-dashboard/:path*']
 }

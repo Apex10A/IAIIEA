@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import IAIIEAmembers from './IAIIEAmembers/page'
 import EventSpeakers from './EventSpeakers/page'
-import Volunteers from './Volunteers/page'
-import ConferenceParticipants from './ConferenceParticipants/page'
+// import Volunteers from './Volunteers/page'
+// import ConferenceParticipants from './ConferenceParticipants/page'
 import WorkshopParticipant from './WorkshopParticipants/page'
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 import   PortalAccessWrapper   from '@/components/ProtectedRoute';
@@ -26,18 +26,18 @@ const Page = () => {
             <EventSpeakers/>
           </div>
         );
-      case 'Conference participants':
-        return (
-          <div>
-            <ConferenceParticipants/>
-          </div>
-        );
-      case 'Volunteers':
-        return (
-          <div>
-            <Volunteers/>
-          </div>
-        );
+      // case 'Conference participants':
+      //   return (
+      //     <div>
+      //       <ConferenceParticipants/>
+      //     </div>
+      //   );
+      // case 'Volunteers':
+      //   return (
+      //     <div>
+      //       <Volunteers/>
+      //     </div>
+      //   );
       case 'Workshop participants':
         return (
           <div>

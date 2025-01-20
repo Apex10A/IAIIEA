@@ -20,12 +20,12 @@ const Page = () => {
             <IAIIEAmembers/>
           </div>
         );
-      case 'Event speakers':
-        return (
-          <div>
-            <EventSpeakers/>
-          </div>
-        );
+      // case 'Event speakers':
+      //   return (
+      //     <div>
+      //       <EventSpeakers/>
+      //     </div>
+      //   );
       // case 'Conference participants':
       //   return (
       //     <div>
@@ -55,13 +55,13 @@ const Page = () => {
       <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
         <h1 className='text-2xl'>Members Directory</h1>
       </div>
-      <div>
+      {/* <div>
         <ButtonProp
-          options={['IAIIEA members', 'Event speakers']}
+          options={['IAIIEA members']}
           selectedSection={selectedSection}
           setSelectedSection={setSelectedSection}
         />
-      </div>
+      </div> */}
 
       <div className='py-10'>
         

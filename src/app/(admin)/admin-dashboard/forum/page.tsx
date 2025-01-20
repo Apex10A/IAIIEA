@@ -2,27 +2,87 @@ import React, { useState, useEffect } from "react";
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useSession } from "next-auth/react";
+import { showToast } from '@/utils/toast';
 
-const ForumPage = () => {
+interface Comment {
+  name: string;
+  profile_picture: string;
+  date: string;
+  comment: string;
+}
+
+interface ForumQuestion {
+  forum_id: string;
+  title: string;
+  description: string;
+  image?: string;
+  poster_name: string;
+  profile_picture: string;
+  posted_date: string;
+  total_comments: number;
+}
+
+interface ForumDetails {
+  comments: Comment[];
+}
+
+interface NewQuestion {
+  title: string;
+  description: string;
+  image: File | null;
+}
+
+const SkeletonLoader = () => (
+  <div className="space-y-6">
+    {[1, 2, 3].map((index) => (
+      <div key={index} className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex items-center mb-4">
+          <div className="w-10 h-10 bg-gray-200 rounded-full mr-4 animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+            <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="mt-4 pt-4 border-t flex justify-between">
+          <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const ForumPage: React.FC = () => {
   const { data: session } = useSession();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeForumId, setActiveForumId] = useState(null);
-  const [forumDetails, setForumDetails] = useState(null);
-  const [newComment, setNewComment] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [questions, setQuestions] = useState<ForumQuestion[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeForumId, setActiveForumId] = useState<string | null>(null);
+  const [forumDetails, setForumDetails] = useState<ForumDetails | null>(null);
+  const [newComment, setNewComment] = useState<string>('');
 
-  const [newQuestion, setNewQuestion] = useState({
+  const [newQuestion, setNewQuestion] = useState<NewQuestion>({
     title: "",
     description: "",
     image: null
   });
 
-  // Fetch all questions
   const fetchQuestions = async () => {
+    if (!bearerToken) {
+      showToast.error("Please login again");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await fetch(`${API_URL}/forum/list`, {
@@ -36,17 +96,25 @@ const ForumPage = () => {
       
       if (data.status === "success") {
         setQuestions(data.data);
+        console.log("Questions fetched successfully");
+      } else {
+        console.log(data.message || "Failed to fetch questions");
       }
     } catch (err) {
-      setError("Failed to fetch questions");
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch questions";
+      setError(errorMessage);
+      showToast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch forum details
-  const fetchForumDetails = async (forumId) => {
+  const fetchForumDetails = async (forumId: string) => {
+    if (!bearerToken) {
+      showToast.error("Please login again");
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/forum/details/${forumId}`, {
         method: 'GET',
@@ -59,23 +127,26 @@ const ForumPage = () => {
       
       if (data.status === "success") {
         setForumDetails(data.data[0]);
+      } else {
+        console.log(data.message || "Failed to fetch forum details");
       }
     } catch (err) {
-      console.error("Failed to fetch forum details:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch forum details";
+      console.log(errorMessage);
     }
   };
 
   useEffect(() => {
     fetchQuestions();
-  }, []);
+  }, [bearerToken]);
 
   useEffect(() => {
     if (activeForumId) {
       fetchForumDetails(activeForumId);
     }
-  }, [activeForumId]);
+  }, [activeForumId, bearerToken]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewQuestion(prev => ({
       ...prev,
@@ -83,17 +154,22 @@ const ForumPage = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
     setNewQuestion(prev => ({
       ...prev,
       image: file
     }));
   };
 
-  const handleSubmitQuestion = async (e: { preventDefault: () => void; }) => {
+  const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!bearerToken) {
+      showToast.error("Please login again");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('title', newQuestion.title);
@@ -113,16 +189,30 @@ const ForumPage = () => {
       const data = await response.json();
 
       if (data.status === "success") {
-        fetchQuestions(); // Refresh the questions list
+        showToast.success("Question posted successfully");
+        fetchQuestions();
         setIsModalOpen(false);
         setNewQuestion({ title: "", description: "", image: null });
+      } else {
+        showToast.error(data.message || "Failed to post question");
       }
     } catch (err) {
-      console.error("Failed to post question:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to post question";
+      showToast.error(errorMessage);
     }
   };
 
-  const handlePostComment = async (forumId: any) => {
+  const handlePostComment = async (forumId: string) => {
+    if (!bearerToken) {
+      showToast.error("Please login again");
+      return;
+    }
+
+    if (!newComment.trim()) {
+      showToast.error("Please enter a comment");
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/forum/post_comment`, {
         method: 'POST',
@@ -139,17 +229,20 @@ const ForumPage = () => {
       const data = await response.json();
 
       if (data.status === "success") {
+        showToast.success("Comment posted successfully");
         setNewComment('');
         fetchForumDetails(forumId);
+      } else {
+        showToast.error(data.message || "Failed to post comment");
       }
     } catch (err) {
-      console.error("Failed to post comment:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to post comment";
+      showToast.error(errorMessage);
     }
   };
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="bg-gray-200 px-5 py-5 mb-5 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-black">Community Forum</h1>
@@ -157,7 +250,6 @@ const ForumPage = () => {
       </header>
 
       <div className="container mx-auto px-4">
-        {/* Forum Description and Ask Button */}
         <div className="flex items-center justify-between mb-8">
           <p className="max-w-[60%]">
             Ask questions, share knowledge, and get feedback from other developers.
@@ -227,9 +319,8 @@ const ForumPage = () => {
           </Dialog.Root>
         </div>
 
-        {/* Questions List */}
         {isLoading ? (
-          <div className="text-center py-8">Loading...</div>
+          <SkeletonLoader />
         ) : error ? (
           <div className="text-red-500 text-center py-8">{error}</div>
         ) : (

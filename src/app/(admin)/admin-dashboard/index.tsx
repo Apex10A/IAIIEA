@@ -15,7 +15,7 @@ import ConferencePortal from '@/app/(members-dashboard)/members-dashboard/confer
 import SeminarsWebinars from "@/app/(members-dashboard)/members-dashboard/seminars/page";
 import MembersDirectory from '@/app/(admin)/admin-dashboard/membersdirectory/page';
 import IAIIEAResources from '@/app/(admin)/admin-dashboard/resources/page';
-import Gallery from '@/app/(admin)/admin-dashboard/gallery/page';
+// import Gallery from '@/app/(admin)/admin-dashboard/gallery/page';
 import Forum from "@/app/(admin)/admin-dashboard/forum/page";
 import Payment from "@/app/(admin)/admin-dashboard/payment/Payment";
 import Settings from '@/app/(members-dashboard)/members-dashboard/settings/page';
@@ -58,7 +58,7 @@ export default function DashboardClient() {
       'Events' : <Events/>,
       'Seminar Participants':  <SeminarParticipants/>,
       'Seminar Resources':  <SeminarResources/>,
-      Gallery: <Gallery />,
+      // Gallery: <Gallery />,
       Forum: <Forum />,
       Settings: <Settings />,
     };

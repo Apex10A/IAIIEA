@@ -15,6 +15,9 @@ interface Schedule {
   venue: string;
   facilitator: string;
 }
+interface ConferenceScheduleModalProps {
+  onScheduleAdded: () => void; // Adjust the type based on your requirements
+}
 
 const ConferenceSchedule = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -74,12 +77,15 @@ const ConferenceSchedule = () => {
       </div>
     );
   }
-
+  const handleScheduleAdded = () => {
+    // Logic to handle when a schedule is added
+    showToast.success("Schedule added!");
+  };
   return (
     <div className="space-y-6 w-full">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Conference Schedule</h2>
-        <ConferenceScheduleModal />
+        <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded}/>
       </div>
 
       {schedules.length === 0 ? (

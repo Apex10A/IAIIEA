@@ -7,20 +7,33 @@ interface ButtonPropProps {
   setSelectedSection: (section: SectionType) => void;
 }
 
-const ButtonProp: React.FC<ButtonPropProps> = ({ options, selectedSection, setSelectedSection }) => (
-  <div className='flex w-full md:w-auto gap-2'>
-    {options.map((option) => (
-      <button
-        key={option}
-        onClick={() => setSelectedSection(option)}
-        className={`${
-          selectedSection === option ? 'bg-[#203a87] text-white flex w-full md:w-auto text-[16px] md:text-[18px]' : 'bg-transparent text-black'
-        } px-3 md:px-5 py-2 font-semibold rounded-lg border  w-full md:w-auto transition-all duration-200 text-[16px] md:text-[18px]`}
-      >
-        {option}
-      </button>
-    ))}
-  </div>
-);
+const ButtonProp: React.FC<ButtonPropProps> = ({ 
+  options, 
+  selectedSection, 
+  setSelectedSection 
+}) => {
+  // Create a handler function to wrap the state setter
+  const handleSectionChange = (option: SectionType) => {
+    setSelectedSection(option);
+  };
+
+  return (
+    <div className='flex w-full md:w-auto gap-2'>
+      {options.map((option) => (
+        <button
+          key={option}
+          onClick={() => handleSectionChange(option)}
+          className={`${
+            selectedSection === option 
+              ? 'bg-[#203a87] text-white flex w-full md:w-auto text-[16px] md:text-[18px]' 
+              : 'bg-transparent text-black'
+          } px-3 md:px-5 py-2 font-semibold rounded-lg border w-full md:w-auto transition-all duration-200 text-[16px] md:text-[18px]`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export default ButtonProp;

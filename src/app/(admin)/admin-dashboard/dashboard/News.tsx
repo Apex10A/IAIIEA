@@ -5,23 +5,46 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { useSession } from "next-auth/react";
 
-const NewsManagement = () => {
-  const [news, setNews] = useState([]);
-  const [formData, setFormData] = useState({
-    title: "",
-    date: "",
-    time: "",
-    social_media: "",
-    social_media_link: "",
-    description: "",
-    image: null,
-  });
-  const [editingNewsId, setEditingNewsId] = useState(null);
-  const [loading, setLoading] = useState(false);
+interface NewsItem {
+  id: string | number;
+  title: string;
+  date: string;
+  time: string;
+  social_media: string;
+  social_media_link: string;
+  description: string;
+  image?: File | null;
+}
+
+interface FormData {
+  title: string;
+  date: string;
+  time: string;
+  social_media: string;
+  social_media_link: string;
+  description: string;
+  image: File | null;
+}
+
+const initialFormData: FormData = {
+  title: "",
+  date: "",
+  time: "",
+  social_media: "",
+  social_media_link: "",
+  description: "",
+  image: null,
+};
+
+const NewsManagement: React.FC = () => {
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [editingNewsId, setEditingNewsId] = useState<string | number | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  const fetchNews = async () => {
+  const fetchNews = async (): Promise<void> => {
     try {
       const response = await fetch("https://iaiiea.org/api/sandbox/admin/list_news", {
         method: "GET",
@@ -43,20 +66,20 @@ const NewsManagement = () => {
 
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [bearerToken]); // Added bearerToken as dependency
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFormData((prev) => ({ ...prev, image: e.target.files[0] }));
+      setFormData((prev) => ({ ...prev, image: e.target.files![0] }));
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (!formData.title || !formData.time || !formData.description || !formData.image) {
       alert("Please fill in all required fields.");
       return;
@@ -69,8 +92,11 @@ const NewsManagement = () => {
 
     try {
       setLoading(true);
-      const endpoint = editingNewsId ? "https://iaiiea.org/api/sandbox/admin/edit_news" : "https://iaiiea.org/api/sandbox/admin/add_news";
-      if (editingNewsId) body.append("news_id", editingNewsId);
+      const endpoint = editingNewsId 
+        ? "https://iaiiea.org/api/sandbox/admin/edit_news" 
+        : "https://iaiiea.org/api/sandbox/admin/add_news";
+      
+      if (editingNewsId) body.append("news_id", editingNewsId.toString());
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -84,15 +110,7 @@ const NewsManagement = () => {
       if (response.ok) {
         alert(editingNewsId ? "News updated successfully!" : "News added successfully!");
         fetchNews();
-        setFormData({
-          title: "",
-          date: "",
-          time: "",
-          social_media: "",
-          social_media_link: "",
-          description: "",
-          image: null,
-        });
+        setFormData(initialFormData);
         setEditingNewsId(null);
       } else {
         alert(result.message || "Failed to submit news.");
@@ -105,7 +123,7 @@ const NewsManagement = () => {
     }
   };
 
-  const handleDelete = async (newsId) => {
+  const handleDelete = async (newsId: string | number): Promise<void> => {
     if (!confirm("Are you sure you want to delete this news?")) return;
 
     try {
@@ -131,7 +149,7 @@ const NewsManagement = () => {
     }
   };
 
-  const handleEdit = (newsItem) => {
+  const handleEdit = (newsItem: NewsItem): void => {
     setFormData({
       title: newsItem.title,
       date: newsItem.date,
@@ -207,7 +225,7 @@ const NewsManagement = () => {
                 onChange={handleInputChange}
                 placeholder="Description (required)"
                 className="w-full px-3 py-2 border rounded-md"
-              ></textarea>
+              />
               <input
                 type="file"
                 onChange={handleImageChange}

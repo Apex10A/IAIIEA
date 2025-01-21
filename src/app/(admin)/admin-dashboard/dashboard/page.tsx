@@ -6,48 +6,36 @@ import { useSession } from "next-auth/react";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import Events from '@/app/(admin)/admin-dashboard/events/page'
+import Events from '@/app/(admin)/admin-dashboard/events/page';
 import BroadcastModal from "./BroadcastModal";
 import DailySchedule from "./DailyShedule";
-import Calendar from './calendar'
-import DailyMeals from './DailyMeals'
-import News from './News'
+import Calendar from './calendar';
+import DailyMeals from './DailyMeals';
+import News from './News';
 import ConferenceSchedule from "./DailyShedule";
+
+// Define the type for dashboard items
+interface DashboardItem {
+  title: string;
+  icon: "Calendar" | "Clock" | "Plus" | "Utensils" | "Newspaper" | "Settings" | "Upload" | "Megaphone";
+  description: string;
+  content: () => JSX.Element;
+}
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
 
-  const dashboardItems = [
+  const dashboardItems: DashboardItem[] = [
     {
       title: "Annual Calendar",
       icon: "Calendar",
       description: "Manage and upload annual calendar",
       content: () => (
         <div>
-        <h2 className="text-2xl font-bold mb-4">Annual Calendar</h2>
-        {/* <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }}
-          editable={true}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={true}
-          events={[
-            { title: 'Event 1', date: '2024-01-15' },
-            { title: 'Event 2', date: '2024-02-20' }
-          ]}
-          height="auto"
-        /> */}
-        <Calendar />
-        
-      </div>
+          <h2 className="text-2xl font-bold mb-4">Annual Calendar</h2>
+          <Calendar />
+        </div>
       )
     },
     {
@@ -88,7 +76,6 @@ export default function AdminDashboardPage() {
       description: "Post and manage news on main website",
       content: () => (
         <div>
-        
           <News/>
         </div>
       )
@@ -100,21 +87,9 @@ export default function AdminDashboardPage() {
       content: () => (
         <div>
           <h2 className="text-2xl font-bold mb-4">Page Settings</h2>
-          {/* Create events content */}
         </div>
       )
     },
-    // {
-    //   title: "Annual Calendar Upload",
-    //   icon: "Upload",
-    //   description: "Upload main website annual calendar",
-    //   content: () => (
-    //     <div>
-    //       <h2 className="text-2xl font-bold mb-4">Annual Calendar Upload</h2>
-    //       {/* Create events content */}
-    //     </div>
-    //   )
-    // },
     {
       title: "Broadcast message",
       icon: "Megaphone",
@@ -122,15 +97,17 @@ export default function AdminDashboardPage() {
       content: () => (
         <div>
           <div>
-          <h2 className="text-2xl font-bold mb-4">Broadcast message</h2>
-          <div className="flex items-center justify-between">
-          <div>
-        <p className="max-w-[60%] opacity-[0.6]">Broadcast a message to all users, members, conference particpants and speakers on the platform</p>
-        </div>
-        <div>
-        <BroadcastModal/>
-        </div>
-          </div>
+            <h2 className="text-2xl font-bold mb-4">Broadcast message</h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="max-w-[60%] opacity-[0.6]">
+                  Broadcast a message to all users, members, conference particpants and speakers on the platform
+                </p>
+              </div>
+              <div>
+                <BroadcastModal/>
+              </div>
+            </div>
           </div>
         </div>
       )
@@ -141,7 +118,7 @@ export default function AdminDashboardPage() {
     <div className="p-6">
       <div className="pb-10">
         <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <h1 className="text-xl">Hi, {session?.user?.userData?.user_data?.name || 'Faith'} 👋</h1>
+        <h1 className="text-xl">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
       </div>
 
       {selectedItem ? (
@@ -156,8 +133,10 @@ export default function AdminDashboardPage() {
         </div>
       ) : (
         <AdminDashboardGrid
-          items={dashboardItems.map((item) => ({
-            ...item,
+          items={dashboardItems.map(item => ({
+            title: item.title,
+            icon: item.icon,
+            description: item.description,
             onClick: () => setSelectedItem(item)
           }))}
         />

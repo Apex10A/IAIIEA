@@ -13,7 +13,10 @@ export type SectionType =
   | 'Members resources'
   | 'Payment History'
   | 'Dues Settings'
-  | 'Workshop participants';
+  | 'Workshop participants'
+  | "Announcement"
+  | "Event"
+  | "News";
 
   export type SectionState = {
     [K in 'section1' | 'section2' | 'section3' | 'section4' | 'section5' | 'section6']: boolean;

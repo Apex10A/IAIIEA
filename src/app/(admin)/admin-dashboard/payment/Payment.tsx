@@ -41,11 +41,11 @@ const Payment = () => {
         <h1 className='text-2xl'>Payment History</h1>
       </div>
       <div>
-        <ButtonProp 
+        {/* <ButtonProp 
           options={['Payment History', 'Dues Settings']} 
           selectedSection={selectedSection} 
           setSelectedSection={setSelectedSection} 
-        />
+        /> */}
       </div>
       {selectedSection === 'Payment History' ? (
         <div className='mt-10'>

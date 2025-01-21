@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 
 // Components
-import Sidebar from '@/app/(admin)/admin-dashboard/sidebar/page';
+import Sidebar from '@/app/(admin)/admin-dashboard/sidebarTwo/sidebar'
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
 
 // Pages
@@ -117,7 +117,7 @@ export default function DashboardClient() {
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 md:z-0`}
         >
-          <Sidebar setActiveComponent={setActiveComponent} />
+          <Sidebar setActiveComponent={setActiveComponent} hasPaid={true}/>
         </div>
 
         {isSidebarOpen && (

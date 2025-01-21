@@ -16,8 +16,8 @@ declare module "next-auth" {
         email: string;
         registration: string;
         membership_due_date: string;
-      }
-    } & DefaultSession["user"]
+      };
+    } & DefaultSession["user"];
   }
 }
 
@@ -27,6 +27,7 @@ declare module "next-auth/jwt" {
     token?: string;
     userData?: {
       f_name: string;
+      token?: string;
       l_name: string;
       m_name: string;
       name: string;
@@ -34,6 +35,6 @@ declare module "next-auth/jwt" {
       email: string;
       registration: string;
       membership_due_date: string;
-    }
+    };
   }
 }

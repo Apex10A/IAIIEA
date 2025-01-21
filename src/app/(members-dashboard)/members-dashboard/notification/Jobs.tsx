@@ -180,10 +180,12 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
       {announcement.image && (
         <div className='relative '>
           <Image
-            src={announcement.image} 
-            alt={announcement.title} 
-            className='w-full h-48 object-cover' 
-          />
+      src={typeof announcement.image === 'string' 
+        ? announcement.image 
+        : URL.createObjectURL(announcement.image)}
+      alt={announcement.title || 'Announcement image'} 
+      className="w-full h-48 object-cover" 
+    />
           <div className='absolute top-0 left-0 w-full h-full bg-black opacity-20 hover:opacity-10 transition-opacity'></div>
         </div>
       )}
@@ -287,14 +289,18 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
         />
       </div>
             <div>
-              <Label>Image</Label>
+            <Label>Image</Label>
               <Input 
-                type='file'
-                onChange={(e) => setCurrentAnnouncement({
-                  ...currentAnnouncement, 
-                  image: e.target.files[0]
-                })}
-              />
+  type="file"
+  onChange={(e) => {
+    if (e.target.files && e.target.files[0]) {
+      setCurrentAnnouncement({
+        ...currentAnnouncement, 
+        image: e.target.files[0]
+      });
+    }
+  }}
+/>
             </div>
             <div>
               <Label>Link (Optional)</Label>

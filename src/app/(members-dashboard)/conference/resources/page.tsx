@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Calendar, MapPin, X, FileText } from 'lucide-react';

@@ -14,12 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface Speaker {
-  id: number;
-  name: string;
-  // Add other speaker properties as needed
-}
-
 interface FormData {
   // Step 1 data
   title: string;
@@ -47,12 +41,21 @@ interface FormData {
   standard_package: string[];
   selectedSpeakers: number[];
 }
+type Speaker = {
+  speaker_id: number;
+  speaker_name: string;
+};
+
+type SelectedSpeaker = {
+  speaker_id: number;
+  occupation: string;
+};
 
 const AddConferenceModal = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [token, setToken] = useState<string>('');
   const [availableSpeakers, setAvailableSpeakers] = useState<Speaker[]>([]);
-  const [selectedSpeakers, setSelectedSpeakers] = useState([]); 
+  const [selectedSpeakers, setSelectedSpeakers] = useState<SelectedSpeaker[]>([]); 
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +90,7 @@ const AddConferenceModal = () => {
     fetchSpeakers();
   }, []);
 
-  const handleSpeakerSelect = (value) => {
+  const handleSpeakerSelect = (value: any) => {
     // Add new speaker with default occupation
     const newSpeaker = {
       speaker_id: Number(value),
@@ -659,14 +662,15 @@ const AddConferenceModal = () => {
         <SelectValue placeholder="Add a speaker" />
       </SelectTrigger>
       <SelectContent>
-        {availableSpeakers.map((speaker) => (
-          <SelectItem 
-            key={speaker.speaker_id} 
-            value={speaker.speaker_id}
-          >
-            {speaker.speaker_name}
-          </SelectItem>
-        ))}
+      {availableSpeakers.map((speaker) => (
+  <SelectItem 
+    key={speaker.speaker_id} 
+    value={speaker.speaker_id.toString()} // Convert to string
+  >
+    {speaker.speaker_name}
+  </SelectItem>
+))}
+
       </SelectContent>
     </Select>
 

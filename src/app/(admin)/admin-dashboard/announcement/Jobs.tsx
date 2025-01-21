@@ -147,9 +147,10 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
     const formData = new FormData();
     
     // Type-safe null checks
-    if (currentAnnouncement.id) {
-      formData.append('id', currentAnnouncement.id);
+    if (currentAnnouncement.id !== undefined) {
+      formData.append('id', currentAnnouncement.id.toString());
     }
+    
     if (currentAnnouncement.title) {
       formData.append('title', currentAnnouncement.title);
     }
@@ -245,12 +246,16 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
               <div>
                 <Label>Image</Label>
                 <Input 
-                  type='file'
-                  onChange={(e) => setCurrentAnnouncement({
-                    ...currentAnnouncement, 
-                    image: e.target.files[0]
-                  })}
-                />
+  type="file"
+  onChange={(e) => {
+    if (e.target.files && e.target.files[0]) {
+      setCurrentAnnouncement({
+        ...currentAnnouncement, 
+        image: e.target.files[0]
+      });
+    }
+  }}
+/>
               </div>
               <div>
                 <Label>Link (Optional)</Label>
@@ -279,15 +284,17 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
       </div>
       
       {announcement.image && (
-        <div className='relative '>
-          <Image
-            src={announcement.image} 
-            alt={announcement.title} 
-            className='w-full h-48 object-cover' 
-          />
-          <div className='absolute top-0 left-0 w-full h-full bg-black opacity-20 hover:opacity-10 transition-opacity'></div>
-        </div>
-      )}
+  <div className="relative">
+    <Image
+      src={typeof announcement.image === 'string' 
+        ? announcement.image 
+        : URL.createObjectURL(announcement.image)}
+      alt={announcement.title || 'Announcement image'} 
+      className="w-full h-48 object-cover" 
+    />
+    <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20 hover:opacity-10 transition-opacity"></div>
+  </div>
+)}
       
       <CardHeader>
         <CardTitle className='flex items-center pt-5'>
@@ -390,12 +397,16 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
             <div>
               <Label>Image</Label>
               <Input 
-                type='file'
-                onChange={(e) => setCurrentAnnouncement({
-                  ...currentAnnouncement, 
-                  image: e.target.files[0]
-                })}
-              />
+  type="file"
+  onChange={(e) => {
+    if (e.target.files && e.target.files[0]) {
+      setCurrentAnnouncement({
+        ...currentAnnouncement, 
+        image: e.target.files[0]
+      });
+    }
+  }}
+/>
             </div>
             <div>
               <Label>Link (Optional)</Label>

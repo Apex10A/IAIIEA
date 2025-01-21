@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, X } from 'lucide-react';
 import Spinner from "@/app/spinner";

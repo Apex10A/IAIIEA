@@ -1,7 +1,17 @@
 import Link from 'next/link';
 import { Calendar, MapPin } from 'lucide-react';
 
-export function ConferenceCard({ conference }) {
+interface Conference {
+  id: string; // or `number`, depending on your data
+  title: string;
+  date: string;
+  venue: string;
+}
+interface ConferenceCardProps {
+  conference: Conference;
+}
+
+export function ConferenceCard({ conference }: ConferenceCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
       <h2 className="text-xl font-semibold text-[#0B142F]">{conference.title}</h2>

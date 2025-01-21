@@ -247,8 +247,8 @@ const PaymentHistory: React.FC = () => {
           setFilteredPayments(paymentData);
           
           // Extract unique payment types
-          const uniqueTypes = [...new Set(paymentData.map(payment => payment.payment_type))];
-          setPaymentTypes(uniqueTypes);
+          // const uniqueTypes = [...new Set(paymentData.map(payment => payment.payment_type))];
+          // setPaymentTypes(uniqueTypes);
           
           setError(null);
         } else {

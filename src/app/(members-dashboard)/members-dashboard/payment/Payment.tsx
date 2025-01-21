@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useFlutterwave, FlutterwaveConfig } from 'flutterwave-react-v3';
+// import { useFlutterwave, FlutterwaveConfig, FlutterWaveResponse } from 'flutterwave-react-v3';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -109,39 +109,45 @@ const PaymentPage: React.FC = () => {
     fetchData();
   }, [status, session, router]);
 
-  const initiatePayment = (type: PaymentType, amount: number, itemId: number | null = null, title = '') => {
-    if (!session?.user) {
-      router.push('/login');
-      return;
-    }
+  // const initiatePayment = (type: PaymentType, amount: number, itemId: number | null = null, title = '') => {
+  //   if (!session?.user) {
+  //     router.push('/login');
+  //     return;
+  //   }
 
-    const userData = (session.user as any).userData as UserData;
+  //   const userData = (session.user as any).userData as UserData;
 
-    const config: FlutterwaveConfig = {
-      public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
-      tx_ref: `${type}-${itemId || 'membership'}-${Date.now()}`,
-      amount: amount,
-      currency: 'NGN',
-      customer: {
-        email: userData.email || session.user.email || '',
-        name: userData.name || 'User',
-        phone_number: userData.phone || '0000000000',
-      },
-      customizations: {
-        title: title,
-        description: `IAIIEA ${type} Payment`,
-        logo: '/logo.png',
-      },
-      payment_options: 'card,ussd,bank_transfer',
-    };
+  //   const config: FlutterwaveConfig = {
+  //     public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
+  //     tx_ref: `${type}-${itemId || 'membership'}-${Date.now()}`,
+  //     amount: amount,
+  //     currency: 'NGN',
+  //     customer: {
+  //       email: userData.email || session.user.email || '',
+  //       name: userData.name || 'User',
+  //       phone_number: userData.phone || '0000000000',
+  //     },
+  //     customizations: {
+  //       title: title,
+  //       description: `IAIIEA ${type} Payment`,
+  //       logo: '/logo.png',
+  //     },
+  //     payment_options: 'card,ussd,bank_transfer',
+  //   };
 
-    const handleFlutterPayment = useFlutterwave(config);
+  //   const handleFlutterPayment = useFlutterwave(config);
 
-    handleFlutterPayment({
-      callback: (transaction: PaymentTransaction) => handlePaymentCallback(transaction, type, itemId),
-      onClose: () => console.log('Payment modal closed'),
-    });
-  };
+  //   handleFlutterPayment({
+  //     callback: async (response: FlutterWaveResponse) => {
+  //       await handlePaymentCallback({
+  //         status: response.status,
+  //         transaction_id: response.transaction_id?.toString(),
+  //         tx_ref: response.tx_ref
+  //       }, type, itemId);
+  //     },
+  //     onClose: () => console.log('Payment modal closed'),
+  //   });
+  // };
 
   const handlePaymentCallback = async (
     transaction: PaymentTransaction, 
@@ -180,7 +186,7 @@ const PaymentPage: React.FC = () => {
           </AlertDescription>
         </Alert>
         <Card>
-          <CardContent className="p-6">
+          {/* <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-2">2024 Membership Payment</h3>
             <p className="text-2xl font-bold mb-4">₦{(50000).toLocaleString()}</p>
             <button
@@ -190,7 +196,7 @@ const PaymentPage: React.FC = () => {
             >
               {isProcessing ? 'Processing...' : 'Make Payment'}
             </button>
-          </CardContent>
+          </CardContent> */}
         </Card>
       </div>
     );
@@ -237,13 +243,13 @@ const PaymentPage: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                <button
+                {/* <button
                   onClick={() => initiatePayment('conference', getAmountForPlan(selectedPlan), conference.id, conference.title)}
                   disabled={isProcessing}
                   className="w-full px-4 py-2 rounded-full bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50"
                 >
                   {isProcessing ? 'Processing...' : 'Make Payment'}
-                </button>
+                </button> */}
               </div>
             </CardContent>
           </Card>
@@ -293,13 +299,13 @@ const PaymentPage: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                <button
+                {/* <button
                   onClick={() => initiatePayment('seminar', getAmountForPlan(selectedPlan), seminar.id, seminar.title)}
                   disabled={isProcessing}
                   className="w-full px-4 py-2 rounded-full bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50"
                 >
                   {isProcessing ? 'Processing...' : 'Make Payment'}
-                </button>
+                </button> */}
               </div>
             </CardContent>
           </Card>

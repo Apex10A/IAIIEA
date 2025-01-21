@@ -1,5 +1,4 @@
 "use client"
-
 import React, { useState, useEffect } from 'react';
 import AddFileModal from './AddFileModal';
 import Link from 'next/link';
@@ -8,9 +7,18 @@ import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notific
 import { useSession } from "next-auth/react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+interface Resource {
+  resource_id: string; // or `number` depending on your data
+  caption: string;
+  date: string; // or `Date` if the API returns a Date object
+  file?: string; // optional, since it's conditionally rendered
+}
+interface ResourceCardProps {
+  resource: Resource;
+}
 
 // Resource Card Component
-const ResourceCard = ({ resource}) => {
+const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 

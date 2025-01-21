@@ -15,7 +15,6 @@ import Announcement from '@/app/(members-dashboard)/members-dashboard/notificati
 import SeminarsWebinars from "@/app/(members-dashboard)/members-dashboard/seminars/page";
 import MembersDirectory from '@/app/(members-dashboard)/members-dashboard/membersdirectory/page';
 import IAIIEAResources from '@/app/(members-dashboard)/members-dashboard/resources/page';
-import Gallery from '@/app/(members-dashboard)/members-dashboard/gallery/page';
 import Forum from "@/app/(members-dashboard)/members-dashboard/forum/page";
 import Payment from "@/app/(members-dashboard)/members-dashboard/payment/Payment";
 import Settings from '@/app/(members-dashboard)/members-dashboard/settings/page';
@@ -58,7 +57,6 @@ export default function DashboardClient() {
       'Seminars / Webinars': <SeminarsWebinars />,
       'Directory': <MembersDirectory />,
       'IAIIEA Resources': <IAIIEAResources />,
-      Gallery: <Gallery />,
       Forum: <Forum />,
       Settings: <Settings />,
     };

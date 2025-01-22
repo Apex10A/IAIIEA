@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 
 interface GalleryItem {
@@ -11,8 +11,21 @@ interface GalleryItem {
   image: string;
 }
 
-const YearPage = () => {
-  const { year } = useParams<{ year: string }>(); // Ensure TypeScript knows the `year` is a string
+// Separate loading component
+const LoadingUI = () => (
+  <div className="px-4 lg:px-10 py-10 bg-[#0e1a3d] text-white min-h-screen">
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+        <p className="mt-4">Loading gallery...</p>
+      </div>
+    </div>
+  </div>
+);
+
+// Main gallery component
+const GalleryContent = () => {
+  const { year } = useParams<{ year: string }>();
   const [images, setImages] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,13 +83,24 @@ const YearPage = () => {
               />
               <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full p-2 text-sm">
                 <p>{image.caption}</p>
-                <p className="text-xs text-gray-300">{new Date(image.date).toLocaleDateString()}</p>
+                <p className="text-xs text-gray-300">
+                  {new Date(image.date).toLocaleDateString()}
+                </p>
               </div>
             </div>
           ))}
         </div>
       )}
     </div>
+  );
+};
+
+// Wrapper component with Suspense
+const YearPage = () => {
+  return (
+    <Suspense fallback={<LoadingUI />}>
+      <GalleryContent />
+    </Suspense>
   );
 };
 

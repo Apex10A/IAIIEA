@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', // Creates a standalone build
+ // Creates a standalone build
   images: {
     domains: [
       'iaiiea.org', 

@@ -1,6 +1,7 @@
+'use client'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
   return (
     <div className='flex flex-col items-center justify-center min-h-[600px] bg-[#E9EBF3]'>
         <div>
@@ -10,4 +11,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

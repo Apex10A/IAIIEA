@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 // import ConferenceLandingPage from '@/modules/external/landing-page/page'
 

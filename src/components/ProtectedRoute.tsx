@@ -133,7 +133,7 @@ const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({
     return (
       <Card>
         <CardContent className="space-y-4 p-6">
-          <Alert variant="destructive">
+          <Alert variant="error">
             <LockIcon className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-2">

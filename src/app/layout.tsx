@@ -40,12 +40,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Suspense fallback={<Loading />}>
         <Providers>
-          <Suspense fallback={<Loading />}>
             {children}
-          </Suspense>
           <ToastProvider />
         </Providers>
+        </Suspense>
       </body>
     </html>
   );

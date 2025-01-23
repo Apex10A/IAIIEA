@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { SkeletonLoader } from './SkeletonLoader'; // Adjust the import path based on your structure
 import { UserDataType } from '@/app/(members-dashboard)/members-dashboard/dash/types';

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-
+import { Suspense } from "react";
 import "./globals.css";
 import Providers from './providers'
 import { ToastProvider } from '@/components/providers/toast-provider';
@@ -41,9 +41,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-         
+          <Suspense fallback={<Loading />}>
             {children}
-
+          </Suspense>
           <ToastProvider />
         </Providers>
       </body>

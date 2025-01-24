@@ -6,6 +6,7 @@ import CarouselLandingPage from "./CarouselLandingPage"
 import Carousel from "@/modules/ui/carousel"
 import { EmblaOptionsType } from 'embla-carousel'
 import RealConference from "@/modules/ui/RealConference";
+import RealSeminar from "@/modules/ui/RealSeminar";
 
 interface Book {
     id: number
@@ -157,6 +158,7 @@ const index: React.FC = () => {
             <h1 className='text-[30px] lg:text-[60px] max-w-2xl font-[500] text-[#0B142F] leading-[60px] pb-3'>Events</h1>
         </div>
         <RealConference/>
+        <RealSeminar/>
     </div>
     </div>
   )

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Logo from "@/assets/auth/images/IAIIEA Logo I.png";
 import Link from "next/link";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { FiChevronDown, FiChevronUp, FiX, FiUser, FiLogOut } from "react-icons/fi";
@@ -17,6 +18,7 @@ const Header = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { data: session } = useSession();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -84,8 +86,8 @@ const Header = () => {
   const renderUserMenu = () => (
     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
       <div className="px-4 py-2 border-b">
-        <p className="text-sm font-medium text-gray-900">{userData?.name}</p>
-        <p className="text-xs text-gray-500">{userData?.email}</p>
+        <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
+        <p className="text-xs text-gray-500">{session?.user?.email}</p>
       </div>
       <Link
         href="/members-dashboard"
@@ -100,7 +102,7 @@ const Header = () => {
         Profile Settings
       </Link>
       <button
-        onClick={handleLogout}
+        onClick={() => signOut()}
         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
       >
         Sign out
@@ -110,9 +112,20 @@ const Header = () => {
 
   const renderDropdownMenu = (type: keyof typeof dropdownContent) => {
     return (
-      <div className="absolute mt-2 flex min-w-[500px] gap-5 justify-center items-center bg-white shadow-lg rounded-[10px] px-3 py-3">
+      <div 
+        className="absolute mt-2 flex min-w-[500px] gap-5 justify-center items-center 
+                   bg-white shadow-lg rounded-[10px] px-3 py-3
+                   transition-all duration-300 ease-in-out 
+                   transform origin-top 
+                   scale-y-95 opacity-0 
+                   animate-dropdown"
+      >
         {dropdownContent[type].map((item, index) => (
-          <div key={index} className="px-6 py-2 rounded-[10px] hover:bg-slate-300">
+          <div 
+            key={index} 
+            className="px-6 py-2 rounded-[10px] hover:bg-slate-300 
+                       transition-colors duration-200"
+          >
             <div>
               <Link href={item.link} className="block text-[18px] pb-2 font-600 text-[#0B142F]">
                 {item.title}
@@ -162,7 +175,10 @@ const Header = () => {
                 {activeDropdown === key ? <FiChevronUp /> : <FiChevronDown />}
               </button>
               {activeDropdown === key && (
-                <div className="pl-4 mt-2 space-y-2">
+                <div className="pl-4 mt-2 space-y-2 
+                  transition-all duration-300 ease-out 
+                  transform origin-top 
+                  opacity-0 animate-fade-in-down">
                   {items.map((item, index) => (
                     <Link
                       key={index}
@@ -187,18 +203,18 @@ const Header = () => {
           </Link>
 
           <div className="mt-4">
-            {userData ? (
+            {session ? (
               <div className="space-y-2">
                 <div className="text-gray-300 border-t pt-4">
-                  <p className="font-medium">{userData.name}</p>
-                  <p className="text-sm">{userData.email}</p>
+                  <p className="font-medium">{session.user?.name}</p>
+                  <p className="text-sm">{session.user?.email}</p>
                 </div>
                 <Link href="/members-dashboard" className="block text-gray-300 py-2">
                   Dashboard
                 </Link>
-                <Link href="/profile" className="block text-gray-300 py-2">
+                {/* <Link href="/profile" className="block text-gray-300 py-2">
                   Profile Settings
-                </Link>
+                </Link> */}
                 <button
                   onClick={handleLogout}
                   className="w-full text-left text-red-400 py-2 flex items-center gap-2"
@@ -277,24 +293,25 @@ const Header = () => {
             </div>
 
             <div className="relative" ref={userMenuRef}>
-              {userData ? (
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 text-gray-300 hover:text-white"
-                >
-                  <div className="w-14 h-14 rounded-full bg-[#D5B93C] flex items-center justify-center">
-                    <FiUser size={20} />
-                  </div>
-                  <span>{userData.name}</span>
-                  {isUserMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
-                </button>
-              ) : (
-                <Link href="/login">
-                  <button className="bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]">
-                    Login
-                  </button>
-                </Link>
-              )}
+            {session ? (
+    <button
+      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+      className="flex items-center gap-2 text-[#0E1A3D] "
+    >
+      <div className="w-14 h-14 rounded-full bg-[#D5B93C] flex items-center justify-center">
+        <FiUser size={20} />
+      </div>
+      <span className="text-white">{session.user?.name}</span>
+      {isUserMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
+    </button>
+  ) : (
+    <button 
+      onClick={() => signIn()}
+      className="bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]"
+    >
+      Login
+    </button>
+  )}
               {isUserMenuOpen && userData && renderUserMenu()}
             </div>
           </div>

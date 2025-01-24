@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface Conference {
   id: number;
@@ -15,6 +16,7 @@ const ConferenceCards = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchConferences = async () => {
@@ -43,6 +45,9 @@ const ConferenceCards = () => {
     fetchConferences();
   }, []);
 
+  const handleReadConference = (conferenceId: number) => {
+    router.push(`/conference-landing-page?id=${conferenceId}`);
+  };
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -115,8 +120,11 @@ const ConferenceCards = () => {
                 {conference.date}
               </p>
               <div className="flex items-center space-x-4">
-                <button className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0">
-                  Make payment
+                <button 
+                  onClick={() => handleReadConference(conference.id)}
+                  className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
+                >
+                  Read
                 </button>
               </div>
             </div>

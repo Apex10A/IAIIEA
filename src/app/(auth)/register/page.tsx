@@ -27,6 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { signIn } from "next-auth/react"
+import { showToast } from '@/utils/toast'
 import { Input } from "@/components/ui/input"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
@@ -90,7 +92,6 @@ export default function RegisterPage() {
   })
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
-    setError("")
     setIsLoading(true)
 
     try {
@@ -109,27 +110,20 @@ export default function RegisterPage() {
         throw new Error(data.error || data.message || 'Registration failed')
       }
 
-      // Store the token if provided
-      if (data.token) {
-        localStorage.setItem('access_token', data.token)
-      }
-      
-      // Store user data if provided
-      if (data.user_data) {
-        localStorage.setItem('user_data', JSON.stringify(data.user_data))
-      }
+      // Show success toast
+      showToast.success("Registration successful!")
 
-      // Redirect to dashboard or verification page
+      // Redirect to login page
       router.push("/login")
       
     } catch (err: any) {
       console.error("Registration error:", err)
-      setError(err.message || "Failed to register. Please try again.")
+      // Show error toast
+      showToast.error(err.message || "Failed to register. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
-
   return (
     <div className='min-h-screen background pt-28 mx-auto flex flex-col items-center'>
       <Card className="md:w-[900px] mx-auto md:px-32 sm:px-20 flex flex-col items-center justify-center min-h-[70%] w-full rounded-none shadow-none md:mx-auto py-5">

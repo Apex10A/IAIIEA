@@ -21,6 +21,16 @@ const Header = () => {
   const { data: session } = useSession();
   const pathname = usePathname();
 
+  const handleLogout = async () => {
+    // Close mobile menu and user dropdown
+    setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
+    
+    // Sign out and redirect to home
+    await signOut({ redirect: false });
+    router.push("/");
+  };
+
   useEffect(() => {
     // Check for user data in localStorage when component mounts
     const storedUserData = localStorage.getItem("user_data");
@@ -29,12 +39,6 @@ const Header = () => {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_data");
-    setUserData(null);
-    router.push("/");
-  };
 
   const closeAllDropdowns = () => {
     setActiveDropdown(null);
@@ -70,7 +74,7 @@ const Header = () => {
 
   const dropdownContent = {
     members: [
-      { title: "How to join", description: "Discover how to become a valued member", link: "/registerTwo", image: "/Head.png" },
+      { title: "How to join", description: "Discover how to become a valued member", link: "/register", image: "/Head.png" },
       { title: "Login", description: "Access exclusive educational events and resources", link: "/login", image: "/HeadTwo.png" }
     ],
     programmes: [
@@ -102,11 +106,11 @@ const Header = () => {
         Profile Settings
       </Link>
       <button
-        onClick={() => signOut()}
-        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-      >
-        Sign out
-      </button>
+      onClick={() => signOut({ callbackUrl: '/' })}
+      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+    >
+      Sign out
+    </button>
     </div>
   );
 
@@ -215,13 +219,13 @@ const Header = () => {
                 {/* <Link href="/profile" className="block text-gray-300 py-2">
                   Profile Settings
                 </Link> */}
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left text-red-400 py-2 flex items-center gap-2"
-                >
-                  <FiLogOut size={18} />
-                  Sign out
-                </button>
+               <button
+                onClick={handleLogout}
+                className="w-full text-left text-red-400 py-2 flex items-center gap-2"
+              >
+                <FiLogOut size={18} />
+                Sign out
+              </button>
               </div>
             ) : (
               <Link href="/login" onClick={toggleMobileMenu}>
@@ -294,9 +298,10 @@ const Header = () => {
 
             <div className="relative" ref={userMenuRef}>
             {session ? (
-    <button
+   <div className="flex">
+     <button
       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-      className="flex items-center gap-2 text-[#0E1A3D] "
+      className="flex items-center gap-2 text-[#0E1A3D]"
     >
       <div className="w-14 h-14 rounded-full bg-[#D5B93C] flex items-center justify-center">
         <FiUser size={20} />
@@ -304,6 +309,8 @@ const Header = () => {
       <span className="text-white">{session.user?.name}</span>
       {isUserMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
     </button>
+     <button className="text-white"  onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
+   </div>
   ) : (
     <button 
       onClick={() => signIn()}

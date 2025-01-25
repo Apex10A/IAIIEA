@@ -1,79 +1,84 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
+import { useSession } from "next-auth/react";
+import { MapPin, FileText, Images, Users, Video, DollarSign } from 'lucide-react';
+
+// Import your page components
+import VenueAndDatePage from '@/app/(landing-pages)/conference-landing-page/venue/page';
+import SubThemesPage from '@/app/(landing-pages)/conference-landing-page/subtheme/page';
+import CallForPapersPage from '@/app/(landing-pages)/conference-landing-page/paper-flyer/page';
+import GalleryPage from '@/app/(landing-pages)/conference-landing-page/gallery/page';
+import SponsorsPage from '@/app/(landing-pages)/conference-landing-page/sponsors/page';
+import VideosPage from '@/app/(landing-pages)/conference-landing-page/videos/page';
+import ConferenceFeesPage from '@/app/(landing-pages)/conference-landing-page/fees/page';
 import RegistrationMessage from './message';
-
-// const CountdownTimer: React.FC<CountdownProps> = ({ targetDate }) => {
-//   const [timeLeft, setTimeLeft] = useState({
-//     days: 0,
-//     hours: 0,
-//     minutes: 0,
-//     seconds: 0,
-//   });
-
-//   useEffect(() => {
-//     const calculateTimeLeft = () => {
-//       const targetDateTime = new Date(targetDate).getTime(); // Convert to a number
-//       const currentTime = new Date().getTime(); // Also a number
-//       const difference = targetDateTime - currentTime;
-
-//       if (difference > 0) {
-//         setTimeLeft({
-//           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-//           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-//           minutes: Math.floor((difference / 1000 / 60) % 60),
-//           seconds: Math.floor((difference / 1000) % 60),
-//         });
-//       } else {
-//         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-//       }
-//     };
-
-//     const timer = setInterval(calculateTimeLeft, 1000);
-//     return () => clearInterval(timer);
-//   }, [targetDate]);
-
-//   return (
-//     <div className='flex items-center gap-5'>
-//       <div className='flex flex-col items-center'>
-//         <h1 className='text-[42px] font-[500]'>{timeLeft.days}</h1>
-//         <p className='font-[500] text-[18px]'>Days</p>
-//       </div>
-//       <div className='flex items-center'><p className='font-bold'>:</p></div>
-//       <div className='flex flex-col items-center'>
-//         <h1 className='text-[42px] font-[500]'>{timeLeft.hours}</h1>
-//         <p className='font-[500] text-[18px]'>Hrs</p>
-//       </div>
-//       <div><p className='font-bold'>:</p></div>
-//       <div className='flex flex-col items-center'>
-//         <h1 className='text-[42px] font-[500]'>{timeLeft.minutes}</h1>
-//         <p className='font-[500] text-[18px]'>Mins</p>
-//       </div>
-//       <div><p className='font-bold'>:</p></div>
-//       <div className='flex flex-col items-center'>
-//         <h1 className='text-[42px] font-[500] text-[#D5B93C]'>{timeLeft.seconds}</h1>
-//         <p className='font-[500] text-[18px] text-[#D5B93C]'>Secs</p>
-//       </div>
-//     </div>
-//   );
-// };
-
 
 const ConferenceDetailsPage = () => {
   const [conferenceDetails, setConferenceDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+
   const searchParams = useSearchParams();
   const conferenceId = searchParams.get('id');
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  const pages = [
+    { 
+      component: (details: unknown) => <VenueAndDatePage details={details} />, 
+      icon: <MapPin className="w-6 h-6" />,
+      title: 'Venue & Date' 
+    },
+    { 
+      component: (details: unknown) => <SubThemesPage details={details} />, 
+      icon: <FileText className="w-6 h-6" />,
+      title: 'Sub Themes' 
+    },
+    { 
+      component: (details: { flyer: string; }) => <CallForPapersPage flyer={details.flyer} />, 
+      icon: <FileText className="w-6 h-6" />,
+      title: 'Call for Papers' 
+    },
+    { 
+      component: (details: { gallery: any; }) => <GalleryPage gallery={details.gallery} />, 
+      icon: <Images className="w-6 h-6" />,
+      title: 'Gallery' 
+    },
+    { 
+      component: (details: { sponsors: any; }) => <SponsorsPage sponsors={details.sponsors} />, 
+      icon: <Users className="w-6 h-6" />,
+      title: 'Sponsors' 
+    },
+    { 
+      component: (details: { videos: any; }) => <VideosPage videos={details.videos} />, 
+      icon: <Video className="w-6 h-6" />,
+      title: 'Videos' 
+    },
+    { 
+      component: (details: { payments: unknown; }) => <ConferenceFeesPage payments={details.payments} />, 
+      icon: <DollarSign className="w-6 h-6" />,
+      title: 'Conference Fees' 
+    }
+  ];
 
   useEffect(() => {
     const fetchConferenceDetails = async () => {
-      if (!conferenceId) return;
+      if (!conferenceId || !bearerToken) return;
 
       try {
         setIsLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`, 
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${bearerToken}` 
+            }
+          }
+        );
         
         if (!response.ok) {
           throw new Error('Failed to fetch conference details');
@@ -94,7 +99,7 @@ const ConferenceDetailsPage = () => {
     };
 
     fetchConferenceDetails();
-  }, [conferenceId]);
+  }, [conferenceId, bearerToken]);
 
   if (isLoading) {
     return <div>Loading conference details...</div>;
@@ -112,34 +117,31 @@ const ConferenceDetailsPage = () => {
   if (!conferenceDetails.is_registered) {
     return (
       <RegistrationMessage 
-      conferenceTitle={conferenceDetails.title} 
-    />
+        conferenceTitle={conferenceDetails.title} 
+      />
     );
   }
 
-  // If registered, show conference details
+  // If registered, show conference details with navigation
   return (
-    <div>
-      <div className='text-[#fff] md:px-14 px-10 py-32 mx-auto gap-5 min-h-screen background'>
-        <div className='lg:flex justify-between items-center'>
-          {/* <CountdownTimer targetDate={conferenceDetails.date} /> */}
-        </div>
-        
-        <div className='flex flex-col items-center justify-center min-h-[500px]'>
-          <div className='flex items-center justify-center pt-10'>
-            <h1 className='text-[40px] lg:text-[80px] font-[600] text-center lg:max-w-[75%]'>
-              {conferenceDetails.title}
-            </h1>
-          </div>
-          
-          <div className='lg:max-w-[60%] text-center pt-5 pb-4'>
-            <p className='text-[18px] lg:text-[20px] font-[400] opacity-[0.7]'>
-              <span className='text-[#D5B93C]'>Theme:</span> {conferenceDetails.theme}
-            </p>
-          </div>
-          
-          {/* Add more details as needed */}
-        </div>
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* Sidebar Navigation */}
+      <div className="w-20 bg-[#1A2A5C] text-white mt-20 flex flex-col items-center py-8 space-y-4">
+        {pages.map((page, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentPage(index)}
+            className={`p-3 rounded-lg ${currentPage === index ? 'bg-[#D5B93C] text-black' : 'hover:bg-blue-700'}`}
+            title={page.title}
+          >
+            {page.icon}
+          </button>
+        ))}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 p-8 mt-20">
+        {pages[currentPage].component(conferenceDetails)}
       </div>
     </div>
   );

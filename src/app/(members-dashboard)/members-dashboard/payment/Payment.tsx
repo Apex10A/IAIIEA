@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-// import { useFlutterwave, FlutterwaveConfig, FlutterWaveResponse } from 'flutterwave-react-v3';
+import { useFlutterwave } from 'flutterwave-react-v3';
+import { FlutterwaveConfig } from 'flutterwave-react-v3/dist/types';
+import { FlutterWaveResponse } from 'flutterwave-react-v3/dist/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -74,8 +76,8 @@ const PaymentPage: React.FC = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [hasMembershipAccess, setHasMembershipAccess] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('basic');
-
   const { data: session, status } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const router = useRouter();
 
   const membershipYears = [
@@ -109,55 +111,151 @@ const PaymentPage: React.FC = () => {
     fetchData();
   }, [status, session, router]);
 
-  // const initiatePayment = (type: PaymentType, amount: number, itemId: number | null = null, title = '') => {
-  //   if (!session?.user) {
-  //     router.push('/login');
-  //     return;
-  //   }
-
-  //   const userData = (session.user as any).userData as UserData;
-
-  //   const config: FlutterwaveConfig = {
-  //     public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
-  //     tx_ref: `${type}-${itemId || 'membership'}-${Date.now()}`,
-  //     amount: amount,
-  //     currency: 'NGN',
-  //     customer: {
-  //       email: userData.email || session.user.email || '',
-  //       name: userData.name || 'User',
-  //       phone_number: userData.phone || '0000000000',
-  //     },
-  //     customizations: {
-  //       title: title,
-  //       description: `IAIIEA ${type} Payment`,
-  //       logo: '/logo.png',
-  //     },
-  //     payment_options: 'card,ussd,bank_transfer',
-  //   };
-
-  //   const handleFlutterPayment = useFlutterwave(config);
-
-  //   handleFlutterPayment({
-  //     callback: async (response: FlutterWaveResponse) => {
-  //       await handlePaymentCallback({
-  //         status: response.status,
-  //         transaction_id: response.transaction_id?.toString(),
-  //         tx_ref: response.tx_ref
-  //       }, type, itemId);
-  //     },
-  //     onClose: () => console.log('Payment modal closed'),
-  //   });
-  // };
-
-  const handlePaymentCallback = async (
-    transaction: PaymentTransaction, 
-    type: PaymentType, 
-    itemId: number | null
-  ) => {
-    // Implement payment callback logic here
-    console.log('Payment completed:', transaction);
+  const initiatePayment = async (type: PaymentType, amount: number, itemId: number | null = null, title = '', plan?: PlanType) => {
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+  
+    setIsProcessing(true);
+  
+    try {
+      if (type === 'conference') {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+              'Authorization': `Bearer ${bearerToken}`
+          },
+          body: JSON.stringify({
+            id: itemId,
+            plan: plan || 'basic'
+          })
+        });
+  
+        const paymentData = await response.json();
+  
+        if (paymentData.status === 'success') {
+          const userData = (session.user as any).userData as UserData;
+  
+          const config: FlutterwaveConfig = {
+            public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
+            tx_ref: `conference-${itemId}-${Date.now()}`,
+            amount: paymentData.data.amount,
+            currency: 'NGN',
+            customer: {
+              email: userData.email || session.user.email || '',
+              name: userData.name || 'User',
+              phone_number: userData.phone || '0000000000',
+            },
+            customizations: {
+              title: title,
+              description: `IAIIEA Conference Payment`,
+              logo: '/logo.png',
+            },
+            payment_options: 'card,ussd,bank_transfer',
+          };
+  
+          const handleFlutterPayment = useFlutterwave(config);
+  
+          handleFlutterPayment({
+            callback: async (response: FlutterWaveResponse) => {
+              await handlePaymentCallback(
+                response, 
+                type, 
+                itemId, 
+                paymentData  // Pass the entire initiate payment response
+              );
+            },
+            onClose: () => console.log('Payment modal closed'),
+          });
+        } else {
+          throw new Error(paymentData.message || 'Payment initiation failed');
+        }
+      } else {
+        // Existing logic for other payment types (membership, seminar)
+        const userData = (session.user as any).userData as UserData;
+  
+        const config: FlutterwaveConfig = {
+          public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
+          tx_ref: `${type}-${itemId || 'payment'}-${Date.now()}`,
+          amount: amount,
+          currency: 'NGN',
+          customer: {
+            email: userData.email || session.user.email || '',
+            name: userData.name || 'User',
+            phone_number: userData.phone || '0000000000',
+          },
+          customizations: {
+            title: title,
+            description: `IAIIEA ${type} Payment`,
+            logo: '/logo.png',
+          },
+          payment_options: 'card,ussd,bank_transfer',
+        };
+  
+        // const handleFlutterPayment = useFlutterwave(config);
+  
+        // handleFlutterPayment({
+        //   callback: async (response: FlutterWaveResponse) => {
+        //     await handlePaymentCallback(
+        //       response, 
+        //       type, 
+        //       itemId, 
+        //       paymentData
+        //     );
+        //   },
+        //   onClose: () => console.log('Payment modal closed'),
+        // });
+      }
+    } catch (error) {
+      console.error('Payment initiation error', error);
+      // Optionally show error to user
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
+
+  const handlePaymentCallback = async (
+    transaction: FlutterWaveResponse, 
+    type: PaymentType, 
+    itemId: number | null,
+    initiatePaymentData: any
+  ) => {
+    try {
+      if (!session?.user || !initiatePaymentData?.data?.payment_id) {
+        console.error('Invalid session or payment data');
+        return;
+      }
+  
+      const confirmPayload = {
+        payment_id: initiatePaymentData.data.payment_id,
+        processor_id: transaction.transaction_id?.toString() || '',
+        paid: initiatePaymentData.data.amount
+      };
+  
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/confirm_payment/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${bearerToken}`
+        },
+        body: JSON.stringify(confirmPayload)
+      });
+  
+      const confirmationResult = await response.json();
+  
+      if (confirmationResult.status === 'success') {
+        console.log('Payment confirmed successfully');
+        // Add any additional success handling
+      } else {
+        console.error('Payment confirmation failed:', confirmationResult.message);
+      }
+    } catch (error) {
+      console.error('Payment confirmation error:', error);
+    }
+  };
   const getAmountForPlan = (plan: PlanType): number => {
     const pricing: Record<PlanType, number> = {
       basic: 25000,
@@ -186,7 +284,7 @@ const PaymentPage: React.FC = () => {
           </AlertDescription>
         </Alert>
         <Card>
-          {/* <CardContent className="p-6">
+          <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-2">2024 Membership Payment</h3>
             <p className="text-2xl font-bold mb-4">₦{(50000).toLocaleString()}</p>
             <button
@@ -196,7 +294,7 @@ const PaymentPage: React.FC = () => {
             >
               {isProcessing ? 'Processing...' : 'Make Payment'}
             </button>
-          </CardContent> */}
+          </CardContent>
         </Card>
       </div>
     );
@@ -243,13 +341,13 @@ const PaymentPage: React.FC = () => {
                     </button>
                   ))}
                 </div>
-                {/* <button
-                  onClick={() => initiatePayment('conference', getAmountForPlan(selectedPlan), conference.id, conference.title)}
+                <button
+                 onClick={() => initiatePayment('conference', getAmountForPlan(selectedPlan), conference.id, conference.title, selectedPlan)}
                   disabled={isProcessing}
                   className="w-full px-4 py-2 rounded-full bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50"
                 >
                   {isProcessing ? 'Processing...' : 'Make Payment'}
-                </button> */}
+                </button>
               </div>
             </CardContent>
           </Card>

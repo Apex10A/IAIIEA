@@ -243,7 +243,7 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className='flex justify-center items-center h-full'>
-        <p>Loading members...</p>
+        <p className='text-gray-600'>Loading members...</p>
       </div>
     );
   }
@@ -262,7 +262,7 @@ const Page = () => {
   if (filteredMembers.length === 0) {
     return (
       <div className='text-center'>
-        <p>No members found</p>
+        <p className='text-gray-600'>No members found</p>
       </div>
     );
   }
@@ -350,9 +350,9 @@ const Page = () => {
 
   return (
     <div className=''>
-    <div className='flex items-center justify-between mb-4'>
+    <div className='lg:flex items-center justify-between mb-4'>
       <div>
-        <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
+        <h1 className='text-[24px] md:text-[28px] text-gray-600 font-[500] pb-1'>Registered Members</h1>
       </div>
       <div className='flex items-center space-x-4'>
         <input 

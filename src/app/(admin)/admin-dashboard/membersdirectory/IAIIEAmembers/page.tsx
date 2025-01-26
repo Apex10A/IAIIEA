@@ -350,24 +350,24 @@ const Page = () => {
 
   return (
     <div className=''>
-    <div className='flex items-center justify-between mb-4'>
+    <div className='lg:flex items-center justify-between mb-4'>
       <div>
-        <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
+        <h1 className='text-[20px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
       </div>
-      <div className='flex items-center space-x-4'>
+      <div className='flex items-center space-x-4 '>
         <input 
           type="text" 
           placeholder="Search members..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="px-3 py-2 border rounded-md"
+          className="px-3 py-2 border text-sm sm:text-base rounded-md"
         />
         <AddMemberModal/>
       </div>
     </div>
 
     <div className='mt-6 w-full overflow-x-auto text-black'>
-      <Table className='min-w-[800px] text-black'>
+      <Table className='min-w-[1200px] text-black'>
       <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">
@@ -404,19 +404,19 @@ const Page = () => {
                       className="form-checkbox h-5 w-5 text-blue-600"
                     />
                   </TableCell>
-                  <TableCell className='text-slate-600'>{member.id}</TableCell>
+                  <TableCell className='text-slate-600 text-sm sm:text-base'>{member.id}</TableCell>
                   <TableCell className="flex items-center space-x-2 text-slate-600">
                     <img 
                       src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${member.name}`} 
                       alt={`${member.name}'s avatar`} 
                       className="w-10 h-10 rounded-full mr-2"
                     />
-                    {truncateText(member.name, 15)}
+                   <span className='text-sm sm:text-base'> {truncateText(member.name, 15)}</span>
                   </TableCell>
-                  <TableCell className='text-slate-600'>{truncateText(member.email, 20)}</TableCell>
-                  <TableCell className='text-slate-600'>Nigeria</TableCell>
-                  <TableCell className='text-slate-600'>{truncateText(member.institution, 15)}</TableCell>
-                  <TableCell className='text-slate-600'>{member.type}</TableCell>
+                  <TableCell className='text-slate-600 text-sm sm:text-base'>{truncateText(member.email, 20)}</TableCell>
+                  <TableCell className='text-slate-600 text-sm sm:text-base'>Nigeria</TableCell>
+                  <TableCell className='text-slate-600 text-sm sm:text-base'>{truncateText(member.institution, 15)}</TableCell>
+                  <TableCell className='text-slate-600 text-sm sm:text-base'>{member.type}</TableCell>
 <TableCell>
         <button
           className='text-[24px] font-bold cursor-pointer relative z-10'

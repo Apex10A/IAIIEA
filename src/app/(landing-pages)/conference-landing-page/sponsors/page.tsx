@@ -1,6 +1,15 @@
 import React from 'react';
 import { Users } from 'lucide-react';
 
+type PageProps = Record<string, unknown> & {
+  sponsors?: string[];
+};
+
+type Diff<T, U, K extends string = 'default'> = 
+  Omit<T, K> & 
+  Partial<Omit<U, keyof T>> & 
+  Record<string, unknown>;
+  
 const SponsorsPage: React.FC<{ sponsors: string[] }> = ({ sponsors }) => {
   if (!sponsors || sponsors.length === 0) {
     return (

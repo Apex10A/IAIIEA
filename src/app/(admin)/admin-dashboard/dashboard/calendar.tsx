@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSession } from "next-auth/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { showToast } from '@/utils/toast';
 
 // Define types
 interface EventDetails {
@@ -115,7 +116,7 @@ const [eventDetails, setEventDetails] = useState({
 
   const handleAddEvent = async () => {
     if (!bearerToken) {
-      setError("No authorization token available");
+      showToast.error("Authorization failed. Please log in again.");
       return;
     }
   
@@ -129,22 +130,21 @@ const [eventDetails, setEventDetails] = useState({
         body: JSON.stringify(eventDetails),
       });
   
-      if (!response.ok) {
-        throw new Error(`Failed to create event: ${response.status}`);
+      const result = await response.json();
+  
+      // Check the actual response status from the API, not just HTTP status
+      if (result.status !== 'success') {
+        throw new Error(result.message || 'Event creation failed');
       }
   
-      const result = await response.json();
-      console.log('Event created successfully:', result);
-  
-      // Optionally refresh the calendar data or close the modal
+      showToast.success('Event created successfully');
       setIsModalOpen(false);
-      setError(null);
     } catch (err) {
-      console.error('Error creating event:', err);
-      setError('Failed to create event. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create event';
+      showToast.error(errorMessage);
+      console.error('Event creation error:', err);
     }
   };
-  
 
   const renderCalendarDays = () => {
     const firstDay = getFirstDayOfMonth(currentMonthIndex, 2025);
@@ -184,18 +184,18 @@ const [eventDetails, setEventDetails] = useState({
         >
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-start">
-              <span className="text-sm font-medium">{dayNumber}</span>
+              <span className="text-sm font-medium text-gray-600">{dayNumber}</span>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6"
+                className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 text-gray-600"
                 onClick={() => {
                   const dateStr = `2025-${(currentMonthIndex + 1).toString().padStart(2, '0')}-${dayData.day}`;
                   setEventDetails(prev => ({ ...prev, date: dateStr }));
                   setIsModalOpen(true);
                 }}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-gray-600" />
               </Button>
             </div>
             <div className="mt-1 space-y-1">
@@ -242,7 +242,7 @@ const [eventDetails, setEventDetails] = useState({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <div className="text-xl font-semibold">
+          <div className="text-xl font-semibold text-gray-600">
             {currentMonth.title}
           </div>
           <div className="flex space-x-2">
@@ -263,9 +263,9 @@ const [eventDetails, setEventDetails] = useState({
           </div>
         </div>
         {isModalOpen && (
-  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+  <div className="fixed inset-0 z-10 bg-gray-800 bg-opacity-50 flex justify-center items-center">
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-      <h3 className="text-lg font-semibold mb-4">Add Calendar Activity</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-600">Add Calendar Activity</h3>
       <form className="space-y-4">
         <input
           type="text"
@@ -278,13 +278,13 @@ const [eventDetails, setEventDetails] = useState({
           type="date"
           value={eventDetails.date}
           onChange={(e) => setEventDetails({ ...eventDetails, date: e.target.value })}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-transparent"
         />
         <input
           type="time"
           value={eventDetails.time}
           onChange={(e) => setEventDetails({ ...eventDetails, time: e.target.value })}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-transparent"
         />
         <input
           type="text"
@@ -302,7 +302,7 @@ const [eventDetails, setEventDetails] = useState({
         <select
           value={eventDetails.priority_level}
           onChange={(e) => setEventDetails({ ...eventDetails, priority_level: e.target.value })}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-transparent"
         >
           <option value="important">Important</option>
           <option value="normal">Normal</option>
@@ -310,7 +310,7 @@ const [eventDetails, setEventDetails] = useState({
         <select
           value={eventDetails.color}
           onChange={(e) => setEventDetails({ ...eventDetails, color: e.target.value })}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded bg-transparent"
         >
           <option value="red">Red</option>
           <option value="blue">Blue</option>
@@ -321,38 +321,38 @@ const [eventDetails, setEventDetails] = useState({
         <Button variant="outline" onClick={() => setIsModalOpen(false)}>
           Cancel
         </Button>
-        <Button onClick={handleAddEvent}>Save</Button>
+        <Button onClick={handleAddEvent} className='text-gray-600 border' variant='outline'>Save</Button>
       </div>
     </div>
   </div>
 )}
 
 <Button onClick={() => setIsModalOpen(true)}>
-  <Plus className="h-4 w-4 mr-2" />
-  Add Event
+  <Plus className="h-4 w-4 mr-2 text-gray-600" />
+ <span className='text-gray-600'>Add Event</span>
 </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          {/* Calendar header */}
-          <div className="grid grid-cols-7 gap-0 mb-2">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <div
-                key={day}
-                className="p-2 text-center font-semibold text-gray-600 border border-gray-200"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-          
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-0">
-            {renderCalendarDays()}
-          </div>
-        </CardContent>
-      </Card>
+      <Card className="w-full  mx-auto">
+  <CardContent className="p-4">
+    {/* Calendar header */}
+    <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+        <div
+          key={day}
+          className="text-center font-semibold text-gray-600 text-xs sm:text-sm md:text-base border border-gray-200 p-1 sm:p-2"
+        >
+          {day}
+        </div>
+      ))}
+    </div>
+    
+    {/* Calendar grid */}
+    <div className="grid grid-cols-7 gap-1 sm:gap-2">
+      {renderCalendarDays()}
+    </div>
+  </CardContent>
+</Card>
     </div>
   );
 };

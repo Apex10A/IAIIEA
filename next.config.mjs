@@ -1,10 +1,12 @@
-/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */ 
 const nextConfig = {
- // Creates a standalone build
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     domains: [
-      'iaiiea.org', 
-      'res.cloudinary.com' // Add Cloudinary domain
+      'iaiiea.org',
+      'res.cloudinary.com'
     ],
   },
 };

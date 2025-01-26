@@ -32,21 +32,21 @@ const ConferenceDetailsPage = () => {
       icon: <MapPin className="w-6 h-6" />,
       title: 'Venue & Date' 
     },
-    // { 
-    //   component: (details: unknown) => <SubThemesPage details={details} />, 
-    //   icon: <FileText className="w-6 h-6" />,
-    //   title: 'Sub Themes' 
-    // },
     { 
-      component: (details: { flyer: string; }) => <CallForPapersPage flyer={details.flyer} />, 
+      component: (details: unknown) => <SubThemesPage details={details} />, 
       icon: <FileText className="w-6 h-6" />,
-      title: 'Call for Papers' 
+      title: 'Sub Themes' 
     },
-    { 
-      component: (details: { gallery: any; }) => <GalleryPage gallery={details.gallery} />, 
-      icon: <Images className="w-6 h-6" />,
-      title: 'Gallery' 
-    },
+    // { 
+    //   component: (details: { flyer: string; }) => <CallForPapersPage flyer={details.flyer} />, 
+    //   icon: <FileText className="w-6 h-6" />,
+    //   title: 'Call for Papers' 
+    // },
+    // { 
+    //   component: (details: { gallery: any; }) => <GalleryPage gallery={details.gallery} />, 
+    //   icon: <Images className="w-6 h-6" />,
+    //   title: 'Gallery' 
+    // },
     { 
       component: (details: { sponsors: any; }) => <SponsorsPage sponsors={details.sponsors} />, 
       icon: <Users className="w-6 h-6" />,
@@ -57,11 +57,11 @@ const ConferenceDetailsPage = () => {
       icon: <Video className="w-6 h-6" />,
       title: 'Videos' 
     },
-    { 
-      component: (details:  { payments: PaymentsStructure }) => <ConferenceFeesPage payments={details.payments} />, 
-      icon: <DollarSign className="w-6 h-6" />,
-      title: 'Conference Fees' 
-    }
+    // { 
+    //   component: (details:  { payments: PaymentsStructure }) => <ConferenceFeesPage payments={details.payments} />, 
+    //   icon: <DollarSign className="w-6 h-6" />,
+    //   title: 'Conference Fees' 
+    // }
   ];
 
   useEffect(() => {

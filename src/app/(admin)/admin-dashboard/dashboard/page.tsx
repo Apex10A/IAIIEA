@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
       description: "Manage and upload annual calendar",
       content: () => (
         <div>
-          <h2 className="text-2xl font-bold mb-4">Annual Calendar</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-600">Annual Calendar</h2>
           <Calendar />
         </div>
       )
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
       icon: "Clock",
       description: "Create and edit conference schedules",
       content: () => (
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full ">
           <ConferenceSchedule/>
         </div>
       )
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
       description: "Add new events to the platform",
       content: () => (
         <div>
-          <h2 className="text-2xl font-bold mb-4">Create Events</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-600">Create Events</h2>
           <Events/>
         </div>
       )
@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
       description: "Upload and update daily meal information",
       content: () => (
         <div>
-          <h2 className="text-2xl font-bold mb-4">Daily Meals</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-600">Daily Meals</h2>
           <DailyMeals/>
         </div>
       )
@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
       description: "Modify website page configurations",
       content: () => (
         <div>
-          <h2 className="text-2xl font-bold mb-4">Page Settings</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-600">Page Settings</h2>
         </div>
       )
     },
@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
       content: () => (
         <div>
           <div>
-            <h2 className="text-2xl font-bold mb-4">Broadcast message</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-600">Broadcast message</h2>
             <div className="flex items-center justify-between">
               <div>
                 <p className="max-w-[60%] opacity-[0.6]">
@@ -117,8 +117,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="p-6">
       <div className="pb-10">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <h1 className="text-xl">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-600">Admin Dashboard</h1>
+        <h1 className="text-xl text-gray-600">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
       </div>
 
       {selectedItem ? (

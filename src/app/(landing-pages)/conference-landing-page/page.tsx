@@ -12,6 +12,7 @@ import GalleryPage from '@/app/(landing-pages)/conference-landing-page/gallery/p
 import SponsorsPage from '@/app/(landing-pages)/conference-landing-page/sponsors/page';
 import VideosPage from '@/app/(landing-pages)/conference-landing-page/videos/page';
 import ConferenceFeesPage from '@/app/(landing-pages)/conference-landing-page/fees/page';
+import { PaymentsStructure } from './fees/fees';
 import RegistrationMessage from './message';
 
 const ConferenceDetailsPage = () => {
@@ -31,11 +32,11 @@ const ConferenceDetailsPage = () => {
       icon: <MapPin className="w-6 h-6" />,
       title: 'Venue & Date' 
     },
-    { 
-      component: (details: unknown) => <SubThemesPage details={details} />, 
-      icon: <FileText className="w-6 h-6" />,
-      title: 'Sub Themes' 
-    },
+    // { 
+    //   component: (details: unknown) => <SubThemesPage details={details} />, 
+    //   icon: <FileText className="w-6 h-6" />,
+    //   title: 'Sub Themes' 
+    // },
     { 
       component: (details: { flyer: string; }) => <CallForPapersPage flyer={details.flyer} />, 
       icon: <FileText className="w-6 h-6" />,
@@ -57,7 +58,7 @@ const ConferenceDetailsPage = () => {
       title: 'Videos' 
     },
     { 
-      component: (details: { payments: unknown; }) => <ConferenceFeesPage payments={details.payments} />, 
+      component: (details:  { payments: PaymentsStructure }) => <ConferenceFeesPage payments={details.payments} />, 
       icon: <DollarSign className="w-6 h-6" />,
       title: 'Conference Fees' 
     }

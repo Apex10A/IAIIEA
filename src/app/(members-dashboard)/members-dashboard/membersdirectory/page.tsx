@@ -53,7 +53,7 @@ const Page = () => {
     <PortalAccessWrapper portalType="membership">
     <div className='p-6'>
       <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-2xl'>Members Directory</h1>
+        <h1 className='text-2xl text-gray-800'>Members Directory</h1>
       </div>
       {/* <div>
         <ButtonProp

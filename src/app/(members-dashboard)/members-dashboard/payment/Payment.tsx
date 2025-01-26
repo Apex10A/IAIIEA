@@ -269,7 +269,7 @@ const PaymentPage: React.FC = () => {
     if (hasMembershipAccess) {
       return (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Membership Payment</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-600">Membership Payment</h2>
           <p className="text-gray-600">You have no pending membership payments.</p>
         </div>
       );
@@ -277,16 +277,16 @@ const PaymentPage: React.FC = () => {
 
     return (
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Membership Payment</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-600">Membership Payment</h2>
         <Alert className="mb-4">
           <AlertDescription>
-            You have a pending membership payment to make for 2024
+            <span className='text-gray-600'>You have a pending membership payment to make for 2024</span>
           </AlertDescription>
         </Alert>
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-2">2024 Membership Payment</h3>
-            <p className="text-2xl font-bold mb-4">₦{(50000).toLocaleString()}</p>
+            <h3 className="text-lg font-semibold mb-2 text-gray-600">2024 Membership Payment</h3>
+            <p className="text-2xl font-bold mb-4 text-gray-600">₦{(50000).toLocaleString()}</p>
             <button
               onClick={() => initiatePayment('membership', 50000, null, '2024 Membership Payment')}
               disabled={isProcessing}
@@ -306,7 +306,7 @@ const PaymentPage: React.FC = () => {
     if (ongoingConferences.length === 0) {
       return (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Conference Payment</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-600">Conference Payment</h2>
           <p className="text-gray-600">You have no pending conference payments.</p>
         </div>
       );
@@ -362,7 +362,7 @@ const PaymentPage: React.FC = () => {
     if (ongoingSeminars.length === 0) {
       return (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Seminar Payment</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-600">Seminar Payment</h2>
           <p className="text-gray-600">You have no pending seminar payments.</p>
         </div>
       );
@@ -423,7 +423,7 @@ const PaymentPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-8">
-        <p className="text-lg">
+        <p className="text-lg text-gray-600">
           Home {'>'} <span className="font-semibold">Payment</span>
         </p>
       </div>

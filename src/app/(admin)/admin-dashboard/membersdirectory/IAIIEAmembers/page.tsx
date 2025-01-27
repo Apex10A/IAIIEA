@@ -354,7 +354,7 @@ const Page = () => {
       <div>
         <h1 className='text-[20px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Registered Members</h1>
       </div>
-      <div className='flex items-center space-x-4 '>
+      <div className='flex items-center space-x-4 w-full'>
         <input 
           type="text" 
           placeholder="Search members..." 

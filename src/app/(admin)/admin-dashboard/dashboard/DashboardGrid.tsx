@@ -48,8 +48,8 @@ const AdminDashboardGrid: React.FC<{ items: DashboardItemProps[] }> = ({ items }
               <Icon className="text-blue-600" size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-gray-600">{item.title}</h3>
-              <p className="text-gray-500">{item.description}</p>
+              <h3 className="text-lg md:text-xl font-semibold text-gray-600">{item.title}</h3>
+              <p className="text-gray-500 text-sm md:text-md lg:text-lg">{item.description}</p>
             </div>
           </div>
         );

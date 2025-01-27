@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { useSession } from "next-auth/react";
+import { showToast } from '@/utils/toast';
 
 interface NewsItem {
   id: string | number;
@@ -81,7 +82,7 @@ const NewsManagement: React.FC = () => {
 
   const handleSubmit = async (): Promise<void> => {
     if (!formData.title || !formData.time || !formData.description || !formData.image) {
-      alert("Please fill in all required fields.");
+      showToast.error("Please fill in all required fields.");
       return;
     }
 
@@ -108,16 +109,16 @@ const NewsManagement: React.FC = () => {
 
       const result = await response.json();
       if (response.ok) {
-        alert(editingNewsId ? "News updated successfully!" : "News added successfully!");
+        showToast.success(editingNewsId ? "News updated successfully!" : "News added successfully!");
         fetchNews();
         setFormData(initialFormData);
         setEditingNewsId(null);
       } else {
-        alert(result.message || "Failed to submit news.");
+        showToast.error(result.message || "Failed to submit news.");
       }
     } catch (error) {
       console.error("Error submitting news:", error);
-      alert("An error occurred while submitting news.");
+      showToast.error("An error occurred while submitting news.");
     } finally {
       setLoading(false);
     }
@@ -138,14 +139,14 @@ const NewsManagement: React.FC = () => {
 
       const result = await response.json();
       if (response.ok) {
-        alert("News deleted successfully!");
+        showToast.success("News deleted successfully!");
         fetchNews();
       } else {
-        alert(result.message || "Failed to delete news.");
+        showToast.error(result.message || "Failed to delete news.");
       }
     } catch (error) {
       console.error("Error deleting news:", error);
-      alert("An error occurred while deleting news.");
+      showToast.error("An error occurred while deleting news.");
     }
   };
 
@@ -164,7 +165,7 @@ const NewsManagement: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">News Management</h1>
+      <h1 className="text-xl md:text-2xl font-bold mb-4 text-gray-600">News Management</h1>
 
       <Dialog.Root>
         <Dialog.Trigger asChild>
@@ -175,7 +176,7 @@ const NewsManagement: React.FC = () => {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
           <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[95vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg z-50">
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-xl font-semibold mb-4 text-gray-600">
               {editingNewsId ? "Edit News" : "Add News"}
             </h2>
             <div className="space-y-4">
@@ -193,7 +194,7 @@ const NewsManagement: React.FC = () => {
                 value={formData.date}
                 onChange={handleInputChange}
                 placeholder="Date (optional)"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md text-gray-600"
               />
               <input
                 type="time"
@@ -201,7 +202,7 @@ const NewsManagement: React.FC = () => {
                 value={formData.time}
                 onChange={handleInputChange}
                 placeholder="Time (required)"
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md text-gray-600"
               />
               <input
                 type="text"
@@ -229,12 +230,12 @@ const NewsManagement: React.FC = () => {
               <input
                 type="file"
                 onChange={handleImageChange}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md text-gray-600"
               />
             </div>
             <div className="mt-6 flex justify-end space-x-4">
               <Dialog.Close asChild>
-                <button className="px-4 py-2 bg-gray-200 rounded-md">
+                <button className="px-4 py-2 text-gray-600 border rounded-md">
                   Cancel
                 </button>
               </Dialog.Close>
@@ -259,11 +260,11 @@ const NewsManagement: React.FC = () => {
       </Dialog.Root>
 
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">News List</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-600">News List</h2>
         <ul>
           {news.map((newsItem) => (
             <li key={newsItem.id} className="mb-4 border p-4 rounded-md">
-              <h3 className="text-lg font-bold">{newsItem.title}</h3>
+              <h3 className="text-lg font-bold text-gray-600">{newsItem.title}</h3>
               <p>{newsItem.description}</p>
               <div className="mt-2 space-x-4">
                 <button

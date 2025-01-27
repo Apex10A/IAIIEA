@@ -128,7 +128,7 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
-        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-[17px]">
+        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-sm md:text-[17px]">
           Add Schedule
         </button>
       </Dialog.Trigger>

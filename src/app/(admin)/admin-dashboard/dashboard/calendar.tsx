@@ -242,7 +242,7 @@ const [eventDetails, setEventDetails] = useState({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <div className="text-xl font-semibold text-gray-600">
+          <div className="text-md md:text-xl font-semibold text-gray-600">
             {currentMonth.title}
           </div>
           <div className="flex space-x-2">
@@ -263,7 +263,7 @@ const [eventDetails, setEventDetails] = useState({
           </div>
         </div>
         {isModalOpen && (
-  <div className="fixed inset-0 z-10 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+  <div className="fixed inset-0 z-10 px-5 bg-gray-800 bg-opacity-50 flex justify-center items-center">
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
       <h3 className="text-lg font-semibold mb-4 text-gray-600">Add Calendar Activity</h3>
       <form className="space-y-4">
@@ -278,13 +278,13 @@ const [eventDetails, setEventDetails] = useState({
           type="date"
           value={eventDetails.date}
           onChange={(e) => setEventDetails({ ...eventDetails, date: e.target.value })}
-          className="w-full p-2 border rounded bg-transparent"
+          className="w-full p-2 border rounded bg-transparent text-gray-600"
         />
         <input
           type="time"
           value={eventDetails.time}
           onChange={(e) => setEventDetails({ ...eventDetails, time: e.target.value })}
-          className="w-full p-2 border rounded bg-transparent"
+          className="w-full p-2 border rounded bg-transparent text-gray-600"
         />
         <input
           type="text"
@@ -304,24 +304,24 @@ const [eventDetails, setEventDetails] = useState({
           onChange={(e) => setEventDetails({ ...eventDetails, priority_level: e.target.value })}
           className="w-full p-2 border rounded bg-transparent"
         >
-          <option value="important">Important</option>
-          <option value="normal">Normal</option>
+          <option value="important" className='text-gray-600'>Important</option>
+          <option value="normal" className='text-gray-600'>Normal</option>
         </select>
         <select
           value={eventDetails.color}
           onChange={(e) => setEventDetails({ ...eventDetails, color: e.target.value })}
           className="w-full p-2 border rounded bg-transparent"
         >
-          <option value="red">Red</option>
-          <option value="blue">Blue</option>
-          <option value="green">Green</option>
+          <option value="red" className='text-gray-600'>Red</option>
+          <option value="blue" className='text-gray-600'>Blue</option>
+          <option value="green" className='text-gray-600'>Green</option>
         </select>
       </form>
       <div className="mt-4 flex justify-end space-x-2">
         <Button variant="outline" onClick={() => setIsModalOpen(false)}>
           Cancel
         </Button>
-        <Button onClick={handleAddEvent} className='text-gray-600 border' variant='outline'>Save</Button>
+        <Button onClick={handleAddEvent} className='text-gray-700 border'>Save</Button>
       </div>
     </div>
   </div>

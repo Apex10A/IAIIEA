@@ -84,7 +84,7 @@ const ConferenceSchedule = () => {
   return (
     <div className="space-y-6 w-full">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Conference Schedule</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-600">Conference Schedule</h2>
         <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded}/>
       </div>
 
@@ -110,17 +110,17 @@ const ConferenceSchedule = () => {
                   
                   <div className="flex items-center text-gray-600 gap-2">
                     <CalendarDays className="h-4 w-4" />
-                    <span>{new Date(schedule.start).toLocaleDateString()} - {new Date(schedule.end).toLocaleDateString()}</span>
+                    <span className='text-sm md:text-md'>{new Date(schedule.start).toLocaleDateString()} - {new Date(schedule.end).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="flex items-center text-gray-600 gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{schedule.venue}</span>
+                    <span className='text-sm md:text-md'>{schedule.venue}</span>
                   </div>
                   
                   <div className="flex items-center text-gray-600 gap-2">
                     <User className="h-4 w-4" />
-                    <span>{schedule.facilitator}</span>
+                    <span className='text-sm md:text-md'>{schedule.facilitator}</span>
                   </div>
                 </div>
               </CardContent>

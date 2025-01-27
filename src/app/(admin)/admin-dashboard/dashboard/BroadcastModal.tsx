@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { showToast } from '@/utils/toast';
 
 const BroadcastMail = () => {
   const [organizationEmail, setOrganizationEmail] = useState("");
@@ -40,7 +41,7 @@ const BroadcastMail = () => {
         }
       );
 
-      alert("Broadcast mail sent successfully!");
+      showToast.success("Broadcast mail sent successfully!");
       console.log(response.data);
       // Reset form
       setOrganizationEmail("");
@@ -49,10 +50,12 @@ const BroadcastMail = () => {
       setMessageToSend("");
     } catch (error) {
       console.error("Error sending broadcast mail:", error);
+      showToast.error("Error sending broadcast mail")
       if (error instanceof Error) {
         setError(error.message);
       } else {
         setError ( "An error occurred while sending the mail.")
+        showToast.error("An error occurred while sending the mail.")
       }
    
     } 
@@ -74,18 +77,18 @@ const BroadcastMail = () => {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-[17px]">
+        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-sm md:text-[17px]">
           Send Broadcast Mail
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
         <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[95vh] w-[90vw] max-w-[725px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none z-50">
-          <h1 className="text-2xl text-center">Broadcast Mail</h1>
+          <h1 className="text-xl md:text-2xl text-center text-gray-600">Broadcast Mail</h1>
 
           <div className="grid gap-4 mt-5">
             <div className="max-w-[60%]">
-              <label htmlFor="organizationEmail" className="block mb-2">
+              <label htmlFor="organizationEmail" className="block mb-2 text-gray-600">
                 Organization's Email Address
               </label>
               <input
@@ -98,7 +101,7 @@ const BroadcastMail = () => {
             </div>
 
             <div className="max-w-[60%]">
-              <label htmlFor="recipients" className="block mb-2">
+              <label htmlFor="recipients" className="block mb-2 text-gray-600">
                 Recipients
               </label>
               <input
@@ -111,7 +114,7 @@ const BroadcastMail = () => {
             </div>
 
             <div className="max-w-[60%]">
-              <label htmlFor="subject" className="block mb-2">
+              <label htmlFor="subject" className="block mb-2 text-gray-600">
                 Subject
               </label>
               <input
@@ -124,7 +127,7 @@ const BroadcastMail = () => {
             </div>
 
             <div className="max-w-[60%]">
-              <label htmlFor="messageToSend" className="block mb-2">
+              <label htmlFor="messageToSend" className="block mb-2 text-gray-600">
                 Message
               </label>
               <textarea

@@ -243,21 +243,21 @@ const ForumPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen px-4 sm:px-5 py-3 mb-6 mt-10">
       <header className="bg-white shadow-sm">
         <div className="bg-gray-200 px-5 py-5 mb-5 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-black">Community Forum</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-black">Community Forum</h1>
         </div>
       </header>
 
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <p className="max-w-[60%]">
+          <p className="max-w-[60%] text-gray-600 text-sm md:text-md">
             Ask questions, share knowledge, and get feedback from other developers.
           </p>
           <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
             <Dialog.Trigger asChild>
-              <button className="bg-[#203a87] text-white px-6 py-3 font-semibold rounded-full hover:bg-[#1a2f6e] transition-colors">
+              <button className="bg-[#203a87] text-white px-6 py-3 font-semibold rounded-lg hover:bg-[#1a2f6e] transition-colors text-sm sm:text-base ">
                 + Ask Question
               </button>
             </Dialog.Trigger>
@@ -335,12 +335,12 @@ const ForumPage: React.FC = () => {
                     className="w-10 h-10 rounded-full mr-4"
                   />
                   <div>
-                    <p className="font-semibold">{question.poster_name}</p>
+                    <p className="font-semibold text-gray-700">{question.poster_name}</p>
                     <p className="text-sm text-gray-500">{new Date(question.posted_date).toLocaleDateString()}</p>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-3">{question.title}</h3>
+                <h3 className="text-xl font-bold mb-3 text-gray-700">{question.title}</h3>
                 <p className="text-gray-700 mb-4">{question.description}</p>
                 
                 {question.image && (
@@ -359,7 +359,7 @@ const ForumPage: React.FC = () => {
                             className="w-8 h-8 rounded-full mr-2"
                           />
                           <div>
-                            <p className="font-medium">{comment.name}</p>
+                            <p className="font-medium text-gray-700">{comment.name}</p>
                             <p className="text-sm text-gray-500">{new Date(comment.date).toLocaleDateString()}</p>
                           </div>
                         </div>

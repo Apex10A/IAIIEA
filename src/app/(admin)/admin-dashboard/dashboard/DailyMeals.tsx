@@ -76,14 +76,14 @@ interface Meal {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-[17px]">
+        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-sm md:text-[17px]">
           Add Meal
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
         <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[95vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none z-50">
-          <Dialog.Title className="text-xl font-bold mb-4">Add New Meal</Dialog.Title>
+          <Dialog.Title className="text-md md:text-xl text-gray-600 font-bold mb-4">Add New Meal</Dialog.Title>
           
           <div className="space-y-4">
             <div>
@@ -92,18 +92,18 @@ interface Meal {
                 type="text"
                 value={mealDetails.name}
                 onChange={(e) => setMealDetails(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md text-gray-600"
                 placeholder="Enter meal name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Meal Image</label>
+              <label className="block text-sm font-medium mb-1 text-gray-600">Meal Image</label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md text-gray-600"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ const ConferenceMeals = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Conference Meals</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-600">Conference Meals</h2>
         <MealsModal onMealAdded={fetchMeals} />
       </div>
 

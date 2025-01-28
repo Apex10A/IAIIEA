@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import "@/app/index.css"
 
 // Import your icons
 import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';

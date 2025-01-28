@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSession } from "next-auth/react";
+import "@/app/index.css"
 import { redirect } from 'next/navigation';
 
 // Components

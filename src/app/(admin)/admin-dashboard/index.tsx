@@ -69,8 +69,8 @@ export default function DashboardClient() {
   // Loading state while checking session
   if (status === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 "></div>
         <p className="pt-3 font-medium text-gray-600">Preparing dashboard...</p>
       </div>
     );
@@ -113,7 +113,7 @@ export default function DashboardClient() {
         </button>
 
         <div
-          className={`fixed inset-y-0 left-0 transform ${
+          className={`fixed inset-y-0 left-0 transform pt-20 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 md:z-0`}
         >

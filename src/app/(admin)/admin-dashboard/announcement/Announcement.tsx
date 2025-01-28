@@ -208,8 +208,8 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
 
   return (
     <div className=''>
-      <div className='flex justify-between items-center mb-6'>
-        <h1 className="text-3xl font-bold">Announcements</h1>
+      <div className='md:flex justify-between items-center mb-6'>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-700">Announcements</h1>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -220,7 +220,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
             <DialogHeader>
               <DialogTitle>Create Announcement</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreateAnnouncement} className='space-y-4'>
+            <form onSubmit={handleCreateAnnouncement} className='space-y-4 bg-white'>
               <div>
                 <Label>Title</Label>
                 <Input 
@@ -303,7 +303,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       </CardHeader>
       
       <CardContent>
-        <p className='text-muted-foreground opacity-[0.8]'>
+        <p className='text-muted-foreground opacity-[0.8] text-sm md:text-md lg:text-lg'>
           {announcement.description}
         </p>
         
@@ -331,6 +331,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
           <div className='flex space-x-2'>
             <Button 
               variant='outline' 
+              className='bg-transparent border'
               size='icon'
               onClick={() => {
                 setCurrentAnnouncement(announcement);
@@ -359,7 +360,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
           <DialogHeader>
             <DialogTitle>Edit Announcement</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditAnnouncement} className='space-y-4'>
+          <form onSubmit={handleEditAnnouncement} className='space-y-4 bg-white'>
             <div>
               <Label>Title</Label>
               <Input 

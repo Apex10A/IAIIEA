@@ -262,8 +262,8 @@ const ForumPage: React.FC = () => {
               </button>
             </Dialog.Trigger>
             <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg focus:outline-none">
+              <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm " />
+              <Dialog.Content className="fixed left-[50%] top-[50%] px-4 z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg focus:outline-none">
                 <form onSubmit={handleSubmitQuestion} className="space-y-4">
                   <div>
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">

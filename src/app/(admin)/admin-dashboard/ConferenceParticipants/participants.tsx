@@ -236,7 +236,7 @@ const Page = () => {
   }
 
   return (
-    <div className=''>
+    <div className='min-h-screen px-4 sm:px-5 py-3 mb-6 mt-10'>
       <div className='flex items-center justify-between mb-4'>
         <div>
           <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Conference Participants</h1>
@@ -258,7 +258,7 @@ const Page = () => {
 
       {/* Table for registered members */}
       <div className='mt-6 w-full overflow-x-auto text-black'>
-        <Table className='min-w-[800px] text-black'>
+        <Table className='min-w-[1200px] text-black'>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">

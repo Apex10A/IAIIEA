@@ -422,10 +422,8 @@ const PaymentPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <p className="text-lg text-gray-600">
-          Home {'>'} <span className="font-semibold">Payment</span>
-        </p>
+     <div className='bg-gray-200 px-5 py-3 mb-6 '>
+        <h1 className='text-2xl'>PAYMENTS</h1>
       </div>
 
       {renderMembershipSection()}

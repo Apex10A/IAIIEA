@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
-
+import "@/app/index.css"
 // Components
 import Sidebar from '@/app/(admin)/admin-dashboard/sidebarTwo/sidebar'
 import DashboardHeader from '@/components/layout/header/DashboardHeader';

@@ -252,7 +252,7 @@ const ForumPage: React.FC = () => {
 
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <p className="max-w-[60%] text-gray-600 text-sm md:text-md">
+          <p className="max-w-[60%] text-gray-600 text-sm md:text-md lg:text-lg">
             Ask questions, share knowledge, and get feedback from other developers.
           </p>
           <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -335,21 +335,21 @@ const ForumPage: React.FC = () => {
                     className="w-10 h-10 rounded-full mr-4"
                   />
                   <div>
-                    <p className="font-semibold text-gray-700">{question.poster_name}</p>
+                    <p className="font-semibold text-gray-700 text-sm md:text-md lg:text-lg">{question.poster_name}</p>
                     <p className="text-sm text-gray-500">{new Date(question.posted_date).toLocaleDateString()}</p>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-3 text-gray-700">{question.title}</h3>
-                <p className="text-gray-700 mb-4">{question.description}</p>
+                <h3 className="text-md md:text-xl font-bold mb-3 text-gray-700">{question.title}</h3>
+                <p className="text-gray-700 mb-4 text-sm md:text-md lg:text-lg">{question.description}</p>
                 
                 {question.image && (
-                  <img src={question.image} alt="Question" className="mb-4 rounded-lg max-w-[60%]" />
+                  <img src={question.image} alt="Question" className="mb-4 rounded-lg w-full md:max-w-[60%]" />
                 )}
 
                 {activeForumId === question.forum_id ? (
                   <div className="mt-4 border-t pt-4">
-                    <h4 className="font-semibold mb-4">Comments</h4>
+                    <h4 className="font-semibold mb-4 text-gray-700 text-sm md:text-md lg:text-lg">Comments</h4>
                     {forumDetails?.comments.map((comment, index) => (
                       <div key={index} className="mb-4 pl-4 border-l-2">
                         <div className="flex items-center mb-2">
@@ -359,11 +359,11 @@ const ForumPage: React.FC = () => {
                             className="w-8 h-8 rounded-full mr-2"
                           />
                           <div>
-                            <p className="font-medium text-gray-700">{comment.name}</p>
-                            <p className="text-sm text-gray-500">{new Date(comment.date).toLocaleDateString()}</p>
+                            <p className="font-medium text-gray-700 text-sm md:text-md lg:text-lg">{comment.name}</p>
+                            <p className="text-sm text-gray-500 md:text-md lg:text-lg">{new Date(comment.date).toLocaleDateString()}</p>
                           </div>
                         </div>
-                        <p className="text-gray-700">{comment.comment}</p>
+                        <p className="text-gray-700 text-sm md:text-md lg:text-lg">{comment.comment}</p>
                       </div>
                     ))}
                     <div className="mt-4 flex gap-2">
@@ -371,7 +371,7 @@ const ForumPage: React.FC = () => {
                         type="text"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        className="flex-1 px-3 py-2 border rounded-md"
+                        className="flex-1 px-3 py-2 border rounded-md text-sm md:text-md lg:text-lg"
                         placeholder="Write a comment..."
                       />
                       <button
@@ -384,12 +384,12 @@ const ForumPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="flex items-center justify-between border-t pt-4">
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 text-sm md:text-md lg:text-lg">
                       {question.total_comments} comments
                     </span>
                     <button
                       onClick={() => setActiveForumId(question.forum_id)}
-                      className="text-[#203a87] hover:underline"
+                      className="text-[#203a87] hover:underline text-sm md:text-md lg:text-lg"
                     >
                       View Discussion
                     </button>

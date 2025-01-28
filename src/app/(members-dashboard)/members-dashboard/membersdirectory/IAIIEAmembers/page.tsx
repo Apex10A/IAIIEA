@@ -367,7 +367,7 @@ const Page = () => {
     </div>
 
     <div className='mt-6 w-full overflow-x-auto text-black'>
-      <Table className='min-w-[800px] text-black'>
+      <Table className='min-w-[1200px] text-black'>
       <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">

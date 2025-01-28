@@ -40,13 +40,13 @@ const Payment = () => {
        <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
         <h1 className='text-xl md:text-2xl text-gray-700'>Payment History</h1>
       </div>
-      <div>
-        {/* <ButtonProp 
+      {/* <div>
+        <ButtonProp 
           options={['Payment History', 'Dues Settings']} 
           selectedSection={selectedSection} 
           setSelectedSection={setSelectedSection} 
-        /> */}
-      </div>
+        />
+      </div> */}
       {selectedSection === 'Payment History' ? (
         <div className='mt-10'>
           {/* Add PaymentHistory component or content here */}

@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 // Components
 import Sidebar from '@/components/layout/sidebar/page';
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
+import LoadingDashboard from '@/app/(admin)/admin-dashboard/LoadingDashboard'
 
 // Pages
 import Dashboard from "@/app/(members-dashboard)/members-dashboard/dash/index";
@@ -67,10 +68,7 @@ export default function DashboardClient() {
   // Loading state while checking session
   if (status === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-        <p className="pt-3 font-medium text-gray-600">Preparing dashboard...</p>
-      </div>
+      <LoadingDashboard/>
     );
   }
 

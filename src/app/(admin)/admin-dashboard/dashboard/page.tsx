@@ -48,17 +48,17 @@ export default function AdminDashboardPage() {
         </div>
       )
     },
-    {
-      title: "Create Events",
-      icon: "Plus",
-      description: "Add new events to the platform",
-      content: () => (
-        <div>
-          <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Create Events</h2>
-          <Events/>
-        </div>
-      )
-    },
+    // {
+    //   title: "Create Events",
+    //   icon: "Plus",
+    //   description: "Add new events to the platform",
+    //   content: () => (
+    //     <div>
+    //       <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Create Events</h2>
+    //       <Events/>
+    //     </div>
+    //   )
+    // },
     {
       title: "Daily Meals",
       icon: "Utensils",
@@ -123,12 +123,26 @@ export default function AdminDashboardPage() {
 
       {selectedItem ? (
         <div>
-          <button 
-            onClick={() => setSelectedItem(null)}
-            className="mb-4 text-blue-600 hover:underline"
-          >
-            ← Back to Dashboard
-          </button>
+         <button 
+  onClick={() => setSelectedItem(null)}
+  className="group flex items-center gap-2 px-4 py-2 mb-6 bg-zinc-100 text-gray-700 hover:text-blue-700 transition-all duration-200 ease-in-out"
+>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="20" 
+    height="20" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className="transform group-hover:-translate-x-1 transition-transform duration-200"
+  >
+    <path d="m15 18-6-6 6-6"/>
+  </svg>
+  <span className="font-medium">Back to Dashboard</span>
+</button>
           {selectedItem.content()}
         </div>
       ) : (

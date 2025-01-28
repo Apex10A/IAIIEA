@@ -167,7 +167,7 @@ const ConferenceResources: React.FC = () => {
               </div>
               <button
                 onClick={() => handleViewResources(conference.id)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full"
+                className="bg-[#203a87] hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full"
               >
                 View Resources
               </button>

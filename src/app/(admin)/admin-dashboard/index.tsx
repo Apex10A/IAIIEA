@@ -24,6 +24,7 @@ import ConferenceParticpants from '@/app/(admin)/admin-dashboard/ConferenceParti
 import  ConferenceResources  from '@/app/(admin)/admin-dashboard/ConferenceResources/resources';
 import SeminarParticipants from '@/app/(admin)/admin-dashboard/training/participants/page'
 import SeminarResources from '@/app/(admin)/admin-dashboard/training/resources/page'
+import LoadingDashboard from './LoadingDashboard';
 
 // TypeScript interfaces
 interface ComponentMap {
@@ -69,10 +70,7 @@ export default function DashboardClient() {
   // Loading state while checking session
   if (status === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 "></div>
-        <p className="pt-3 font-medium text-gray-600">Preparing dashboard...</p>
-      </div>
+     <LoadingDashboard/>
     );
   }
 

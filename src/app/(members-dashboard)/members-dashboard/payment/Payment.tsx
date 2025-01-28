@@ -344,7 +344,7 @@ const PaymentPage: React.FC = () => {
                 <button
                  onClick={() => initiatePayment('conference', getAmountForPlan(selectedPlan), conference.id, conference.title, selectedPlan)}
                   disabled={isProcessing}
-                  className="w-full px-4 py-2 rounded-full bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50"
+                  className=" px-4 py-2 rounded-lg bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50"
                 >
                   {isProcessing ? 'Processing...' : 'Make Payment'}
                 </button>

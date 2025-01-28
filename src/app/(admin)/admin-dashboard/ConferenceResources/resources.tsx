@@ -3,6 +3,9 @@ import { useSession } from "next-auth/react";
 import AddFileModal from './AddFileModal';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { Trash2 } from 'lucide-react';
+import { showToast } from '@/utils/toast';
 
 // TypeScript interfaces
 interface Resource {
@@ -37,6 +40,14 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
   onEditConference 
 }) => {
   const resourceCount = conference.resources?.length || 0;
+    const handleDelete = async () => {
+      try {
+        await onDeleteConference(conference.id);
+        showToast.success('Conference deleted successfully');
+      } catch (error) {
+        showToast.error('Failed to delete conference');
+      }
+    };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow">
@@ -53,25 +64,53 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         <p className="mb-2">{conference.venue}</p>
         <p>{conference.date}</p>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex justify-between gap-2">
         <button 
           onClick={() => onViewResources(conference)}
           className="text-blue-600 hover:text-blue-800 font-semibold text-sm sm:text-base flex items-center gap-2"
         >
           View Resources
         </button>
-        <button 
+        {/* <button 
           onClick={() => onEditConference(conference)}
           className="text-green-600 hover:text-green-800 font-semibold text-sm sm:text-base flex items-center gap-2"
         >
           Edit
-        </button>
-        <button 
-          onClick={() => onDeleteConference(conference.id)}
-          className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          Delete
-        </button>
+        </button> */}
+           <AlertDialog.Root>
+                 <AlertDialog.Trigger asChild>
+                   <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
+                     <Trash2 className="w-4 h-4" />
+                     Delete
+                   </button>
+                 </AlertDialog.Trigger>
+                 <AlertDialog.Portal>
+                   <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                   <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                     <AlertDialog.Title className="text-lg font-semibold">
+                       Delete Conference
+                     </AlertDialog.Title>
+                     <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                       Are you sure you want to delete this conference? This action cannot be undone.
+                     </AlertDialog.Description>
+                     <div className="flex justify-end gap-4">
+                       <AlertDialog.Cancel asChild>
+                         <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                           Cancel
+                         </button>
+                       </AlertDialog.Cancel>
+                       <AlertDialog.Action asChild>
+                         <button 
+                           onClick={handleDelete}
+                           className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                         >
+                           Delete
+                         </button>
+                       </AlertDialog.Action>
+                     </div>
+                   </AlertDialog.Content>
+                 </AlertDialog.Portal>
+               </AlertDialog.Root>
       </div>
     </div>
   );
@@ -90,6 +129,14 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
       day: 'numeric'
     });
   };
+    const handleDelete = async () => {
+      try {
+        await onDelete(resource.resource_id);
+        showToast.success('Resource deleted successfully');
+      } catch (error) {
+        showToast.error('Failed to delete resource');
+      }
+    };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
@@ -238,12 +285,25 @@ const ConferenceResources: React.FC = () => {
         // Resources View
         <div>
           <div className="flex justify-between items-center mb-6">
-            <button 
-              onClick={() => setSelectedConference(null)}
-              className="text-blue-600 hover:text-blue-800 flex items-center gap-2 text-sm sm:text-base"
-            >
-              ← Back to Conferences
-            </button>
+          <button 
+  onClick={() => setSelectedConference(null)}
+  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors rounded-lg hover:bg-gray-100 hover:text-gray-900"
+>
+  <svg 
+    className="w-4 h-4" 
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24"
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth={2} 
+      d="M15 19l-7-7 7-7"
+    />
+  </svg>
+  Back to Conferences
+</button>
             <AddFileModal />
           </div>
 

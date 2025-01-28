@@ -1,31 +1,34 @@
-"use client"; 
 import React, { useState, useEffect } from 'react';
-import { ChevronsLeft, ChevronsRight, Menu, ChevronDown, ChevronRight } from 'lucide-react';
+import { Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import HomeIcon from "@/assets/landingpage/svg/HomeIcon"
-import NotificationIcon from "@/assets/landingpage/svg/NotificationIcon";
-import BagIcon from "@/assets/landingpage/svg/BagIcon";
 
-import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon'
-import PaymentIcon from '@/assets/sidebarIcons/PaymentIcon'
-import AnnouncementIcon from '@/assets/sidebarIcons/AnnouncementIcon'
-import GalleryIcon from '@/assets/sidebarIcons/GalleryIcon'
-import ConferenceIcon from '@/assets/sidebarIcons/ConferenceIcon'
-import SeminarIcon from '@/assets/sidebarIcons/SeminarIcon'
-import ResourcesIcon from '@/assets/sidebarIcons/ResourcesIcon'
-import ForumIcon from '@/assets/sidebarIcons/ForumIcon'
-import MembersIcon from '@/assets/sidebarIcons/MembersDirectoryIcon'
-
-import CalendarIcon from "@/assets/landingpage/svg/CalendarIcon";
-import "@/app/index.css";
+// Import your icons
+import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
+import PaymentIcon from '@/assets/sidebarIcons/PaymentIcon';
+import AnnouncementIcon from '@/assets/sidebarIcons/AnnouncementIcon';
+import GalleryIcon from '@/assets/sidebarIcons/GalleryIcon';
+import ResourcesIcon from '@/assets/sidebarIcons/ResourcesIcon';
+import ForumIcon from '@/assets/sidebarIcons/ForumIcon';
+import MembersIcon from '@/assets/sidebarIcons/MembersDirectoryIcon';
 
 type SidebarProps = {
   setActiveComponent: (component: string) => void;
   hasPaid?: boolean;
 };
 
-// Define main portal items and their sub-items
-const portalItems = [
+type NavItem = {
+  name: string;
+  icon: React.FC<{ isActive: boolean }>;
+  requiredPortal: string | null;
+  subItems: {
+    name: string;
+    requiredPortal: string | null;
+    icon: React.FC<{ isActive: boolean }>;
+  }[];
+};
+
+// Portal items configuration
+const portalItems: NavItem[] = [
   { 
     name: 'Dashboard', 
     icon: DashboardIcon, 
@@ -44,12 +47,10 @@ const portalItems = [
     requiredPortal: 'membership',
     subItems: [
       { name: 'Directory', requiredPortal: 'membership', icon: MembersIcon },
-      { name: 'resources', requiredPortal: 'membership', icon: ResourcesIcon },
-      // { name: 'Gallery', requiredPortal: 'membership', icon: GalleryIcon },
+      { name: 'Resources', requiredPortal: 'membership', icon: ResourcesIcon },
       { name: 'Forum', requiredPortal: 'membership', icon: ForumIcon },
       { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon },
-      { name: 'Events', icon: AnnouncementIcon }
-      
+      { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]
   },
   { 
@@ -57,10 +58,8 @@ const portalItems = [
     icon: MembersIcon,
     requiredPortal: 'conference',
     subItems: [
-      { name: 'Participants', requiredPortal: 'membership', icon: MembersIcon },
-      { name: 'Resources', requiredPortal: 'membership', icon: ResourcesIcon },
-
-      
+      { name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },
+      { name: 'Resources', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   },
   { 
@@ -70,299 +69,186 @@ const portalItems = [
     subItems: [
       { name: 'Seminar Participants', requiredPortal: 'seminar', icon: MembersIcon },
       { name: 'Seminar Resources', requiredPortal: 'seminar', icon: ResourcesIcon },
-
-      
     ]
-  },
-//   { 
-//     name: 'Conference Portal', 
-//     icon: ConferenceIcon,
-//     requiredPortal: 'conference',
-//     subItems: []
-//   },
-//   { 
-//     name: 'Seminars / Webinars', 
-//     icon: SeminarIcon,
-//     requiredPortal: 'webinar',
-//     subItems: []
-//   },
-//   { 
-//     name: 'Settings', 
-//     icon: BagIcon,
-//     requiredPortal: null,
-//     subItems: []
-//   }
+  }
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [activeComponent, setActive] = useState('Dashboard');
-  const [sidebarMode, setSidebarMode] = useState<'default' | 'mini' | 'closed' | 'mobile'>('default');
-  const [windowWidth, setWindowWidth] = useState<number>(0);
-  const [openPortals, setOpenPortals] = useState<{[key: string]: boolean}>({
-    'Membership Portal': false,
-    'Conference Portal': false,
-    'Seminars / Webinars': false
-  });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState('Dashboard');
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Handle responsive design
   useEffect(() => {
-    // Set initial window width
-    setWindowWidth(window.innerWidth);
-
-    // Update window width on resize
     const handleResize = () => {
-      const newWidth = window.innerWidth;
-      setWindowWidth(newWidth);
-
-      // Adjust sidebar mode based on screen size
-      if (newWidth < 640) {
-        setSidebarMode('mobile');
-        setIsOpen(false);
-      } else if (newWidth < 1024) {
-        setSidebarMode('mini');
-        setIsOpen(false);
-      } else {
-        setSidebarMode('default');
-        setIsOpen(true);
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setIsMobileOpen(false);
       }
     };
 
-    // Add resize event listener
-    window.addEventListener('resize', handleResize);
-
-    // Initial check
     handleResize();
-
-    // Cleanup
+    window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const toggleSidebar = () => {
-    switch (sidebarMode) {
-      case 'default':
-        setSidebarMode('mini');
-        setIsOpen(false);
-        break;
-      case 'mini':
-        setSidebarMode('closed');
-        break;
-      case 'closed':
-        setSidebarMode('default');
-        setIsOpen(true);
-        break;
-      case 'mobile':
-        setSidebarMode('closed');
-        break;
+  const toggleItem = (itemName: string) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemName)) {
+        newSet.delete(itemName);
+      } else {
+        newSet.add(itemName);
+      }
+      return newSet;
+    });
+  };
+
+  const handleItemClick = (item: NavItem | NavItem['subItems'][0]) => {
+    setActiveItem(item.name);
+    setActiveComponent(item.name);
+    if (isMobile) {
+      setIsMobileOpen(false);
     }
   };
 
-  const togglePortal = (portalName: string) => {
-    setOpenPortals(prev => ({
-      ...Object.fromEntries(
-        Object.entries(prev).map(([key]) => [key, false])
-      ),
-      [portalName]: !prev[portalName]
-    }));
-  };
+  const NavItemComponent: React.FC<{
+    item: NavItem;
+    level?: number;
+  }> = ({ item, level = 0 }) => {
+    const isExpanded = expandedItems.has(item.name);
+    const isActive = activeItem === item.name;
+    const IconComponent = item.icon;
+    const hasSubItems = item.subItems.length > 0;
 
-  const handleComponentClick = (component: string, isSubItem: boolean = false) => {
-    setActive(component);
-    setActiveComponent(component);
-  
-    // Close mobile sidebar after selection
-    if (sidebarMode === 'mobile') {
-      setSidebarMode('closed');
-    }
-  };
+    return (
+      <div className="w-full">
+        <motion.button
+          className={`
+            w-full flex items-center justify-between p-3 rounded-lg
+            transition-colors duration-200
+            ${isActive ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/5'}
+            ${level > 0 ? 'ml-4' : ''}
+          `}
+          onClick={() => {
+            if (hasSubItems) {
+              toggleItem(item.name);
+            } else {
+              handleItemClick(item);
+            }
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`
+              w-8 h-8 flex items-center justify-center
+              ${isActive ? 'text-white' : 'text-gray-400'}
+            `}>
+              <IconComponent isActive={isActive} />
+            </div>
+            <span className="text-sm font-medium">{item.name}</span>
+          </div>
+          {hasSubItems && (
+            <motion.div
+              animate={{ rotate: isExpanded ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </motion.div>
+          )}
+        </motion.button>
 
-  const getButtonClassName = (component: string, isSubItem: boolean = false) => {
-    const isActive = activeComponent === component;
-    
-    return `
-      font-[500] flex items-end justify-center
-      ${isSubItem 
-        ? 'text-[16px] py-1 px-20 text-zinc-400 flex text-center ' 
-        : 'text-[14px] md:text-[18px] py-1 md:py-2 text-black'}
-      px-2 md:px-3 rounded-md cursor-pointer md:mx-3 
-      ${isActive 
-        ? 'bg-gray-200 text-[#0E1A3D] ' 
-        : 'text-white hover:bg-[#0E1A3D] hover:text-[#cfc8c8]'}
-      ${sidebarMode === 'mobile' ? 'text-[16px]' : ''}
-    `;
-  };
-
-  // Sidebar width and visibility based on mode
-  const getSidebarWidth = () => {
-    switch (sidebarMode) {
-      case 'default': return 'w-72';
-      case 'mini': return 'w-20';
-      case 'mobile': return 'w-64';
-      case 'closed': return 'w-0';
-    }
-  };
-
-  // Mobile overlay for sidebar
-  const getMobileSidebarClasses = () => {
-    return `
-      fixed top-0 left-0 h-full z-50 bg-[#0e1a3d] shadow-lg 
-      transition-transform duration-300 
-      ${sidebarMode === 'mobile' ? 'translate-x-0' : '-translate-x-full'}
-    `;
+        <AnimatePresence>
+          {isExpanded && hasSubItems && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              {item.subItems.map((subItem) => (
+                <NavItemComponent
+                  key={subItem.name}
+                  item={{ ...subItem, subItems: [] }}
+                  level={level + 1}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
   };
 
   return (
     <>
-      {/* Mobile/Small Screen Sidebar Trigger */}
-      {(sidebarMode === 'mobile' || sidebarMode === 'closed') && (
-        <div 
-          className="fixed top-4 left-4 z-40 
-          md:hidden block"
-        >
-          <Menu 
-            className="text-black cursor-pointer" 
-            onClick={() => setSidebarMode('mobile')} 
-          />
-        </div>
-      )}
-
-      {/* Sidebar */}
-      <motion.div 
-        initial={{ width: '23rem' }}
-        animate={{ 
-          width: sidebarMode === 'default' ? '23rem' : 
-                 sidebarMode === 'mini' ? '5rem' : 
-                 sidebarMode === 'mobile' ? '18rem' : 0 
-        }}
-        transition={{ duration: 0.3 }}
-        className={`
-          ${getSidebarWidth()} 
-          ${sidebarMode === 'mobile' ? getMobileSidebarClasses() : ''}
-          border border-[#CACAC9] bg-[#0e1a3d]
-          h-full top-24 p-5 pt-8 
-          relative duration-300 
-          flex items-center justify-center 
-          ${sidebarMode !== 'mobile' ? 'max-md:hidden' : ''}
-        `}
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="fixed top-4 left-4 z-[60] p-2 rounded-lg bg-gray-800 text-white md:hidden"
       >
-        {/* Sidebar Toggle Button for non-mobile views */}
-        {sidebarMode !== 'mobile' && (
-          <div className='absolute top-4 right-4 z-50'>
-            {sidebarMode === 'default' && (
-              <ChevronsLeft 
-                className="text-white cursor-pointer" 
-                onClick={toggleSidebar} 
-              />
-            )}
-            {sidebarMode === 'mini' && (
-              <Menu 
-                className="text-white cursor-pointer" 
-                onClick={toggleSidebar} 
-              />
-            )}
-            {sidebarMode === 'closed' && (
-              <ChevronsRight 
-                className="text-white cursor-pointer" 
-                onClick={toggleSidebar} 
-              />
-            )}
-          </div>
-        )}
+        {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
 
-        <AnimatePresence>
-          {sidebarMode !== 'closed' && (
-            <motion.div 
+     <div className='flex h-full'>
+       {/* Backdrop */}
+       <AnimatePresence>
+          {isMobileOpen && (
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className='flex flex-col justify-between items-center h-full mt-5 md:mt-10 w-full'
-            >
-              <div className='w-full'>
-                <ul>
-                  <div className='leading-[40px] flex flex-col gap-3 md:gap-5'>
-                  {portalItems.map((item) => {
-  const IconComponent = item.icon;
-  const hasSubItems = item.subItems && item.subItems.length > 0;
-  const isPortalOpen = openPortals[item.name];
-  const isItemActive = activeComponent === item.name;
-
-  return (
-    <div key={item.name}>
-      <motion.li
-        className={`
-          ${getButtonClassName(item.name)}
-          ${sidebarMode === 'mini' ? 'flex justify-center items-center' : ''}
-        `}
-        onClick={() => {
-          hasSubItems 
-            ? togglePortal(item.name)
-            : handleComponentClick(item.name);
-        }}
-      >
-        <div className={`
-          flex items-center gap-x-4 w-full
-          ${sidebarMode === 'mini' ? 'justify-center' : 'justify-between'}
-        `}>
-          <div className="flex items-center gap-x-4">
-            {sidebarMode === 'mini' ? (
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#0E1A3D]">
-                <IconComponent isActive={isItemActive} />
-              </div>
-            ) : (
-              <IconComponent isActive={isItemActive} />
-            )}
-                                {(sidebarMode === 'default' || sidebarMode === 'mobile') && (
-                                  <motion.span
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                  >
-                                    {item.name}
-                                  </motion.span>
-                                )}
-                              </div>
-
-                              {/* Dropdown icon for portals with sub-items */}
-                              {hasSubItems && (sidebarMode === 'default' || sidebarMode === 'mobile') && (
-                                <div>
-                                  {isPortalOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-                                </div>
-                              )}
-                            </div>
-                          </motion.li>
-
-                          {/* Dropdown Sub-Items */}
-                          {hasSubItems && isPortalOpen && (sidebarMode === 'default' || sidebarMode === 'mobile') && (
-                            <AnimatePresence>
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                {item.subItems.map((subItem) => (
-                                  <motion.li
-                                    key={subItem.name}
-                                    className={getButtonClassName(subItem.name, true)}
-                                    onClick={() => handleComponentClick(subItem.name, true)}
-                                  >
-                                    {subItem.name}
-                                  </motion.li>
-                                ))}
-                              </motion.div>
-                            </AnimatePresence>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </ul>
-              </div>
-            </motion.div>
+              onClick={() => setIsMobileOpen(false)}
+              className="fixed inset-0 bg-black/50 z-[40] md:hidden"
+            />
           )}
         </AnimatePresence>
-      </motion.div>
+
+        {/* Sidebar Container */}
+        <AnimatePresence>
+          {(isMobileOpen || !isMobile) && (
+            <motion.aside
+              initial={isMobile ? { x: "-100%" } : { x: 0 }}
+              animate={{ x: 0 }}
+              exit={isMobile ? { x: "-100%" } : {}}
+              transition={{ type: "tween", duration: 0.3 }}
+              className={`
+                ${isMobile ? 'fixed left-0 top-0' : 'relative'}
+                h-full w-64
+                bg-[#0e1a3d] shadow-xl
+                z-[50]
+                flex flex-col
+                overflow-hidden
+              `}
+            >
+              {/* Sidebar Content */}
+              <div className="flex flex-col gap-2 p-4 pt-20 h-full overflow-y-auto">
+                {portalItems.map((item) => (
+                  <NavItemComponent key={item.name} item={item} />
+                ))}
+              </div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+     </div>
+
+      {/* Sidebar */}
+      <motion.aside
+        initial={isMobile ? { x: '-100%' } : false}
+        animate={isMobile ? { x: isMobileOpen ? 0 : '-100%' } : false}
+        transition={{ type: 'tween', duration: 0.3 }}
+        className={`
+          fixed top-0 left-0 h-full w-64 z-50
+          bg-[#0e1a3d] shadow-xl
+          flex flex-col gap-2 p-4 pt-20
+          overflow-y-auto
+          md:relative md:translate-x-0
+        `}
+      >
+        {portalItems.map((item) => (
+          <NavItemComponent key={item.name} item={item} />
+        ))}
+      </motion.aside>
     </>
   );
 };

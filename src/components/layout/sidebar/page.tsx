@@ -48,10 +48,10 @@ const portalItems: NavItem[] = [
     requiredPortal: 'membership',
     subItems: [
       { name: 'Directory', requiredPortal: 'membership', icon: MembersIcon },
-      { name: 'Resources', requiredPortal: 'membership', icon: ResourcesIcon },
+      { name: 'IAIIEA Resources', requiredPortal: 'membership', icon: ResourcesIcon },
       { name: 'Forum', requiredPortal: 'membership', icon: ForumIcon },
-      { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon },
-      { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
+      { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon }
+      // { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]
   },
   { 

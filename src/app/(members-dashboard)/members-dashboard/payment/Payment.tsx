@@ -314,7 +314,7 @@ const PaymentPage: React.FC = () => {
 
     return (
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Conference Payment</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-600">Conference Payment</h2>
         <Alert className="mb-4">
           <AlertDescription>
             You have pending conference payments to make
@@ -331,7 +331,7 @@ const PaymentPage: React.FC = () => {
                     <button
                       key={plan}
                       onClick={() => setSelectedPlan(plan)}
-                      className={`px-4 py-2 rounded ${
+                      className={`px-4 py-2 rounded text-sm ${
                         selectedPlan === plan 
                           ? 'bg-[#0E1A3D] text-white' 
                           : 'bg-gray-100'
@@ -344,7 +344,7 @@ const PaymentPage: React.FC = () => {
                 <button
                  onClick={() => initiatePayment('conference', getAmountForPlan(selectedPlan), conference.id, conference.title, selectedPlan)}
                   disabled={isProcessing}
-                  className=" px-4 py-2 rounded-lg bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50"
+                  className=" px-4 py-2 rounded-lg bg-[#0E1A3D] hover:bg-primary/90 text-white font-semibold disabled:opacity-50 text-sm md:text-md"
                 >
                   {isProcessing ? 'Processing...' : 'Make Payment'}
                 </button>
@@ -423,7 +423,7 @@ const PaymentPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
      <div className='bg-gray-200 px-5 py-3 mb-6 '>
-        <h1 className='text-2xl'>PAYMENTS</h1>
+        <h1 className="text-lg md:text-2xl text-black">PAYMENTS</h1>
       </div>
 
       {renderMembershipSection()}

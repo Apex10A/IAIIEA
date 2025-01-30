@@ -38,7 +38,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user }) => {
         Hi, {user?.name} 👋
       </h1>
       <div className="mt-4">
-        <p className="text-gray-600 text-[16px] md:text-lg">
+        <p className="text-gray-600 text-[15px] md:text-lg">
           Welcome to your dashboard, here you can access your conference portal and other features
         </p>
         {user?.registration && (

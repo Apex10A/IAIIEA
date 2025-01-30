@@ -243,27 +243,27 @@ const ForumPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen p-6">
       <header className="bg-white shadow-sm">
         <div className="bg-gray-200 px-5 py-5 mb-5 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-black">Community Forum</h1>
+          <h1 className="text-lg md:text-2xl text-black">Community Forum</h1>
         </div>
       </header>
 
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
-          <p className="max-w-[60%]">
+          <p className="max-w-[60%] text-sm md:text-md lg:text-lg text-gray-700">
             Ask questions, share knowledge, and get feedback from other developers.
           </p>
           <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
             <Dialog.Trigger asChild>
-              <button className="bg-[#203a87] text-white px-6 py-3 font-semibold rounded-full hover:bg-[#1a2f6e] transition-colors">
+              <button className="bg-[#203a87] text-white px-6 py-3 font-semibold rounded-lg hover:bg-[#1a2f6e] transition-colors text-sm md:text-md">
                 + Ask Question
               </button>
             </Dialog.Trigger>
             <Dialog.Portal>
               <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg focus:outline-none">
+              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 px-6 shadow-lg focus:outline-none">
                 <form onSubmit={handleSubmitQuestion} className="space-y-4">
                   <div>
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -300,7 +300,7 @@ const ForumPage: React.FC = () => {
                       name="image"
                       type="file"
                       onChange={handleImageChange}
-                      className="w-full"
+                      className="w-full text-gray-600"
                       accept="image/*"
                     />
                   </div>
@@ -335,21 +335,21 @@ const ForumPage: React.FC = () => {
                     className="w-10 h-10 rounded-full mr-4"
                   />
                   <div>
-                    <p className="font-semibold">{question.poster_name}</p>
-                    <p className="text-sm text-gray-500">{new Date(question.posted_date).toLocaleDateString()}</p>
+                    <p className="font-semibold text-gray-600 text-sm md:text-md">{question.poster_name}</p>
+                    <p className="text-sm text-gray-400">{new Date(question.posted_date).toLocaleDateString()}</p>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-3">{question.title}</h3>
-                <p className="text-gray-700 mb-4">{question.description}</p>
+                <h3 className="text-lg md:text-xl font-bold mb-3 text-gray-600">{question.title}</h3>
+                <p className="text-gray-600 mb-4">{question.description}</p>
                 
                 {question.image && (
-                  <img src={question.image} alt="Question" className="mb-4 rounded-lg max-w-[60%]" />
+                  <img src={question.image} alt="Question" className="mb-4 rounded-lg w-full md:max-w-[60%]" />
                 )}
 
                 {activeForumId === question.forum_id ? (
                   <div className="mt-4 border-t pt-4">
-                    <h4 className="font-semibold mb-4">Comments</h4>
+                    <h4 className="font-semibold text-sm md:text-md mb-4 text-gray-600">Comments</h4>
                     {forumDetails?.comments.map((comment, index) => (
                       <div key={index} className="mb-4 pl-4 border-l-2">
                         <div className="flex items-center mb-2">
@@ -359,11 +359,11 @@ const ForumPage: React.FC = () => {
                             className="w-8 h-8 rounded-full mr-2"
                           />
                           <div>
-                            <p className="font-medium">{comment.name}</p>
-                            <p className="text-sm text-gray-500">{new Date(comment.date).toLocaleDateString()}</p>
+                            <p className="font-medium text-sm md:text-md text-gray-600">{comment.name}</p>
+                            <p className="text-sm text-gray-400">{new Date(comment.date).toLocaleDateString()}</p>
                           </div>
                         </div>
-                        <p className="text-gray-700">{comment.comment}</p>
+                        <p className="text-gray-700 text-sm md:text-md">{comment.comment}</p>
                       </div>
                     ))}
                     <div className="mt-4 flex gap-2">
@@ -371,7 +371,7 @@ const ForumPage: React.FC = () => {
                         type="text"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        className="flex-1 px-3 py-2 border rounded-md"
+                        className="flex-1 px-3 py-2 border rounded-md text-sm md:text-md"
                         placeholder="Write a comment..."
                       />
                       <button
@@ -384,12 +384,12 @@ const ForumPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="flex items-center justify-between border-t pt-4">
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 text-sm md:text-md">
                       {question.total_comments} comments
                     </span>
                     <button
                       onClick={() => setActiveForumId(question.forum_id)}
-                      className="text-[#203a87] hover:underline"
+                      className="text-[#203a87] hover:underline text-sm md:text-md "
                     >
                       View Discussion
                     </button>

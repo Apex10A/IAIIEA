@@ -30,7 +30,7 @@ const Page = () => {
   return (
     <div className='p-6'>
       <div className='bg-gray-200 px-5 py-3 mb-6 '>
-        <h1 className='text-2xl'>OPPORTUNITIES</h1>
+        <h1 className="text-lg md:text-2xl text-black">OPPORTUNITIES</h1>
       </div>
       <div>
         <ButtonProp

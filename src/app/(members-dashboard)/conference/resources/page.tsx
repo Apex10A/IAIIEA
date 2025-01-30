@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Calendar, MapPin, X, FileText } from 'lucide-react';
 import Spinner from "@/app/spinner";
+import SkeletonLoader from './ConferenceLoader'
 
 // TypeScript interfaces
 interface Resource {
@@ -111,15 +112,15 @@ const ConferenceResources: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-        <Spinner />
+        <SkeletonLoader/>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <div className="bg-gray-200 px-5 py-3 mb-4">
-        <h1 className="text-2xl text-[#0B142F]">Conference Resources</h1>
+    <div className="p-6">
+         <div className='bg-gray-200 px-5 py-3 mb-6 '>
+        <h1 className="text-lg md:text-2xl text-black">CONFERENCE RESOURCES</h1>
       </div>
 
       {selectedConference ? (

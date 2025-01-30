@@ -141,7 +141,7 @@ const Page = () => {
   return (
     <div className="p-6">
       <div className="bg-gray-200 px-5 py-3 mb-6 mt-10">
-        <h1 className="text-2xl">IAIIEA Resources</h1>
+        <h1 className="text-lg md:text-2xl text-black">IAIIEA Resources</h1>
       </div>
       <div className='pt-10'>
         {/* <div className="mb-6">

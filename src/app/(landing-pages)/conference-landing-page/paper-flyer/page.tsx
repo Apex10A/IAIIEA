@@ -1,10 +1,18 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 
-const CallForPapersPage: React.FC<{ flyer: string }> = ({ flyer }) => {
+
+interface CallForPapersPageProps {
+  flyer?: string;  // Make flyer optional
+}
+
+const CallForPapersPage: React.FC<CallForPapersPageProps> = ({ flyer }) => {
   const handleDownloadFlyer = () => {
-    // Implement flyer download logic
-    window.open(flyer, '_blank');
+    if (flyer) {
+      window.open(flyer, '_blank');
+    } else {
+      console.log('No flyer available');
+    }
   };
 
   return (
@@ -20,9 +28,10 @@ const CallForPapersPage: React.FC<{ flyer: string }> = ({ flyer }) => {
         </p>
         
         <div className="flex justify-center">
-          <button 
+          <button
             onClick={handleDownloadFlyer}
-            className="bg-[#D5B93C] text-black px-6 py-3 rounded-lg flex items-center space-x-2 hover:bg-yellow-500 transition"
+            disabled={!flyer}
+            className="bg-[#D5B93C] text-black px-6 py-3 rounded-lg flex items-center space-x-2 hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-5 h-5" />
             <span>Download Conference Flyer</span>

@@ -28,37 +28,37 @@ const ConferenceDetailsPage = () => {
 
   const pages = [
     { 
-      component: (details: unknown) => <VenueAndDatePage details={details} />, 
+      component: (details: any) => <VenueAndDatePage details={details || {}} />, 
       icon: <MapPin className="w-6 h-6" />,
       title: 'Venue & Date' 
     },
     { 
-      component: (details: unknown) => <SubThemesPage details={details} />, 
+      component: (details: any) => <SubThemesPage details={details || {}} />, 
       icon: <FileText className="w-6 h-6" />,
       title: 'Sub Themes' 
     },
     { 
-      component: (details: { flyer: string; }) => <CallForPapersPage flyer={details.flyer} />, 
+      component: (details: any) => <CallForPapersPage flyer={details?.flyer || ''} />, 
       icon: <FileText className="w-6 h-6" />,
       title: 'Call for Papers' 
     },
     { 
-      component: (details: { gallery: any; }) => <GalleryPage gallery={details.gallery} />, 
+      component: (details: any) => <GalleryPage gallery={details?.gallery || []} />, 
       icon: <Images className="w-6 h-6" />,
       title: 'Gallery' 
     },
     { 
-      component: (details: { sponsors: any; }) => <SponsorsPage sponsors={details.sponsors} />, 
+      component: (details: any) => <SponsorsPage sponsors={details?.sponsors || []} />, 
       icon: <Users className="w-6 h-6" />,
       title: 'Sponsors' 
     },
     { 
-      component: (details: { videos: any; }) => <VideosPage videos={details.videos} />, 
+      component: (details: any) => <VideosPage videos={details?.videos || []} />, 
       icon: <Video className="w-6 h-6" />,
       title: 'Videos' 
     },
     { 
-      component: (details:  { payments: PaymentsStructure }) => <ConferenceFeesPage payments={details.payments} />, 
+      component: (details: any) => <ConferenceFeesPage payments={details?.payments || {}} />, 
       icon: <DollarSign className="w-6 h-6" />,
       title: 'Conference Fees' 
     }

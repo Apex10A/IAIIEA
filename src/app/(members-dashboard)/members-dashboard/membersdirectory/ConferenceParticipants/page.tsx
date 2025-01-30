@@ -239,9 +239,9 @@ const Page = () => {
   return (
     <div className=''>
       <div className='flex items-center justify-between mb-4'>
-        <div>
-          <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Conference Participants</h1>
-        </div>
+      <div className='bg-gray-200 px-5 py-3 mb-6 '>
+        <h1 className="text-lg md:text-2xl text-black">CONFERENCE PARTICIPANTS</h1>
+      </div>
         <div className='flex items-center space-x-4'>
           {/* Search Input */}
           <input 

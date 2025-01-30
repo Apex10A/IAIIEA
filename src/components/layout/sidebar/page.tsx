@@ -139,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
       font-[500] flex items-center
       ${isSubItem 
         ? 'text-[16px] py-1 px-6 text-zinc-400' 
-        : 'text-[14px] md:text-[18px] py-2 text-white'}
+        : 'text-md py-2 text-white'}
       px-3 rounded-md cursor-pointer mx-3 
       ${isActive 
         ? 'bg-white/10' 
@@ -260,7 +260,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
                               )}
                               
                               {(sidebarMode === 'default' || sidebarMode === 'mobile') && (
-                                <span>{item.name}</span>
+                                <span className=''>{item.name}</span>
                               )}
                             </div>
 

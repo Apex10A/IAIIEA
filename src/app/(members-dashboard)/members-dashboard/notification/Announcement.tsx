@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -5,23 +6,13 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
-import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import { useSession } from "next-auth/react";
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
-import Image from "next/image"
+import Image from "next/image";
+import { Calendar, Clock, ExternalLink } from 'lucide-react';
 
-// Define the Announcement type
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// TypeScript interfaces
 interface Announcement {
   id: number;
   title: string;
@@ -30,10 +21,9 @@ interface Announcement {
   date: string;
   file: string | null;
   link: string;
-  image?: File | string | null;
+  image?: string | null;
 }
 
-// Define the API response type
 interface AnnouncementsResponse {
   status: string;
   message: string;
@@ -42,281 +32,230 @@ interface AnnouncementsResponse {
   };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const styles = `
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
 
-const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { data: session } = useSession();
-  const [selectedSection, setSelectedSection] = useState('Announcement');
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentAnnouncement, setCurrentAnnouncement] = useState<Partial<Announcement>>({
-    id: undefined,
-    title: '',
-    description: '',
-    image: null,
-    link: ''
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+  }
+`;
+
+
+
+const EmptyState: React.FC = () => (
+  <div className="flex flex-col items-center justify-center p-8 text-center bg-gray-50 rounded-lg min-h-[300px]">
+    <Calendar className="w-16 h-16 text-gray-400 mb-4" />
+    <h3 className="text-lg font-medium text-gray-900 mb-2">No Announcements Yet</h3>
+    <p className="text-gray-500">Check back later for updates and announcements.</p>
+  </div>
+);
+
+const LoadingState: React.FC = () => (
+  <div className="flex justify-center items-center min-h-[300px]">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
+
+const AnnouncementCard: React.FC<{ announcement: Announcement }> = ({ announcement }) => {
+  const formattedDate = new Date(announcement.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 
-  // Extract token from loginResponse
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
-
-  // Fetch announcements
-  const fetchAnnouncements = async () => {
-    try {
-      const response = await fetch(`${API_URL}/announcements`, {
-        headers: {
-          'Authorization': `Bearer ${bearerToken}`
-        }
-      });
-      
-      const data: AnnouncementsResponse = await response.json();
-      
-      if (data.status === "success" && data.data) {
-        // Transform the data to include date information
-        const formattedAnnouncements = Object.entries(data.data).flatMap(([date, announcements]) => 
-          announcements.map(announcement => ({
-            ...announcement,
-            date // Add the date to each announcement
-          }))
-        );
-        
-        // Sort announcements by date (most recent first)
-        formattedAnnouncements.sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        
-        setAnnouncements(formattedAnnouncements);
-      } else {
-        console.error('Invalid data structure:', data);
-        setAnnouncements([]); 
-      }
-    } catch (error) {
-      console.error('Failed to fetch announcements', error);
-      setAnnouncements([]); 
-    }
-  };
-
- 
-
-  useEffect(() => {
-    if (bearerToken) {
-      fetchAnnouncements();
-    }
-  }, [bearerToken]);
-
   return (
-    <div className=''>
-      <div className='flex justify-between items-center mb-6'>
-        <h1 className="text-3xl font-bold">Announcements</h1>
-        {/* <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
-              <PlusIcon className='mr-2' /> Create Announcement
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Announcement</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreateAnnouncement} className='space-y-4'>
-              <div>
-                <Label>Title</Label>
-                <Input 
-                  value={currentAnnouncement.title}
-                  onChange={(e) => setCurrentAnnouncement({
-                    ...currentAnnouncement, 
-                    title: e.target.value
-                  })}
-                  required 
-                />
-              </div>
-              <div>
-                <Label>Description</Label>
-                <Textarea 
-                  value={currentAnnouncement.description}
-                  onChange={(e) => setCurrentAnnouncement({
-                    ...currentAnnouncement, 
-                    description: e.target.value
-                  })}
-                  required 
-                />
-              </div>
-              <div>
-                <Label>Image</Label>
-                <Input 
-                  type='file'
-                  onChange={(e) => setCurrentAnnouncement({
-                    ...currentAnnouncement, 
-                    image: e.target.files[0]
-                  })}
-                />
-              </div>
-              <div>
-                <Label>Link (Optional)</Label>
-                <Input 
-                  value={currentAnnouncement.link}
-                  onChange={(e) => setCurrentAnnouncement({
-                    ...currentAnnouncement, 
-                    link: e.target.value
-                  })}
-                />
-              </div>
-              <Button type='submit' className='w-full'>Create Announcement</Button>
-            </form>
-          </DialogContent>
-        </Dialog> */}
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-  {announcements.map((announcement) => (
-    <Card 
-      key={announcement.id} 
-      className=' hover:shadow-xl transition-all duration-300 relative'
-    >
-        <div className='absolute top-2 right-2 text-sm text-muted-foreground'>
-        <span className='opacity-[0.6] italic'>{announcement.date} - {announcement.time}</span>
+    <Card className="hover:shadow-xl transition-all duration-300 relative h-full flex flex-col">
+      <div className="absolute top-2 right-2 z-10 bg-black/50 text-white text-xs rounded-full px-3 py-1 flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        <span>{announcement.time}</span>
       </div>
       
       {announcement.image && (
-        <div className='relative '>
+        <div className="relative w-full h-48">
           <Image
-               src={typeof announcement.image === 'string' 
-                 ? announcement.image 
-                 : URL.createObjectURL(announcement.image)}
-               alt={announcement.title || 'Announcement image'} 
-               className="w-full h-48 object-cover" 
-             />
-          <div className='absolute top-0 left-0 w-full h-full bg-black opacity-20 hover:opacity-10 transition-opacity'></div>
+            src={announcement.image}
+            alt={announcement.title}
+            fill
+            className="object-cover rounded-t-lg"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
         </div>
       )}
       
       <CardHeader>
-        <CardTitle className='flex items-center pt-5'>
-          <span className='text-xl'>{announcement.title}</span>
+        <CardTitle className="text-lg md:text-xl line-clamp-2">
+          {announcement.title}
         </CardTitle>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="w-4 h-4" />
+          {formattedDate}
+        </div>
       </CardHeader>
       
-      <CardContent>
-        <p className='text-muted-foreground opacity-[0.8]'>
+      <CardContent className="flex-grow flex flex-col justify-between">
+        <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
           {announcement.description}
         </p>
         
-        <div className='flex justify-between items-center pt-2'>
-          {announcement.link && (
-            <a 
-              href={announcement.link} 
-              target='_blank' 
-              rel='noopener noreferrer' 
-              className='text-blue-600 hover:underline flex items-center'
-            >
-              Learn More
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className='ml-1 h-4 w-4' 
-                fill='none' 
-                viewBox='0 0 24 24' 
-                stroke='currentColor'
-              >
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
-              </svg>
-            </a>
-          )}
-          
-          <div className='flex space-x-2'>
-            <Button 
-              variant='outline' 
-              size='icon'
-              onClick={() => {
-                setCurrentAnnouncement(announcement);
-                setIsEditModalOpen(true);
-              }}
-            >
-              <EditIcon className='h-4 w-4' />
-            </Button>
-            <Button 
-              variant='destructive' 
-              size='icon'
-            //   onClick={() => handleDeleteAnnouncement(announcement.id)}
-            >
-              <TrashIcon className='h-4 w-4' />
-            </Button>
-          </div>
-        </div>
+        {announcement.link && (
+          <a 
+            href={announcement.link} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center text-primary hover:text-primary/80 transition-colors mt-auto group"
+          >
+            Learn More
+            <ExternalLink className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </a>
+        )}
       </CardContent>
     </Card>
-  ))}
-</div>
-
-      {/* Edit Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Announcement</DialogTitle>
-          </DialogHeader>
-          <form  className='space-y-4'>
-            <div>
-              <Label>Title</Label>
-              <Input 
-                value={currentAnnouncement.title}
-                onChange={(e) => setCurrentAnnouncement({
-                  ...currentAnnouncement, 
-                  title: e.target.value
-                })}
-                required 
-              />
-            </div>
-             <div>
-              <Label>Description</Label>
-              <Textarea 
-                value={currentAnnouncement.description}
-                onChange={(e) => setCurrentAnnouncement({
-                  ...currentAnnouncement, 
-                  description: e.target.value
-                })}
-                required 
-              />
-            </div>
-            <div>
-        <Label>ID</Label>
-        <Input 
-          type="text"
-          value={currentAnnouncement.id || ''}
-          onChange={(e) => setCurrentAnnouncement({
-            ...currentAnnouncement, 
-            id: Number(e.target.value) // Convert to number
-          })}
-          required 
-        />
+  );
+};
+const SkeletonCard: React.FC = () => (
+  <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+    {/* Image skeleton */}
+    <div className="w-full h-48 skeleton" />
+    
+    {/* Content area */}
+    <div className="p-6">
+      {/* Title skeleton */}
+      <div className="skeleton h-6 w-3/4 mb-4 rounded" />
+      
+      {/* Date skeleton */}
+      <div className="skeleton h-4 w-1/3 mb-4 rounded" />
+      
+      {/* Description lines */}
+      <div className="space-y-2 mb-4">
+        <div className="skeleton h-4 w-full rounded" />
+        <div className="skeleton h-4 w-full rounded" />
+        <div className="skeleton h-4 w-2/3 rounded" />
       </div>
-            <div>
-                <Label>Image</Label>
-                           <Input 
-               type="file"
-               onChange={(e) => {
-                 if (e.target.files && e.target.files[0]) {
-                   setCurrentAnnouncement({
-                     ...currentAnnouncement, 
-                     image: e.target.files[0]
-                   });
-                 }
-               }}
-             />
-            </div>
-            <div>
-              <Label>Link (Optional)</Label>
-              <Input 
-                value={currentAnnouncement.link || ''}
-                onChange={(e) => setCurrentAnnouncement({
-                  ...currentAnnouncement, 
-                  link: e.target.value
-                })}
-              />
-            </div>
-            <Button type='submit' className='w-full'>Update Announcement</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+      
+      {/* Link skeleton */}
+      <div className="skeleton h-4 w-24 rounded mt-4" />
+    </div>
+  </div>
+);
+
+const SkeletonLoader: React.FC = () => (
+  <>
+    <style>{styles}</style>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <SkeletonCard key={i} />
+      ))}
+    </div>
+  </>
+);
+
+
+const AnnouncementsPage: React.FC = () => {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  const fetchAnnouncements = async () => {
+    if (!bearerToken) return;
+    
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_URL}/announcements`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch announcements');
+      }
+
+      const data: AnnouncementsResponse = await response.json();
+      
+      if (data.status === "success" && data.data) {
+        const formattedAnnouncements = Object.entries(data.data)
+          .flatMap(([date, announcements]) => 
+            announcements.map(announcement => ({
+              ...announcement,
+              date
+            }))
+          )
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        
+        setAnnouncements(formattedAnnouncements);
+      } else {
+        throw new Error(data.message || 'Failed to fetch announcements');
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
+      console.error('Failed to fetch announcements:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [bearerToken]);
+
+  const renderContent = () => {
+    if (isLoading) {
+      return <LoadingState />;
+    }
+
+    if (error) {
+      return (
+        <div className="bg-red-50 p-4 rounded-lg">
+          <p className="text-red-600 text-center">{error}</p>
+        </div>
+      );
+    }
+
+    if (announcements.length === 0) {
+      return <EmptyState />;
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {announcements.map((announcement) => (
+          <AnnouncementCard 
+            key={announcement.id} 
+            announcement={announcement}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="p-4 md:p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Announcements
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Stay updated with the latest news and information
+          </p>
+        </div>
+      </div>
+      {isLoading ? <SkeletonLoader /> : renderContent()}
     </div>
   );
 };

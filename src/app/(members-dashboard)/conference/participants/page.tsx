@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/modules/ui/table';
 import Spinner from "@/app/spinner"
+import SkeletonLoader from './TableSkeleton'
 
 // Define the type for member data
 interface Member {
@@ -213,7 +214,7 @@ const Page = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-      <Spinner/>
+      <SkeletonLoader/>
   </div>
     );
   }
@@ -238,16 +239,16 @@ const Page = () => {
   }
 
   return (
-    <div className=''>
-      <div className='flex items-center justify-between mb-4'>
-        <div>
-          <h1 className='text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1'>Conference Participants</h1>
-        </div>
+    <div className='p-6'>
+      <div className=' md:flex items-center justify-between mb-4'>
+      <div className='bg-gray-200 px-5 py-3 mb-6 '>
+        <h1 className="text-lg md:text-2xl text-black">CONFERENCE PARTICIPANTS</h1>
+      </div>
         <div className='flex items-center space-x-4'>
           {/* Search Input */}
           <input 
             type="text" 
-            placeholder="Search members..." 
+            placeholder="Search conference participants..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="px-3 py-2 border rounded-md"
@@ -260,7 +261,7 @@ const Page = () => {
 
       {/* Table for registered members */}
       <div className='mt-6 w-full overflow-x-auto text-black'>
-        <Table className='min-w-[800px] text-black'>
+        <Table className='min-w-[1200px] text-black'>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">
@@ -277,7 +278,7 @@ const Page = () => {
               <TableHead>Country</TableHead>
               <TableHead>Institution</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Action</TableHead>
+              {/* <TableHead>Action</TableHead> */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -292,31 +293,31 @@ const Page = () => {
                       className="form-checkbox h-5 w-5 text-blue-600"
                     />
                   </TableCell>
-                  <TableCell>{member.id}</TableCell>
+                  <TableCell  className='opacity-[0.7]'>{member.id}</TableCell>
                   <TableCell className="flex items-center space-x-2">
                     <img 
                       src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${member.name}`} 
                       alt={`${member.name}'s avatar`} 
                       className="w-10 h-10 rounded-full mr-2"
                     />
-                    {truncateText(member.name, 15)}
+                   <span className='opacity-[0.7]'>{truncateText(member.name, 15)}</span>
                   </TableCell>
-                  <TableCell>{truncateText(member.email, 20)}</TableCell>
-                  <TableCell>Nigeria</TableCell>
-                  <TableCell>{truncateText(member.institution, 15)}</TableCell>
-                  <TableCell>{member.role}</TableCell>
-                  <TableCell>
+                  <TableCell className='opacity-[0.7]'>{truncateText(member.email, 20)}</TableCell>
+                  <TableCell  className='opacity-[0.7]'>Nigeria</TableCell>
+                  <TableCell  className='opacity-[0.7]'>{truncateText(member.institution, 15)}</TableCell>
+                  <TableCell  className='opacity-[0.7]'>{member.role}</TableCell>
+                  {/* <TableCell>
                     <button
                       onClick={() => setActiveMemberId(member.id)}
                       className='text-[24px] font-bold cursor-pointer'
                     >
                       :
                     </button>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
 
                 {/* Dropdown for edit/delete */}
-                {activeMemberId === member.id && (
+                {/* {activeMemberId === member.id && (
                   <div className="absolute right-0 space-x-4 bg-gray-100 px-7 py-3 rounded shadow-lg border">
                     <div className='flex flex-col items-start'>
                       <button className="py-2 rounded">Edit</button>
@@ -327,7 +328,7 @@ const Page = () => {
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
               </React.Fragment>
             ))}
           </TableBody>

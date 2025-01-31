@@ -36,7 +36,6 @@
 // };
 
 // export default GalleryPage;
-
 import React from 'react'
 
 const page = () => {

@@ -1951,3 +1951,11 @@ const handler = NextAuth({
 });
 
 export { handler as GET, handler as POST };
+
+
+
+
+
+
+different announcement for members, particpants and seminars
+admin payment part looks similar, improve UI

@@ -149,7 +149,6 @@
 // };
 
 // export default ConferenceDetailsPage;
-
 import React from 'react'
 
 const page = () => {

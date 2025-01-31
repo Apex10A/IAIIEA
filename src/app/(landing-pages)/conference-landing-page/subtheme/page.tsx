@@ -50,7 +50,6 @@
 // };
 
 // export default SubThemesPage;
-
 import React from 'react'
 
 const page = () => {

@@ -25,6 +25,8 @@ import  ConferenceResources  from '@/app/(admin)/admin-dashboard/ConferenceResou
 import SeminarParticipants from '@/app/(admin)/admin-dashboard/training/participants/page'
 import SeminarResources from '@/app/(admin)/admin-dashboard/training/resources/page'
 import MembersResorces from '@/app/(admin)/admin-dashboard/members-resources/page'
+import Messages from '@/app/(admin)/admin-dashboard/messages/page'
+import Broadcast from '@/app/(admin)/admin-dashboard/broadcast/page'
 import LoadingDashboard from './LoadingDashboard';
 
 // TypeScript interfaces
@@ -52,6 +54,8 @@ export default function DashboardClient() {
       Announcement: <Announcement />,
       Payment: <Payment />,
       'Participants': <ConferenceParticpants/>,
+      'Messages' : <Messages/>,
+      'Broadcast' : <Broadcast/>,
       'Members Resources': <MembersResorces/>,
       'Resources': <ConferenceResources/>,
       // 'Conference Portal': <ConferencePortal />,

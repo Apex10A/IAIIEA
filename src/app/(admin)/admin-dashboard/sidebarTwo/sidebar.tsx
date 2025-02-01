@@ -51,7 +51,7 @@ const portalItems: NavItem[] = [
       { name: 'Members Resources', requiredPortal: 'membership', icon: ResourcesIcon },
       { name: 'Forum', requiredPortal: 'membership', icon: ForumIcon },
       { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon },
-      { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
+      // { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]
   },
   { 
@@ -61,6 +61,7 @@ const portalItems: NavItem[] = [
     subItems: [
       { name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },
       { name: 'Resources', requiredPortal: 'conference', icon: ResourcesIcon },
+      { name: 'Messages', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   },
   { 
@@ -70,6 +71,7 @@ const portalItems: NavItem[] = [
     subItems: [
       { name: 'Seminar Participants', requiredPortal: 'seminar', icon: MembersIcon },
       { name: 'Seminar Resources', requiredPortal: 'seminar', icon: ResourcesIcon },
+      { name: 'Broadcast', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   }
 ];
@@ -215,7 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
               transition={{ type: "tween", duration: 0.3 }}
               className={`
                 ${isMobile ? 'fixed left-0 top-0' : 'relative'}
-                h-full w-64
+                h-full w-77
                 bg-[#0e1a3d] shadow-xl
                 z-[50]
                 flex flex-col

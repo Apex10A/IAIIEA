@@ -1,9 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Calendar, MapPin, X, FileText } from 'lucide-react';
-import Spinner from "@/app/spinner";
-import SkeletonLoader from './ConferenceLoader'
+import { Calendar, MapPin, X, FileText, Info } from 'lucide-react';
+import SkeletonLoader from './ConferenceLoader';
 
 // TypeScript interfaces
 interface Resource {
@@ -23,11 +22,16 @@ interface Conference {
   status: string;
   is_registered: boolean;
   resources: Resource[];
+  sub_theme: string[];
+  work_shop: string[];
+  important_date: string[];
+  start_date: string;
 }
 
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const [viewMode, setViewMode] = useState<'details' | 'resources'>('details');
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -61,8 +65,8 @@ const ConferenceResources: React.FC = () => {
     }
   }, [bearerToken]);
 
-  // Fetch conference details and resources
-  const handleViewResources = async (conferenceId: number) => {
+  // Fetch conference details
+  const handleViewConference = async (conferenceId: number) => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
@@ -109,17 +113,59 @@ const ConferenceResources: React.FC = () => {
     );
   };
 
+  const ConferenceDetails: React.FC<{ conference: Conference }> = ({ conference }) => {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4">Conference Information</h3>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-gray-700">Theme</h4>
+              <p className="text-gray-600">{conference.theme}</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-700">Sub Themes</h4>
+              <ul className="list-disc pl-5 text-gray-600 space-y-2">
+                {conference.sub_theme?.map((theme, index) => (
+                  <li key={index}>{theme}</li>
+                ))}
+              </ul>
+            </div>
+            {conference.work_shop && conference.work_shop.length > 0 && (
+              <div>
+                <h4 className="font-medium text-gray-700">Workshops</h4>
+                <ul className="list-disc pl-5 text-gray-600 space-y-2">
+                  {conference.work_shop.map((workshop, index) => (
+                    <li key={index}>{workshop}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div>
+              <h4 className="font-medium text-gray-700">Important Dates</h4>
+              <ul className="list-disc pl-5 text-gray-600 space-y-2">
+                {conference.important_date?.map((date, index) => (
+                  <li key={index}>{date}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-        <SkeletonLoader/>
+        <SkeletonLoader />
       </div>
     );
   }
 
   return (
     <div className="p-6">
-         <div className='bg-gray-200 px-5 py-3 mb-6 '>
+      <div className="bg-gray-200 px-5 py-3 mb-6">
         <h1 className="text-lg md:text-2xl text-black">CONFERENCE RESOURCES</h1>
       </div>
 
@@ -128,14 +174,41 @@ const ConferenceResources: React.FC = () => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-2xl font-bold text-[#0B142F]">{selectedConference.title}</h2>
-              <p className="text-gray-600 mt-2">{selectedConference.theme}</p>
+              <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Calendar className="w-4 h-4" />
+                  <span>{selectedConference.date}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <MapPin className="w-4 h-4" />
+                  <span>{selectedConference.venue}</span>
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => setSelectedConference(null)}
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setViewMode(viewMode === 'details' ? 'resources' : 'details')}
+                className="bg-blue-50 text-blue-600 px-4 py-2 rounded-md text-sm flex items-center gap-2"
+              >
+                {viewMode === 'details' ? (
+                  <>
+                    <FileText className="w-4 h-4" />
+                    View Resources
+                  </>
+                ) : (
+                  <>
+                    <Info className="w-4 h-4" />
+                    View Details
+                  </>
+                )}
+              </button>
+              <button 
+                onClick={() => setSelectedConference(null)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
           </div>
 
           {!selectedConference.is_registered ? (
@@ -144,6 +217,8 @@ const ConferenceResources: React.FC = () => {
                 You must be registered for this conference to access its resources.
               </p>
             </div>
+          ) : viewMode === 'details' ? (
+            <ConferenceDetails conference={selectedConference} />
           ) : selectedConference.resources.length > 0 ? (
             <ResourceList resources={selectedConference.resources} />
           ) : (
@@ -167,10 +242,10 @@ const ConferenceResources: React.FC = () => {
                 <span className="text-sm">{conference.venue}</span>
               </div>
               <button
-                onClick={() => handleViewResources(conference.id)}
+                onClick={() => handleViewConference(conference.id)}
                 className="bg-[#203a87] hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm w-full"
               >
-                View Resources
+                View Details
               </button>
             </div>
           ))}

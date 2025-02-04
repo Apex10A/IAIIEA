@@ -61,6 +61,7 @@ const portalItems: NavItem[] = [
     subItems: [
       { name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },
       { name: 'Resources', requiredPortal: 'conference', icon: ResourcesIcon },
+      { name: 'Conference Announcements', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   },
   { 
@@ -70,6 +71,7 @@ const portalItems: NavItem[] = [
     subItems: [
       { name: 'Seminar Participants', requiredPortal: 'seminar', icon: MembersIcon },
       { name: 'Seminar Resources', requiredPortal: 'seminar', icon: ResourcesIcon },
+      { name: 'Seminar Announcements', requiredPortal: 'seminar', icon: ResourcesIcon },
     ]
   }
 ];

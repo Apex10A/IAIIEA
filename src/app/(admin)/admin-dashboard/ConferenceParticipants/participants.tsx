@@ -186,7 +186,7 @@ const ConferenceParticipantsPage = () => {
       <div className="flex flex-col space-y-6">
         {/* Conferences List */}
         <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10">
-           <h1 className="text-xl sm:text-2xl">Conference Resources</h1>
+           <h1 className="text-xl sm:text-2xl">Conference Participants</h1>
           </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {conferences.map((conference) => (

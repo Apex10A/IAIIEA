@@ -130,7 +130,7 @@ const ConferenceResources: React.FC = () => {
               <p className="text-gray-600 font-bold text-md md:text-lg">{conference.theme}</p>
             </div>
             <div>
-              <h4 className="font-medium text-gray-700">Sub Themes</h4>
+              <h4 className="font-bold text-md md:text-lg text-gray-700">Sub Themes</h4>
               <ul className="list-disc pl-5 text-gray-600 space-y-2">
                 {conference.sub_theme?.map((theme, index) => (
                   <li key={index}>{theme}</li>
@@ -139,7 +139,7 @@ const ConferenceResources: React.FC = () => {
             </div>
             {conference.work_shop && conference.work_shop.length > 0 && (
               <div>
-                <h4 className="font-medium text-gray-700">Workshops</h4>
+                <h4 className="font-bold text-md md:text-lg text-gray-700">Workshops</h4>
                 <ul className="list-disc pl-5 text-gray-600 space-y-2">
                   {conference.work_shop.map((workshop, index) => (
                     <li key={index}>{workshop}</li>
@@ -148,7 +148,7 @@ const ConferenceResources: React.FC = () => {
               </div>
             )}
             <div>
-              <h4 className="font-medium text-gray-700">Important Dates</h4>
+              <h4 className="font-bold text-md md:text-lg text-gray-700">Important Dates</h4>
               <ul className="list-disc pl-5 text-gray-600 space-y-2">
                 {conference.important_date?.map((date, index) => (
                   <li key={index}>{date}</li>
@@ -157,7 +157,7 @@ const ConferenceResources: React.FC = () => {
             </div>
             {conference.meals && conference.meals.length > 0 && (
             <div>
-              <h4 className="font-medium text-gray-700">Meal Ticketing</h4>
+              <h4 className="font-bold text-gray-700 text-md md:text-lg py-6">Meal Ticketing</h4>
               <p className="text-gray-600 mb-4">These are the meals currently available for the day. Select any meal of your choice:</p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {conference.meals.map((meal) => (
@@ -181,6 +181,20 @@ const ConferenceResources: React.FC = () => {
               </div>
             </div>
           )}
+          </div>
+          <div>
+            <h1>Join event for virtual attendees</h1>
+           <div className='flex'>
+           <p>You can access the live event from here</p>
+           <button>Join here </button>
+           </div>
+          </div>
+          <div>
+            <h1>Certification</h1>
+           <div className='flex'>
+           <p>Complete the conference evaluation to access certificate</p>
+           <button>Access here </button>
+           </div>
           </div>
         </div>
       </div>

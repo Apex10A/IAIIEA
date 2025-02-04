@@ -12,6 +12,11 @@ interface Resource {
   date: string;
   file: string;
 }
+interface Meal {
+  meal_id: number;
+  name: string;
+  image: string;
+}
 
 interface Conference {
   id: number;
@@ -22,6 +27,7 @@ interface Conference {
   status: string;
   is_registered: boolean;
   resources: Resource[];
+  meals: Meal[];
   sub_theme: string[];
   work_shop: string[];
   important_date: string[];
@@ -121,7 +127,7 @@ const ConferenceResources: React.FC = () => {
           <div className="space-y-4">
             <div>
               <h4 className="font-medium text-gray-700">Theme</h4>
-              <p className="text-gray-600">{conference.theme}</p>
+              <p className="text-gray-600 font-bold text-md md:text-lg">{conference.theme}</p>
             </div>
             <div>
               <h4 className="font-medium text-gray-700">Sub Themes</h4>
@@ -149,6 +155,32 @@ const ConferenceResources: React.FC = () => {
                 ))}
               </ul>
             </div>
+            {conference.meals && conference.meals.length > 0 && (
+            <div>
+              <h4 className="font-medium text-gray-700">Meal Ticketing</h4>
+              <p className="text-gray-600 mb-4">These are the meals currently available for the day. Select any meal of your choice:</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {conference.meals.map((meal) => (
+                  <div key={meal.meal_id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="aspect-w-16 aspect-h-9 mb-3">
+                      {meal.image ? (
+                        <img 
+                          src={meal.image} 
+                          alt={meal.name}
+                          className="object-cover rounded-md w-full h-48"
+                        />
+                      ) : (
+                        <div className="bg-gray-200 rounded-md w-full h-48 flex items-center justify-center">
+                          <span className="text-gray-400">No image available</span>
+                        </div>
+                      )}
+                    </div>
+                    <h5 className="font-medium text-gray-800">{meal.name}</h5>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           </div>
         </div>
       </div>

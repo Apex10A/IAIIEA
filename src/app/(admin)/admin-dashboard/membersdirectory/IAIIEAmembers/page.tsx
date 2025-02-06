@@ -13,6 +13,9 @@ import {
 import { PencilIcon, TrashIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddMemberModal from "./AddMemberModal"
+import { showToast } from '@/utils/toast';
+import { Trash2 } from 'lucide-react';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 // Define the type for member data
 interface Member {
@@ -104,54 +107,85 @@ const Page = () => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Fetch members from backend
-  useEffect(() => {
-    const fetchMembers = async () => {
-      if (!session || !bearerToken) {
-        setError('No authentication token found');
-        setIsLoading(false);
-        return;
-      }
+  // Fetch members function
+const fetchMembers = async () => {
+  if (!session || !bearerToken) {
+    setError("No authentication token found");
+    setIsLoading(false);
+    return;
+  }
 
-      try {
-        const response = await fetch(`${API_URL}/admin/user_list/member`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${bearerToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
+  try {
+    const response = await fetch(`${API_URL}/admin/user_list/member`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch members');
-        }
+    if (!response.ok) {
+      throw new Error("Failed to fetch members");
+    }
 
-        const responseData = await response.json();
-        const membersData = responseData.data;
+    const responseData = await response.json();
+    const membersData = responseData.data;
 
-        setMembers(membersData);
-        setFilteredMembers(membersData);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching members:', err);
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        setIsLoading(false);
-      }
-    };
+    setMembers(membersData);
+    setFilteredMembers(membersData);
+  } catch (err) {
+    console.error("Error fetching members:", err);
+    setError(err instanceof Error ? err.message : "An unknown error occurred");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    fetchMembers();
-  }, [session, bearerToken, API_URL]);
+// Fetch members on component mount or when dependencies change
+useEffect(() => {
+  fetchMembers();
+}, [session, bearerToken, API_URL]);
 
-  // Search functionality
-  useEffect(() => {
-    const filtered = members.filter(member => 
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.type.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredMembers(filtered);
-    setCurrentPage(1); // Reset to first page when search results change
-  }, [searchTerm, members]);
+// Search functionality
+useEffect(() => {
+  const filtered = members.filter((member) =>
+    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  setFilteredMembers(filtered);
+  setCurrentPage(1); // Reset to first page when search results change
+}, [searchTerm, members]);
+
+// Delete user function
+const handleDelete = async (userId: string): Promise<void> => {
+  try {
+    const response = await fetch("https://iaiiea.org/api/sandbox/admin/delete_user/", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${bearerToken}`,
+      },
+      body: JSON.stringify({
+        id: userId, // Changed from `news_id` to `id`
+        type: "member", // Assuming it's always "member"; modify if dynamic
+      }),
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      showToast.success("User deleted successfully!");
+      await fetchMembers(); // Now it can be called directly
+    } else {
+      showToast.error("Failed to delete user.");
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    showToast.error("An error occurred while deleting user.");
+  }
+};
+
+
 
   // Edit member handler
   const handleEditMember = async (e: React.FormEvent) => {
@@ -174,10 +208,13 @@ const Page = () => {
           ...editFormData
         })
       });
-
       if (!response.ok) {
+        showToast.error('Failed to update member');
         throw new Error('Failed to update member');
       }
+      // Show success message
+    showToast.success('Member updated successfully!');
+      
 
       // Update local state
       const updatedMembers = members.map(member => 
@@ -195,6 +232,7 @@ const Page = () => {
       setEditFormData({});
     } catch (err) {
       console.error('Error updating member:', err);
+      showToast.error('Failed to update member');
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     }
   };
@@ -448,17 +486,41 @@ const Page = () => {
   <PencilIcon className="w-4 h-4 text-gray-600" />
   <span>Edit</span>
 </button>
-          <button 
-            className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 flex items-center space-x-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Add delete logic here
-              console.log(`Delete member ${member.id}`);
-            }}
-          >
-            <TrashIcon className="w-4 h-4" />
-            <span>Delete</span>
+<AlertDialog.Root>
+  <AlertDialog.Trigger asChild>
+    <button  className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+      <Trash2 className="w-4 h-4" />
+      <span>Delete</span>
+    </button>
+  </AlertDialog.Trigger>
+  <AlertDialog.Portal>
+    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+      <AlertDialog.Title className="text-lg font-semibold">
+        Delete User
+      </AlertDialog.Title>
+      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+        Are you sure you want to delete this user? This action cannot be undone.
+      </AlertDialog.Description>
+      <div className="flex justify-end gap-4">
+        <AlertDialog.Cancel asChild>
+          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Cancel
           </button>
+        </AlertDialog.Cancel>
+        <AlertDialog.Action asChild>
+          <button 
+           onClick={() => handleDelete(member.id.toString())}  // Pass the correct `userId`
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </AlertDialog.Action>
+      </div>
+    </AlertDialog.Content>
+  </AlertDialog.Portal>
+</AlertDialog.Root>
+
         </div>
       </motion.div>
     )}

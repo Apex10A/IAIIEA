@@ -1,11 +1,12 @@
-"use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
-// import AddFileModal from './AddFileModal';
-import * as Dialog from '@radix-ui/react-dialog';
-import { Cross2Icon } from '@radix-ui/react-icons';
 
-// TypeScript interfaces
+interface Speaker {
+  name: string;
+  title: string;
+  picture: string;
+}
+
 interface Resource {
   resource_id: number;
   resource_type: string | null;
@@ -14,149 +15,81 @@ interface Resource {
   file: string;
 }
 
-interface Conference {
+interface Seminar {
   id: number;
   title: string;
   theme: string;
   venue: string;
   date: string;
   status: string;
+}
+
+interface SeminarDetails {
+  id: number;
+  is_registered: boolean;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  start_date: string;
+  start_time: string;
+  sub_theme: string[];
+  work_shop: string[];
+  speakers: Speaker[];
   resources: Resource[];
 }
 
-interface ConferenceCardProps {
-  conference: Conference;
-  onViewResources: (conference: Conference) => void;
-}
-
-const ConferenceCard: React.FC<ConferenceCardProps> = ({ 
-  conference, 
-  onViewResources
-}) => {
-  const resourceCount = conference.resources?.length || 0;
-
-  return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{conference.title}</h3>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">{conference.theme}</p>
-        </div>
-        <span className="bg-blue-100 text-blue-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
-          {resourceCount} {resourceCount === 1 ? 'Resource' : 'Resources'}
-        </span>
-      </div>
-      <div className="text-xs sm:text-sm text-gray-500">
-        <p className="mb-2">{conference.venue}</p>
-        <p>{conference.date}</p>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button 
-          onClick={() => onViewResources(conference)}
-          className="text-blue-600 hover:text-blue-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          View Resources
-        </button>
-        {/* <button 
-          onClick={() => onEditConference(conference)}
-          className="text-green-600 hover:text-green-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          Edit
-        </button>
-        <button 
-          onClick={() => onDeleteConference(conference.id)}
-          className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          Delete
-        </button> */}
-      </div>
-    </div>
-  );
-};
-
-interface ResourceCardProps {
-  resource: Resource;
-}
-
-const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <h3 className="text-sm sm:text-lg font-semibold text-gray-900 mb-2">{resource.caption}</h3>
-          <p className="text-xs sm:text-sm text-gray-600 mb-4">
-            Added on: {formatDate(resource.date)}
-          </p>
-          {resource.file && (
-            <a
-              href={resource.file}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Download Resource
-            </a>
-          )}
-        </div>
-        {/* <button
-          onClick={() => onDelete(resource.resource_id)}
-          className="text-red-600 hover:text-red-800 text-sm"
-        >
-          Delete
-        </button> */}
-      </div>
-    </div>
-  );
-};
-
-const ConferenceResources: React.FC = () => {
-  const [conferences, setConferences] = useState<Conference[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+const SeminarsList = () => {
+  const [seminars, setSeminars] = useState<Seminar[]>([]);
+  const [selectedSeminar, setSelectedSeminar] = useState<SeminarDetails | null>(null);
+  const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  const fetchConferences = async () => {
+  const fetchSeminars = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
       const data = await response.json();
       if (data.status === "success") {
-        const sortedConferences = data.data.sort((a: Conference, b: Conference) => {
-          const yearA = a.title.match(/\d{4}/)?.[0] || "0";
-          const yearB = b.title.match(/\d{4}/)?.[0] || "0";
-          return parseInt(yearB) - parseInt(yearA);
+        const sortedSeminars = data.data.sort((a: Seminar, b: Seminar) => {
+          const yearA = new Date(a.date).getFullYear();
+          const yearB = new Date(b.date).getFullYear();
+          return yearB - yearA;
         });
-        setConferences(sortedConferences);
+        setSeminars(sortedSeminars);
       }
     } catch (error) {
-      console.error('Error fetching conferences:', error);
+      console.error('Error fetching seminars:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSeminarDetails = async (id: number) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (data.status === "success") {
+        setSelectedSeminar(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching seminar details:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchConferences();
+    fetchSeminars();
   }, []);
-
-
-  const conferencesByYear = conferences.reduce((acc: Record<string, Conference[]>, conference) => {
-    const year = conference.title.match(/\d{4}/)?.[0] || "Unknown Year";
-    if (!acc[year]) {
-      acc[year] = [];
-    }
-    acc[year].push(conference);
-    return acc;
-  }, {});
 
   if (loading) {
     return (
@@ -166,74 +99,141 @@ const ConferenceResources: React.FC = () => {
     );
   }
 
-  return (
-    <div className="p-4 sm:p-6">
-      {selectedConference ? (
-        // Resources View
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <button 
-              onClick={() => setSelectedConference(null)}
-              className="text-blue-600 hover:text-blue-800 flex items-center gap-2 text-sm sm:text-base"
-            >
-              ← Back to Conferences
-            </button>
-            {/* <AddFileModal /> */}
-          </div>
+  const renderSeminarCard = (seminar: Seminar) => (
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-gray-900">{seminar.title}</h3>
+        <p className="text-gray-600 mt-2">{seminar.theme}</p>
+      </div>
+      <div className="text-sm text-gray-500">
+        <p className="mb-2">{seminar.venue}</p>
+        <p>{seminar.date}</p>
+      </div>
+      <button 
+        onClick={() => fetchSeminarDetails(seminar.id)}
+        className="mt-4 text-blue-600 hover:text-blue-800 font-semibold"
+      >
+        View Details
+      </button>
+    </div>
+  );
 
-          <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6">
-            <h1 className="text-xl sm:text-2xl font-semibold">{selectedConference.title}</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">{selectedConference.theme}</p>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">{selectedConference.date}</p>
-          </div>
+  const renderSeminarDetails = (details: SeminarDetails) => (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <button 
+          onClick={() => setSelectedSeminar(null)}
+          className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+        >
+          ← Back to Seminars
+        </button>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {selectedConference.resources?.map((resource) => (
-              <ResourceCard 
-                key={resource.resource_id} 
-                resource={resource} 
-              />
-            ))}
+      <div className="">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">{details.title}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h1 className="font-bold md:text-2xl text-md uppercase opacity-[0.9]">{details.theme}</h1>
+            {details.venue && (
+              <p className="text-gray-600"><span className="font-semibold">Venue:</span> {details.venue}</p>
+            )}
+            <p className="text-gray-600"><span className="font-semibold">Date:</span> {details.date}</p>
+            <p className="text-gray-600"><span className="font-semibold">Time:</span> {details.start_time}</p>
           </div>
-
-          {(!selectedConference.resources || selectedConference.resources.length === 0) && (
-            <div className="text-center py-12 text-gray-600">
-              No resources available for this conference.
-            </div>
-          )}
         </div>
-      ) : (
-        // Conferences List View
-        <>
-          <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10">
-            <div className="flex justify-between items-center">
-              <h1 className="text-xl sm:text-2xl">Seminar Resources</h1>
-              {/* <AddFileModal/> */}
-            </div>
-          </div>
+      </div>
+      <div>
+        <hr />
+      </div>
+      {details.sub_theme.length > 0 && (
+        <div className="">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Sub-themes</h3>
+          <ul className="list-disc list-inside space-y-2">
+            {details.sub_theme.map((theme, index) => (
+              <li key={index} className="text-gray-600">{theme}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-          <div className="mb-6 flex gap-2 overflow-x-auto py-2">
-            {Object.keys(conferencesByYear).map((year) => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year === selectedYear ? null : year)}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors
-                  ${selectedYear === year 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                {year} ({conferencesByYear[year].length})
-              </button>
+      {details.work_shop.length > 0 && (
+        <div className="">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Workshops</h3>
+          <ul className="list-disc list-inside space-y-2">
+            {details.work_shop.map((workshop, index) => (
+              <li key={index} className="text-gray-600">{workshop}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+<div>
+        <hr />
+      </div>
+      {details.speakers.length > 0 && (
+        <div className="">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Speakers</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {details.speakers.map((speaker, index) => (
+              <div key={index} className="flex flex-col items-center p-4 bg-gray-50 shadow-md rounded-lg">
+                <div className="w-36 h-36 mb-4 rounded-md overflow-hidden ">
+                  <img
+                    src={speaker.picture}
+                    alt={speaker.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder-avatar.png';
+                    }}
+                  />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 text-center">{speaker.name}</h4>
+                <p className="text-sm max-w-[70%] opacity-[0.7] text-center mt-2">{speaker.title}</p>
+              </div>
             ))}
           </div>
+        </div>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {(selectedYear ? conferencesByYear[selectedYear] : conferences).map((conference) => (
-              <ConferenceCard 
-                key={conference.id} 
-                conference={conference} 
-                onViewResources={setSelectedConference}
-              />
+      {details.resources.length > 0 && (
+        <div className="">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Resources</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {details.resources.map((resource) => (
+              <div key={resource.resource_id} className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold mb-2">{resource.caption}</h4>
+                <p className="text-sm text-gray-600 mb-3">Added: {new Date(resource.date).toLocaleDateString()}</p>
+                {resource.file && (
+                  <a
+                    href={resource.file}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+                  >
+                    Download Resource
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="p-6">
+      {selectedSeminar ? (
+        renderSeminarDetails(selectedSeminar)
+      ) : (
+        <>
+          <div className="bg-gray-200 px-5 py-3 mb-6">
+            <h1 className="text-2xl font-semibold">Seminars</h1>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {seminars.map((seminar) => (
+              <div key={seminar.id}>
+                {renderSeminarCard(seminar)}
+              </div>
             ))}
           </div>
         </>
@@ -242,4 +242,4 @@ const ConferenceResources: React.FC = () => {
   );
 };
 
-export default ConferenceResources;
+export default SeminarsList;

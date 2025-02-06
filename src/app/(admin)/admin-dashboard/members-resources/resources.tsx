@@ -14,6 +14,8 @@ import React, { useState, useEffect } from 'react';
 import { Download, Eye, Video, X } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { format } from 'date-fns';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { Trash2 } from 'lucide-react';
 
 export type ResourceType = 'Video';
 
@@ -68,7 +70,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Video Resources</h1>
+        <h1 className="text-2xl font-bold">Members Resources</h1>
         <ResourceUploadModal onUpload={handleUpload} />
       </div>
 
@@ -76,23 +78,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
         {resources && resources.length > 0 ? (
           resources.map((resource) => (
             <Card key={resource.resource_id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Video className="w-5 h-5 text-blue-500" />
-                  <span className="font-semibold truncate max-w-[200px]">
-                    {resource.caption}
-                  </span>
-                </div>
-                {onDelete && resource.resource_id && (
-                  <button 
-                    onClick={() => onDelete(resource.resource_id!)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                )}
-              </CardHeader>
-              <CardContent className="p-4 pt-2">
+               <CardContent className="p-4 pt-2">
                 <div className="flex flex-col gap-2">
                   <video 
                     controls 
@@ -107,17 +93,66 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
                         ? format(new Date(resource.created_at), 'PPP') 
                         : 'No date'}
                     </span>
-                    <div className="flex gap-2">
-                      <button className="text-blue-500 hover:text-blue-700">
-                        <Eye className="w-5 h-5" />
-                      </button>
-                      <button className="text-green-500 hover:text-green-700">
-                        <Download className="w-5 h-5" />
-                      </button>
-                    </div>
                   </div>
                 </div>
               </CardContent>
+              <div className="flex items-center gap-2 px-4">
+                  {/* <Video className="w-5 h-5 text-blue-500" /> */}
+                  <span className="font-semibold truncate max-w-[200px]">
+                    <h1 className='text-md md:text-lg'>{resource.caption}</h1>
+                  </span>
+                </div>
+              <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+                <div className='flex items-center justify-between w-full'>
+                  <div className=" flex gap-2">
+                      {/* <button className="text-blue-500 hover:text-blue-700">
+                        <Eye className="w-5 h-5" />
+                      </button> */}
+                      <button className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2">
+                        <Download className="w-5 h-5" />
+                        <span className='text-sm'>Download video</span>
+                      </button>
+                    </div>
+               <div>
+               {onDelete && resource.resource_id && (
+                 <AlertDialog.Root>
+                 <AlertDialog.Trigger asChild>
+                   <button  className="w-full text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
+                     <Trash2 className="w-4 h-4" />
+                     <span className='text-sm'>Delete</span>
+                   </button>
+                 </AlertDialog.Trigger>
+                 <AlertDialog.Portal>
+                   <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                   <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                     <AlertDialog.Title className="text-lg font-semibold">
+                       Delete Video
+                     </AlertDialog.Title>
+                     <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                       Are you sure you want to delete this video? This action cannot be undone.
+                     </AlertDialog.Description>
+                     <div className="flex justify-end gap-4">
+                       <AlertDialog.Cancel asChild>
+                         <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                           Cancel
+                         </button>
+                       </AlertDialog.Cancel>
+                       <AlertDialog.Action asChild>
+                         <button 
+                          onClick={() => onDelete(resource.resource_id!)} // Pass the correct `userId`
+                           className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                         >
+                           Delete
+                         </button>
+                       </AlertDialog.Action>
+                     </div>
+                   </AlertDialog.Content>
+                 </AlertDialog.Portal>
+               </AlertDialog.Root>
+                )}
+               </div>
+                </div>
+              </CardHeader>
             </Card>
           ))
         ) : (
@@ -190,6 +225,7 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Upload Video Resources</DialogTitle>
+          <span className='text-sm opacity-[0.6] pt-2'>Videos should not be more than 10mb and they should be in MP4 format</span>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

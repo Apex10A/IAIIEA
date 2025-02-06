@@ -3,6 +3,10 @@ import axios from 'axios';
 import { Resource, ResourcesPage } from './resources';
 import { useSession } from "next-auth/react";
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import * as Dialog from "@radix-ui/react-dialog";
+import { showToast } from '@/utils/toast';
 
 const Page = () => {
   const { data: session } = useSession();
@@ -67,12 +71,12 @@ const Page = () => {
         timeout: 300000 // 5-minute timeout
       });
   
-      toast.success('Video upload complete');
+      showToast.success('Video upload complete');
       setUploadProgress(0);
       await fetchResources();
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Video upload failed');
+      showToast.error('Video upload failed');
       setUploadProgress(0);
     }
   };
@@ -84,11 +88,11 @@ const Page = () => {
           'Authorization': `Bearer ${bearerToken}`
         }
       });
-      toast.success('Video resource deleted');
+      showToast.success('Video resource deleted');
       await fetchResources();
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error('Failed to delete video resource');
+      showToast.error('Failed to delete video resource');
     }
   };
 

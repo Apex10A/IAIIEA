@@ -182,19 +182,21 @@ const ConferenceResources: React.FC = () => {
             </div>
           )}
           </div>
+          <div className='py-10'>
           <div>
-            <h1>Join event for virtual attendees</h1>
+          <h4 className="font-bold text-md md:text-lg text-gray-700">Join event for virtual attendees</h4>
            <div className='flex'>
            <p>You can access the live event from here</p>
            <button>Join here </button>
            </div>
           </div>
           <div>
-            <h1>Certification</h1>
+          <h4 className="font-bold text-md md:text-lg text-gray-700">Certification</h4>
            <div className='flex'>
            <p>Complete the conference evaluation to access certificate</p>
            <button>Access here </button>
            </div>
+          </div>
           </div>
         </div>
       </div>

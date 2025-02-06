@@ -13,15 +13,15 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
-import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import { useSession } from "next-auth/react";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
-import Image from "next/image"
+import Image from "next/image";
 
-// Define the Announcement type
+// Update the Announcement interface
 interface Announcement {
   id: number;
   title: string;
@@ -31,9 +31,10 @@ interface Announcement {
   file: string | null;
   link: string;
   image?: File | string | null;
+  viewer: 'all' | 'conference' | 'seminar' | 'speaker';
+  linked_id?: string;
 }
 
-// Define the API response type
 interface AnnouncementsResponse {
   status: string;
   message: string;
@@ -48,17 +49,17 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { data: session } = useSession();
-  const [selectedSection, setSelectedSection] = useState('Announcement');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentAnnouncement, setCurrentAnnouncement] = useState<Partial<Announcement>>({
     id: undefined,
     title: '',
     description: '',
     image: null,
-    link: ''
+    link: '',
+    viewer: 'all',
+    linked_id: ''
   });
 
-  // Extract token from loginResponse
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   // Fetch announcements
@@ -73,15 +74,13 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       const data: AnnouncementsResponse = await response.json();
       
       if (data.status === "success" && data.data) {
-        // Transform the data to include date information
         const formattedAnnouncements = Object.entries(data.data).flatMap(([date, announcements]) => 
           announcements.map(announcement => ({
             ...announcement,
-            date // Add the date to each announcement
+            date
           }))
         );
         
-        // Sort announcements by date (most recent first)
         formattedAnnouncements.sort((a, b) => 
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
@@ -102,7 +101,6 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     e.preventDefault();
     const formData = new FormData();
     
-    // Type-safe null checks
     if (currentAnnouncement.title) {
       formData.append('title', currentAnnouncement.title);
     }
@@ -114,6 +112,13 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     }
     if (currentAnnouncement.link) {
       formData.append('link', currentAnnouncement.link);
+    }
+    // Add new fields
+    if (currentAnnouncement.viewer) {
+      formData.append('viewer', currentAnnouncement.viewer);
+    }
+    if (currentAnnouncement.linked_id) {
+      formData.append('linked_id', currentAnnouncement.linked_id);
     }
 
     try {
@@ -133,7 +138,9 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
           title: '',
           description: '',
           image: null,
-          link: ''
+          link: '',
+          viewer: 'all',
+          linked_id: ''
         });
       }
     } catch (error) {
@@ -146,11 +153,9 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     e.preventDefault();
     const formData = new FormData();
     
-    // Type-safe null checks
     if (currentAnnouncement.id !== undefined) {
       formData.append('id', currentAnnouncement.id.toString());
     }
-    
     if (currentAnnouncement.title) {
       formData.append('title', currentAnnouncement.title);
     }
@@ -162,6 +167,13 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     }
     if (currentAnnouncement.link) {
       formData.append('link', currentAnnouncement.link);
+    }
+    // Add new fields
+    if (currentAnnouncement.viewer) {
+      formData.append('viewer', currentAnnouncement.viewer);
+    }
+    if (currentAnnouncement.linked_id) {
+      formData.append('linked_id', currentAnnouncement.linked_id);
     }
 
     try {
@@ -206,6 +218,31 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     }
   }, [bearerToken]);
 
+  // Helper function to render viewer badge
+// Update the ViewerBadge component with proper type checking
+const ViewerBadge: React.FC<{ viewer: string, linkedId?: string }> = ({ viewer, linkedId }) => {
+  const getBadgeColor = () => {
+    if (!viewer) return 'bg-gray-100 text-gray-800'; // Default color if viewer is undefined
+    
+    switch (viewer) {
+      case 'all': return 'bg-green-100 text-green-800';
+      case 'conference': return 'bg-blue-100 text-blue-800';
+      case 'seminar': return 'bg-purple-100 text-purple-800';
+      case 'speaker': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Add null check before rendering
+  if (!viewer) return null; // Don't render badge if no viewer
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getBadgeColor()}`}>
+      {`${viewer.charAt(0).toUpperCase()}${viewer.slice(1)}`}
+      {linkedId && ` (ID: ${linkedId})`}
+    </span>
+  );
+};
   return (
     <div className=''>
       <div className='md:flex justify-between items-center mb-6'>
@@ -244,18 +281,50 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
                 />
               </div>
               <div>
+                <Label>Viewer</Label>
+                <Select 
+                  value={currentAnnouncement.viewer}
+                  onValueChange={(value) => setCurrentAnnouncement({
+                    ...currentAnnouncement,
+                    viewer: value as 'all' | 'conference' | 'seminar' | 'speaker'
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select viewer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="conference">Members</SelectItem>
+                    <SelectItem value="conference">Conference Participants</SelectItem>
+                    <SelectItem value="seminar">Seminar Participants</SelectItem>
+                    <SelectItem value="speaker">Speakers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Linked ID (Optional)</Label>
+                <Input 
+                  value={currentAnnouncement.linked_id}
+                  onChange={(e) => setCurrentAnnouncement({
+                    ...currentAnnouncement, 
+                    linked_id: e.target.value
+                  })}
+                  placeholder="Enter specific ID if needed"
+                />
+              </div>
+              <div>
                 <Label>Image</Label>
                 <Input 
-  type="file"
-  onChange={(e) => {
-    if (e.target.files && e.target.files[0]) {
-      setCurrentAnnouncement({
-        ...currentAnnouncement, 
-        image: e.target.files[0]
-      });
-    }
-  }}
-/>
+                  type="file"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setCurrentAnnouncement({
+                        ...currentAnnouncement, 
+                        image: e.target.files[0]
+                      });
+                    }
+                  }}
+                />
               </div>
               <div>
                 <Label>Link (Optional)</Label>
@@ -274,85 +343,95 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-  {announcements.map((announcement) => (
-    <Card 
-      key={announcement.id} 
-      className=' hover:shadow-xl transition-all duration-300 relative'
-    >
-        <div className='absolute top-2 right-2 text-sm text-muted-foreground'>
-        <span className='opacity-[0.6] italic'>{announcement.date} - {announcement.time}</span>
-      </div>
-      
-      {announcement.image && (
-  <div className="relative">
+        {announcements.map((announcement) => (
+          <Card 
+            key={announcement.id} 
+            className='hover:shadow-xl transition-all duration-300 relative'
+          >
+            <div className='absolute top-2 right-2 text-sm text-muted-foreground'>
+              <span className='opacity-[0.6] italic'>{announcement.date} - {announcement.time}</span>
+            </div>
+            
+            {announcement.image && (
+  <div className="relative w-full h-48">
     <Image
-      src={typeof announcement.image === 'string' 
-        ? announcement.image 
-        : URL.createObjectURL(announcement.image)}
-      alt={announcement.title || 'Announcement image'} 
-      className="w-full h-48 object-cover" 
+      src={
+        typeof announcement.image === 'string'
+          ? announcement.image.startsWith('http') 
+            ? announcement.image 
+            : `${API_URL}/${announcement.image}`
+          : URL.createObjectURL(announcement.image as File)
+      }
+      alt={announcement.title || 'Announcement image'}
+      fill
+      style={{ objectFit: 'cover' }}
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        target.onerror = null; // Prevent infinite callback loop
+        target.src = '/placeholder-image.jpg'; // Replace with your placeholder image path
+      }}
     />
-    <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20 hover:opacity-10 transition-opacity"></div>
   </div>
 )}
-      
-      <CardHeader>
-        <CardTitle className='flex items-center pt-5'>
-          <span className='text-xl'>{announcement.title}</span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        <p className='text-muted-foreground opacity-[0.8] text-sm md:text-md lg:text-lg'>
-          {announcement.description}
-        </p>
-        
-        <div className='flex justify-between items-center pt-2'>
-          {announcement.link && (
-            <a 
-              href={announcement.link} 
-              target='_blank' 
-              rel='noopener noreferrer' 
-              className='text-blue-600 hover:underline flex items-center'
-            >
-              Learn More
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className='ml-1 h-4 w-4' 
-                fill='none' 
-                viewBox='0 0 24 24' 
-                stroke='currentColor'
-              >
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
-              </svg>
-            </a>
-          )}
-          
-          <div className='flex space-x-2'>
-            <Button 
-              variant='outline' 
-              className='bg-transparent border'
-              size='icon'
-              onClick={() => {
-                setCurrentAnnouncement(announcement);
-                setIsEditModalOpen(true);
-              }}
-            >
-              <EditIcon className='h-4 w-4' />
-            </Button>
-            <Button 
-              variant='destructive' 
-              size='icon'
-              onClick={() => handleDeleteAnnouncement(announcement.id)}
-            >
-              <TrashIcon className='h-4 w-4' />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  ))}
-</div>
+            
+            <CardHeader>
+              <CardTitle className='flex items-center justify-between pt-5'>
+                <span className='text-xl'>{announcement.title}</span>
+                <ViewerBadge viewer={announcement.viewer} linkedId={announcement.linked_id} />
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent>
+              <p className='text-muted-foreground opacity-[0.8] text-sm md:text-md lg:text-lg'>
+                {announcement.description}
+              </p>
+              
+              <div className='flex justify-between items-center pt-2'>
+                {announcement.link && (
+                  <a 
+                    href={announcement.link} 
+                    target='_blank' 
+                    rel='noopener noreferrer' 
+                    className='text-blue-600 hover:underline flex items-center'
+                  >
+                    Learn More
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className='ml-1 h-4 w-4' 
+                      fill='none' 
+                      viewBox='0 0 24 24' 
+                      stroke='currentColor'
+                    >
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
+                    </svg>
+                  </a>
+                )}
+                
+                <div className='flex space-x-2'>
+                  <Button 
+                    variant='outline' 
+                    className='bg-transparent border'
+                    size='icon'
+                    onClick={() => {
+                      setCurrentAnnouncement(announcement);
+                      setIsEditModalOpen(true);
+                    }}
+                    >
+                    <EditIcon className='h-4 w-4' />
+                  </Button>
+                  <Button 
+                    variant='destructive' 
+                    size='icon'
+                    onClick={() => handleDeleteAnnouncement(announcement.id)}
+                  >
+                    <TrashIcon className='h-4 w-4' />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
@@ -372,7 +451,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
                 required 
               />
             </div>
-             <div>
+            <div>
               <Label>Description</Label>
               <Textarea 
                 value={currentAnnouncement.description}
@@ -384,30 +463,49 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
               />
             </div>
             <div>
-        <Label>ID</Label>
-        <Input 
-          type="text"
-          value={currentAnnouncement.id || ''}
-          onChange={(e) => setCurrentAnnouncement({
-            ...currentAnnouncement, 
-            id: Number(e.target.value) // Convert to number
-          })}
-          required 
-        />
-      </div>
+              <Label>Viewer</Label>
+              <Select 
+                value={currentAnnouncement.viewer}
+                onValueChange={(value) => setCurrentAnnouncement({
+                  ...currentAnnouncement,
+                  viewer: value as 'all' | 'conference' | 'seminar' | 'speaker'
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select viewer" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="conference">Conference Participants</SelectItem>
+                  <SelectItem value="seminar">Seminar Participants</SelectItem>
+                  <SelectItem value="speaker">Speakers</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Linked ID (Optional)</Label>
+              <Input 
+                value={currentAnnouncement.linked_id}
+                onChange={(e) => setCurrentAnnouncement({
+                  ...currentAnnouncement, 
+                  linked_id: e.target.value
+                })}
+                placeholder="Enter specific ID if needed"
+              />
+            </div>
             <div>
               <Label>Image</Label>
               <Input 
-  type="file"
-  onChange={(e) => {
-    if (e.target.files && e.target.files[0]) {
-      setCurrentAnnouncement({
-        ...currentAnnouncement, 
-        image: e.target.files[0]
-      });
-    }
-  }}
-/>
+                type="file"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setCurrentAnnouncement({
+                      ...currentAnnouncement, 
+                      image: e.target.files[0]
+                    });
+                  }
+                }}
+              />
             </div>
             <div>
               <Label>Link (Optional)</Label>

@@ -5,6 +5,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon, CalendarIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
+import { showToast } from '@/utils/toast';
+import ImageUpload from './ImageUpload'
 import { useSession } from "next-auth/react";
 import {
   Select,
@@ -90,16 +92,16 @@ const AddConferenceModal = () => {
     fetchSpeakers();
   }, []);
 
-  const handleSpeakerSelect = (value: any) => {
-    // Add new speaker with default occupation
-    const newSpeaker = {
-      speaker_id: Number(value),
-      occupation: "Workshop Facilitator" // default value, can be changed
-    };
+  // const handleSpeakerSelect = (value: any) => {
+  //   // Add new speaker with default occupation
+  //   const newSpeaker = {
+  //     speaker_id: Number(value),
+  //     occupation: "Workshop Facilitator" // default value, can be changed
+  //   };
     
-    setSelectedSpeakers(prev => [...prev, newSpeaker]);
-    handleInputChange('selectedSpeakers', [...selectedSpeakers, newSpeaker]);
-  };
+  //   setSelectedSpeakers(prev => [...prev, newSpeaker]);
+  //   handleInputChange('selectedSpeakers', [...selectedSpeakers, newSpeaker]);
+  // };
   
   const fetchSpeakers = async () => {
     try {
@@ -110,13 +112,43 @@ const AddConferenceModal = () => {
       });
       const data = await response.json();
       if (data.status === "success") {
-        console.log('Speaker data:', data.data); // Add this line to see the structure
+        console.log('Speaker data:', data.data);
         setAvailableSpeakers(data.data);
       }
     } catch (error) {
       console.error('Error fetching speakers:', error);
     }
   };
+  const handleSpeakerSelect = (value: string) => {
+    const newSpeaker = {
+      speaker_id: Number(value),
+      occupation: "Workshop Facilitator" // default value
+    };
+    
+    const updatedSpeakers = [...selectedSpeakers, newSpeaker];
+    setSelectedSpeakers(updatedSpeakers);
+    handleInputChange('selectedSpeakers', updatedSpeakers);
+  };
+
+  const handleRoleChange = (index: number, occupation: string) => {
+    const updatedSpeakers = selectedSpeakers.map((s, i) => 
+      i === index ? { ...s, occupation } : s
+    );
+    setSelectedSpeakers(updatedSpeakers);
+    handleInputChange('selectedSpeakers', updatedSpeakers);
+  };
+
+  const removeSpeaker = (index: number) => {
+    const updatedSpeakers = selectedSpeakers.filter((_, i) => i !== index);
+    setSelectedSpeakers(updatedSpeakers);
+    handleInputChange('selectedSpeakers', updatedSpeakers);
+  };
+
+  const roles = [
+    "Workshop Facilitator",
+    "Key Note Address",
+    "Guest Speaker"
+  ];
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
@@ -151,21 +183,21 @@ const AddConferenceModal = () => {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, field: 'flyer' | 'gallery' | 'sponsors' | 'videos') => {
-    const files = event.target.files;
-    if (!files) return;
-
-    if (field === 'flyer') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: files[0]
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [field]: [...Array.from(files)]
-      }));
-    }
-  };
+      const files = event.target.files as FileList;
+      if (!files) return;
+  
+      if (field === 'flyer') {
+        setFormData(prev => ({
+          ...prev,
+          [field]: files[0]
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          [field]: [...Array.from(files)]
+        }));
+      }
+    };
 
   const handleStepOneSubmit = async () => {
     const formDataToSend = new FormData();
@@ -189,13 +221,17 @@ const AddConferenceModal = () => {
       });
       
       const data = await response.json();
-      if (data.status === "success") {
-        setToken(data.token);
+      console.log('Step 1 Response:', data);
+      if (data.status === "success" && data.data?.token) {  // Changed this line
+        setToken(data.data.token);  // Changed this line
         setCurrentStep(2);
+      } else {
+        console.error('No token in response:', data);
+        showToast.error('Failed to get token from server');
       }
     } catch (error) {
       console.error('Error submitting step 1:', error);
-      alert('Failed to submit conference details');
+      showToast.error('Failed to submit conference details');
     }
   };
 
@@ -217,6 +253,7 @@ const AddConferenceModal = () => {
     formDataToSend.append('standard_usd', formData.standard_usd);
     formDataToSend.append('standard_package', JSON.stringify(formData.standard_package));
     formDataToSend.append('speakers', JSON.stringify(formData.selectedSpeakers));
+    console.log(token)
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_conference/2`, {
@@ -229,12 +266,11 @@ const AddConferenceModal = () => {
       
       const data = await response.json();
       if (data.status === "success") {
-        alert('Conference created successfully');
-        // Close modal and refresh conferences list
+        showToast.success('Conference created successfully');
       }
     } catch (error) {
       console.error('Error submitting step 2:', error);
-      alert('Failed to submit conference details');
+      showToast.error('Failed to submit conference details');
     }
   };
 
@@ -254,484 +290,478 @@ const AddConferenceModal = () => {
           
           {currentStep === 1 ? (
             // Step 1 Form
-            <div className="space-y-4">
-              <div className="grid gap-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Title</label>
-                  <input
-                    className="col-span-3 p-2 border rounded"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
-                  />
+            <div className="max-w-5xl mx-auto p-6 space-y-8">
+            {/* Basic Information */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Basic Information</h3>
+                
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right text-sm font-medium text-gray-700">Title</label>
+                    <input
+                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.title}
+                      onChange={(e) => handleInputChange('title', e.target.value)}
+                    />
+                  </div>
+      
+                  {/* Theme */}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right text-sm font-medium text-gray-700">Theme</label>
+                    <input
+                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.theme}
+                      onChange={(e) => handleInputChange('theme', e.target.value)}
+                    />
+                  </div>
+      
+                  {/* Venue */}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right text-sm font-medium text-gray-700">Venue</label>
+                    <input
+                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.venue}
+                      onChange={(e) => handleInputChange('venue', e.target.value)}
+                    />
+                  </div>
+      
+                  {/* Dates */}
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right text-sm font-medium text-gray-700">Start Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.start}
+                      onChange={(e) => handleInputChange('start', e.target.value)}
+                    />
+                  </div>
+      
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right text-sm font-medium text-gray-700">End Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.end}
+                      onChange={(e) => handleInputChange('end', e.target.value)}
+                    />
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Theme</label>
-                  <input
-                    className="col-span-3 p-2 border rounded"
-                    value={formData.theme}
-                    onChange={(e) => handleInputChange('theme', e.target.value)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Venue</label>
-                  <input
-                    className="col-span-3 p-2 border rounded"
-                    value={formData.venue}
-                    onChange={(e) => handleInputChange('venue', e.target.value)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Start Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    className="col-span-3 p-2 border rounded"
-                    value={formData.start}
-                    onChange={(e) => handleInputChange('start', e.target.value)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">End Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    className="col-span-3 p-2 border rounded"
-                    value={formData.end}
-                    onChange={(e) => handleInputChange('end', e.target.value)}
-                  />
-                </div>
-
+              </div>
+            </div>
+      
+            {/* Additional Information */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-6 space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Additional Details</h3>
+      
                 {/* Subthemes */}
                 <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Subthemes</label>
+                  <label className="text-right text-sm font-medium text-gray-700">Subthemes</label>
                   <div className="col-span-3 space-y-2">
                     {formData.subthemes_input.map((subtheme, index) => (
                       <div key={index} className="flex gap-2">
                         <input
-                          className="flex-1 p-2 border rounded"
+                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={subtheme}
                           onChange={(e) => handleArrayInputChange('subthemes_input', index, e.target.value)}
                         />
                         <button
                           onClick={() => removeArrayItem('subthemes_input', index)}
-                          className="p-2 text-red-600"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                         >
-                          <TrashIcon />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                     <button
                       onClick={() => addArrayItem('subthemes_input')}
-                      className="text-blue-600 flex items-center gap-1"
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
-                      <PlusIcon /> Add Subtheme
+                      <PlusIcon className="w-4 h-4" /> Add Subtheme
                     </button>
                   </div>
                 </div>
-
+      
                 {/* Workshops */}
                 <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Workshops</label>
+                  <label className="text-right text-sm font-medium text-gray-700">Workshops</label>
                   <div className="col-span-3 space-y-2">
                     {formData.workshops_input.map((workshop, index) => (
                       <div key={index} className="flex gap-2">
                         <input
-                          className="flex-1 p-2 border rounded"
+                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={workshop}
                           onChange={(e) => handleArrayInputChange('workshops_input', index, e.target.value)}
                         />
                         <button
                           onClick={() => removeArrayItem('workshops_input', index)}
-                          className="p-2 text-red-600"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                         >
-                          <TrashIcon />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                     <button
                       onClick={() => addArrayItem('workshops_input')}
-                      className="text-blue-600 flex items-center gap-1"
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
-                      <PlusIcon /> Add Workshop
+                      <PlusIcon className="w-4 h-4" /> Add Workshop
                     </button>
                   </div>
                 </div>
-
+      
                 {/* Important Dates */}
                 <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Important Dates</label>
+                  <label className="text-right text-sm font-medium text-gray-700">Important Dates</label>
                   <div className="col-span-3 space-y-2">
                     {formData.important_date.map((date, index) => (
                       <div key={index} className="flex gap-2">
                         <input
-                          className="flex-1 p-2 border rounded"
+                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={date}
                           onChange={(e) => handleArrayInputChange('important_date', index, e.target.value)}
                           placeholder="e.g., Abstract Submission 2024-05-01"
                         />
                         <button
                           onClick={() => removeArrayItem('important_date', index)}
-                          className="p-2 text-red-600"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                         >
-                          <TrashIcon />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                     <button
                       onClick={() => addArrayItem('important_date')}
-                      className="text-blue-600 flex items-center gap-1"
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
-                      <PlusIcon /> Add Important Date
+                      <PlusIcon className="w-4 h-4" /> Add Important Date
                     </button>
                   </div>
                 </div>
-
-                {/* Flyer Upload */}
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Flyer</label>
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileChange(e, 'flyer')}
-                    className="col-span-3 p-2"
-                    accept="image/*"
-                  />
-                </div>
               </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <Dialog.Close asChild>
-                  <button className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-                </Dialog.Close>
-                <button
-                  onClick={handleStepOneSubmit}
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                  Next Step
+            </div>
+      
+            {/* Flyer Upload */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-3 mb-6">Event Flyer</h3>
+                <ImageUpload 
+                  onFileChange={(files: File[]) => {
+                    const syntheticEvent = {
+                      target: {
+                        files: (() => {
+                          const dataTransfer = new DataTransfer();
+                          files.forEach(file => dataTransfer.items.add(file));
+                          return dataTransfer.files;
+                        })()
+                      }
+                    } as React.ChangeEvent<HTMLInputElement>;
+                    handleFileChange(syntheticEvent, 'flyer');
+                  }} 
+                />
+              </div>
+            </div>
+      
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3">
+              <Dialog.Close asChild>
+                <button className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                  Cancel
                 </button>
-              </div>
-              </div>
+              </Dialog.Close>
+              <button
+                onClick={handleStepOneSubmit}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Next Step
+              </button>
+            </div>
+          </div>
             ) : (
             // Step 2 Form
-            <div className="space-y-4">
-              <div className="grid gap-4">
-                {/* Gallery Images */}
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Gallery Images</label>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => handleFileChange(e, 'gallery')}
-                    className="col-span-3 p-2"
-                    accept="image/*"
-                  />
-                </div>
+<div className="max-w-5xl mx-auto p-6 space-y-8">
+      {/* File Upload Section */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Media Upload</h3>
+          
+          {/* Gallery Images */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right text-sm font-medium text-gray-700">Gallery Images</label>
+            <div className="col-span-3">
+              <input
+                type="file"
+                multiple
+                onChange={(e) => handleFileChange(e, 'gallery')}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                accept="image/*"
+              />
+            </div>
+          </div>
 
-                {/* Sponsors Images */}
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Sponsors Images</label>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => handleFileChange(e, 'sponsors')}
-                    className="col-span-3 p-2"
-                    accept="image/*"
-                  />
-                </div>
+          {/* Sponsors Images */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right text-sm font-medium text-gray-700">Sponsors Images</label>
+            <div className="col-span-3">
+              <input
+                type="file"
+                multiple
+                onChange={(e) => handleFileChange(e, 'sponsors')}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                accept="image/*"
+              />
+            </div>
+          </div>
 
-                {/* Videos */}
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <label className="text-right">Videos</label>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => handleFileChange(e, 'videos')}
-                    className="col-span-3 p-2"
-                    accept="video/*"
-                  />
-                </div>
+          {/* Videos */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right text-sm font-medium text-gray-700">Videos</label>
+            <div className="col-span-3">
+              <input
+                type="file"
+                multiple
+                onChange={(e) => handleFileChange(e, 'videos')}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                accept="video/*"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
-                {/* Basic Package */}
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Basic Package</label>
-                  <div className="col-span-3 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        placeholder="Naira Price"
-                        type="number"
-                        className="p-2 border rounded"
-                        value={formData.basic_naira}
-                        onChange={(e) => handleInputChange('basic_naira', e.target.value)}
-                      />
-                      <input
-                        placeholder="USD Price"
-                        type="number"
-                        className="p-2 border rounded"
-                        value={formData.basic_usd}
-                        onChange={(e) => handleInputChange('basic_usd', e.target.value)}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Packages</label>
-                  <div className="col-span-3 space-y-2">
+      {/* Packages Section */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 space-y-8">
+          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Package Details</h3>
+
+          {/* Basic Package */}
+          <div className="space-y-6">
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h4 className="text-md font-medium text-gray-900 mb-4">Basic Package</h4>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <label className="text-right text-sm font-medium text-gray-700">Pricing</label>
+                <div className="col-span-3 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      placeholder="Naira Price"
+                      type="number"
+                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.basic_naira}
+                      onChange={(e) => handleInputChange('basic_naira', e.target.value)}
+                    />
+                    <input
+                      placeholder="USD Price"
+                      type="number"
+                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.basic_usd}
+                      onChange={(e) => handleInputChange('basic_usd', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
                     {formData.basic_package.map((subtheme, index) => (
                       <div key={index} className="flex gap-2">
                         <input
-                          className="flex-1 p-2 border rounded"
+                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={subtheme}
                           onChange={(e) => handleArrayInputChange('basic_package', index, e.target.value)}
                         />
                         <button
                           onClick={() => removeArrayItem('basic_package', index)}
-                          className="p-2 text-red-600"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                         >
-                          <TrashIcon />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                     <button
                       onClick={() => addArrayItem('basic_package')}
-                      className="text-blue-600 flex items-center gap-1"
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
-                      <PlusIcon /> Add Package
+                      <PlusIcon className="w-4 h-4" /> Add Package Item
                     </button>
                   </div>
                 </div>
-                    {/* <Select.Root
-                      onValueChange={(values) => handleInputChange('basic_package', values.split(','))}
-                    >
-                      <Select.Trigger className="w-full p-2 border rounded">
-                        <Select.Value placeholder="Select package items" />
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Content>
-                          <Select.Viewport>
-                            {['Food', 'Accommodation', 'Recordings', 'Jobs'].map((item) => (
-                              <Select.Item key={item} value={item}>
-                                <Select.ItemText>{item}</Select.ItemText>
-                              </Select.Item>
-                            ))}
-                          </Select.Viewport>
-                        </Select.Content>
-                      </Select.Portal>
-                    </Select.Root> */}
-                  </div>
-                </div>
+              </div>
+            </div>
 
-                {/* Premium Package */}
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Premium Package</label>
-                  <div className="col-span-3 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        placeholder="Naira Price"
-                        type="number"
-                        className="p-2 border rounded"
-                        value={formData.premium_naira}
-                        onChange={(e) => handleInputChange('premium_naira', e.target.value)}
-                      />
-                      <input
-                        placeholder="USD Price"
-                        type="number"
-                        className="p-2 border rounded"
-                        value={formData.premium_usd}
-                        onChange={(e) => handleInputChange('premium_usd', e.target.value)}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Packages</label>
-                  <div className="col-span-3 space-y-2">
-                    {formData.premium_package.map((subtheme, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded"
-                          value={subtheme}
-                          onChange={(e) => handleArrayInputChange('premium_package', index, e.target.value)}
-                        />
-                        <button
-                          onClick={() => removeArrayItem('premium_package', index)}
-                          className="p-2 text-red-600"
-                        >
-                          <TrashIcon />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('premium_package')}
-                      className="text-blue-600 flex items-center gap-1"
-                    >
-                      <PlusIcon /> Add Package
-                    </button>
+            {/* Standard Package */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h4 className="text-md font-medium text-gray-900 mb-4">Standard Package</h4>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <label className="text-right text-sm font-medium text-gray-700">Pricing</label>
+                <div className="col-span-3 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      placeholder="Naira Price"
+                      type="number"
+                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.standard_naira}
+                      onChange={(e) => handleInputChange('standard_naira', e.target.value)}
+                    />
+                    <input
+                      placeholder="USD Price"
+                      type="number"
+                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.standard_usd}
+                      onChange={(e) => handleInputChange('standard_usd', e.target.value)}
+                    />
                   </div>
-                </div>
-                    {/* <Select.Root
-                      onValueChange={(values) => handleInputChange('premium_package', values.split(','))}
-                    >
-                      <Select.Trigger className="w-full p-2 border rounded">
-                        <Select.Value placeholder="Select package items" />
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Content>
-                          <Select.Viewport>
-                            {['Food', 'Accommodation', 'Recordings', 'Jobs'].map((item) => (
-                              <Select.Item key={item} value={item}>
-                                <Select.ItemText>{item}</Select.ItemText>
-                              </Select.Item>
-                            ))}
-                          </Select.Viewport>
-                        </Select.Content>
-                      </Select.Portal>
-                    </Select.Root> */}
-                  </div>
-                </div>
-
-                {/* Standard Package */}
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Standard Package</label>
-                  <div className="col-span-3 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        placeholder="Naira Price"
-                        type="number"
-                        className="p-2 border rounded"
-                        value={formData.standard_naira}
-                        onChange={(e) => handleInputChange('standard_naira', e.target.value)}
-                      />
-                      <input
-                        placeholder="USD Price"
-                        type="number"
-                        className="p-2 border rounded"
-                        value={formData.standard_usd}
-                        onChange={(e) => handleInputChange('standard_usd', e.target.value)}
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right">Packages</label>
-                  <div className="col-span-3 space-y-2">
+                  <div className="space-y-2">
                     {formData.standard_package.map((subtheme, index) => (
                       <div key={index} className="flex gap-2">
                         <input
-                          className="flex-1 p-2 border rounded"
+                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           value={subtheme}
                           onChange={(e) => handleArrayInputChange('standard_package', index, e.target.value)}
                         />
                         <button
                           onClick={() => removeArrayItem('standard_package', index)}
-                          className="p-2 text-red-600"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
                         >
-                          <TrashIcon />
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                     <button
                       onClick={() => addArrayItem('standard_package')}
-                      className="text-blue-600 flex items-center gap-1"
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
-                      <PlusIcon /> Add Package
+                      <PlusIcon className="w-4 h-4" /> Add Package Item
                     </button>
                   </div>
                 </div>
-                    {/* <Select.Root
-                      onValueChange={(values) => handleInputChange('standard_package', values.split(','))}
-                    >
-                      <Select.Trigger className="w-full p-2 border rounded">
-                        <Select.Value placeholder="Select package items" />
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Content>
-                          <Select.Viewport>
-                            {['Food', 'Accommodation', 'Recordings', 'Jobs'].map((item) => (
-                              <Select.Item key={item} value={item}>
-                                <Select.ItemText>{item}</Select.ItemText>
-                              </Select.Item>
-                            ))}
-                          </Select.Viewport>
-                        </Select.Content>
-                      </Select.Portal>
-                    </Select.Root> */}
-                  </div>
-                </div>
-
-                {/* Speakers Selection */}
-                <div className="grid grid-cols-4 items-start gap-4">
-  <label className="text-right">Speakers</label>
-  <div className="col-span-3">
-    <Select onValueChange={handleSpeakerSelect}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Add a speaker" />
-      </SelectTrigger>
-      <SelectContent>
-      {availableSpeakers.map((speaker) => (
-  <SelectItem 
-    key={speaker.speaker_id} 
-    value={speaker.speaker_id.toString()} // Convert to string
-  >
-    {speaker.speaker_name}
-  </SelectItem>
-))}
-
-      </SelectContent>
-    </Select>
-
-    {/* Display selected speakers with their roles */}
-    <div className="mt-4 space-y-2">
-      {selectedSpeakers.map((selected, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <span>
-            {availableSpeakers.find(s => s.speaker_id === selected.speaker_id)?.speaker_name}
-          </span>
-          <Select
-            value={selected.occupation}
-            onValueChange={(occupation) => {
-              const updatedSpeakers = selectedSpeakers.map((s, i) => 
-                i === index ? { ...s, occupation } : s
-              );
-              setSelectedSpeakers(updatedSpeakers);
-              handleInputChange('selectedSpeakers', updatedSpeakers);
-            }}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Workshop Facilitator">Workshop Facilitator</SelectItem>
-              <SelectItem value="Key Note Address">Key Note Address</SelectItem>
-              <SelectItem value="Guest Speaker">Guest Speaker</SelectItem>
-            </SelectContent>
-          </Select>
-          <button
-            onClick={() => {
-              const updatedSpeakers = selectedSpeakers.filter((_, i) => i !== index);
-              setSelectedSpeakers(updatedSpeakers);
-              handleInputChange('selectedSpeakers', updatedSpeakers);
-            }}
-            className="text-red-500 hover:text-red-700"
-          >
-            Remove
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="px-4 py-2 bg-gray-200 rounded"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={handleStepTwoSubmit}
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                  Create Conference
-                </button>
               </div>
             </div>
+
+            {/* Premium Package */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h4 className="text-md font-medium text-gray-900 mb-4">Premium Package</h4>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <label className="text-right text-sm font-medium text-gray-700">Pricing</label>
+                <div className="col-span-3 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      placeholder="Naira Price"
+                      type="number"
+                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.premium_naira}
+                      onChange={(e) => handleInputChange('premium_naira', e.target.value)}
+                    />
+                    <input
+                      placeholder="USD Price"
+                      type="number"
+                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.premium_usd}
+                      onChange={(e) => handleInputChange('premium_usd', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    {formData.premium_package.map((subtheme, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          value={subtheme}
+                          onChange={(e) => handleArrayInputChange('premium_package', index, e.target.value)}
+                        />
+                        <button
+                          onClick={() => removeArrayItem('premium_package', index)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => addArrayItem('premium_package')}
+                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
+                      <PlusIcon className="w-4 h-4" /> Add Package Item
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Speakers Section */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Speakers</h3>
+          <div className="grid grid-cols-4 items-start gap-4">
+            <label className="text-right text-sm font-medium text-gray-700">Add Speakers</label>
+            <div className="col-span-3 space-y-4">
+              <Select onValueChange={handleSpeakerSelect}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Add a speaker" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSpeakers.map((speaker) => (
+                    <SelectItem
+                      key={speaker.speaker_id}
+                      value={speaker.speaker_id.toString()}
+                      disabled={selectedSpeakers.some(s => s.speaker_id === speaker.speaker_id)}
+                    >
+                      {speaker.speaker_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="space-y-3">
+                {selectedSpeakers.map((selected, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <span className="min-w-[150px] font-medium">
+                      {availableSpeakers.find(s => s.speaker_id === selected.speaker_id)?.speaker_name}
+                    </span>
+                    <Select
+                      value={selected.occupation}
+                      onValueChange={(occupation) => handleRoleChange(index, occupation)}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <button
+                      onClick={() => removeSpeaker(index)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors ml-auto"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setCurrentStep(1)}
+          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+        >
+          Back
+        </button>
+        <button
+          onClick={handleStepTwoSubmit}
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Create Conference
+        </button>
+      </div>
+    </div>
           )}
 
           <Dialog.Close asChild>

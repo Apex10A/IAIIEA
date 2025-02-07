@@ -79,7 +79,7 @@ const Header = () => {
     ],
     programmes: [
       { title: "Conference", description: "Meet industry experts in live interactive sessions", link: "/conference-landing-page", image: "/Head.png" },
-      { title: "Seminar/webinar", description: "Join the online trainings and group sessions", link: "/seminar-landing-page", image: "/HeadTwo.png" }
+      { title: "Seminar/Training", description: "Join the online trainings and group sessions", link: "/seminars", image: "/HeadTwo.png" }
     ],
     media: [
       { title: "Gallery", description: "Access all of IAIIEA photos", link: "/gallery/media", image: "/Head.png" },

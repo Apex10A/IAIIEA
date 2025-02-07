@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Trash2Icon } from "lucide-react";
+import { showToast } from '@/utils/toast';
 
 interface Speaker {
   speaker_id: number;
   occupation: string;
 }
 
+interface AvailableSpeaker {
+  speaker_id: number;
+  speaker_name: string;
+  // Add other speaker properties as needed
+}
 interface Step1Data {
   title: string;
   theme: string;
@@ -36,6 +42,7 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [step, setStep] = useState(1);
   const [step1Token, setStep1Token] = useState('');
+  const [availableSpeakers, setAvailableSpeakers] = useState<AvailableSpeaker[]>([]);
   
   const [step1Data, setStep1Data] = useState<Step1Data>({
     title: '',
@@ -74,14 +81,16 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
       const data = await response.json();
       if (data.status === "success" && data.data?.token) {
         setStep1Token(data.data.token);
+        console.log(data.data.token)
         setStep2Data(prev => ({ ...prev, token: data.data.token }));
         setStep(2);
       } else {
+        showToast.error("Failed to create seminar")
         throw new Error(data.message || 'Failed to create seminar');
       }
     } catch (error) {
       console.error('Error creating seminar:', error);
-      alert('Failed to create seminar');
+      showToast.error('Failed to create seminar');
     }
   };
 
@@ -99,6 +108,7 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
 
       const data = await response.json();
       if (data.status === "success") {
+        showToast.success('Seminar created successfully');
         onSuccess();
         setStep(1);
         setStep1Data({
@@ -126,7 +136,7 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
       }
     } catch (error) {
       console.error('Error completing seminar creation:', error);
-      alert('Failed to complete seminar creation');
+      showToast.error('Failed to complete seminar creation');
     }
   };
   
@@ -151,10 +161,40 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
     }
   };
 
+
+
+  useEffect(() => {
+    fetchSpeakers();
+  }, []);
+
+  const fetchSpeakers = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/speakers_list`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
+        }
+      });
+      const data = await response.json();
+      if (data.status === "success") {
+        setAvailableSpeakers(data.data);
+        console.log(data.data)
+      }
+    } catch (error) {
+      console.error('Error fetching speakers:', error);
+    }
+  };
+
   const addSpeaker = () => {
     setStep2Data(prev => ({
       ...prev,
       speakers: [...prev.speakers, { speaker_id: 0, occupation: '' }]
+    }));
+  };
+
+  const removeSpeaker = (index: number) => {
+    setStep2Data(prev => ({
+      ...prev,
+      speakers: prev.speakers.filter((_, i) => i !== index)
     }));
   };
 
@@ -165,7 +205,67 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
         i === index ? { ...speaker, [field]: value } : speaker
       )
     }));
-  };
+  
+  }
+
+  const renderSpeakersSection = () => (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="font-medium">Speakers</h3>
+        <button
+          type="button"
+          onClick={addSpeaker}
+          className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+        >
+          <PlusIcon className="h-4 w-4" />
+          Add Speaker
+        </button>
+      </div>
+      
+      {step2Data.speakers.map((speaker, index) => (
+        <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium mb-1">Speaker</label>
+            <select
+              value={speaker.speaker_id}
+              onChange={e => updateSpeaker(index, 'speaker_id', Number(e.target.value))}
+              className="w-full border rounded-md p-2"
+              required
+            >
+              <option value="">Select a speaker</option>
+              {availableSpeakers.map((speaker) => (
+                <option key={speaker.speaker_id} value={speaker.speaker_id}>
+                  {speaker.speaker_name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Role</label>
+            <select
+              value={speaker.occupation}
+              onChange={e => updateSpeaker(index, 'occupation', e.target.value)}
+              className="w-full border rounded-md p-2"
+              required
+            >
+              <option value="">Select a role</option>
+              <option value="Keynote Speaker">Keynote Speaker</option>
+              <option value="Workshop Facilitator">Workshop Facilitator</option>
+              <option value="Panel Moderator">Panel Moderator</option>
+              <option value="Guest Speaker">Guest Speaker</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={() => removeSpeaker(index)}
+            className="text-red-600 hover:text-red-800 p-2"
+          >
+            <Trash2Icon className="h-5 w-5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <Dialog.Root>
@@ -394,44 +494,7 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
               </div>
 
               {/* Speakers */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium">Speakers</h3>
-                  <button
-                    type="button"
-                    onClick={addSpeaker}
-                    className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Add Speaker
-                  </button>
-                </div>
-                
-                {step2Data.speakers.map((speaker, index) => (
-                  <div key={index} className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Speaker ID</label>
-                      <input
-                        type="number"
-                        value={speaker.speaker_id}
-                        onChange={e => updateSpeaker(index, 'speaker_id', Number(e.target.value))}
-                        className="w-full border rounded-md p-2"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Occupation</label>
-                      <input
-                        type="text"
-                        value={speaker.occupation}
-                        onChange={e => updateSpeaker(index, 'occupation', e.target.value)}
-                        className="w-full border rounded-md p-2"
-                        required
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+ {renderSpeakersSection()}
 
               <div className="flex gap-4 pt-4">
                 <button

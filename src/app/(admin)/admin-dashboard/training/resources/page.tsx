@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
-// import AddFileModal from './AddFileModal';
+import AddFileModal from './AddFileModal';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 
@@ -245,7 +245,6 @@ const ConferenceResources: React.FC = () => {
             >
               ← Back to Conferences
             </button>
-            {/* <AddFileModal /> */}
           </div>
 
           <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6">
@@ -276,7 +275,7 @@ const ConferenceResources: React.FC = () => {
           <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10">
             <div className="flex justify-between items-center">
               <h1 className="text-xl sm:text-2xl">Seminar Resources</h1>
-              {/* <AddFileModal/> */}
+              <AddFileModal onSuccess={fetchConferences}/>
             </div>
           </div>
 

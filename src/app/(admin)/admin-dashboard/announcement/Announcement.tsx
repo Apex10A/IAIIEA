@@ -16,10 +16,15 @@ import {
 import { useSession } from "next-auth/react";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Trash2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
 import Image from "next/image";
+import * as RadixDialog from "@radix-ui/react-dialog";
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { showToast } from '@/utils/toast';
+
 
 // Update the Announcement interface
 interface Announcement {
@@ -31,7 +36,7 @@ interface Announcement {
   file: string | null;
   link: string;
   image?: File | string | null;
-  viewer: 'all' | 'conference' | 'seminar' | 'speaker';
+  viewer: 'all' | 'members' | 'conference' | 'seminar' | 'speaker';
   linked_id?: string;
 }
 
@@ -42,7 +47,10 @@ interface AnnouncementsResponse {
     [date: string]: Announcement[];
   };
 }
-
+interface ViewerBadgeProps {
+  viewer: 'all' | 'members' | 'conference' | 'seminar' | 'speaker';
+  linkedId?: string;
+}
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
@@ -74,25 +82,32 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       const data: AnnouncementsResponse = await response.json();
       
       if (data.status === "success" && data.data) {
-        const formattedAnnouncements = Object.entries(data.data).flatMap(([date, announcements]) => 
-          announcements.map(announcement => ({
-            ...announcement,
-            date
-          }))
-        );
-        
-        formattedAnnouncements.sort((a, b) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
+        const formattedAnnouncements = Object.entries(data.data)
+          .flatMap(([date, announcements]) =>
+            announcements.map(announcement => ({
+              ...announcement,
+              date
+            }))
+          )
+          // Sort by date and time
+          .sort((a, b) => {
+            const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
+            if (dateCompare === 0) {
+              // If same date, sort by time
+              return new Date(`2000/01/01 ${b.time}`).getTime() - 
+                     new Date(`2000/01/01 ${a.time}`).getTime();
+            }
+            return dateCompare;
+          });
         
         setAnnouncements(formattedAnnouncements);
       } else {
         console.error('Invalid data structure:', data);
-        setAnnouncements([]); 
+        setAnnouncements([]);
       }
     } catch (error) {
       console.error('Failed to fetch announcements', error);
-      setAnnouncements([]); 
+      setAnnouncements([]);
     }
   };
 
@@ -101,27 +116,28 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     e.preventDefault();
     const formData = new FormData();
     
-    if (currentAnnouncement.title) {
-      formData.append('title', currentAnnouncement.title);
-    }
-    if (currentAnnouncement.description) {
-      formData.append('description', currentAnnouncement.description);
-    }
-    if (currentAnnouncement.image) {
-      formData.append('image', currentAnnouncement.image);
-    }
-    if (currentAnnouncement.link) {
-      formData.append('link', currentAnnouncement.link);
-    }
-    // Add new fields
-    if (currentAnnouncement.viewer) {
-      formData.append('viewer', currentAnnouncement.viewer);
-    }
-    if (currentAnnouncement.linked_id) {
-      formData.append('linked_id', currentAnnouncement.linked_id);
-    }
-
     try {
+      // Validate required fields
+      if (!currentAnnouncement.title || !currentAnnouncement.description || !currentAnnouncement.viewer) {
+        showToast.error("Please fill in all required fields");
+        return;
+      }
+  
+      // Append all fields to formData
+      formData.append('title', currentAnnouncement.title);
+      formData.append('description', currentAnnouncement.description);
+      formData.append('viewer', currentAnnouncement.viewer);
+      
+      if (currentAnnouncement.image) {
+        formData.append('image', currentAnnouncement.image);
+      }
+      if (currentAnnouncement.link) {
+        formData.append('link', currentAnnouncement.link);
+      }
+      if (currentAnnouncement.linked_id) {
+        formData.append('linked_id', currentAnnouncement.linked_id);
+      }
+  
       const response = await fetch(`${API_URL}/admin/create_announcement`, {
         method: 'POST',
         headers: {
@@ -130,21 +146,26 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
         body: formData
       });
       
-      if (response.ok) {
-        fetchAnnouncements();
-        setIsCreateModalOpen(false);
-        setCurrentAnnouncement({
-          id: undefined,
-          title: '',
-          description: '',
-          image: null,
-          link: '',
-          viewer: 'all',
-          linked_id: ''
-        });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to create announcement');
       }
+  
+      showToast.success("Announcement created successfully");
+      fetchAnnouncements();
+      setIsCreateModalOpen(false);
+      setCurrentAnnouncement({
+        id: undefined,
+        title: '',
+        description: '',
+        image: null,
+        link: '',
+        viewer: 'all',
+        linked_id: ''
+      });
     } catch (error) {
       console.error('Failed to create announcement', error);
+      showToast.error("Failed to create announcement");
     }
   };
 
@@ -197,18 +218,25 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   // Delete announcement
   const handleDeleteAnnouncement = async (id: number) => {
     try {
-      const response = await fetch(`${API_URL}/admin/delete_announcement/${id}`, {
+      const response = await fetch(`${API_URL}/admin/delete_announcement`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${bearerToken}`
-        }
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json'  // Important since we're sending a JSON body
+        },
+        body: JSON.stringify({ id })  // Send ID in request body
       });
       
-      if (response.ok) {
-        fetchAnnouncements();
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to delete announcement');
       }
+  
+      showToast.success("Announcement deleted successfully");
+      fetchAnnouncements();
     } catch (error) {
-      console.error('Failed to delete announcement', error);
+      console.error('Failed to delete announcement:', error);
+      showToast.error("Failed to delete announcement");
     }
   };
 
@@ -218,14 +246,16 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     }
   }, [bearerToken]);
 
+  
   // Helper function to render viewer badge
 // Update the ViewerBadge component with proper type checking
-const ViewerBadge: React.FC<{ viewer: string, linkedId?: string }> = ({ viewer, linkedId }) => {
+const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
   const getBadgeColor = () => {
-    if (!viewer) return 'bg-gray-100 text-gray-800'; // Default color if viewer is undefined
-    
+    if (!viewer) return 'bg-gray-100 text-gray-800';
+   
     switch (viewer) {
       case 'all': return 'bg-green-100 text-green-800';
+      case 'members': return 'bg-yellow-100 text-yellow-800';
       case 'conference': return 'bg-blue-100 text-blue-800';
       case 'seminar': return 'bg-purple-100 text-purple-800';
       case 'speaker': return 'bg-orange-100 text-orange-800';
@@ -233,13 +263,15 @@ const ViewerBadge: React.FC<{ viewer: string, linkedId?: string }> = ({ viewer, 
     }
   };
 
-  // Add null check before rendering
-  if (!viewer) return null; // Don't render badge if no viewer
+  // Add null check and provide default text
+  const displayText = viewer 
+    ? viewer.charAt(0).toUpperCase() + viewer.slice(1)
+    : 'Unknown';
 
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getBadgeColor()}`}>
-      {`${viewer.charAt(0).toUpperCase()}${viewer.slice(1)}`}
-      {linkedId && ` (ID: ${linkedId})`}
+    <span className={`px-2 py-1 rounded ${getBadgeColor()}`}>
+      {displayText}
+      {linkedId && ` (${linkedId})`}
     </span>
   );
 };
@@ -293,12 +325,12 @@ const ViewerBadge: React.FC<{ viewer: string, linkedId?: string }> = ({ viewer, 
                     <SelectValue placeholder="Select viewer" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Users</SelectItem>
-                    <SelectItem value="conference">Members</SelectItem>
-                    <SelectItem value="conference">Conference Participants</SelectItem>
-                    <SelectItem value="seminar">Seminar Participants</SelectItem>
-                    <SelectItem value="speaker">Speakers</SelectItem>
-                  </SelectContent>
+  <SelectItem value="all">All Users</SelectItem>
+  <SelectItem value="members">Members</SelectItem>  {/* Add this */}
+  <SelectItem value="conference">Conference Participants</SelectItem>
+  <SelectItem value="seminar">Seminar Participants</SelectItem>
+  <SelectItem value="speaker">Speakers</SelectItem>
+</SelectContent>
                 </Select>
               </div>
               <div>
@@ -346,7 +378,12 @@ const ViewerBadge: React.FC<{ viewer: string, linkedId?: string }> = ({ viewer, 
         {announcements.map((announcement) => (
           <Card 
             key={announcement.id} 
-            className='hover:shadow-xl transition-all duration-300 relative'
+            className={`hover:shadow-xl transition-all duration-300 relative
+              ${announcement.viewer === 'all' ? 'border-green-200' : ''}
+      ${announcement.viewer === 'conference' ? 'border-blue-200' : ''}
+      ${announcement.viewer === 'seminar' ? 'border-purple-200' : ''}
+      ${announcement.viewer === 'speaker' ? 'border-orange-200' : ''}`}
+            
           >
             <div className='absolute top-2 right-2 text-sm text-muted-foreground'>
               <span className='opacity-[0.6] italic'>{announcement.date} - {announcement.time}</span>
@@ -419,13 +456,40 @@ const ViewerBadge: React.FC<{ viewer: string, linkedId?: string }> = ({ viewer, 
                     >
                     <EditIcon className='h-4 w-4' />
                   </Button>
-                  <Button 
-                    variant='destructive' 
-                    size='icon'
-                    onClick={() => handleDeleteAnnouncement(announcement.id)}
-                  >
-                    <TrashIcon className='h-4 w-4' />
-                  </Button>
+                  <AlertDialog.Root>
+  <AlertDialog.Trigger asChild>
+    <button  className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+      <Trash2 className="w-4 h-4" />
+      <span>Delete</span>
+    </button>
+  </AlertDialog.Trigger>
+  <AlertDialog.Portal>
+    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+      <AlertDialog.Title className="text-lg font-semibold">
+        Delete Announcement 
+      </AlertDialog.Title>
+      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+        Are you sure you want to delete this Announcement? This action cannot be undone.
+      </AlertDialog.Description>
+      <div className="flex justify-end gap-4">
+        <AlertDialog.Cancel asChild>
+          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Cancel
+          </button>
+        </AlertDialog.Cancel>
+        <AlertDialog.Action asChild>
+          <button 
+          onClick={() => handleDeleteAnnouncement(announcement.id)}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </AlertDialog.Action>
+      </div>
+    </AlertDialog.Content>
+  </AlertDialog.Portal>
+</AlertDialog.Root>
                 </div>
               </div>
             </CardContent>

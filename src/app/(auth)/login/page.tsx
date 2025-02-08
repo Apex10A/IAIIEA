@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { LoadingSpinner } from '@/components/loading-spinner'
 import Link from "next/link";
+import { showToast } from "@/utils/toast";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
@@ -35,12 +36,14 @@ export default function LoginPage() {
         setIsLoading(false);
         return;
       }
+      showToast.success('Login successful!')
 
       // Successful login
       router.push("/members-dashboard");
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred");
+      showToast.error('An unexpected error occured');
     } finally {
       setIsLoading(false);
     }

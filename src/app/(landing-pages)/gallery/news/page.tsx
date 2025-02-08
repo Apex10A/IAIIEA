@@ -1,6 +1,8 @@
 import React from 'react';
 import '@/app/index.css';
 import Image from 'next/image';
+import Upcoming from './UpcomingSeminars'
+import ActiveConferences from './UpcomingConferences'
 
 const Page = () => {
   return (
@@ -54,19 +56,8 @@ const Page = () => {
 
       {/* Sidebar content */}
       <div className='lg:w-[30%] w-full flex flex-col gap-4'>
-        <div className='w-full h-full bg-gray-200 p-4 rounded-lg'>
-          <h2 className='text-lg md:text-xl font-semibold mb-4'>Related News or Ads</h2>
-          <p className='text-sm md:text-base'>
-            This section takes up 30% of the page. You can add related news, advertisements, or other side content here.
-          </p>
-        </div>
-        
-        <div className='w-full h-full bg-gray-200 p-4 rounded-lg'>
-          <h2 className='text-lg md:text-xl font-semibold mb-4'>Latest News</h2>
-          <p className='text-sm md:text-base'>
-          President Bola Ahmed Tinubu is set to attend the burial ceremony of the late President General of Ohanaeze Ndigbo Worldwide, Chief Emmanuel Iwuanyanwu, in Imo State.
-          </p>
-        </div>
+       <Upcoming/>
+        <ActiveConferences/>
       </div>
     </div>
   );

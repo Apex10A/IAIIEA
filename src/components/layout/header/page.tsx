@@ -5,7 +5,7 @@ import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { FiChevronDown, FiChevronUp, FiX, FiUser, FiLogOut } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiX, FiUser, FiLogOut, FiSettings } from "react-icons/fi";
 import "../../../app/globals.css";
 import { Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -14,7 +14,6 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -22,23 +21,10 @@ const Header = () => {
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    // Close mobile menu and user dropdown
     setIsMobileMenuOpen(false);
     setIsUserMenuOpen(false);
-    
-    // Sign out and redirect to home
-    await signOut({ redirect: false });
-    router.push("/");
+    await signOut({ callbackUrl: '/' });
   };
-
-  useEffect(() => {
-    // Check for user data in localStorage when component mounts
-    const storedUserData = localStorage.getItem("user_data");
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
-    }
-  }, []);
-
 
   const closeAllDropdowns = () => {
     setActiveDropdown(null);
@@ -88,29 +74,21 @@ const Header = () => {
   };
 
   const renderUserMenu = () => (
-    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-      <div className="px-4 py-2 border-b">
-        <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
-        <p className="text-xs text-gray-500">{session?.user?.email}</p>
-      </div>
-      <Link
-        href="/members-dashboard"
-        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-      >
-        Dashboard
-      </Link>
+    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
       <Link
         href="/profile"
-        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
       >
-        Profile Settings
+        <FiSettings className="mr-2" />
+        Update Profile
       </Link>
       <button
-      onClick={() => signOut({ callbackUrl: '/' })}
-      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-    >
-      Sign out
-    </button>
+        onClick={handleLogout}
+        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+      >
+        <FiLogOut className="mr-2" />
+        Logout
+      </button>
     </div>
   );
 
@@ -147,6 +125,47 @@ const Header = () => {
     );
   };
 
+  const renderUserSection = () => {
+    if (session) {
+      return (
+        <div className="flex items-center gap-4">
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2 text-white"
+            >
+              <div className="w-10 h-10 rounded-full bg-[#D5B93C] flex items-center justify-center">
+                <FiUser size={20} />
+              </div>
+              <span className="font-medium">{session.user?.name}</span>
+              {isUserMenuOpen ? (
+                <FiChevronUp className="text-[#D5B93C]" />
+              ) : (
+                <FiChevronDown className="text-[#D5B93C]" />
+              )}
+            </button>
+            {isUserMenuOpen && renderUserMenu()}
+          </div>
+          
+          <Link href="/members-dashboard">
+            <button className="bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]">
+              Go to Dashboard
+            </button>
+          </Link>
+        </div>
+      );
+    }
+
+    return (
+      <button 
+        onClick={() => signIn()}
+        className="bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]"
+      >
+        Login
+      </button>
+    );
+  };
+
   const renderMobileMenu = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
       <div className="fixed right-0 top-0 h-full w-[80%] max-w-sm bg-[#0E1A3D] z-50 overflow-y-auto">
@@ -158,7 +177,6 @@ const Header = () => {
         </div>
 
         <div className="flex flex-col p-5 space-y-4">
-          {/* Mobile menu items */}
           <Link
             href="/"
             className={`text-gray-300 py-2 ${pathname === "/" ? "text-yellow-500" : ""}`}
@@ -209,23 +227,28 @@ const Header = () => {
           <div className="mt-4">
             {session ? (
               <div className="space-y-2">
-                <div className="text-gray-300 border-t pt-4">
-                  <p className="font-medium">{session.user?.name}</p>
-                  <p className="text-sm">{session.user?.email}</p>
+                <div className="flex items-center gap-3 text-gray-300 border-t pt-4">
+                  <div className="w-10 h-10 rounded-full bg-[#D5B93C] flex items-center justify-center">
+                    <FiUser size={20} />
+                  </div>
+                  <div>
+                    <p className="font-medium">{session.user?.name}</p>
+                    <p className="text-sm">{session.user?.email}</p>
+                  </div>
                 </div>
+                <Link href="/profile" className="block text-gray-300 py-2">
+                  Update Profile
+                </Link>
                 <Link href="/members-dashboard" className="block text-gray-300 py-2">
                   Dashboard
                 </Link>
-                {/* <Link href="/profile" className="block text-gray-300 py-2">
-                  Profile Settings
-                </Link> */}
-               <button
-                onClick={handleLogout}
-                className="w-full text-left text-red-400 py-2 flex items-center gap-2"
-              >
-                <FiLogOut size={18} />
-                Sign out
-              </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left text-red-400 py-2 flex items-center gap-2"
+                >
+                  <FiLogOut size={18} />
+                  Sign out
+                </button>
               </div>
             ) : (
               <Link href="/login" onClick={toggleMobileMenu}>
@@ -296,31 +319,7 @@ const Header = () => {
               </Link>
             </div>
 
-            <div className="relative" ref={userMenuRef}>
-            {session ? (
-   <div className="flex">
-     <button
-      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-      className="flex items-center gap-2 text-[#0E1A3D]"
-    >
-      <div className="w-14 h-14 rounded-full bg-[#D5B93C] flex items-center justify-center">
-        <FiUser size={20} />
-      </div>
-      <span className="text-white">{session.user?.name}</span>
-      {isUserMenuOpen ? <FiChevronUp /> : <FiChevronDown />}
-    </button>
-     <button className="text-white"  onClick={() => signOut({ callbackUrl: '/' })}>Logout</button>
-   </div>
-  ) : (
-    <button 
-      onClick={() => signIn()}
-      className="bg-transparent border-2 border-[#D5B93C] px-8 py-2 font-semibold text-[#D5B93C]"
-    >
-      Login
-    </button>
-  )}
-              {isUserMenuOpen && userData && renderUserMenu()}
-            </div>
+            {renderUserSection()}
           </div>
         </div>
       </div>

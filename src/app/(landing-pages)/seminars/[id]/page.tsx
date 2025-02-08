@@ -94,19 +94,16 @@ const SeminarDetailsPage = () => {
               <h3 className="text-xl font-semibold mb-2">Theme</h3>
               <p className="text-gray-600">{seminarDetails.theme}</p>
             </div>
-
             <div className="flex items-center gap-4">
               <div className="flex items-center text-gray-500">
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 <span>{seminarDetails.date}</span>
               </div>
-              
               <div className="flex items-center text-gray-500">
                 <MapPinIcon className="w-5 h-5 mr-2" />
                 <span>{seminarDetails.venue}</span>
               </div>
             </div>
-
             {seminarDetails.resources && seminarDetails.resources.length > 0 && (
               <div>
                 <h3 className="text-xl font-semibold mb-2">Resources</h3>

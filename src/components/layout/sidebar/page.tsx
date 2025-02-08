@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronsLeft, ChevronsRight, Menu, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import "@/app/index.css";
 
-// Import your icons
 import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
 import PaymentIcon from '@/assets/sidebarIcons/PaymentIcon';
 import AnnouncementIcon from '@/assets/sidebarIcons/AnnouncementIcon';
@@ -51,7 +50,6 @@ const portalItems: NavItem[] = [
       { name: 'IAIIEA Resources', requiredPortal: 'membership', icon: ResourcesIcon },
       { name: 'Forum', requiredPortal: 'membership', icon: ForumIcon },
       { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon }
-      // { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]
   },
   { 
@@ -76,11 +74,18 @@ const portalItems: NavItem[] = [
   }
 ];
 
+const MIN_SIDEBAR_WIDTH = 80;
+const MAX_SIDEBAR_WIDTH = 400;
+const DEFAULT_WIDTH = 288;
+
 const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }) => {
   const [activeComponent, setActive] = useState('Dashboard');
   const [sidebarMode, setSidebarMode] = useState<'default' | 'mini' | 'closed' | 'mobile'>('default');
   const [windowWidth, setWindowWidth] = useState<number>(0);
   const [openPortals, setOpenPortals] = useState<{[key: string]: boolean}>({});
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -101,19 +106,45 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const startResizing = (e: React.MouseEvent) => {
+    setIsResizing(true);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', stopResizing);
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing || !sidebarRef.current) return;
+    
+    const newWidth = e.clientX;
+    if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= MAX_SIDEBAR_WIDTH) {
+      setSidebarWidth(newWidth);
+    }
+  };
+
+  const stopResizing = () => {
+    setIsResizing(false);
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', stopResizing);
+  };
+
   const toggleSidebar = () => {
     switch (sidebarMode) {
       case 'default':
         setSidebarMode('mini');
+        setSidebarWidth(MIN_SIDEBAR_WIDTH);
         break;
       case 'mini':
         setSidebarMode('closed');
+        setSidebarWidth(0);
         break;
       case 'closed':
         setSidebarMode('default');
+        setSidebarWidth(DEFAULT_WIDTH);
         break;
       case 'mobile':
         setSidebarMode('closed');
+        setSidebarWidth(0);
         break;
     }
   };
@@ -150,15 +181,6 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
     `;
   };
 
-  const getSidebarWidth = () => {
-    switch (sidebarMode) {
-      case 'default': return 'w-72';
-      case 'mini': return 'w-20';
-      case 'mobile': return 'w-64';
-      case 'closed': return 'w-0';
-    }
-  };
-
   const getMobileSidebarClasses = () => {
     return `
       fixed top-0 left-0 h-full z-50 bg-[#0e1a3d] shadow-lg 
@@ -178,23 +200,25 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
         </div>
       )}
 
-      <motion.div 
-        initial={{ width: '23rem' }}
-        animate={{ 
-          width: sidebarMode === 'default' ? '23rem' : 
-                 sidebarMode === 'mini' ? '5rem' : 
-                 sidebarMode === 'mobile' ? '18rem' : 0 
+      <div 
+        ref={sidebarRef}
+        style={{ 
+          width: sidebarMode === 'closed' ? 0 : `${sidebarWidth}px`,
+          transition: isResizing ? 'none' : 'width 0.3s ease-in-out'
         }}
-        transition={{ duration: 0.3 }}
         className={`
-          ${getSidebarWidth()} 
+          relative
           ${sidebarMode === 'mobile' ? getMobileSidebarClasses() : ''}
           bg-[#0e1a3d]
           h-full p-5 pt-20  
-          relative duration-300 
           ${sidebarMode !== 'mobile' ? 'max-md:hidden' : ''}
         `}
       >
+        <div
+          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-400 hover:opacity-100 transition-colors ${isResizing ? 'bg-blue-400' : 'bg-gray-300 opacity-0'}`}
+          onMouseDown={startResizing}
+        />
+
         {sidebarMode !== 'mobile' && (
           <div className='absolute top-4 right-4 z-50'>
             {sidebarMode === 'default' && (
@@ -302,7 +326,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </>
   );
 };

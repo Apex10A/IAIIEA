@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { showToast } from "@/utils/toast";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -34,12 +35,15 @@ export default function AdminLoginPage() {
         setIsLoading(false);
         return;
       }
+      showToast.success('Login successful!')
+
 
       // Successful login
       router.push("/admin-dashboard");
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred");
+      showToast.error('An unexpected error occured');
     } finally {
       setIsLoading(false);
     }

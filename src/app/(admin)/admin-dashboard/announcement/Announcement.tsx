@@ -73,7 +73,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   // Fetch announcements
   const fetchAnnouncements = async () => {
     try {
-      const response = await fetch(`${API_URL}/announcements`, {
+      const response = await fetch(`${API_URL}/announcements/member`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }
@@ -278,7 +278,7 @@ const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
   return (
     <div className=''>
       <div className='md:flex justify-between items-center mb-6'>
-        <h1 className="text-xl md:text-2xl font-bold text-gray-700">Announcements</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-700">Members Announcements</h1>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -334,7 +334,7 @@ const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
                 </Select>
               </div>
               <div>
-                <Label>Linked ID (Optional)</Label>
+                <Label>Linked ID (Conference ID you want to send announcement to)</Label>
                 <Input 
                   value={currentAnnouncement.linked_id}
                   onChange={(e) => setCurrentAnnouncement({
@@ -547,7 +547,7 @@ const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
               </Select>
             </div>
             <div>
-              <Label>Linked ID (Optional)</Label>
+              <Label>Linked ID (Conference ID you want to send announcement to)</Label>
               <Input 
                 value={currentAnnouncement.linked_id}
                 onChange={(e) => setCurrentAnnouncement({

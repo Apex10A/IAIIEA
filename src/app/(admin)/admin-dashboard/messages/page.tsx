@@ -74,7 +74,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   // Fetch announcements
   const fetchAnnouncements = async () => {
     try {
-      const response = await fetch(`${API_URL}/announcements/conference/12`, {
+      const response = await fetch(`${API_URL}/announcements/conference/8`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }

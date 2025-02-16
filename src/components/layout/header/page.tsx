@@ -64,7 +64,7 @@ const Header = () => {
       { title: "Login", description: "Access exclusive educational events and resources", link: "/login", image: "/HeadTwo.png" }
     ],
     programmes: [
-      { title: "Conference", description: "Meet industry experts in live interactive sessions", link: "/conference-landing-page", image: "/Head.png" },
+      { title: "Conference", description: "Meet industry experts in live interactive sessions", link: "/conference", image: "/Head.png" },
       { title: "Seminar/Training", description: "Join the online trainings and group sessions", link: "/seminars", image: "/HeadTwo.png" }
     ],
     media: [

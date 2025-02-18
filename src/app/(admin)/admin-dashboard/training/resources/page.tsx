@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import AddFileModal from './AddFileModal';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
+import { showToast } from '@/utils/toast';
 
 // TypeScript interfaces
 interface Resource {
@@ -154,31 +155,31 @@ const ConferenceResources: React.FC = () => {
   }, []);
 
   const handleDeleteConference = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this conference?')) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_seminar`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ conference_id: id }),
+        body: JSON.stringify({ id: id }),
       });
 
       if (response.ok) {
+        showToast.success('Seminar deleted successfully');
         setConferences(prev => prev.filter(conf => conf.id !== id));
       } else {
         throw new Error('Delete failed');
+        showToast.error('Failed to delete Seminar');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Failed to delete conference');
+      showToast.error('Failed to delete Seminar');
     }
   };
 
   const handleDeleteResource = async (resourceId: number) => {
-    if (!window.confirm('Are you sure you want to delete this resource?')) return;
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`, {
@@ -191,6 +192,7 @@ const ConferenceResources: React.FC = () => {
       });
 
       if (response.ok) {
+        showToast.success('Resource deleted successfully');
         if (selectedConference) {
           const updatedResources = selectedConference.resources.filter(
             resource => resource.resource_id !== resourceId
@@ -209,10 +211,11 @@ const ConferenceResources: React.FC = () => {
         }
       } else {
         throw new Error('Delete failed');
+        showToast.error('Failed to delete resource');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Failed to delete resource');
+      showToast.error('Failed to delete resource');
     }
   };
 

@@ -62,12 +62,12 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         >
           View Resources
         </button>
-        <button 
+        {/* <button 
           onClick={() => onEditConference(conference)}
           className="text-green-600 hover:text-green-800 font-semibold text-sm sm:text-base flex items-center gap-2"
         >
           Edit
-        </button>
+        </button> */}
         <button 
           onClick={() => onDeleteConference(conference.id)}
           className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2"

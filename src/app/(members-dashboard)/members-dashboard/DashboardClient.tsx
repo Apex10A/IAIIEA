@@ -26,6 +26,8 @@ import Conferences from "@/app/(members-dashboard)/members-dashboard/conference/
 import SeminarResources from "@/app/(members-dashboard)/members-dashboard/training/resources/page"
 import SeminarDirectory from "@/app/(members-dashboard)/members-dashboard/training/participants/page"
 import ConfAnnouncement from "@/app/(members-dashboard)/members-dashboard/confAnnouncement/page"
+import SeminarParticipants from "@/app/(members-dashboard)/members-dashboard/training/participants/page"
+import SeminarAnnouncements from "@/app/(members-dashboard)/members-dashboard/training/announcements/page"
 
 // TypeScript interfaces
 interface ComponentMap {
@@ -54,6 +56,8 @@ export default function DashboardClient() {
       'Seminar Directory': <SeminarDirectory/>,
       'Conference Announcements': <ConfAnnouncement />,
       'Seminar Resources': <SeminarResources/>,
+      'Seminar Participants': <SeminarParticipants/>,
+      'Seminar Announcements': <SeminarAnnouncements />,
       'Participants': <Participants/>,
       'Resources': <Resources/>,
       'Conferences': <Conferences/>,

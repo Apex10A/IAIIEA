@@ -200,8 +200,6 @@ const ConferenceResources: React.FC = () => {
   }, []);
 
   const handleDeleteConference = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this conference?')) return;
-
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`, {
         method: 'DELETE',
@@ -209,22 +207,23 @@ const ConferenceResources: React.FC = () => {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ conference_id: id }),
+        body: JSON.stringify({ id: id }),
       });
 
       if (response.ok) {
+        showToast.success('Conference deleted successfully');
         setConferences(prev => prev.filter(conf => conf.id !== id));
       } else {
         throw new Error('Delete failed');
+        showToast.error('Failed to delete conference');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Failed to delete conference');
+      showToast.error('Failed to delete conference');
     }
   };
 
   const handleDeleteResource = async (resourceId: number) => {
-    if (!window.confirm('Are you sure you want to delete this resource?')) return;
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`, {

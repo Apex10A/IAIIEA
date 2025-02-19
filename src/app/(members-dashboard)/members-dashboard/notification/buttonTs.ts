@@ -16,7 +16,11 @@ export type SectionType =
   | 'Workshop participants'
   | "Announcement"
   | "Event"
-  | "News";
+  | "News"
+  | "Create Conference Resources"
+  | "Create Conference Events"
+  | "Create Seminar Resources"
+  | "Create Seminar Events";
 
   export type SectionState = {
     [K in 'section1' | 'section2' | 'section3' | 'section4' | 'section5' | 'section6']: boolean;

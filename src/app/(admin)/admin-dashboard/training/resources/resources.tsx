@@ -26,7 +26,7 @@ export interface Resource {
   resource: string | File[];
   caption: string;
   created_at?: string;
-  conference_id: string
+  seminar_id: string
 }
 
 interface ResourcesPageProps {
@@ -180,7 +180,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Conferences Resources</h1>
+        <h1 className="text-2xl font-bold">Seminar Resources</h1>
         <ResourceUploadModal onUpload={onUpload} />
       </div>
 
@@ -236,7 +236,7 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
   const [date, setDate] = useState('');
   const [resourceType, setResourceType] = useState<ResourceType>('Video');
   const [isOpen, setIsOpen] = useState(false);
-  const [conferenceId, setConferenceId] = useState(''); // New state for conference ID
+  const [seminarId, setSeminarId] = useState(''); // New state for conference ID
 
   const acceptedFileTypes = {
     'Video': 'video/*',
@@ -267,14 +267,14 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
         resource: Array.from(files),
         caption: caption.trim(),
         created_at: date || new Date().toISOString(),
-        conference_id: conferenceId.trim() // Use the conference ID from state
+        seminar_id: seminarId.trim() // Use the conference ID from state
       });
       
       setFiles(null);
       setCaption('');
       setDate('');
       setIsOpen(false);
-      setConferenceId(''); // Reset conference ID
+      setSeminarId(''); // Reset conference ID
     } catch (error) {
       console.error('Upload failed', error);
     }
@@ -362,15 +362,15 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
             />
           </div>
           <div>
-            <label htmlFor="conference-id" className="block mb-2">
-              Conference ID
+            <label htmlFor="seminar-id" className="block mb-2">
+              Seminar ID
             </label>
             <Input 
-              id="conference-id"
+              id="seminar-id"
               type="text"
-              value={conferenceId}
-              onChange={(e) => setConferenceId(e.target.value)}
-              placeholder="Enter conference ID"
+              value={seminarId}
+              onChange={(e) => setSeminarId(e.target.value)}
+              placeholder="Enter seminar ID"
               className="w-full"
               required
             />

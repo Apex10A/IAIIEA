@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Resource, ResourcesPage } from './resources';
 import { useSession } from "next-auth/react";
 import { toast } from 'sonner';
+import   PortalAccessWrapper   from '@/components/ProtectedRoute';
 
 const Page = () => {
   const { data: session } = useSession();
@@ -95,12 +96,14 @@ const Page = () => {
   }, [bearerToken]);
 
   return (
+    <PortalAccessWrapper portalType="membership">
     <ResourcesPage
       initialResources={resources}
       onUpload={handleUpload}
       onDelete={handleDelete}
       uploadProgress={uploadProgress}
     />
+      </PortalAccessWrapper>
   );
 };
 

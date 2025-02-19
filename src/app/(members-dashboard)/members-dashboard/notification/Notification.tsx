@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import AnnouncementsPage from './Announcement';
 import JobOpportunitiesPage from './Jobs';
+import   PortalAccessWrapper   from '@/components/ProtectedRoute';
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 
 const Page = () => {
@@ -28,6 +29,7 @@ const Page = () => {
   };
 
   return (
+    <PortalAccessWrapper portalType="membership">
     <div className='p-6'>
       <div className='bg-gray-200 px-5 py-3 mb-6 '>
         <h1 className="text-lg md:text-2xl text-black">OPPORTUNITIES</h1>
@@ -45,6 +47,7 @@ const Page = () => {
         {renderContent()}
       </div>
     </div>
+    </PortalAccessWrapper>
   );
 };
 

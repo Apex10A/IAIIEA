@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Types
 interface Conference {
@@ -30,12 +31,18 @@ interface Member {
   institution: string;
 }
 
+interface ConferenceDetails {
+  is_registered: boolean;
+  // ... other conference details properties
+}
+
 const ConferenceParticipantsPage = () => {
   // States for conferences
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
   
-  // States from previous implementation
+  // States for members
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +99,7 @@ const ConferenceParticipantsPage = () => {
 
       setIsLoading(true);
       try {
-        // Fetch conference details first
+        // Fetch conference details first to check registration status
         const detailsResponse = await fetch(`${API_URL}/landing/event_details/${selectedConference.id}`, {
           headers: {
             'Authorization': `Bearer ${bearerToken}`,
@@ -101,21 +108,30 @@ const ConferenceParticipantsPage = () => {
         });
 
         if (!detailsResponse.ok) throw new Error('Failed to fetch conference details');
+        
+        const detailsData = await detailsResponse.json();
+        setIsRegistered(detailsData.data.is_registered);
 
-        // Then fetch participants for this conference
-        const participantsResponse = await fetch(`${API_URL}/admin/user_list/conference_member/${selectedConference.id}`, {
-          headers: {
-            'Authorization': `Bearer ${bearerToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        // Only fetch participants if user is registered
+        if (detailsData.data.is_registered) {
+          const participantsResponse = await fetch(`${API_URL}/admin/user_list/conference_member/${selectedConference.id}`, {
+            headers: {
+              'Authorization': `Bearer ${bearerToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
 
-        if (!participantsResponse.ok) throw new Error('Failed to fetch participants');
+          if (!participantsResponse.ok) throw new Error('Failed to fetch participants');
 
-        const participantsData = await participantsResponse.json();
-        setMembers(participantsData.data);
-        setFilteredMembers(participantsData.data);
-        setCurrentPage(1);
+          const participantsData = await participantsResponse.json();
+          setMembers(participantsData.data);
+          setFilteredMembers(participantsData.data);
+          setCurrentPage(1);
+        } else {
+          // Clear participants data if not registered
+          setMembers([]);
+          setFilteredMembers([]);
+        }
       } catch (err) {
         console.error('Error fetching conference data:', err);
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -168,7 +184,7 @@ const ConferenceParticipantsPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <p>Loading...</p>
+        <p>Loading participants...</p>
       </div>
     );
   }
@@ -188,7 +204,7 @@ const ConferenceParticipantsPage = () => {
         {/* Conferences List */}
         <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10">
            <h1 className="text-xl sm:text-2xl">Conference Participants</h1>
-          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {conferences.map((conference) => (
             <Card 
@@ -211,115 +227,125 @@ const ConferenceParticipantsPage = () => {
           ))}
         </div>
 
-        {/* Participants Table - Only show if a conference is selected */}
+        {/* Registration Check and Participants Table */}
         {selectedConference && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1">
-                  {selectedConference.title} - Participants
-                </h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <input 
-                  type="text" 
-                  placeholder="Search participants..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-3 py-2 border rounded-md"
-                />
-              </div>
-            </div>
-
-            {filteredMembers.length === 0 ? (
-              <div className="text-center py-8">
-                <p>No participants found for this conference</p>
-              </div>
+            {!isRegistered ? (
+              <Alert className="bg-yellow-50 border-yellow-200 mt-4">
+                <AlertDescription>
+                  You need to be registered for {selectedConference.title} to view its participants. 
+                </AlertDescription>
+              </Alert>
             ) : (
               <div>
-                <div className="mt-6 w-full overflow-x-auto">
-                <Table className="min-w-[1200px]">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
-                        <input 
-                          type="checkbox" 
-                          checked={isAllSelected}
-                          onChange={handleSelectAll}
-                          className="form-checkbox h-5 w-5 text-blue-600"
-                        />
-                      </TableHead>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Country</TableHead>
-                      <TableHead>Institution</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentMembers.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>
-                          <input 
-                            type="checkbox" 
-                            checked={selectedMembers.includes(member.id)}
-                            onChange={() => handleMemberSelect(member.id)}
-                            className="form-checkbox h-5 w-5 text-blue-600"
-                          />
-                        </TableCell>
-                        <TableCell>{member.id}</TableCell>
-                        <TableCell className="flex items-center space-x-2">
-                          <img 
-                            src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${member.name}`} 
-                            alt={`${member.name}'s avatar`} 
-                            className="w-10 h-10 rounded-full mr-2"
-                          />
-                          {member.name}
-                        </TableCell>
-                        <TableCell>{member.email}</TableCell>
-                        <TableCell>Nigeria</TableCell>
-                        <TableCell>{member.institution}</TableCell>
-                        <TableCell>{member.role}</TableCell>
-                        <TableCell>
-                          <button
-                            onClick={() => setActiveMemberId(member.id)}
-                            className="text-[24px] font-bold cursor-pointer"
-                          >
-                            :
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                  <TableFooter>
-                    <TableRow>
-                      <TableCell colSpan={8}>
-                        <div className="flex justify-center items-center space-x-2 mt-4">
-                          <button 
-                            onClick={() => paginate(currentPage - 1)} 
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 border-2 border-[#fef08a] bg-transparent rounded disabled:opacity-50"
-                          >
-                            Previous
-                          </button>
-                          <span>
-                            Page {currentPage} of {totalPages}
-                          </span>
-                          <button 
-                            onClick={() => paginate(currentPage + 1)} 
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-[#fef08a] rounded disabled:opacity-50"
-                          >
-                            Next
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  </TableFooter>
-                </Table>
-              </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h1 className="text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1">
+                      {selectedConference.title} - Participants
+                    </h1>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <input 
+                      type="text" 
+                      placeholder="Search participants..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="px-3 py-2 border rounded-md"
+                    />
+                  </div>
+                </div>
+
+                {filteredMembers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p>No participants found for this conference</p>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mt-6 w-full overflow-x-auto">
+                      <Table className="min-w-[1200px]">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[50px]">
+                              <input 
+                                type="checkbox" 
+                                checked={isAllSelected}
+                                onChange={handleSelectAll}
+                                className="form-checkbox h-5 w-5 text-blue-600"
+                              />
+                            </TableHead>
+                            <TableHead>ID</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Country</TableHead>
+                            <TableHead>Institution</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {currentMembers.map((member) => (
+                            <TableRow key={member.id}>
+                              <TableCell>
+                                <input 
+                                  type="checkbox" 
+                                  checked={selectedMembers.includes(member.id)}
+                                  onChange={() => handleMemberSelect(member.id)}
+                                  className="form-checkbox h-5 w-5 text-blue-600"
+                                />
+                              </TableCell>
+                              <TableCell>{member.id}</TableCell>
+                              <TableCell className="flex items-center space-x-2">
+                                <img 
+                                  src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${member.name}`} 
+                                  alt={`${member.name}'s avatar`} 
+                                  className="w-10 h-10 rounded-full mr-2"
+                                />
+                                {member.name}
+                              </TableCell>
+                              <TableCell>{member.email}</TableCell>
+                              <TableCell>Nigeria</TableCell>
+                              <TableCell>{member.institution}</TableCell>
+                              <TableCell>{member.role}</TableCell>
+                              <TableCell>
+                                <button
+                                  onClick={() => setActiveMemberId(member.id)}
+                                  className="text-[24px] font-bold cursor-pointer"
+                                >
+                                  :
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                        <TableFooter>
+                          <TableRow>
+                            <TableCell colSpan={8}>
+                              <div className="flex justify-center items-center space-x-2 mt-4">
+                                <button 
+                                  onClick={() => paginate(currentPage - 1)} 
+                                  disabled={currentPage === 1}
+                                  className="px-4 py-2 border-2 border-[#fef08a] bg-transparent rounded disabled:opacity-50"
+                                >
+                                  Previous
+                                </button>
+                                <span>
+                                  Page {currentPage} of {totalPages}
+                                </span>
+                                <button 
+                                  onClick={() => paginate(currentPage + 1)} 
+                                  disabled={currentPage === totalPages}
+                                  className="px-4 py-2 bg-[#fef08a] rounded disabled:opacity-50"
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        </TableFooter>
+                      </Table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

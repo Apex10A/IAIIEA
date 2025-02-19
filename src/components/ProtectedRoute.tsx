@@ -13,17 +13,26 @@ interface ConferenceDetails {
   theme: string;
   // ... other conference details as needed
 }
+interface SeminarDetails {
+  id: number;
+  is_registered: boolean;
+  title: string;
+  theme: string;
+  // ... other conference details as needed
+}
 
 interface PortalAccessWrapperProps {
   portalType: 'membership' | 'conference' | 'webinar' | string;
   children: React.ReactNode;
   conferenceDetails?: ConferenceDetails | null; // Optional for conference portal
+  seminarDetails?: SeminarDetails | null; // Optional for conference portal
 }
 
 const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({ 
   portalType, 
   children,
-  conferenceDetails 
+  conferenceDetails, 
+  seminarDetails
 }) => {
   const { data: session, status } = useSession({
     required: true,
@@ -36,7 +45,7 @@ const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({
     const names = {
       membership: 'Membership Portal',
       conference: 'Conference Portal',
-      webinar: 'Webinar Portal'
+      webinar: 'Training Portal'
     };
     
     return names[portalType as keyof typeof names] || portalType;
@@ -63,7 +72,7 @@ const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({
         return conferenceDetails?.is_registered || false;
       
       case 'webinar':
-        return session?.user?.userData?.registration === 'complete';
+        return seminarDetails?.is_registered || false;
       
       default:
         return false;
@@ -97,7 +106,7 @@ const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({
       case 'membership':
         return {
           title: 'Membership Access Required',
-          message: 'Please complete registration for the Membership Portal to view this content.',
+          message: 'Please make payment for the Membership Portal to view this content.',
           action: 'Complete Registration'
         };
       
@@ -131,10 +140,10 @@ const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({
     const accessMessage = getAccessMessage();
     
     return (
-      <Card>
+      <div>
         <CardContent className="space-y-4 p-6">
           <Alert variant="error">
-            <LockIcon className="h-4 w-4" />
+            <LockIcon className="h-4 w-4 " />
             <AlertDescription>
               <div className="space-y-2">
                 <h3 className="font-bold">{accessMessage.title}</h3>
@@ -143,14 +152,9 @@ const PortalAccessWrapper: React.FC<PortalAccessWrapperProps> = ({
               </div>
             </AlertDescription>
           </Alert>
-          <button 
-            onClick={handlePurchaseAccess}
-            className="w-full bg-primary text-primary-foreground p-2 rounded"
-          >
-            {accessMessage.action}
-          </button>
+         
         </CardContent>
-      </Card>
+      </div>
     );
   }
 

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Calendar, MapPin, X, FileText, Info } from 'lucide-react';
 import SkeletonLoader from './ConferenceLoader';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // TypeScript interfaces
 interface Resource {
@@ -39,6 +40,7 @@ const ConferenceResources: React.FC = () => {
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
   const [viewMode, setViewMode] = useState<'details' | 'resources'>('details');
   const [loading, setLoading] = useState(true);
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
@@ -55,6 +57,7 @@ const ConferenceResources: React.FC = () => {
           }
         );
         const data = await response.json();
+        
         
         if (data.status === "success") {
           setConferences(data.data);
@@ -260,11 +263,11 @@ const ConferenceResources: React.FC = () => {
           </div>
 
           {!selectedConference.is_registered ? (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-              <p className="text-red-700">
-                You must be registered for this conference to access its resources.
-              </p>
-            </div>
+             <Alert className="bg-yellow-50 border-yellow-200 mt-4">
+             <AlertDescription>
+             You must be registered for this conference to access its resources.
+             </AlertDescription>
+           </Alert>
           ) : viewMode === 'details' ? (
             <ConferenceDetails conference={selectedConference} />
           ) : selectedConference.resources.length > 0 ? (

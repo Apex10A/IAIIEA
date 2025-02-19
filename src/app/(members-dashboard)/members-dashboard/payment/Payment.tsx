@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -5,8 +6,17 @@ import { useFlutterwave } from 'flutterwave-react-v3';
 import type { FlutterwaveConfig, FlutterWaveResponse } from 'flutterwave-react-v3/dist/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // TypeScript Interfaces
+type PaymentPlan = 'basic' | 'premium' | 'standard';
+
 interface UserData {
   registration: string;
   email?: string;
@@ -57,76 +67,94 @@ interface PaymentData {
 
 const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStates, setProcessingStates] = useState<Record<string, boolean>>({});
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [conferenceDetails, setConferenceDetails] = useState<Record<number, EventDetails>>({});
   const [seminarDetails, setSeminarDetails] = useState<Record<number, EventDetails>>({});
   const [hasMembershipAccess, setHasMembershipAccess] = useState(false);
+  const [selectedPlans, setSelectedPlans] = useState<Record<number, PaymentPlan>>({});
   
   const { data: session, status } = useSession();
   const router = useRouter();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (status === 'authenticated' && session?.user) {
-        try {
-          // Check membership status
-          const userData = (session.user as any).userData as UserData;
-          setHasMembershipAccess(userData?.registration === 'complete');
-
-          // Fetch conferences
-          const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
-          const confData: ApiResponse<Conference[]> = await confResponse.json();
-          const relevantConferences = (confData.data || []).filter(
-            conf => conf.status === 'Incoming' || conf.status === 'Ongoing'
-          );
-          setConferences(relevantConferences);
-
-          // Fetch seminars
-          const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
-          const semData: ApiResponse<Seminar[]> = await semResponse.json();
-          const relevantSeminars = (semData.data || []).filter(
-            sem => sem.status === 'Incoming' || sem.status === 'Ongoing'
-          );
-          setSeminars(relevantSeminars);
-
-          // Fetch details for each conference
-          for (const conf of relevantConferences) {
-            const detailsResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conf.id}`
-            );
-            const detailsData: ApiResponse<EventDetails> = await detailsResponse.json();
-            setConferenceDetails(prev => ({
-              ...prev,
-              [conf.id]: detailsData.data
-            }));
-          }
-
-          // Fetch details for each seminar
-          for (const sem of relevantSeminars) {
-            const detailsResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${sem.id}`
-            );
-            const detailsData: ApiResponse<EventDetails> = await detailsResponse.json();
-            setSeminarDetails(prev => ({
-              ...prev,
-              [sem.id]: detailsData.data
-            }));
-          }
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        } finally {
-          setLoading(false);
-        }
-      } else if (status === 'unauthenticated') {
-        router.push('/login');
+  // Function to fetch event details
+  const fetchEventDetails = async (eventId: number, type: 'conference' | 'seminar') => {
+    try {
+      const endpoint = type === 'conference' 
+        ? `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${eventId}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${eventId}`;
+        
+      const response = await fetch(endpoint);
+      const data: ApiResponse<EventDetails> = await response.json();
+      
+      if (type === 'conference') {
+        setConferenceDetails(prev => ({
+          ...prev,
+          [eventId]: data.data
+        }));
+      } else {
+        setSeminarDetails(prev => ({
+          ...prev,
+          [eventId]: data.data
+        }));
       }
-    };
+    } catch (error) {
+      console.error(`Error fetching ${type} details:`, error);
+    }
+  };
 
-    fetchData();
+  // Function to fetch all data
+  const fetchAllData = async () => {
+    if (status === 'authenticated' && session?.user) {
+      try {
+        // Check membership status
+        const userData = (session.user as any).userData as UserData;
+        setHasMembershipAccess(userData?.registration === 'complete');
+
+        // Fetch conferences
+        const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
+        const confData: ApiResponse<Conference[]> = await confResponse.json();
+        const relevantConferences = (confData.data || []).filter(
+          conf => conf.status === 'Incoming' || conf.status === 'Ongoing'
+        );
+        setConferences(relevantConferences);
+
+        // Fetch seminars
+        const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
+        const semData: ApiResponse<Seminar[]> = await semResponse.json();
+        const relevantSeminars = (semData.data || []).filter(
+          sem => sem.status === 'Incoming' || sem.status === 'Ongoing'
+        );
+        setSeminars(relevantSeminars);
+
+        // Fetch details for each conference
+        for (const conf of relevantConferences) {
+          await fetchEventDetails(conf.id, 'conference');
+        }
+
+        // Fetch details for each seminar
+        for (const sem of relevantSeminars) {
+          await fetchEventDetails(sem.id, 'seminar');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    } else if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
   }, [status, session, router]);
+
+  const getProcessingKey = (type: string, id?: number) => {
+    return `${type}-${id || 'membership'}`;
+  };
 
   const initiatePayment = async (
     type: 'membership' | 'conference' | 'seminar',
@@ -139,7 +167,13 @@ const PaymentPage: React.FC = () => {
       return;
     }
 
-    setIsProcessing(true);
+    if ((type === 'conference' || type === 'seminar') && !itemId) {
+      console.error('Item ID is required for conference and seminar payments');
+      return;
+    }
+
+    const processingKey = getProcessingKey(type, itemId);
+    setProcessingStates(prev => ({ ...prev, [processingKey]: true }));
 
     try {
       let paymentData: PaymentData | null = null;
@@ -151,7 +185,27 @@ const PaymentPage: React.FC = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${bearerToken}`
           },
-          body: JSON.stringify({ id: itemId })
+          body: JSON.stringify({ 
+            id: itemId,
+            plan: selectedPlans[itemId!] || 'basic'
+          })
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          paymentData = data.data;
+        }
+      } else if (type === 'seminar') {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${bearerToken}`
+          },
+          body: JSON.stringify({ 
+            id: itemId,
+            plan: selectedPlans[itemId!] || 'basic'
+          })
         });
 
         const data = await response.json();
@@ -185,15 +239,16 @@ const PaymentPage: React.FC = () => {
       handleFlutterPayment({
         callback: async (response: FlutterWaveResponse) => {
           await handlePaymentCallback(response, type, itemId, paymentData);
+          setProcessingStates(prev => ({ ...prev, [processingKey]: false }));
         },
         onClose: () => {
           console.log('Payment modal closed');
-          setIsProcessing(false);
+          setProcessingStates(prev => ({ ...prev, [processingKey]: false }));
         },
       });
     } catch (error) {
       console.error('Payment initiation error:', error);
-      setIsProcessing(false);
+      setProcessingStates(prev => ({ ...prev, [processingKey]: false }));
     }
   };
 
@@ -208,11 +263,12 @@ const PaymentPage: React.FC = () => {
         console.error('Invalid session or payment data');
         return;
       }
+      const amountPaid = transaction.amount;
 
       const confirmPayload = {
         payment_id: paymentData.payment_id,
         processor_id: transaction.transaction_id?.toString() || '',
-        paid: paymentData.amount
+        paid: amountPaid
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/confirm_payment/`, {
@@ -226,8 +282,14 @@ const PaymentPage: React.FC = () => {
 
       const result = await response.json();
       if (result.status === 'success') {
-        // Refresh the page or update state as needed
-        window.location.reload();
+        // Update the relevant event details after successful payment
+        if (type === 'conference' && itemId) {
+          await fetchEventDetails(itemId, 'conference');
+        } else if (type === 'seminar' && itemId) {
+          await fetchEventDetails(itemId, 'seminar');
+        } else if (type === 'membership') {
+          setHasMembershipAccess(true);
+        }
       }
     } catch (error) {
       console.error('Payment confirmation error:', error);
@@ -246,34 +308,63 @@ const PaymentPage: React.FC = () => {
     event: EventBase;
     type: 'conference' | 'seminar';
     isRegistered: boolean;
-  }> = ({ event, type, isRegistered }) => (
-    <Card className="mb-4 overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
-            <p className="text-gray-600 mb-2">{event.date}</p>
-            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 
-              ${event.status === 'Incoming' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-              {event.status}
-            </span>
+  }> = ({ event, type, isRegistered }) => {
+    const processingKey = getProcessingKey(type, event.id);
+    const isProcessing = processingStates[processingKey];
+
+    return (
+      <Card className="mb-4 overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
+              <p className="text-gray-600 mb-2">{event.date}</p>
+              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 
+                ${event.status === 'Incoming' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                {event.status}
+              </span>
+            </div>
+            {isRegistered ? (
+              <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
+                Active Access
+              </span>
+            ) : (
+              <div className="flex items-center gap-4">
+                <Select
+                  onValueChange={(value: PaymentPlan) => 
+                    setSelectedPlans(prev => ({ ...prev, [event.id]: value }))
+                  }
+                  defaultValue="basic"
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">Basic Plan</SelectItem>
+                    <SelectItem value="standard">Standard Plan</SelectItem>
+                    <SelectItem value="premium">Premium Plan</SelectItem>
+                  </SelectContent>
+                </Select>
+                <button
+                  onClick={() => initiatePayment(type, 50000, event.id, event.title)}
+                  disabled={isProcessing}
+                  className="px-6 py-2 bg-[#0E1A3D] hover:bg-primary/90 text-white rounded-lg transition-colors
+                    disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? 'Processing...' : 'Make Payment'}
+                </button>
+              </div>
+            )}
           </div>
-          {!isRegistered && (
-            <button
-              onClick={() => initiatePayment(type, 50000, event.id, event.title)}
-              disabled={isProcessing}
-              className="px-6 py-2 bg-[#0E1A3D] hover:bg-primary/90 text-white rounded-lg transition-colors
-                disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isProcessing ? 'Processing...' : 'Make Payment'}
-            </button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   const MembershipSection = () => {
+    const processingKey = getProcessingKey('membership');
+    const isProcessing = processingStates[processingKey];
+    
     if (hasMembershipAccess) {
       return (
         <div className="mb-8">
@@ -305,82 +396,82 @@ const PaymentPage: React.FC = () => {
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? 'Processing...' : 'Make Payment'}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    };
+  
+    if (loading) {
+      return (
+        <div className="container mx-auto px-4 py-8 space-y-8">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      );
+    }
+  
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="bg-gray-100 px-5 py-3 mb-6 rounded-lg">
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Payments</h1>
+        </div>
+  
+        {/* Membership Section */}
+        <MembershipSection />
+  
+        {/* Conferences Section */}
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Conference Payments</h2>
+          {conferences.length === 0 ? (
+            <p className="text-gray-600">No pending conference payments.</p>
+          ) : (
+            <>
+              <Alert className="mb-4">
+                <AlertDescription>
+                  You have pending conference payments to make
+                </AlertDescription>
+              </Alert>
+              {conferences.map(conference => (
+                <EventCard
+                  key={conference.id}
+                  event={conference}
+                  type="conference"
+                  isRegistered={conferenceDetails[conference.id]?.is_registered ?? false}
+                />
+              ))}
+            </>
+          )}
+        </section>
+  
+        {/* Seminars Section */}
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">Seminar Payments</h2>
+          {seminars.length === 0 ? (
+            <p className="text-gray-600">No pending seminar payments.</p>
+          ) : (
+            <>
+              <Alert className="mb-4">
+                <AlertDescription>
+                  You have pending seminar payments to make
+                </AlertDescription>
+              </Alert>
+              {seminars.map(seminar => (
+                <EventCard
+                  key={seminar.id}
+                  event={seminar}
+                  type="seminar"
+                  isRegistered={seminarDetails[seminar.id]?.is_registered ?? false}
+                />
+              ))}
+            </>
+          )}
+        </section>
       </div>
     );
   };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="bg-gray-100 px-5 py-3 mb-6 rounded-lg">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Payments</h1>
-      </div>
-
-      {/* Membership Section */}
-      <MembershipSection />
-
-      {/* Conferences Section */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Conference Payments</h2>
-        {conferences.length === 0 ? (
-          <p className="text-gray-600">No pending conference payments.</p>
-        ) : (
-          <>
-            <Alert className="mb-4">
-              <AlertDescription>
-                You have pending conference payments to make
-              </AlertDescription>
-            </Alert>
-            {conferences.map(conference => (
-              <EventCard
-                key={conference.id}
-                event={conference}
-                type="conference"
-                isRegistered={conferenceDetails[conference.id]?.is_registered ?? false}
-              />
-            ))}
-          </>
-        )}
-      </section>
-
-      {/* Seminars Section */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Seminar Payments</h2>
-        {seminars.length === 0 ? (
-          <p className="text-gray-600">No pending seminar payments.</p>
-        ) : (
-          <>
-            <Alert className="mb-4">
-              <AlertDescription>
-                You have pending seminar payments to make
-              </AlertDescription>
-            </Alert>
-            {seminars.map(seminar => (
-              <EventCard
-                key={seminar.id}
-                event={seminar}
-                type="seminar"
-                isRegistered={seminarDetails[seminar.id]?.is_registered ?? false}
-              />
-            ))}
-          </>
-        )}
-      </section>
-    </div>
-  );
-};
-
-export default PaymentPage;
+  
+  export default PaymentPage;

@@ -13,7 +13,7 @@ const Page = () => {
 
   const fetchResources = async () => {
     try {
-      const response = await axios.get('https://iaiiea.org/api/sandbox/member_resources', {
+      const response = await axios.get('https://iaiiea.org/api/sandbox/conference_resources', {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json'

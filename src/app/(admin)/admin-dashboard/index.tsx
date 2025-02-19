@@ -21,7 +21,7 @@ import Payment from "@/app/(admin)/admin-dashboard/payment/Payment";
 import Settings from '@/app/(members-dashboard)/members-dashboard/settings/page';
 import Events from "@/app/(admin)/admin-dashboard/events/page"
 import ConferenceParticpants from '@/app/(admin)/admin-dashboard/ConferenceParticipants/participants'
-import  ConferenceResources  from '@/app/(admin)/admin-dashboard/ConferenceResources/resources';
+import  ConferenceResources  from '@/app/(admin)/admin-dashboard/ConferenceResources/page';
 import SeminarParticipants from '@/app/(admin)/admin-dashboard/training/participants/page'
 import SeminarResources from '@/app/(admin)/admin-dashboard/training/resources/page'
 import MembersResorces from '@/app/(admin)/admin-dashboard/members-resources/page'

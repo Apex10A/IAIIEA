@@ -1,160 +1,195 @@
-// "use client"
-// import React, { useState, useEffect } from 'react';
-// import { useSearchParams } from 'next/navigation';
-// import { useSession } from "next-auth/react";
-// import { MapPin, FileText, Images, Users, Video, DollarSign } from 'lucide-react';
+"use client"
+import React from 'react';
+import { MapPin, Calendar, FileText, Images, Users, Video, DollarSign, Coffee } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import "@/app/index.css"
+import { useSession } from "next-auth/react";
+import Link from 'next/link';
 
-// // Import your page components
-// import VenueAndDatePage from '@/app/(landing-pages)/conference-landing-page/venue/page';
-// import SubThemesPage from '@/app/(landing-pages)/conference-landing-page/subtheme/page';
-// import CallForPapersPage from '@/app/(landing-pages)/conference-landing-page/paper-flyer/page';
-// import GalleryPage from '@/app/(landing-pages)/conference-landing-page/gallery/page';
-// import SponsorsPage from '@/app/(landing-pages)/conference-landing-page/sponsors/page';
-// import VideosPage from '@/app/(landing-pages)/conference-landing-page/videos/page';
-// import ConferenceFeesPage from '@/app/(landing-pages)/conference-landing-page/fees/page';
-// import { PaymentsStructure } from './fees/fees';
-// import RegistrationMessage from './message';
+const ConferenceLandingPage = () => {
+  interface ConferenceDetails {
+    title: string;
+    theme: string;
+    venue: string;
+    date: string;
+    sub_theme: string[];
+    work_shop: string[];
+    important_date: string[];
+    gallery: string[];
+    sponsors: string[];
+    meals: { name: string; image?: string }[];
+  }
 
-// const ConferenceDetailsPage = () => {
-//   const [conferenceDetails, setConferenceDetails] = useState<any>(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const [currentPage, setCurrentPage] = useState(0);
+  const [conferenceDetails, setConferenceDetails] = React.useState<ConferenceDetails | null>(null);
+  const searchParams = useSearchParams();
+  const conferenceId = searchParams.get('id');
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-//   const searchParams = useSearchParams();
-//   const conferenceId = searchParams.get('id');
-//   const { data: session } = useSession();
-//   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  React.useEffect(() => {
+    const fetchConferenceDetails = async () => {
+      if (!conferenceId || !bearerToken) return;
 
-//   const pages = [
-//     { 
-//       component: (details: any) => <VenueAndDatePage details={details || {}} />, 
-//       icon: <MapPin className="w-6 h-6" />,
-//       title: 'Venue & Date' 
-//     },
-//     { 
-//       component: (details: any) => <SubThemesPage details={details || {}} />, 
-//       icon: <FileText className="w-6 h-6" />,
-//       title: 'Sub Themes' 
-//     },
-//     { 
-//       component: (details: any) => <CallForPapersPage flyer={details?.flyer || ''} />, 
-//       icon: <FileText className="w-6 h-6" />,
-//       title: 'Call for Papers' 
-//     },
-//     { 
-//       component: (details: any) => <GalleryPage gallery={details?.gallery || []} />, 
-//       icon: <Images className="w-6 h-6" />,
-//       title: 'Gallery' 
-//     },
-//     { 
-//       component: (details: any) => <SponsorsPage sponsors={details?.sponsors || []} />, 
-//       icon: <Users className="w-6 h-6" />,
-//       title: 'Sponsors' 
-//     },
-//     { 
-//       component: (details: any) => <VideosPage videos={details?.videos || []} />, 
-//       icon: <Video className="w-6 h-6" />,
-//       title: 'Videos' 
-//     },
-//     { 
-//       component: (details: any) => <ConferenceFeesPage payments={details?.payments || {}} />, 
-//       icon: <DollarSign className="w-6 h-6" />,
-//       title: 'Conference Fees' 
-//     }
-//   ];
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${bearerToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        const data = await response.json();
+        if (data.status === "success") {
+          setConferenceDetails(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch conference details:', error);
+      }
+    };
 
-//   useEffect(() => {
-//     const fetchConferenceDetails = async () => {
-//       if (!conferenceId || !bearerToken) return;
+    fetchConferenceDetails();
+  }, [conferenceId, bearerToken]);
 
-//       try {
-//         setIsLoading(true);
-//         const response = await fetch(
-//           `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`, 
-//           {
-//             method: 'GET',
-//             headers: {
-//               'Content-Type': 'application/json',
-//               'Authorization': `Bearer ${bearerToken}` 
-//             }
-//           }
-//         );
-        
-//         if (!response.ok) {
-//           throw new Error('Failed to fetch conference details');
-//         }
+  if (!conferenceDetails) {
+    return <div>Loading...</div>;
+  }
 
-//         const data = await response.json();
-        
-//         if (data.status === "success") {
-//           setConferenceDetails(data.data);
-//         } else {
-//           throw new Error(data.message || 'Failed to fetch conference details');
-//         }
-//       } catch (err) {
-//         setError(err instanceof Error ? err.message : 'An error occurred');
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-
-//     fetchConferenceDetails();
-//   }, [conferenceId, bearerToken]);
-
-//   if (isLoading) {
-//     return <div>Loading conference details...</div>;
-//   }
-
-//   if (error) {
-//     return <div>Error: {error}</div>;
-//   }
-
-//   if (!conferenceDetails) {
-//     return <div>No conference details found</div>;
-//   }
-
-//   // If not registered, show registration message
-//   if (!conferenceDetails.is_registered) {
-//     return (
-//       <RegistrationMessage 
-//         conferenceTitle={conferenceDetails.title} 
-//       />
-//     );
-//   }
-
-//   // If registered, show conference details with navigation
-//   return (
-//     <div className="min-h-screen bg-gray-100 flex">
-//       {/* Sidebar Navigation */}
-//       <div className="w-20 bg-[#1A2A5C] text-white mt-20 flex flex-col items-center py-8 space-y-4">
-//         {pages.map((page, index) => (
-//           <button
-//             key={index}
-//             onClick={() => setCurrentPage(index)}
-//             className={`p-3 rounded-lg ${currentPage === index ? 'bg-[#D5B93C] text-black' : 'hover:bg-blue-700'}`}
-//             title={page.title}
-//           >
-//             {page.icon}
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* Main Content Area */}
-//       <div className="flex-1 p-8 mt-20">
-//         {pages[currentPage].component(conferenceDetails)}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ConferenceDetailsPage;
-import React from 'react'
-
-const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative h-screen bg-[#1A2A5C] text-white flex items-center">
+        <div className="container mx-auto px-6">
+          <h1 className="text-6xl font-bold mb-4">{conferenceDetails.title}</h1>
+          <p className="text-lg mb-8">{conferenceDetails.theme}</p>
+          <div className="">
+           <div className='flex items-center gap-3 '>
+           <MapPin className="w-6 h-6" />
+           <span className='text-lg'>{conferenceDetails.venue}</span>
+           </div>
+            <div className='flex items-center gap-3 '>
+            <Calendar className="w-6 h-6" />
+            <span className='text-lg'>{conferenceDetails.date}</span>
+            </div>
+          </div>
+          <div>
+            <Link href="/dashboard">
+            <button className="bg-[#D5B93C] text-[#031a] py-2 px-6 mt-8 rounded-sm uppercase font-semibold">Register</button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
-export default page
+      {/* About Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-12 text-center">About the Conference</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="text-2xl font-semibold mb-4">Sub Themes</h3>
+              <ul className="space-y-2">
+                {conferenceDetails.sub_theme.map((theme, index) => (
+                  <li key={index} className="flex items-center">
+                    <FileText className="w-5 h-5 mr-2 text-[#D5B93C]" />
+                    {theme}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-2xl font-semibold mb-4">Workshops</h3>
+              <ul className="space-y-2">
+                {conferenceDetails.work_shop.map((workshop, index) => (
+                  <li key={index} className="flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-[#D5B93C]" />
+                    {workshop}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Important Dates */}
+      <section className="py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-12 text-center">Important Dates</h2>
+          <div className="max-w-3xl mx-auto">
+            {conferenceDetails.important_date.map((date, index) => (
+              <div key={index} className="flex items-center mb-4 p-4 bg-gray-50 rounded-lg">
+                <Calendar className="w-6 h-6 mr-4 text-[#D5B93C]" />
+                <span>{date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery */}
+      {conferenceDetails.gallery.length > 0 && (
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-6">
+            <h2 className="text-4xl font-bold mb-12 text-center">Gallery</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {conferenceDetails.gallery.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Gallery image ${index + 1}`}
+                  className="w-full h-64 object-cover rounded-lg shadow-lg"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Sponsors */}
+      {conferenceDetails.sponsors.length > 0 && (
+        <section className="py-20">
+          <div className="container mx-auto px-6">
+            <h2 className="text-4xl font-bold mb-12 text-center">Our Sponsors</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {conferenceDetails.sponsors.map((sponsor, index) => (
+                <img
+                  key={index}
+                  src={sponsor}
+                  alt={`Sponsor ${index + 1}`}
+                  className="w-full h-32 object-contain"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Meals */}
+      {conferenceDetails.meals.length > 0 && (
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-6">
+            <h2 className="text-4xl font-bold mb-12 text-center">Meals & Refreshments</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {conferenceDetails.meals.map((meal, index) => (
+                <div key={index} className="bg-white p-6 rounded-lg shadow-lg">
+                  <Coffee className="w-8 h-8 mb-4 text-[#D5B93C]" />
+                  <h3 className="text-xl font-semibold mb-2">{meal.name}</h3>
+                  {meal.image && (
+                    <img
+                      src={meal.image}
+                      alt={meal.name}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+};
+
+export default ConferenceLandingPage;

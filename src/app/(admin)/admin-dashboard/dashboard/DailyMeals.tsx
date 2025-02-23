@@ -53,7 +53,7 @@ interface Meal {
 
     try {
       setIsLoading(true);
-      const response = await fetch('https://iaiiea.org/api/sandbox/admin/add_conference_meal', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add_conference_meal`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${bearerToken}`,

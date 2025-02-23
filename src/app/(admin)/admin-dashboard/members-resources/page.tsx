@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Resource, ResourcesPage } from './resources';
 import { useSession } from "next-auth/react";
-import { toast } from 'sonner';
+import { showToast } from '@/utils/toast';
 
 const Page = () => {
   const { data: session } = useSession();
@@ -13,7 +13,7 @@ const Page = () => {
 
   const fetchResources = async () => {
     try {
-      const response = await axios.get('https://iaiiea.org/api/sandbox/member_resources', {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/member_resources`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json'
@@ -32,7 +32,7 @@ const Page = () => {
       setResources(formattedResources);
     } catch (error) {
       console.error('Fetch error:', error);
-      toast.error('Failed to fetch resources');
+      showToast.error('Failed to fetch resources');
     }
   };
 
@@ -49,7 +49,7 @@ const Page = () => {
     }
 
     try {
-      await axios.post('https://iaiiea.org/api/sandbox/admin/upload_member_resource', formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload_member_resource`, formData, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'multipart/form-data'
@@ -63,12 +63,12 @@ const Page = () => {
         timeout: 300000 // 5-minute timeout
       });
 
-      toast.success('Resource upload complete');
+      showToast.success('Resource upload complete');
       setUploadProgress(0);
       await fetchResources();
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Resource upload failed');
+      showToast.error('Resource upload failed');
       setUploadProgress(0);
     }
   };
@@ -80,11 +80,11 @@ const Page = () => {
           'Authorization': `Bearer ${bearerToken}`
         }
       });
-      toast.success('Resource deleted');
+      showToast.success('Resource deleted');
       await fetchResources();
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error('Failed to delete resource');
+      showToast.error('Failed to delete resource');
     }
   };
 

@@ -27,7 +27,7 @@ const BroadcastMail = () => {
 
     try {
       const response = await axios.post(
-        "https://iaiiea.org/api/sandbox/admin/send_broadcast_mail",
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/send_broadcast_mail`,
         {
           organization_email: organizationEmail,
           recipients,

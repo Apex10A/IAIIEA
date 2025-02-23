@@ -121,7 +121,7 @@ const [eventDetails, setEventDetails] = useState({
     }
   
     try {
-      const response = await fetch('https://iaiiea.org/api/sandbox/admin/create_calendar_activity', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_calendar_activity`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${bearerToken}`,

@@ -47,7 +47,7 @@ const NewsManagement: React.FC = () => {
 
   const fetchNews = async (): Promise<void> => {
     try {
-      const response = await fetch("https://iaiiea.org/api/sandbox/admin/list_news", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/list_news`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${bearerToken}`,
@@ -57,11 +57,10 @@ const NewsManagement: React.FC = () => {
       if (response.ok) {
         setNews(result.data || []);
       } else {
-        alert(result.message || "Failed to fetch news.");
+        console.error(result.message || "Failed to fetch news.");
       }
     } catch (error) {
       console.error("Error fetching news:", error);
-      alert("An error occurred while fetching news.");
     }
   };
 
@@ -94,8 +93,8 @@ const NewsManagement: React.FC = () => {
     try {
       setLoading(true);
       const endpoint = editingNewsId 
-        ? "https://iaiiea.org/api/sandbox/admin/edit_news" 
-        : "https://iaiiea.org/api/sandbox/admin/add_news";
+        ? `${process.env.NEXT_PUBLIC_API_URL}/admin/edit_news` 
+        : `${process.env.NEXT_PUBLIC_API_URL}/admin/add_news`;
       
       if (editingNewsId) body.append("news_id", editingNewsId.toString());
 
@@ -128,7 +127,7 @@ const NewsManagement: React.FC = () => {
     if (!confirm("Are you sure you want to delete this news?")) return;
 
     try {
-      const response = await fetch("https://iaiiea.org/api/sandbox/admin/delete_news", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_news`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

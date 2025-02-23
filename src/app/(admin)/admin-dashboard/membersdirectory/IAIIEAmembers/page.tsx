@@ -160,7 +160,7 @@ useEffect(() => {
 // Delete user function
 const handleDelete = async (userId: string): Promise<void> => {
   try {
-    const response = await fetch("https://iaiiea.org/api/sandbox/admin/delete_user/", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_user/`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

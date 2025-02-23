@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { countries } from '@/utils/countries'
+import { showToast } from '@/utils/toast';
 import { Button } from '@/components/ui/button'
 import { useSession } from "next-auth/react";
 import {
@@ -98,10 +99,11 @@ const AddMembers = () => {
       form.reset()
       
       console.log('Member registered successfully', data)
+      showToast.success('Member registered successfully')
       
     } catch (err: any) {
       console.error("Registration error:", err)
-      setError(err.message || "Failed to register member. Please try again.")
+      showToast.error(err.message || "Failed to register member. Please try again.")
     } finally {
       setIsLoading(false)
     }

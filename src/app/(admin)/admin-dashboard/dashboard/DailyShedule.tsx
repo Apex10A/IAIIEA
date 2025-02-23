@@ -36,7 +36,7 @@ const ConferenceSchedule = () => {
       }
 
       try {
-        const response = await fetch('https://iaiiea.org/api/sandbox/landing/event_details/1', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/1`, {
           headers: {
             'Authorization': `Bearer ${bearerToken}`,
             'Content-Type': 'application/json',

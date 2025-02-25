@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { showToast } from "@/utils/toast";
+import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -54,7 +55,7 @@ export default function AdminLoginPage() {
       <Card className="md:w-[700px] md:px-32 sm:px-20 py-5 flex flex-col items-center justify-center min-h-max w-full rounded-none shadow-none">
         <CardHeader className="w-full">
           <div className="flex flex-col gap-8 items-center w-full">
-            <Image src="/LogoNew.svg" alt="logo" width={200} height={70} />
+            <Image src={Logo} alt="logo" width={200} height={70} />
             <div className="flex flex-col text-center gap-[8px]">
               <h1 className="text-black font-bold text-2xl md:text-4xl">
                 Admin Login

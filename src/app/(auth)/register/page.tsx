@@ -125,11 +125,11 @@ export default function RegisterPage() {
     }
   }
   return (
-    <div className='min-h-screen background pt-28 mx-auto flex flex-col items-center'>
-      <Card className="md:w-[900px] mx-auto md:px-32 sm:px-20 flex flex-col items-center justify-center min-h-[70%] w-full rounded-none shadow-none md:mx-auto py-5">
+    <div className='min-h-screen background py-28 md:px-auto px-5 w-full flex flex-col items-center'>
+      <div className="md:w-[900px] bg-[#fff] md:px-32 sm:px-20 rounded-md flex flex-col items-center justify-center min-h-[70%] w-full  shadow-none py-5">
         <CardHeader className="w-full">
           <div className="flex flex-col gap-8 items-center w-full">
-            <Image src="/LogoNew.svg" alt="logo" width={200} height={70} />
+          <Image src='/logo.png' alt="logo" width={130} height={50} />
             <div className="flex flex-col text-center gap-[8px]">
               <h1 className="text-[#203A87] font-bold text-2xl md:text-4xl">
                 Become a member of IAIIEA
@@ -149,9 +149,10 @@ export default function RegisterPage() {
           )}
 
           <Form {...form}>
-            <form className="grid gap-4 md:grid-cols-2" onSubmit={form.handleSubmit(onSubmit)}>
+            <form className=" " onSubmit={form.handleSubmit(onSubmit)}>
               {/* First Name */}
-              <FormField
+             <div className="grid gap-4 md:grid-cols-2 mb-5">
+             <FormField
                 control={form.control}
                 name="f_name"
                 render={({ field }) => (
@@ -312,7 +313,7 @@ export default function RegisterPage() {
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder="phone number"
+                        placeholder="phone number e.g +234 810-123-3211"
                         pattern="[0-9]*" 
                         required
                         {...field}
@@ -465,6 +466,7 @@ export default function RegisterPage() {
                 )}
               />
               {/* Phone, Email, Postal Address, Country, etc. */}
+             </div>
               
               <div className="flex flex-col w-full">
               <Button
@@ -499,7 +501,7 @@ export default function RegisterPage() {
             Back to Home
           </Link>
         </CardContent>
-      </Card>
+      </div>
     </div>
   )
 }

@@ -13,7 +13,7 @@ const Page = () => {
 
   const fetchResources = async () => {
     try {
-      const response = await axios.get('https://iaiiea.org/api/sandbox/conference_resources', {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/conference_resources`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json'
@@ -49,7 +49,7 @@ const Page = () => {
     }
 
     try {
-      await axios.post('https://iaiiea.org/api/sandbox/admin/upload_member_resource', formData, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload_member_resource`, formData, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'multipart/form-data'
@@ -75,7 +75,7 @@ const Page = () => {
 
   const handleDelete = async (resourceId: string) => {
     try {
-      await axios.delete(`https://iaiiea.org/api/sandbox/admin/delete_member_resource/${resourceId}`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_member_resource/${resourceId}`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }

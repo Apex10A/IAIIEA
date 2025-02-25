@@ -28,6 +28,20 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
+.conference-bg{
+  background-image: url('/icons/Landing page.png'); /* Corrected path */
+  width: 100%;
+ 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.backgroundLogin {
+  background-image: url('/icons/Landing page.png'); /* Corrected path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 @keyframes dropdown {
   from {
     opacity: 0;

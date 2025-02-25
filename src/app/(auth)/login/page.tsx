@@ -49,11 +49,11 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className="min-h-screen background pt-28 mx-auto flex flex-col items-center">
-      <Card className="md:w-[700px] md:px-32 sm:px-20 py-5 flex flex-col items-center justify-center min-h-max w-full rounded-none shadow-none">
+    <div className="backgroundLogin mx-auto md:px-auto px-5 flex flex-col items-center justify-center w-full min-h-screen">
+      <div className="md:w-[700px] bg-[#fff] md:px-32 sm:px-20 flex flex-col items-center justify-center h-full w-full rounded-md shadow-none">
         <CardHeader className="w-full">
           <div className="flex flex-col gap-8 items-center w-full">
-            <Image src="/LogoNew.svg" alt="logo" width={200} height={70} />
+            <Image src="/logo.png" alt="logo" width={130} height={50} />
             <div className="flex flex-col text-center gap-[8px]">
               <h1 className="text-black font-bold text-2xl md:text-4xl">
                 Log in to your account
@@ -98,7 +98,7 @@ export default function LoginPage() {
                     type={defaultInpType}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your phone number"
+                    placeholder="Enter your password"
                     className="w-full p-2 border rounded-md"
                     required
                     disabled={isLoading}
@@ -120,7 +120,7 @@ export default function LoginPage() {
                 </div>
                 <div className="text-right">
                   <Link href="/reset-password" className="text-xs text-brand-primary font-bold">
-                    Forgot Phone Number?
+                    Forgot Password?
                   </Link>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function LoginPage() {
             <span>Back to Home</span>
           </Link>
         </CardContent>
-      </Card>
+      </div>
     </div>
   );
 }

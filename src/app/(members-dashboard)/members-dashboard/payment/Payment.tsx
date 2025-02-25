@@ -115,7 +115,9 @@ const PaymentPage: React.FC = () => {
 
         // Fetch conferences
         const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
+
         const confData: ApiResponse<Conference[]> = await confResponse.json();
+        console.log(confData)
         const relevantConferences = (confData.data || []).filter(
           conf => conf.status === 'Incoming' || conf.status === 'Ongoing'
         );
@@ -395,7 +397,7 @@ const PaymentPage: React.FC = () => {
                 className="px-6 py-2 bg-[#0E1A3D] hover:bg-primary/90 text-white rounded-lg transition-colors
                   disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isProcessing ? 'Processing...' : 'Make Payment'}
+                {isProcessing ? 'Processing...' : 'sMake Payment'}
                 </button>
               </div>
             </CardContent>

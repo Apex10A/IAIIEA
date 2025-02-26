@@ -15,43 +15,12 @@ import {
 } from "@/components/ui/select";
 
 // TypeScript Interfaces
-type PaymentPlan = 'basic' | 'premium' | 'standard';
-
-interface UserData {
-  registration: string;
-  email?: string;
-  name?: string;
-  phone?: string;
-}
-
-interface EventBase {
-  id: number;
+interface PendingPayment {
   title: string;
-  date: string;
-  status: 'Incoming' | 'Ongoing';
-}
-
-interface Conference extends EventBase {
-  theme: string;
-  venue: string;
-  resources: any[];
-}
-
-interface Seminar extends EventBase {
-  theme: string;
-  venue: string;
-  resources: any[];
-}
-
-interface EventDetails {
-  id: number;
-  is_registered: boolean;
-  title: string;
-  theme: string;
-  venue: string;
-  date: string;
-  start_date: string;
-  start_time: string;
+  payment_id: string;
+  amount: number;
+  currency: string;
+  sub_payments: Record<string, number> | [];
 }
 
 interface ApiResponse<T> {
@@ -60,88 +29,51 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface PaymentData {
-  payment_id: string;
-  amount: number;
+interface UserData {
+  registration: string;
+  email?: string;
+  name?: string;
+  phone?: string;
 }
 
 const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [processingStates, setProcessingStates] = useState<Record<string, boolean>>({});
-  const [conferences, setConferences] = useState<Conference[]>([]);
-  const [seminars, setSeminars] = useState<Seminar[]>([]);
-  const [conferenceDetails, setConferenceDetails] = useState<Record<number, EventDetails>>({});
-  const [seminarDetails, setSeminarDetails] = useState<Record<number, EventDetails>>({});
-  const [hasMembershipAccess, setHasMembershipAccess] = useState(false);
-  const [selectedPlans, setSelectedPlans] = useState<Record<number, PaymentPlan>>({});
+  const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
+  const [selectedPlans, setSelectedPlans] = useState<Record<string, string>>({});
   
   const { data: session, status } = useSession();
   const router = useRouter();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Function to fetch event details
-  const fetchEventDetails = async (eventId: number, type: 'conference' | 'seminar') => {
-    try {
-      const endpoint = type === 'conference' 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${eventId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${eventId}`;
-        
-      const response = await fetch(endpoint);
-      const data: ApiResponse<EventDetails> = await response.json();
-      
-      if (type === 'conference') {
-        setConferenceDetails(prev => ({
-          ...prev,
-          [eventId]: data.data
-        }));
-      } else {
-        setSeminarDetails(prev => ({
-          ...prev,
-          [eventId]: data.data
-        }));
-      }
-    } catch (error) {
-      console.error(`Error fetching ${type} details:`, error);
-    }
-  };
-
-  // Function to fetch all data
-  const fetchAllData = async () => {
+  // Function to fetch pending payments
+  const fetchPendingPayments = async () => {
     if (status === 'authenticated' && session?.user) {
       try {
-        // Check membership status
-        const userData = (session.user as any).userData as UserData;
-        setHasMembershipAccess(userData?.registration === 'complete');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pending_payments/`, {
+          headers: {
+            'Authorization': `Bearer ${bearerToken}`
+          }
+        });
+        
+        const data: ApiResponse<PendingPayment[]> = await response.json();
+        
+        if (data.status === 'success') {
+          setPendingPayments(data.data || []);
 
-        // Fetch conferences
-        const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
-
-        const confData: ApiResponse<Conference[]> = await confResponse.json();
-        console.log(confData)
-        const relevantConferences = (confData.data || []).filter(
-          conf => conf.status === 'Incoming' || conf.status === 'Ongoing'
-        );
-        setConferences(relevantConferences);
-
-        // Fetch seminars
-        const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
-        const semData: ApiResponse<Seminar[]> = await semResponse.json();
-        const relevantSeminars = (semData.data || []).filter(
-          sem => sem.status === 'Incoming' || sem.status === 'Ongoing'
-        );
-        setSeminars(relevantSeminars);
-
-        // Fetch details for each conference
-        for (const conf of relevantConferences) {
-          await fetchEventDetails(conf.id, 'conference');
-        }
-
-        // Fetch details for each seminar
-        for (const sem of relevantSeminars) {
-          await fetchEventDetails(sem.id, 'seminar');
+          // Initialize selected plans for payments with sub_payments
+          const initialPlans: Record<string, string> = {};
+          data.data.forEach(payment => {
+            if (payment.sub_payments && typeof payment.sub_payments === 'object' && Object.keys(payment.sub_payments).length > 0) {
+              // Set default plan to the first one
+              const firstPlan = Object.keys(payment.sub_payments)[0];
+              initialPlans[payment.payment_id] = firstPlan;
+            }
+          });
+          setSelectedPlans(initialPlans);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching pending payments:', error);
       } finally {
         setLoading(false);
       }
@@ -151,68 +83,26 @@ const PaymentPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchAllData();
+    fetchPendingPayments();
   }, [status, session, router]);
 
-  const getProcessingKey = (type: string, id?: number) => {
-    return `${type}-${id || 'membership'}`;
-  };
-
-  const initiatePayment = async (
-    type: 'membership' | 'conference' | 'seminar',
-    amount: number,
-    itemId?: number,
-    title = ''
-  ) => {
+  const initiatePayment = async (payment: PendingPayment) => {
     if (!session?.user) {
       router.push('/login');
       return;
     }
 
-    if ((type === 'conference' || type === 'seminar') && !itemId) {
-      console.error('Item ID is required for conference and seminar payments');
-      return;
-    }
-
-    const processingKey = getProcessingKey(type, itemId);
-    setProcessingStates(prev => ({ ...prev, [processingKey]: true }));
+    setProcessingStates(prev => ({ ...prev, [payment.payment_id]: true }));
 
     try {
-      let paymentData: PaymentData | null = null;
-
-      if (type === 'conference') {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${bearerToken}`
-          },
-          body: JSON.stringify({ 
-            id: itemId,
-            plan: selectedPlans[itemId!] || 'basic'
-          })
-        });
-
-        const data = await response.json();
-        if (data.status === 'success') {
-          paymentData = data.data;
-        }
-      } else if (type === 'seminar') {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${bearerToken}`
-          },
-          body: JSON.stringify({ 
-            id: itemId,
-            plan: selectedPlans[itemId!] || 'basic'
-          })
-        });
-
-        const data = await response.json();
-        if (data.status === 'success') {
-          paymentData = data.data;
+      // Calculate amount based on selected plan if sub_payments exists
+      let amount = payment.amount;
+      const selectedPlan = selectedPlans[payment.payment_id];
+      
+      if (payment.sub_payments && typeof payment.sub_payments === 'object' && 
+          Object.keys(payment.sub_payments).length > 0 && selectedPlan) {
+        if (typeof payment.sub_payments !== 'undefined' && !Array.isArray(payment.sub_payments)) {
+          amount = payment.sub_payments[selectedPlan];
         }
       }
 
@@ -220,57 +110,63 @@ const PaymentPage: React.FC = () => {
       
       const config: FlutterwaveConfig = {
         public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
-        tx_ref: `${type}-${itemId || 'payment'}-${Date.now()}`,
-        amount: paymentData?.amount || amount,
-        currency: 'NGN',
+        tx_ref: `${payment.payment_id}-${Date.now()}`,
+        amount: amount,
+        currency: payment.currency,
         customer: {
           email: userData.email || session.user.email || '',
           name: userData.name || 'User',
           phone_number: userData.phone || '0000000000',
         },
         customizations: {
-          title: title || `IAIIEA ${type} Payment`,
-          description: `IAIIEA ${type} Payment`,
+          title: payment.title,
+          description: `IAIIEA ${payment.title} Payment`,
           logo: '/logo.png',
         },
-        payment_options: 'card,ussd,bank_transfer',
+        payment_options: 'bank_transfer',
       };
 
       const handleFlutterPayment = useFlutterwave(config);
 
       handleFlutterPayment({
         callback: async (response: FlutterWaveResponse) => {
-          await handlePaymentCallback(response, type, itemId, paymentData);
-          setProcessingStates(prev => ({ ...prev, [processingKey]: false }));
+          await handlePaymentCallback(response, payment);
+          setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
         },
         onClose: () => {
           console.log('Payment modal closed');
-          setProcessingStates(prev => ({ ...prev, [processingKey]: false }));
+          setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
         },
       });
     } catch (error) {
       console.error('Payment initiation error:', error);
-      setProcessingStates(prev => ({ ...prev, [processingKey]: false }));
+      setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
     }
   };
 
   const handlePaymentCallback = async (
     transaction: FlutterWaveResponse,
-    type: string,
-    itemId?: number,
-    paymentData?: PaymentData | null
+    payment: PendingPayment
   ) => {
     try {
-      if (!session?.user || !paymentData?.payment_id) {
-        console.error('Invalid session or payment data');
+      if (!session?.user) {
+        console.error('Invalid session');
         return;
       }
+      
       const amountPaid = transaction.amount;
+      let selectedPlan = '';
+      
+      if (payment.sub_payments && typeof payment.sub_payments === 'object' && 
+          Object.keys(payment.sub_payments).length > 0) {
+        selectedPlan = selectedPlans[payment.payment_id] || '';
+      }
 
       const confirmPayload = {
-        payment_id: paymentData.payment_id,
+        payment_id: payment.payment_id,
         processor_id: transaction.transaction_id?.toString() || '',
-        paid: amountPaid
+        paid: amountPaid,
+        plan: selectedPlan || undefined
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/confirm_payment/`, {
@@ -284,14 +180,8 @@ const PaymentPage: React.FC = () => {
 
       const result = await response.json();
       if (result.status === 'success') {
-        // Update the relevant event details after successful payment
-        if (type === 'conference' && itemId) {
-          await fetchEventDetails(itemId, 'conference');
-        } else if (type === 'seminar' && itemId) {
-          await fetchEventDetails(itemId, 'seminar');
-        } else if (type === 'membership') {
-          setHasMembershipAccess(true);
-        }
+        // Refresh the pending payments list
+        await fetchPendingPayments();
       }
     } catch (error) {
       console.error('Payment confirmation error:', error);
@@ -306,174 +196,107 @@ const PaymentPage: React.FC = () => {
     </div>
   );
 
-  const EventCard: React.FC<{
-    event: EventBase;
-    type: 'conference' | 'seminar';
-    isRegistered: boolean;
-  }> = ({ event, type, isRegistered }) => {
-    const processingKey = getProcessingKey(type, event.id);
-    const isProcessing = processingStates[processingKey];
+  const PaymentCard: React.FC<{
+    payment: PendingPayment;
+  }> = ({ payment }) => {
+    const isProcessing = processingStates[payment.payment_id];
+    const hasSubPayments = payment.sub_payments && 
+                          typeof payment.sub_payments === 'object' && 
+                          Object.keys(payment.sub_payments).length > 0;
+
+    const formatAmount = (amount: number, currency: string) => {
+      return currency === 'USD' 
+        ? `$${amount.toLocaleString()}`
+        : `${currency} ${amount.toLocaleString()}`;
+    };
 
     return (
       <Card className="mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
-              <p className="text-gray-600 mb-2">{event.date}</p>
-              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 
-                ${event.status === 'Incoming' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                {event.status}
-              </span>
+              <h3 className="text-lg font-semibold mb-2">{payment.title}</h3>
+              <p className="text-2xl font-bold text-gray-700">
+                {hasSubPayments && selectedPlans[payment.payment_id] 
+                  ? formatAmount((payment.sub_payments as Record<string, number>)[selectedPlans[payment.payment_id]], payment.currency)
+                  : formatAmount(payment.amount, payment.currency)
+                }
+              </p>
+              <p className="text-gray-500 text-sm mt-1">Payment ID: {payment.payment_id}</p>
             </div>
-            {isRegistered ? (
-              <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
-                Active Access
-              </span>
-            ) : (
-              <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
+              {hasSubPayments && (
                 <Select
-                  onValueChange={(value: PaymentPlan) => 
-                    setSelectedPlans(prev => ({ ...prev, [event.id]: value }))
+                  onValueChange={(value: string) => 
+                    setSelectedPlans(prev => ({ ...prev, [payment.payment_id]: value }))
                   }
-                  defaultValue="basic"
+                  defaultValue={Object.keys(payment.sub_payments)[0]}
+                  value={selectedPlans[payment.payment_id]}
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="basic">Basic Plan</SelectItem>
-                    <SelectItem value="standard">Standard Plan</SelectItem>
-                    <SelectItem value="premium">Premium Plan</SelectItem>
+                    {Object.entries(payment.sub_payments).map(([planName, planAmount]) => (
+                      <SelectItem key={planName} value={planName}>
+                        {planName} ({formatAmount(planAmount, payment.currency)})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <button
-                  onClick={() => initiatePayment(type, 50000, event.id, event.title)}
-                  disabled={isProcessing}
-                  className="px-6 py-2 bg-[#0E1A3D] hover:bg-primary/90 text-white rounded-lg transition-colors
-                    disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isProcessing ? 'Processing...' : 'Make Payment'}
-                </button>
-              </div>
-            )}
+              )}
+              <button
+                onClick={() => initiatePayment(payment)}
+                disabled={isProcessing}
+                className="px-6 py-2 bg-[#0E1A3D] hover:bg-primary/90 text-white rounded-lg transition-colors
+                  disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isProcessing ? 'Processing...' : 'Make Payment'}
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   };
-
-  const MembershipSection = () => {
-    const processingKey = getProcessingKey('membership');
-    const isProcessing = processingStates[processingKey];
-    
-    if (hasMembershipAccess) {
-      return (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Membership Payment</h2>
-          <p className="text-gray-600">You have no pending membership payments.</p>
-        </div>
-      );
-    }
-
+  
+  if (loading) {
     return (
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Membership Payment</h2>
-        <Alert className="mb-4">
-          <AlertDescription>
-            You have a pending membership payment to make for 2024
-          </AlertDescription>
-        </Alert>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">2024 Membership Payment</h3>
-                <p className="text-2xl font-bold text-gray-700">₦{(50000).toLocaleString()}</p>
-              </div>
-              <button
-                onClick={() => initiatePayment('membership', 50000, undefined, '2024 Membership Payment')}
-                disabled={isProcessing}
-                className="px-6 py-2 bg-[#0E1A3D] hover:bg-primary/90 text-white rounded-lg transition-colors
-                  disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isProcessing ? 'Processing...' : 'sMake Payment'}
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    };
-  
-    if (loading) {
-      return (
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      );
-    }
-  
-    return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-gray-100 px-5 py-3 mb-6 rounded-lg">
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Payments</h1>
-        </div>
-  
-        {/* Membership Section */}
-        <MembershipSection />
-  
-        {/* Conferences Section */}
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Conference Payments</h2>
-          {conferences.length === 0 ? (
-            <p className="text-gray-600">No pending conference payments.</p>
-          ) : (
-            <>
-              <Alert className="mb-4">
-                <AlertDescription>
-                  You have pending conference payments to make
-                </AlertDescription>
-              </Alert>
-              {conferences.map(conference => (
-                <EventCard
-                  key={conference.id}
-                  event={conference}
-                  type="conference"
-                  isRegistered={conferenceDetails[conference.id]?.is_registered ?? false}
-                />
-              ))}
-            </>
-          )}
-        </section>
-  
-        {/* Seminars Section */}
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Seminar Payments</h2>
-          {seminars.length === 0 ? (
-            <p className="text-gray-600">No pending seminar payments.</p>
-          ) : (
-            <>
-              <Alert className="mb-4">
-                <AlertDescription>
-                  You have pending seminar payments to make
-                </AlertDescription>
-              </Alert>
-              {seminars.map(seminar => (
-                <EventCard
-                  key={seminar.id}
-                  event={seminar}
-                  type="seminar"
-                  isRegistered={seminarDetails[seminar.id]?.is_registered ?? false}
-                />
-              ))}
-            </>
-          )}
-        </section>
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
       </div>
     );
-  };
+  }
   
-  export default PaymentPage;
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="bg-gray-100 px-5 py-3 mb-6 rounded-lg">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Payments</h1>
+      </div>
+  
+      {pendingPayments.length === 0 ? (
+        <div className="text-center py-10">
+          <p className="text-gray-600 text-lg">You have no pending payments.</p>
+        </div>
+      ) : (
+        <>
+          <Alert className="mb-6">
+            <AlertDescription>
+              You have {pendingPayments.length} pending payment{pendingPayments.length > 1 ? 's' : ''} to make
+            </AlertDescription>
+          </Alert>
+          
+          <div className="space-y-4">
+            {pendingPayments.map((payment) => (
+              <PaymentCard key={payment.payment_id} payment={payment} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default PaymentPage;

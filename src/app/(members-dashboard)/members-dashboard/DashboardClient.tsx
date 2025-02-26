@@ -92,11 +92,14 @@ export default function DashboardClient() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-50">
-        <DashboardHeader />
+        <DashboardHeader 
+          isSidebarOpen={isSidebarOpen} 
+          toggleSidebar={toggleSidebar} 
+        />
       </div>
 
       <div className="flex flex-grow h-full">
-        <button
+        {/* <button
           className="fixed left-4 top-20 z-50 p-2 rounded-md bg-white shadow-md md:hidden"
           onClick={toggleSidebar}
         >
@@ -113,14 +116,18 @@ export default function DashboardClient() {
               d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
             />
           </svg>
-        </button>
+        </button> */}
 
         <div
           className={`fixed inset-y-0 left-0 transform ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 md:z-0`}
         >
-          <Sidebar setActiveComponent={setActiveComponent} />
+          <Sidebar 
+            setActiveComponent={setActiveComponent} 
+            isMobileOpen={isSidebarOpen} 
+            onMobileToggle={toggleSidebar} 
+          />
         </div>
 
         {isSidebarOpen && (

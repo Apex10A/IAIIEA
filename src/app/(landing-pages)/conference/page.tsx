@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import "@/app/index.css";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, MapPin, Clock, Book } from "lucide-react";
+import { Calendar, MapPin, Clock, Book, Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Types
 interface PaymentTier {
@@ -161,32 +160,116 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
 
   return (
     <div className="flex justify-center mb-8">
-      <div className="grid grid-cols-4 gap-4 text-center">
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="text-4xl font-bold text-white">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 text-center">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+          <div className="text-2xl md:text-4xl font-bold text-white">
             {String(timeLeft.days).padStart(2, '0')}
           </div>
-          <div className="text-white/80 text-sm">Days</div>
+          <div className="text-white/80 text-xs md:text-sm">Days</div>
         </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="text-4xl font-bold text-white">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+          <div className="text-2xl md:text-4xl font-bold text-white">
             {String(timeLeft.hours).padStart(2, '0')}
           </div>
-          <div className="text-white/80 text-sm">Hours</div>
+          <div className="text-white/80 text-xs md:text-sm">Hours</div>
         </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="text-4xl font-bold text-white">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+          <div className="text-2xl md:text-4xl font-bold text-white">
             {String(timeLeft.minutes).padStart(2, '0')}
           </div>
-          <div className="text-white/80 text-sm">Minutes</div>
+          <div className="text-white/80 text-xs md:text-sm">Minutes</div>
         </div>
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-          <div className="text-4xl font-bold text-white">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+          <div className="text-2xl md:text-4xl font-bold text-white">
             {String(timeLeft.seconds).padStart(2, '0')}
           </div>
-          <div className="text-white/80 text-sm">Seconds</div>
+          <div className="text-white/80 text-xs md:text-sm">Seconds</div>
         </div>
       </div>
+    </div>
+  );
+};
+
+// Carousel Component for Gallery & Sponsors
+const Carousel = ({ 
+  items, 
+  showArrows = true 
+}: { 
+  items: string[]; 
+  showArrows?: boolean 
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const itemsPerPage = 3;
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  
+  const goToPrevious = () => {
+    setCurrentIndex(prev => (prev - 1 + totalPages) % totalPages);
+  };
+  
+  const goToNext = () => {
+    setCurrentIndex(prev => (prev + 1) % totalPages);
+  };
+  
+  const startIndex = currentIndex * itemsPerPage;
+  const visibleItems = items.slice(startIndex, startIndex + itemsPerPage);
+  
+  return (
+    <div className="relative">
+      <div className="flex items-center justify-center">
+        {showArrows && (
+          <button 
+            onClick={goToPrevious}
+            className="absolute left-0 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 transition-colors"
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+        )}
+        
+        <div className="flex justify-center items-center gap-4 my-4 overflow-hidden">
+          {visibleItems.length > 0 ? (
+            visibleItems.map((item, idx) => (
+              <div key={idx} className="w-full max-w-xs h-48 rounded-lg overflow-hidden">
+                <img 
+                  src={item || "/api/placeholder/320/240"} 
+                  alt={`Item ${startIndex + idx + 1}`}
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.currentTarget.src = "/api/placeholder/320/240";
+                  }}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="text-white opacity-70">No items available</div>
+          )}
+        </div>
+        
+        {showArrows && (
+          <button 
+            onClick={goToNext}
+            className="absolute right-0 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 transition-colors"
+            aria-label="Next"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+        )}
+      </div>
+      
+      {showArrows && totalPages > 1 && (
+        <div className="flex justify-center mt-4 gap-2">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <button
+              key={idx}
+              className={`h-2 w-2 rounded-full ${
+                idx === currentIndex ? 'bg-[#D5B93C]' : 'bg-white/30'
+              }`}
+              onClick={() => setCurrentIndex(idx)}
+              aria-label={`Go to page ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -249,50 +332,40 @@ export default function ConferencePage() {
   if (status === "loading" || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        Loading...
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D5B93C]"></div>
       </div>
     );
   }
 
-  // if (!session) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-screen">
-  //       Please sign in to view conference details
-  //     </div>
-  //   );
-  // }
-
   if (error || !conference) {
     return (
       <div className="flex justify-center conference-bg items-center min-h-screen">
-        <p className="text-2xl text-white opacity-[0.7]">{error}</p>
+        <p className="text-2xl text-white opacity-70">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="conference-bg mx-auto min-h-screen pt-24 py-8 px-16 w-full">
-      {/* Countdown Timer */}
-      <div className="flex items-center justify-between w-full pt-20">
-      <div className="text-center">
-        {/* <h2 className="text-2xl font-semibold text-white mb-4">Time Remaining Until Conference</h2> */}
-        {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
-      </div>
-      <div>
-      <button className="bg-[#D5B93C] px-8 py-3 text-[#0E1A3D] rounded-md">
-              Status: Not Registered
-      </button>
-      </div>
+    <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full">
+      {/* Header with Countdown and Button */}
+      <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-20 gap-6">
+        <div className="w-full md:w-auto">
+          {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
+        </div>
+        <div>
+          <button className="bg-[#D5B93C] px-4 sm:px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md w-full md:w-auto">
+            Conference portal
+          </button>
+        </div>
       </div>
       
       {/* Hero Section */}
-      <div className="mb-12 ">
-        {/* <h1 className="text-5xl font-bold mb-4  text-white">{conference.title}</h1> */}
-        <h1 className="text-5xl font-bold text-[#D5B93C] mb-6 max-w-[60%] leading-24">{conference.theme}</h1>
-        <div className="flex flex-wrap  gap-4">
+      <div className="mb-12">
+        <h1 className="text-3xl md:text-5xl font-bold text-[#D5B93C] mb-6 max-w-full md:max-w-3/4 lg:max-w-[60%] leading-tight">{conference.theme}</h1>
+        <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2 text-white">
             <Calendar className="w-5 h-5" />
-            <span className=''>{conference.date}</span>
+            <span>{conference.date}</span>
           </div>
           <div className="flex items-center gap-2 text-white">
             <MapPin className="w-5 h-5" />
@@ -305,68 +378,137 @@ export default function ConferencePage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <Tabs defaultValue="overview" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-5 lg:w-[550px]">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="registration">Registration</TabsTrigger>
-          <TabsTrigger value="paper flyer">Paper flyer</TabsTrigger>
-          <TabsTrigger value="Gallery">Gallery</TabsTrigger>
-        
-        </TabsList>
+      {/* Main Content - Landing Page Style */}
+      <div className="space-y-12">
+        {/* Overview Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Overview</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Sub-themes */}
+            <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
+              <CardHeader>
+                <CardTitle className="text-[#D5B93C]">Sub-themes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {conference.sub_theme.map((theme, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                      <span>{theme}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
 
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
+            {/* Workshops */}
+            <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
+              <CardHeader>
+                <CardTitle className="text-[#D5B93C]">Workshops</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {conference.work_shop.map((workshop, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                      <span>{workshop}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Important Dates */}
+          <Card className="bg-white/5 backdrop-blur-sm border-none text-white mt-6">
             <CardHeader>
-              <CardTitle>Sub-themes</CardTitle>
+              <CardTitle className="text-[#D5B93C]">Important Dates</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="list-disc pl-6 space-y-2">
-                {conference.sub_theme.map((theme, index) => (
-                  <li key={index}>{theme}</li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Important Dates</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {conference.important_date.map((date, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {date}
-                  </li>
+                  <div key={index} className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                    <span>{date}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </section>
 
-        <TabsContent value="registration" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Registration Fees</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
+        {/* Schedule Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Conference Schedule</h2>
+          
+          <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
+            <CardContent className="pt-6">
+              {conference.schedule && conference.schedule.length > 0 ? (
+                <div className="space-y-4">
+                  {conference.schedule.map((item, index) => (
+                    <div key={index} className="border-b border-white/10 pb-4 last:border-0">
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <div className="font-semibold mb-2 sm:mb-0">
+                          {item.time || 'Time TBA'}
+                        </div>
+                        <div className="text-[#D5B93C]">
+                          {item.date || 'Date TBA'}
+                        </div>
+                      </div>
+                      <div className="mt-2">{item.title || item.description || 'Details coming soon'}</div>
+                      {item.speaker && (
+                        <div className="mt-1 text-white/70">
+                          Speaker: {item.speaker}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-6 text-white/70">Schedule will be announced soon.</p>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Gallery Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Gallery</h2>
+          
+          {conference.gallery && conference.gallery.length > 0 ? (
+            <Carousel items={conference.gallery} />
+          ) : (
+            <p className="text-center py-6 text-white/70">Photos will be available soon.</p>
+          )}
+        </section>
+
+        {/* Registration Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Registration Information</h2>
+          
+          <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.entries(conference.payments).map(
                   ([category, types], index) => (
-                    <div key={index}>
-                      <div className="space-y-4">
-                        <h3 className="font-semibold capitalize">
-                          {category.replace(/_/g, " ")}
-                        </h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            Virtual: ${types.virtual.usd} (NGN {types.virtual.naira})
+                    <div key={index} className="border-b border-white/10 pb-4 last:border-0">
+                      <h3 className="font-semibold capitalize text-[#D5B93C] mb-3">
+                        {category.replace(/_/g, " ")}
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="bg-white/10 p-3 rounded-md">
+                          <div className="font-medium mb-1">Virtual</div>
+                          <div className="flex justify-between">
+                            <span>${types.virtual.usd}</span>
+                            <span>NGN {types.virtual.naira}</span>
                           </div>
-                          <div>
-                            Physical: ${types.physical.usd} (NGN {types.physical.naira})
+                        </div>
+                        <div className="bg-white/10 p-3 rounded-md">
+                          <div className="font-medium mb-1">Physical</div>
+                          <div className="flex justify-between">
+                            <span>${types.physical.usd}</span>
+                            <span>NGN {types.physical.naira}</span>
                           </div>
                         </div>
                       </div>
@@ -374,98 +516,60 @@ export default function ConferencePage() {
                   )
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="workshops" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Workshops</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                {conference.work_shop.map((workshop, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Book className="w-4 h-4" />
-                    {workshop}
-                  </div>
-                ))}
+              
+              <div className="flex justify-center mt-6">
+                <button className="bg-[#D5B93C] px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md">
+                  Register Now
+                </button>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </section>
 
-        <TabsContent value="schedule">
-          <Card>
-            <CardHeader>
-              <CardTitle>Conference Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {conference.schedule && conference.schedule.length > 0 ? (
-                <div className="space-y-4">
-                  {/* Add schedule content here when available */}
-                </div>
-              ) : (
-                <p>Schedule will be announced soon.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Paper Flyer Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Conference Flyer</h2>
+          
+          {conference.flyer ? (
+            <div className="flex justify-center">
+              <img 
+                src={conference.flyer} 
+                alt="Conference Flyer" 
+                className="max-w-full h-auto max-h-[70vh] rounded-lg shadow-lg"
+                onError={(e) => {
+                  e.currentTarget.src = "/api/placeholder/400/600";
+                }} 
+              />
+            </div>
+          ) : (
+            <p className="text-center py-6 text-white/70">Flyer will be available soon.</p>
+          )}
+        </section>
 
-        <TabsContent value="paper flyer">
-          <Card>
-            <CardHeader>
-              <CardTitle>Conference Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {conference.schedule && conference.schedule.length > 0 ? (
-                <div className="space-y-4">
-                  {/* Add schedule content here when available */}
-                </div>
-              ) : (
-                <p>Schedule will be announced soon.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Sponsors Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Our Sponsors</h2>
+          
+          {conference.sponsors && conference.sponsors.length > 0 ? (
+            <Carousel items={conference.sponsors} showArrows={false} />
+          ) : (
+            <p className="text-center py-6 text-white/70">Sponsor information will be available soon.</p>
+          )}
+        </section>
 
-        <TabsContent value="Gallery">
-          <Card>
-            <CardHeader>
-              <CardTitle>Conference Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {conference.schedule && conference.schedule.length > 0 ? (
-                <div className="space-y-4">
-                  {/* Add schedule content here when available */}
-                </div>
-              ) : (
-                <p>Schedule will be announced soon.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="schedule">
-          <Card>
-            <CardHeader>
-              <CardTitle>Conference Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {conference.schedule && conference.schedule.length > 0 ? (
-                <div className="space-y-4">
-                  {/* Add schedule content here when available */}
-                </div>
-              ) : (
-                <p>Schedule will be announced soon.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-      </Tabs>
+         {/* Videos Section */}
+         <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Videos</h2>
+          
+          {conference.videos && conference.videos.length > 0 ? (
+            <Carousel items={conference.videos} showArrows={false} />
+          ) : (
+            <p className="text-center py-6 text-white/70">Video information will be available soon.</p>
+          )}
+        </section>
+      </div>
+      
+      
     </div>
   );
 }

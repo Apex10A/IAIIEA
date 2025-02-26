@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/modules/ui/badge';
 import { CalendarIcon, MapPinIcon } from 'lucide-react';
+import { useSession } from "next-auth/react";
 import '@/app/index.css'
 
 interface SeminarDetails {
@@ -14,13 +15,22 @@ interface SeminarDetails {
   venue: string;
   resources?: string[];
 }
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 
 const SeminarDetailsPage = () => {
   const [seminarDetails, setSeminarDetails] = useState<SeminarDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
+   const { data: session } = useSession();
   const seminarId = params.id;
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   useEffect(() => {
     const fetchSeminarDetails = async () => {
@@ -30,7 +40,7 @@ const SeminarDetailsPage = () => {
         setIsLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${seminarId}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming token is stored in localStorage
+            'Authorization': `Bearer ${bearerToken}` // Assuming token is stored in localStorage
           }
         });
         
@@ -79,8 +89,79 @@ const SeminarDetailsPage = () => {
     );
   }
 
+  // Countdown Timer Component
+  const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
+    const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0
+    });
+  
+    useEffect(() => {
+      const calculateTimeLeft = () => {
+        const difference = targetDate.getTime() - new Date().getTime();
+        
+        if (difference <= 0) {
+          return {
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+          };
+        }
+        
+        return {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000)
+        };
+      };
+  
+      setTimeLeft(calculateTimeLeft());
+      
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 1000);
+  
+      return () => clearInterval(timer);
+    }, [targetDate]);
+  
+    return (
+      <div className="flex justify-center mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 text-center">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+            <div className="text-2xl md:text-4xl font-bold text-white">
+              {String(timeLeft.days).padStart(2, '0')}
+            </div>
+            <div className="text-white/80 text-xs md:text-sm">Days</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+            <div className="text-2xl md:text-4xl font-bold text-white">
+              {String(timeLeft.hours).padStart(2, '0')}
+            </div>
+            <div className="text-white/80 text-xs md:text-sm">Hours</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+            <div className="text-2xl md:text-4xl font-bold text-white">
+              {String(timeLeft.minutes).padStart(2, '0')}
+            </div>
+            <div className="text-white/80 text-xs md:text-sm">Minutes</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 md:p-4">
+            <div className="text-2xl md:text-4xl font-bold text-white">
+              {String(timeLeft.seconds).padStart(2, '0')}
+            </div>
+            <div className="text-white/80 text-xs md:text-sm">Seconds</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 conference-bg">
       <div className="max-w-4xl mx-auto pt-32">
       <div className="flex justify-between items-start">
               <h1 className="text-3xl font-bold">{seminarDetails.title}</h1>

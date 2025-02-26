@@ -16,7 +16,7 @@ import {
 import { useSession } from "next-auth/react";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
@@ -58,6 +58,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { data: session } = useSession();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<number[]>([]);
   const [currentAnnouncement, setCurrentAnnouncement] = useState<Partial<Announcement>>({
     id: undefined,
     title: '',
@@ -239,7 +240,13 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       showToast.error("Failed to delete announcement");
     }
   };
-
+  const toggleExpand = (id: number) => {
+    setExpandedIds((prev: number[]) => 
+      prev.includes(id) 
+        ? prev.filter((itemId: number) => itemId !== id) 
+        : [...prev, id]
+    );
+  };
   useEffect(() => {
     if (bearerToken) {
       fetchAnnouncements();
@@ -274,6 +281,9 @@ const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
       {linkedId && ` (${linkedId})`}
     </span>
   );
+  
+  
+
 };
   return (
     <div className=''>
@@ -374,89 +384,102 @@ const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
         </Dialog>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {announcements.map((announcement) => (
+      <div className='space-y-4 w-full'>
+      {announcements.map((announcement) => {
+        const isExpanded = expandedIds.includes(announcement.id);
+        
+        return (
           <Card 
             key={announcement.id} 
-            className={`hover:shadow-xl transition-all duration-300 relative
-              ${announcement.viewer === 'all' ? 'border-green-200' : ''}
-      ${announcement.viewer === 'conference' ? 'border-blue-200' : ''}
-      ${announcement.viewer === 'seminar' ? 'border-purple-200' : ''}
-      ${announcement.viewer === 'speaker' ? 'border-orange-200' : ''}`}
-            
+            className={`transition-all duration-300 overflow-hidden
+              ${announcement.viewer === 'all' ? 'border-l-4 border-l-green-500' : ''}
+              ${announcement.viewer === 'conference' ? 'border-l-4 border-l-blue-500' : ''}
+              ${announcement.viewer === 'seminar' ? 'border-l-4 border-l-purple-500' : ''}
+              ${announcement.viewer === 'speaker' ? 'border-l-4 border-l-orange-500' : ''}
+              ${isExpanded ? 'shadow-md' : 'hover:shadow-sm'}`}
           >
-            <div className='absolute top-2 right-2 text-sm text-muted-foreground'>
-              <span className='opacity-[0.6] italic'>{announcement.date} - {announcement.time}</span>
+            <div 
+              className='flex items-center justify-between p-4 cursor-pointer'
+              onClick={() => toggleExpand(announcement.id)}
+            >
+              <div className='flex items-center space-x-3'>
+                {isExpanded ? 
+                  <ChevronDown className='h-5 w-5 text-gray-500' /> : 
+                  <ChevronRight className='h-5 w-5 text-gray-500' />
+                }
+                <p className='font-medium text-lg'>{announcement.title}</p>
+              </div>
+              
+              <div className='flex items-center space-x-4'>
+                <ViewerBadge viewer={announcement.viewer} linkedId={announcement.linked_id} />
+                <span className='text-sm text-muted-foreground italic'>
+                  {announcement.date}
+                </span>
+              </div>
             </div>
             
-            {announcement.image && (
-  <div className="relative w-full h-48">
-    <Image
-      src={
-        typeof announcement.image === 'string'
-          ? announcement.image.startsWith('http') 
-            ? announcement.image 
-            : `${API_URL}/${announcement.image}`
-          : URL.createObjectURL(announcement.image as File)
-      }
-      alt={announcement.title || 'Announcement image'}
-      fill
-      style={{ objectFit: 'cover' }}
-      onError={(e) => {
-        const target = e.target as HTMLImageElement;
-        target.onerror = null; // Prevent infinite callback loop
-        target.src = '/placeholder-image.jpg'; // Replace with your placeholder image path
-      }}
-    />
-  </div>
-)}
-            
-            <CardHeader>
-              <CardTitle className='flex items-center justify-between pt-5'>
-                <span className='text-xl'>{announcement.title}</span>
-                <ViewerBadge viewer={announcement.viewer} linkedId={announcement.linked_id} />
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent>
-              <p className='text-muted-foreground opacity-[0.8] text-sm md:text-md lg:text-lg'>
-                {announcement.description}
-              </p>
-              
-              <div className='flex justify-between items-center pt-2'>
-                {announcement.link && (
-                  <a 
-                    href={announcement.link} 
-                    target='_blank' 
-                    rel='noopener noreferrer' 
-                    className='text-blue-600 hover:underline flex items-center'
-                  >
-                    Learn More
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className='ml-1 h-4 w-4' 
-                      fill='none' 
-                      viewBox='0 0 24 24' 
-                      stroke='currentColor'
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
-                    </svg>
-                  </a>
+            {isExpanded && (
+              <div className='animate-accordion-down'>
+                {announcement.image && (
+                  <div className="relative w-full h-64">
+                    <Image
+                      src={
+                        typeof announcement.image === 'string'
+                          ? announcement.image.startsWith('http') 
+                            ? announcement.image 
+                            : `${API_URL}/${announcement.image}`
+                          : URL.createObjectURL(announcement.image as File)
+                      }
+                      alt={announcement.title || 'Announcement image'}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src = '/placeholder-image.jpg';
+                      }}
+                    />
+                  </div>
                 )}
                 
-                <div className='flex space-x-2'>
-                  <Button 
-                    variant='outline' 
-                    className='bg-transparent border'
-                    size='icon'
-                    onClick={() => {
-                      setCurrentAnnouncement(announcement);
-                      setIsEditModalOpen(true);
-                    }}
-                    >
-                    <EditIcon className='h-4 w-4' />
-                  </Button>
-                  <AlertDialog.Root>
+                <CardContent className='pt-4'>
+                  <p className='text-muted-foreground text-sm mb-6'>
+                    {announcement.description}
+                  </p>
+                  
+                  <div className='flex justify-between items-center'>
+                    {announcement.link && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        asChild
+                      >
+                        <a 
+                          href={announcement.link} 
+                          target='_blank' 
+                          rel='noopener noreferrer'
+                          className='flex items-center'
+                        >
+                          Learn More
+                          <ExternalLink className='ml-2 h-3 w-3' />
+                        </a>
+                      </Button>
+                    )}
+                    
+                    <div className='flex space-x-2'>
+                      <Button 
+                        variant='outline' 
+                        size='icon'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentAnnouncement(announcement);
+                          setIsEditModalOpen(true);
+                        }}
+                      >
+                        <EditIcon className='h-4 w-4' />
+                      </Button>
+                      
+                      <AlertDialog.Root>
   <AlertDialog.Trigger asChild>
     <button  className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
       <Trash2 className="w-4 h-4" />
@@ -490,12 +513,15 @@ const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
     </AlertDialog.Content>
   </AlertDialog.Portal>
 </AlertDialog.Root>
-                </div>
+                    </div>
+                  </div>
+                </CardContent>
               </div>
-            </CardContent>
+            )}
           </Card>
-        ))}
-      </div>
+        );
+      })}
+    </div>
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

@@ -1,8 +1,8 @@
-// context/authContext.tsx
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react';
 
 interface User {
   id: string
@@ -22,6 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession(); // Moved inside the component
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
@@ -32,10 +33,10 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('access_token')
-      const userData = localStorage.getItem('user_data')
+      const bearerToken = session?.user?.token || session?.user?.userData?.token;
+      const userData = sessionStorage.getItem('user')
 
-      if (token && userData) {
+      if (bearerToken && userData) {
         setUser(JSON.parse(userData))
       }
     } catch (error) {
@@ -46,14 +47,14 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   }
 
   const login = (token: string, userData: any) => {
-    localStorage.setItem('access_token', token)
-    localStorage.setItem('user_data', JSON.stringify(userData))
+    sessionStorage.setItem('token', token)
+    sessionStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
   }
 
   const logout = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user_data')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
     setUser(null)
     router.push('/login')
   }

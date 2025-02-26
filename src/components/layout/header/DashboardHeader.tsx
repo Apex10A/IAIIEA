@@ -10,8 +10,15 @@ import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
 import { Menu, Search, Settings, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/modules/ui/avatar';
 
-const DashboardHeader = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+type DashboardHeaderProps = {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+};
+
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
+  isSidebarOpen, 
+  toggleSidebar 
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { data: session } = useSession({
     required: true,
@@ -58,30 +65,6 @@ const DashboardHeader = () => {
     }
   };
 
-  // Mobile menu animation variants
-  const mobileMenuVariants = {
-    hidden: { 
-      height: 0,
-      opacity: 0
-    },
-    visible: { 
-      height: 'auto',
-      opacity: 1,
-      transition: {
-        duration: 0.3,
-        ease: "easeInOut"
-      }
-    },
-    exit: { 
-      height: 0,
-      opacity: 0,
-      transition: {
-        duration: 0.2,
-        ease: "easeInOut"
-      }
-    }
-  };
-
   // If no session, return null or a loading state
   if (!session?.user) return null;
 
@@ -91,8 +74,17 @@ const DashboardHeader = () => {
       <div className="fixed w-full bg-[#0E1A3D] z-40 py-3">
         <div className="max-w-[1440px] lg:max-w-full mx-auto px-4 md:px-8 py-4">
           <div className="flex items-center justify-between px-auto md:px-14">
+            {/* Mobile Menu Button */}
+            <button 
+              className="p-2 text-white rounded-md flex md:hidden hover:bg-[#1A2C5B] transition-colors"
+              onClick={toggleSidebar}
+              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            >
+              <Menu size={24} />
+            </button>
+
             {/* Logo */}
-            <Link href="/" className="block w-[100px] md:w-[130px]">
+            <Link href="/" className="block w-[100px] md:w-[130px] ml-2">
               <Image src={Logo} alt="Logo" priority className="w-full h-auto" />
             </Link>
 
@@ -106,92 +98,55 @@ const DashboardHeader = () => {
               <Search className="absolute top-1/2 -translate-y-1/2 left-3" />
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="flex gap-5 items-center">
-              <button 
-                className="md:hidden p-2 text-white"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                <Menu size={24} />
-              </button>
-
-              {/* Profile Dropdown */}
-              <div className="relative">
-                <div onClick={toggleDropdown} className="flex items-center gap-2 cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                      <AvatarImage
-                        src={session.user?.image || '/default-avatar.png'}
-                        alt={session.user?.name || 'User'}
-                      />
-                      <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
-                        {session.user?.name?.charAt(0) || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden md:inline text-white">
-                      {session.user?.name}
-                    </span>
-                  </div>
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <div onClick={toggleDropdown} className="flex items-center gap-2 cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                    <AvatarImage
+                      src={session.user?.image || '/default-avatar.png'}
+                      alt={session.user?.name || 'User'}
+                    />
+                    <AvatarFallback className="bg-yellow-200 uppercase text-[#0E1A3D] font-bold">
+                      {session.user?.name?.charAt(0) || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:inline text-white">
+                    {session.user?.name}
+                  </span>
                 </div>
-
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div 
-                      variants={dropdownVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2"
-                    >
-                      <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <Settings size={18} className="inline-block mr-2" />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
-                      >
-                        <LogOut size={18} className="inline-block mr-2" />
-                        Logout
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
+
+              <AnimatePresence>
+                {isDropdownOpen && (
+                  <motion.div 
+                    variants={dropdownVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50"
+                  >
+                    <Link href="/members-dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      <Settings size={18} className="inline-block mr-2" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                    >
+                      <LogOut size={18} className="inline-block mr-2" />
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
-
-        {/* Mobile Menu with Framer Motion */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              variants={mobileMenuVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="md:hidden bg-[#0E1A3D] border-t border-gray-700"
-            >
-              <div className="px-4 py-3">
-                <Link href="/members-dashboard/settings" className="flex items-center gap-2 text-white w-full py-2">
-                  <Settings size={20} />
-                  <span>Settings</span>
-                </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 text-red-400 w-full py-2"
-                >
-                  <LogOut size={20} />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Spacer */}
-      <div className="h-16 md:h-20" />
+      <div className="h-24" />
     </>
   );
 };

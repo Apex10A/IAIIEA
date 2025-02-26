@@ -8,13 +8,13 @@ import { AuthContextProvider } from '@/context/AuthContext'
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AuthContextProvider>
-      <SessionProvider>
+    <SessionProvider>
+      <AuthContextProvider>
         {children}
         <Toaster />
         <Sonner richColors expand={true} position="top-right" />
-        </SessionProvider>
-    </AuthContextProvider>
+      </AuthContextProvider>
+    </SessionProvider>
   )
 }
 

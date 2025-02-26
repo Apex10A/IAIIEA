@@ -27,6 +27,7 @@ const SeminarDetailsPage = () => {
   const [seminarDetails, setSeminarDetails] = useState<SeminarDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [conferenceDate, setConferenceDate] = useState<Date | null>(null);
   const params = useParams();
    const { data: session } = useSession();
   const seminarId = params.id;
@@ -163,6 +164,16 @@ const SeminarDetailsPage = () => {
   return (
     <div className="min-h-screen p-6 conference-bg">
       <div className="max-w-4xl mx-auto pt-32">
+      <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-20 gap-6">
+        <div className="w-full md:w-auto">
+          {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
+        </div>
+        <div>
+          <button className="bg-[#D5B93C] px-4 sm:px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md w-full md:w-auto">
+            Conference portal
+          </button>
+        </div>
+      </div>
       <div className="flex justify-between items-start">
               <h1 className="text-3xl font-bold">{seminarDetails.title}</h1>
               <Badge className={seminarDetails.status === 'Ongoing' ? 'bg-green-500' : 'bg-blue-500'}>

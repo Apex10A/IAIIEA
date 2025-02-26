@@ -110,19 +110,20 @@ const SeminarListPage = () => {
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
-      <div className="max-w-7xl mx-auto pt-32">
-        <h1 className="text-3xl font-bold mb-8">Active Seminars</h1>
+    <div className="min-h-screen p-6 conference-bg bg-gray-50 px-4 md:px-8 lg:px-16 w-full">
+      <div className=" pt-32">
+        <h1 className="text-3xl font-bold mb-8 text-white">Active Seminars</h1>
         
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 relative md:grid-cols-2 lg:grid-cols-3">
           {seminars.map((seminar) => (
+           <div>
+             <div className='absolute h-full w-5 z-10 bg-[#e0ce7e]'></div>
             <div 
               key={seminar.id}
               className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleSeminarClick(seminar.id)}
             >
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-xl font-semibold">{seminar.title}</h2>
+              <div className="flex justify-between items-start mb-4 relative z-20">
+                <h2 className="text-xl font-semibold ">{seminar.title}</h2>
                 <Badge variant={getStatusVariant(seminar.status)} className='px-2 py-1'>
                   {seminar.status}
                 </Badge>
@@ -130,7 +131,8 @@ const SeminarListPage = () => {
               
               <p className="text-gray-600 mb-4">{seminar.theme}</p>
               
-              <div className="space-y-2">
+             <div className='flex items-center justify-between'>
+             <div className="space-y-2">
                 <div className="flex items-center text-gray-500">
                   <CalendarIcon className="w-4 h-4 mr-2" />
                   <span className="text-sm">{formatDate(seminar.date)}</span>
@@ -141,7 +143,12 @@ const SeminarListPage = () => {
                   <span className="text-sm">{seminar.venue || 'Venue TBA'}</span>
                 </div>
               </div>
+              <div>
+                <button className="bg-[#e0ce7e] px-4 sm:px-5 py-2 text-[#0E1A3D] rounded-md w-full md:w-auto" onClick={() => handleSeminarClick(seminar.id)}>View details</button>
+              </div>
+             </div>
             </div>
+           </div>
           ))}
         </div>
 

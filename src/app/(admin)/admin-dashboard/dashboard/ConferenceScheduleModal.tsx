@@ -6,22 +6,31 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { showToast } from '@/utils/toast';
 
 interface ConferenceScheduleModalProps {
-    onScheduleAdded: () => void;
-  }
+  onScheduleAdded: () => void;
+}
 
-  interface ScheduleDetails {
-    event_id: string;
-    day: string;
-    start: string;
-    end: string;
-    activity: string;
-    venue: string;
-    facilitator: string;
-  }
+interface ScheduleDetails {
+  event_id: string;
+  day: string;
+  start: string;
+  end: string;
+  activity: string;
+  venue: string;
+  facilitator: string;
+}
+
+interface Conference {
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: string;
+}
 
 const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onScheduleAdded }) => {
   const [scheduleDetails, setScheduleDetails] = useState<ScheduleDetails>({
-    event_id: "1", // Default to 1 since we're working with conference ID 1
+    event_id: "",
     day: "",
     start: "",
     end: "",
@@ -31,10 +40,59 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingConferences, setIsFetchingConferences] = useState(false);
   const [error, setError] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [conferences, setConferences] = useState<Conference[]>([]);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  // Fetch conferences when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchConferences();
+    }
+  }, [isOpen]);
+
+  const fetchConferences = async () => {
+    try {
+      setIsFetchingConferences(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch conferences: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      if (result.status === "success") {
+        setConferences(result.data);
+        // Set default selection to the first conference if available
+        if (result.data.length > 0) {
+          setScheduleDetails(prev => ({
+            ...prev,
+            event_id: result.data[0].id.toString()
+          }));
+        }
+      } else {
+        throw new Error(result.message || "Failed to fetch conferences");
+      }
+    } catch (error) {
+      console.error("Error fetching conferences:", error);
+      let errorMessage = "Failed to load conferences";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
+      showToast.error(errorMessage);
+    } finally {
+      setIsFetchingConferences(false);
+    }
+  };
 
   const validateDates = () => {
     const startDate = new Date(scheduleDetails.start);
@@ -45,12 +103,27 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
   const handleInputChange = (field: keyof ScheduleDetails, value: string) => {
     setError(""); // Clear any previous errors
     setScheduleDetails((prev) => ({ ...prev, [field]: value }));
+
+    // If conference selection changes, update the venue with the conference venue
+    if (field === "event_id") {
+      const selectedConference = conferences.find(conf => conf.id.toString() === value);
+      if (selectedConference) {
+        // Optionally pre-fill the venue with the conference venue
+        // Comment or remove this if you don't want this behavior
+        setScheduleDetails(prev => ({
+          ...prev,
+          venue: selectedConference.venue
+        }));
+      }
+    }
   };
-  
 
   const resetForm = () => {
+    // If conferences exist, set the default event_id to the first one
+    const defaultEventId = conferences.length > 0 ? conferences[0].id.toString() : "";
+    
     setScheduleDetails({
-      event_id: "1",
+      event_id: defaultEventId,
       day: "",
       start: "",
       end: "",
@@ -65,6 +138,7 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
     try {
       // Validate all required fields
       const requiredFields: (keyof ScheduleDetails)[] = [
+        "event_id",
         "day",
         "start",
         "end",
@@ -95,15 +169,14 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
         body: JSON.stringify(scheduleDetails),
       });
 
-      if (!response.ok){
-        showToast.success('schedule added successfully!');
-      }else {
+      if (!response.ok) {
         throw new Error(`Failed to create schedule: ${response.statusText}`);
       }
    
       const result = await response.json();
       
       if (result.status === "success") {
+        showToast.success('Schedule added successfully!');
         if (onScheduleAdded) {
           onScheduleAdded();
         }
@@ -113,14 +186,13 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
         throw new Error(result.message || "Failed to create schedule");
       }
     } catch (error) {
-        console.error(error);
-        if (error instanceof Error) {
-          showToast.error(error.message);
-        } else {
-          showToast.error("An error occurred while creating the schedule");
-        }
+      console.error(error);
+      if (error instanceof Error) {
+        showToast.error(error.message);
+      } else {
+        showToast.error("An error occurred while creating the schedule");
       }
-       finally {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -157,6 +229,30 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
             )}
 
             <div className="grid gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Conference</label>
+                {isFetchingConferences ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
+                    <span>Loading conferences...</span>
+                  </div>
+                ) : (
+                  <select
+                    value={scheduleDetails.event_id}
+                    onChange={(e) => handleInputChange("event_id", e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md bg-white"
+                    required
+                  >
+                    <option value="" disabled>Select a conference</option>
+                    {conferences.map((conference) => (
+                      <option key={conference.id} value={conference.id.toString()}>
+                        {conference.title} - {conference.status} ({conference.date})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">Day</label>
                 <input
@@ -241,7 +337,7 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
               </Dialog.Close>
               <button
                 onClick={handleSubmit}
-                disabled={isLoading}
+                disabled={isLoading || isFetchingConferences}
                 className="px-4 py-2 text-sm font-medium text-white bg-[#203a87] rounded-md hover:bg-[#152a61] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Saving..." : "Save Schedule"}

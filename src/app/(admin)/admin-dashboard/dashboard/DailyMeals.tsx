@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Plus } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Plus, Trash2 } from 'lucide-react';
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { showToast } from '@/utils/toast';
+import { Button } from "@/components/ui/button";
 
 interface ConferenceMealsProps {
   onMealAdded: () => void;
@@ -16,14 +17,14 @@ interface Meal {
 }
 
 // const MealsModal = ({ onMealAdded }) => {
-  const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded }) => {
-    const [mealDetails, setMealDetails] = useState<{
-      name: string;
-      image: File | null;
-    }>({
-      name: "",
-      image: null,
-    });
+const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded }) => {
+  const [mealDetails, setMealDetails] = useState<{
+    name: string;
+    image: File | null;
+  }>({
+    name: "",
+    image: null,
+  });
     
   const [isLoading, setIsLoading] = useState(false);
   const { data: session } = useSession();
@@ -40,7 +41,6 @@ interface Meal {
     }
   };
   
-
   const handleSubmit = async () => {
     if (!mealDetails.name || !mealDetails.image) {
       showToast.error('Please fill in all fields');
@@ -53,7 +53,7 @@ interface Meal {
 
     try {
       setIsLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add_conference_meal`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add_meal`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
@@ -141,6 +141,7 @@ const ConferenceMeals = () => {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -153,7 +154,7 @@ const ConferenceMeals = () => {
     }
 
     try {
-      const response = await fetch('https://iaiiea.org/api/sandbox/landing/event_details/1', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/14`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
@@ -170,6 +171,39 @@ const ConferenceMeals = () => {
       showToast.error('Failed to load meals. Please try again later.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteMeal = async (mealId: string) => {
+    if (!bearerToken) {
+      showToast.error("Please login again to perform this action");
+      return;
+    }
+
+    setIsDeleting(mealId);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_meal`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: mealId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete meal: ${response.status}`);
+      }
+
+      // Remove the deleted meal from the state
+      setMeals(meals.filter(meal => meal.meal_id !== mealId));
+      showToast.success("Meal deleted successfully");
+    } catch (err) {
+      console.error('Error deleting meal:', err);
+      showToast.error('Failed to delete meal. Please try again.');
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -212,16 +246,16 @@ const ConferenceMeals = () => {
             <Card key={meal.meal_id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video relative overflow-hidden bg-gray-100">
                 {meal.image ? (
-                 <img
-                 src={meal.image}
-                 alt={meal.name}
-                 className="object-cover w-full h-full"
-                 onError={(e) => {
-                   const target = e.target as HTMLImageElement; // Cast to HTMLImageElement
-                   target.src = '/placeholder-meal.jpg'; // Placeholder image
-                   target.alt = 'Meal image not available';
-                 }}
-               />
+                  <img
+                    src={meal.image}
+                    alt={meal.name}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder-meal.jpg';
+                      target.alt = 'Meal image not available';
+                    }}
+                  />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-400">
                     No image available
@@ -231,6 +265,23 @@ const ConferenceMeals = () => {
               <CardContent className="p-4">
                 <h3 className="font-semibold text-lg">{meal.name}</h3>
               </CardContent>
+              <CardFooter className="flex justify-end p-4 pt-0">
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => handleDeleteMeal(meal.meal_id)}
+                  disabled={isDeleting === meal.meal_id}
+                >
+                  {isDeleting === meal.meal_id ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
             </Card>
           ))}
         </div>

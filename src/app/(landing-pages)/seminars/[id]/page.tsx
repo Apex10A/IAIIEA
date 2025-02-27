@@ -162,7 +162,7 @@ const SeminarDetailsPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 conference-bg">
+    <div className="min-h-screen p-6 conference-bg pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full">
       <div className="max-w-4xl mx-auto pt-32">
       <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-20 gap-6">
         <div className="w-full md:w-auto">
@@ -170,12 +170,13 @@ const SeminarDetailsPage = () => {
         </div>
         <div>
           <button className="bg-[#D5B93C] px-4 sm:px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md w-full md:w-auto">
-            Conference portal
+            Seminar portal
           </button>
         </div>
       </div>
+
       <div className="flex justify-between items-start">
-              <h1 className="text-3xl font-bold">{seminarDetails.title}</h1>
+              <h1 className="text-3xl font-bold text-white">{seminarDetails.title}</h1>
               <Badge className={seminarDetails.status === 'Ongoing' ? 'bg-green-500' : 'bg-blue-500'}>
                 {seminarDetails.status}
               </Badge>
@@ -183,8 +184,7 @@ const SeminarDetailsPage = () => {
         <div className="">        
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-semibold mb-2">Theme</h3>
-              <p className="text-gray-600">{seminarDetails.theme}</p>
+              <h1 className="text-3xl md:text-5xl font-bold text-[#D5B93C] mb-6 max-w-full md:max-w-3/4 lg:max-w-[60%] leading-tight">{seminarDetails.theme}</h1>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center text-gray-500">

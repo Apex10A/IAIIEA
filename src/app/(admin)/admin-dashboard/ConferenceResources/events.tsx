@@ -4,8 +4,9 @@ import AddFileModal from './AddFileModal';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Calendar, MapPin, Tag, ArrowLeft } from 'lucide-react';
 import { showToast } from '@/utils/toast';
+import Image from 'next/image';
 
 // TypeScript interfaces
 interface Resource {
@@ -29,6 +30,7 @@ interface Conference {
 interface ConferenceCardProps {
   conference: Conference;
   onViewResources: (conference: Conference) => void;
+  onViewDetails: (conference: Conference) => void;
   onDeleteConference: (id: number) => void;
   onEditConference: (conference: Conference) => void;
 }
@@ -36,81 +38,103 @@ interface ConferenceCardProps {
 const ConferenceCard: React.FC<ConferenceCardProps> = ({ 
   conference, 
   onViewResources, 
+  onViewDetails,
   onDeleteConference,
   onEditConference 
 }) => {
   const resourceCount = conference.resources?.length || 0;
-    const handleDelete = async () => {
-      try {
-        await onDeleteConference(conference.id);
-        showToast.success('Conference deleted successfully');
-      } catch (error) {
-        showToast.error('Failed to delete conference');
-      }
-    };
+  
+  const handleDelete = async () => {
+    try {
+      await onDeleteConference(conference.id);
+      showToast.success('Conference deleted successfully');
+    } catch (error) {
+      showToast.error('Failed to delete conference');
+    }
+  };
+
+  // Function to get background color based on index
+  const getBgColor = (index: number) => {
+    const colors = ['bg-blue-50', 'bg-amber-50', 'bg-emerald-50'];
+    return colors[index % colors.length];
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{conference.title}</h3>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">{conference.theme}</p>
+    <div className="rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div className="relative">
+        <div className="absolute z-20 bottom-5 left-5">
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+              conference.status === "Completed"
+                ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+                : "bg-[#203A87] text-white hover:bg-[#152a61]"
+            }`}
+          >
+            {conference.status}
+          </button>
         </div>
-        <span className="bg-blue-100 text-blue-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
-          {resourceCount} {resourceCount === 1 ? 'Resource' : 'Resources'}
-        </span>
+        <Image
+          src="/Meeting.png"
+          alt={conference.title}
+          width={600}
+          height={400}
+          className="w-full h-[250px] object-cover"
+        />
       </div>
-      <div className="text-xs sm:text-sm text-gray-500">
-        <p className="mb-2">{conference.venue}</p>
-        <p>{conference.date}</p>
+      <div className='p-4'>
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
+            {conference.title}
+          </h1>
+        </div>
+        <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
+          {conference.theme}
+        </p>
+        <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
+          {conference.date}
+        </p>
       </div>
-      <div className="mt-4 flex justify-between gap-2">
-        <button 
-          onClick={() => onViewResources(conference)}
-          className="text-blue-600 hover:text-blue-800 font-semibold text-sm sm:text-base flex items-center gap-2"
+      <div className="mt-4 flex justify-between gap-2 px-4 pb-4">
+        <button
+          onClick={() => onViewDetails(conference)}
+          className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
         >
-          View Resources
+          View Details
         </button>
-        {/* <button 
-          onClick={() => onEditConference(conference)}
-          className="text-green-600 hover:text-green-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          Edit
-        </button> */}
-           <AlertDialog.Root>
-                 <AlertDialog.Trigger asChild>
-                   <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
-                     <Trash2 className="w-4 h-4" />
-                     Delete
-                   </button>
-                 </AlertDialog.Trigger>
-                 <AlertDialog.Portal>
-                   <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
-                   <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
-                     <AlertDialog.Title className="text-lg font-semibold">
-                       Delete Conference
-                     </AlertDialog.Title>
-                     <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                       Are you sure you want to delete this conference? This action cannot be undone.
-                     </AlertDialog.Description>
-                     <div className="flex justify-end gap-4">
-                       <AlertDialog.Cancel asChild>
-                         <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                           Cancel
-                         </button>
-                       </AlertDialog.Cancel>
-                       <AlertDialog.Action asChild>
-                         <button 
-                           onClick={handleDelete}
-                           className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-                         >
-                           Delete
-                         </button>
-                       </AlertDialog.Action>
-                     </div>
-                   </AlertDialog.Content>
-                 </AlertDialog.Portal>
-               </AlertDialog.Root>
+        <AlertDialog.Root>
+          <AlertDialog.Trigger asChild>
+            <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          </AlertDialog.Trigger>
+          <AlertDialog.Portal>
+            <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+            <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+              <AlertDialog.Title className="text-lg font-semibold">
+                Delete Conference
+              </AlertDialog.Title>
+              <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                Are you sure you want to delete this conference? This action cannot be undone.
+              </AlertDialog.Description>
+              <div className="flex justify-end gap-4">
+                <AlertDialog.Cancel asChild>
+                  <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Cancel
+                  </button>
+                </AlertDialog.Cancel>
+                <AlertDialog.Action asChild>
+                  <button 
+                    onClick={handleDelete}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </AlertDialog.Action>
+              </div>
+            </AlertDialog.Content>
+          </AlertDialog.Portal>
+        </AlertDialog.Root>
       </div>
     </div>
   );
@@ -129,14 +153,15 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
       day: 'numeric'
     });
   };
-    const handleDelete = async () => {
-      try {
-        await onDelete(resource.resource_id);
-        showToast.success('Resource deleted successfully');
-      } catch (error) {
-        showToast.error('Failed to delete resource');
-      }
-    };
+  
+  const handleDelete = async () => {
+    try {
+      await onDelete(resource.resource_id);
+      showToast.success('Resource deleted successfully');
+    } catch (error) {
+      showToast.error('Failed to delete resource');
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
@@ -168,11 +193,136 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
   );
 };
 
+// New Conference Details Component
+interface ConferenceDetailsProps {
+  conference: Conference;
+  onBack: () => void;
+  onViewResources: (conference: Conference) => void;
+}
+
+const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({ 
+  conference, 
+  onBack,
+  onViewResources
+}) => {
+  return (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="relative">
+        <button 
+          onClick={onBack}
+          className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </button>
+        
+        <div className="absolute z-10 bottom-4 right-4">
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+              conference.status === "Completed"
+                ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+                : "bg-[#203A87] text-white hover:bg-[#152a61]"
+            }`}
+          >
+            {conference.status}
+          </button>
+        </div>
+        
+        <Image
+          src="/Meeting.png"
+          alt={conference.title}
+          width={800}
+          height={400}
+          className="w-full h-[300px] md:h-[400px] object-cover"
+        />
+      </div>
+      
+      <div className="p-6 md:p-8">
+       <div className='flex items-center justify-between'>
+       <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
+          {conference.title}
+        </h1>
+        <p>100+ people registered <a href="" className='underline font-bold'>access participant directory</a></p>
+       </div>
+        
+        <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
+          <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
+            {conference.theme}
+          </p>
+        </div>
+        <div className='mb-6'>
+          <hr />
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-3">
+            <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Date</h3>
+              <p className="text-base md:text-lg font-medium text-[#0B142F]">{conference.date}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Venue</h3>
+              <p className="text-base md:text-lg font-medium text-[#0B142F]">{conference.venue}</p>
+            </div>
+          </div>
+        </div>
+        <div className='my-6'>
+          <hr />
+        </div>
+        <div>
+          <h1 className='text-2xl mb-3'>Resources</h1>
+          <p>View <a href="" className='underline font-bold'>Conference preceeding</a></p>
+          <div className='flex items-center gap-4 justify-between'>
+          <p>Get the conference resources by each speaker here</p>
+          <button className='px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]'>Resources</button>
+          </div>
+        </div>
+        <div className='my-6'>
+          <hr />
+        </div>
+        <div>
+        <h1 className='text-2xl mb-3'>Daily conference schedule</h1>
+        </div>
+        <div className='my-6'>
+          <hr />
+        </div>
+        <div>
+        <h1 className='text-2xl mb-3'>Meal Ticketing</h1>
+        <p>This are the list of food currently available for the day. Select any food of your choice</p>
+        </div>
+        <div className='my-6'>
+          <hr />
+        </div>
+        <div>
+        <h1 className='text-2xl mb-3'>Join event for virtual attendees</h1>
+        <div className='flex items-center gap-4 justify-between'>
+          <p>You can access the live event from here</p>
+          <button onClick={() => onViewResources(conference)} className='px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]'>Join in</button>
+          </div>
+        </div>
+        <div className='my-6'>
+          <hr />
+        </div>
+        <div>
+        <h1 className='text-2xl mb-3'>Certification</h1>
+        <p>Complete the conference evaluation to <a href="" className='underline font-bold'>access certificate</a></p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main component
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'details' | 'resources'>('list');
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
@@ -215,7 +365,6 @@ const ConferenceResources: React.FC = () => {
         setConferences(prev => prev.filter(conf => conf.id !== id));
       } else {
         throw new Error('Delete failed');
-        showToast.error('Failed to delete conference');
       }
     } catch (error) {
       console.error('Delete failed:', error);
@@ -224,7 +373,6 @@ const ConferenceResources: React.FC = () => {
   };
 
   const handleDeleteResource = async (resourceId: number) => {
-
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`, {
         method: 'DELETE',
@@ -252,13 +400,29 @@ const ConferenceResources: React.FC = () => {
               : conf
           ));
         }
+        showToast.success('Resource deleted successfully');
       } else {
         throw new Error('Delete failed');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      alert('Failed to delete resource');
+      showToast.error('Failed to delete resource');
     }
+  };
+
+  const handleViewDetails = (conference: Conference) => {
+    setSelectedConference(conference);
+    setViewMode('details');
+  };
+
+const handleViewResources = (conference: Conference) => {
+  setSelectedConference(conference);
+  setViewMode('resources');
+};
+
+  const handleBackToDashboard = () => {
+    setViewMode('list');
+    setSelectedConference(null);
   };
 
   const conferencesByYear = conferences.reduce((acc: Record<string, Conference[]>, conference) => {
@@ -280,29 +444,17 @@ const ConferenceResources: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6">
-      {selectedConference ? (
+      {viewMode === 'resources' && selectedConference ? (
         // Resources View
         <div>
           <div className="flex justify-between items-center mb-6">
-          <button 
-  onClick={() => setSelectedConference(null)}
-  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors rounded-lg hover:bg-gray-100 hover:text-gray-900"
->
-  <svg 
-    className="w-4 h-4" 
-    fill="none" 
-    stroke="currentColor" 
-    viewBox="0 0 24 24"
-  >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      strokeWidth={2} 
-      d="M15 19l-7-7 7-7"
-    />
-  </svg>
-  Back to Conferences
-</button>
+            <button 
+              onClick={handleBackToDashboard}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors rounded-lg hover:bg-gray-100 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </button>
             <AddFileModal />
           </div>
 
@@ -328,6 +480,13 @@ const ConferenceResources: React.FC = () => {
             </div>
           )}
         </div>
+      ) : viewMode === 'details' && selectedConference ? (
+        // Conference Details View
+        <ConferenceDetails 
+          conference={selectedConference} 
+          onBack={handleBackToDashboard}
+          onViewResources={handleViewResources}
+        />
       ) : (
         // Conferences List View
         <>
@@ -358,7 +517,8 @@ const ConferenceResources: React.FC = () => {
               <ConferenceCard 
                 key={conference.id} 
                 conference={conference} 
-                onViewResources={setSelectedConference}
+                onViewResources={handleViewResources}
+                onViewDetails={handleViewDetails}
                 onDeleteConference={handleDeleteConference}
                 onEditConference={() => {/* Add edit functionality */}}
               />

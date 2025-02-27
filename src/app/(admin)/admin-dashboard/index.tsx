@@ -58,7 +58,7 @@ export default function DashboardClient() {
       'Broadcast' : <Broadcast/>,
       'Members Resources': <MembersResorces/>,
       'Gallery': <Gallery/>,
-      'Resources': <ConferenceResources/>,
+      'Conferences': <ConferenceResources/>,
       // 'Conference Portal': <ConferencePortal />,
       'Seminars / Webinars': <SeminarsWebinars />,
       'Directory': <MembersDirectory />,
@@ -94,7 +94,7 @@ export default function DashboardClient() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="fixed top-0 left-0 right-0 z-50">
-        <DashboardHeader />
+        <DashboardHeader isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       </div>
 
       <div className="flex flex-grow h-full">

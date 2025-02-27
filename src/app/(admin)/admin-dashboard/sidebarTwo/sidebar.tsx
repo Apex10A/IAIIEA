@@ -60,7 +60,7 @@ const portalItems: NavItem[] = [
     requiredPortal: 'conference',
     subItems: [
       { name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },
-      { name: 'Resources', requiredPortal: 'conference', icon: ResourcesIcon },
+      { name: 'Conferences', requiredPortal: 'conference', icon: ResourcesIcon },
       { name: 'Messages', requiredPortal: 'conference', icon: ResourcesIcon },
       { name: 'Gallery', requiredPortal: 'conference', icon: ResourcesIcon },
     ]

@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import * as Dialog from '@radix-ui/react-dialog';

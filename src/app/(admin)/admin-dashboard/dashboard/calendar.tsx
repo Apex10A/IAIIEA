@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useSession } from "next-auth/react";
@@ -53,16 +53,17 @@ const Calendar = () => {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<CalendarData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-const [eventDetails, setEventDetails] = useState({
-  activity: '',
-  date: '',
-  time: '',
-  location: '',
-  description: '',
-  priority_level: 'important',
-  color: 'red',
-});
-
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [eventDetails, setEventDetails] = useState({
+    activity: '',
+    date: '',
+    time: '',
+    location: '',
+    description: '',
+    priority_level: 'important',
+    color: 'red',
+  });
 
   useEffect(() => {
     const fetchCalendarData = async () => {
@@ -73,7 +74,7 @@ const [eventDetails, setEventDetails] = useState({
       }
 
       try {
-        const response = await fetch('https://iaiiea.org/api/sandbox/admin/anual_calendar/2025', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/anual_calendar/2025`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${bearerToken}`,
@@ -107,7 +108,8 @@ const [eventDetails, setEventDetails] = useState({
   };
 
   const goToNextMonth = () => {
-    setCurrentMonthIndex(prev => prev < 11 ? prev - 1 : 0);
+    // Fixed: Now increases the month index instead of decreasing
+    setCurrentMonthIndex(prev => prev < 11 ? prev + 1 : 0);
   };
 
   const getFirstDayOfMonth = (month: number, year: number) => {
@@ -139,11 +141,33 @@ const [eventDetails, setEventDetails] = useState({
   
       showToast.success('Event created successfully');
       setIsModalOpen(false);
+      
+      // Refresh calendar data after adding a new event
+      setIsLoading(true);
+      const fetchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/anual_calendar/2025`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (fetchResponse.ok) {
+        const refreshedData = await fetchResponse.json();
+        setData(refreshedData);
+      }
+      setIsLoading(false);
+      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create event';
       showToast.error(errorMessage);
       console.error('Event creation error:', err);
     }
+  };
+
+  const openViewModal = (event: any) => {
+    setSelectedEvent(event);
+    setIsViewModalOpen(true);
   };
 
   const renderCalendarDays = () => {
@@ -160,7 +184,6 @@ const [eventDetails, setEventDetails] = useState({
       );
     }
 
-    // Actual days from API data
     // Actual days from API data
     currentMonth.days?.forEach((dayData: { day: React.Key | null | undefined; events: any; }) => {
       const dayNumber = parseInt(dayData.day as string);
@@ -190,7 +213,7 @@ const [eventDetails, setEventDetails] = useState({
                 size="sm" 
                 className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 text-gray-600"
                 onClick={() => {
-                  const dateStr = `2025-${(currentMonthIndex + 1).toString().padStart(2, '0')}-${dayData.day}`;
+                  const dateStr = `2025-${(currentMonthIndex + 1).toString().padStart(2, '0')}-${dayNumber.toString().padStart(2, '0')}`;
                   setEventDetails(prev => ({ ...prev, date: dateStr }));
                   setIsModalOpen(true);
                 }}
@@ -203,11 +226,12 @@ const [eventDetails, setEventDetails] = useState({
                 <div 
                   key={idx}
                   className={`text-xs p-1 rounded truncate ${
-                    event.color === 'blue' ? 'bg-blue-100' :
-                    event.color === 'red' ? 'bg-red-100' :
-                    event.color === 'green' ? 'bg-green-100' : 'bg-gray-100'
-                  }`}
-                  title={`${event.activity} - ${event.location}\n${event.description}`}
+                    event.color === 'blue' ? 'bg-blue-100 hover:bg-blue-200' :
+                    event.color === 'red' ? 'bg-red-100 hover:bg-red-200' :
+                    event.color === 'green' ? 'bg-green-100 hover:bg-green-200' : 'bg-gray-100 hover:bg-gray-200'
+                  } cursor-pointer transition-colors`}
+                  title={`${event.activity} - ${event.location}`}
+                  onClick={() => openViewModal(event)}
                 >
                   <div className="font-medium">{event.activity}</div>
                   <div className="text-xs opacity-75">{event.time}</div>
@@ -262,97 +286,139 @@ const [eventDetails, setEventDetails] = useState({
             </Button>
           </div>
         </div>
-        {isModalOpen && (
-  <div className="fixed inset-0 z-10 px-5 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-      <h3 className="text-lg font-semibold mb-4 text-gray-600">Add Calendar Activity</h3>
-      <form className="space-y-4">
-        <input
-          type="text"
-          placeholder="Activity"
-          value={eventDetails.activity}
-          onChange={(e) => setEventDetails({ ...eventDetails, activity: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="date"
-          value={eventDetails.date}
-          onChange={(e) => setEventDetails({ ...eventDetails, date: e.target.value })}
-          className="w-full p-2 border rounded bg-transparent text-gray-600"
-        />
-        <input
-          type="time"
-          value={eventDetails.time}
-          onChange={(e) => setEventDetails({ ...eventDetails, time: e.target.value })}
-          className="w-full p-2 border rounded bg-transparent text-gray-600"
-        />
-        <input
-          type="text"
-          placeholder="Location"
-          value={eventDetails.location}
-          onChange={(e) => setEventDetails({ ...eventDetails, location: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <textarea
-          placeholder="Description"
-          value={eventDetails.description}
-          onChange={(e) => setEventDetails({ ...eventDetails, description: e.target.value })}
-          className="w-full p-2 border rounded"
-        ></textarea>
-        <select
-          value={eventDetails.priority_level}
-          onChange={(e) => setEventDetails({ ...eventDetails, priority_level: e.target.value })}
-          className="w-full p-2 border rounded bg-transparent"
-        >
-          <option value="important" className='text-gray-600'>Important</option>
-          <option value="normal" className='text-gray-600'>Normal</option>
-        </select>
-        <select
-          value={eventDetails.color}
-          onChange={(e) => setEventDetails({ ...eventDetails, color: e.target.value })}
-          className="w-full p-2 border rounded bg-transparent"
-        >
-          <option value="red" className='text-gray-600'>Red</option>
-          <option value="blue" className='text-gray-600'>Blue</option>
-          <option value="green" className='text-gray-600'>Green</option>
-        </select>
-      </form>
-      <div className="mt-4 flex justify-end space-x-2">
-        <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-          Cancel
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-2 text-gray-600" />
+          <span className='text-gray-600'>Add Event</span>
         </Button>
-        <Button onClick={handleAddEvent} className='text-gray-700 border'>Save</Button>
-      </div>
-    </div>
-  </div>
-)}
-
-<Button onClick={() => setIsModalOpen(true)}>
-  <Plus className="h-4 w-4 mr-2 text-gray-600" />
- <span className='text-gray-600'>Add Event</span>
-</Button>
       </div>
 
-      <Card className="w-full  mx-auto">
-  <CardContent className="p-4">
-    {/* Calendar header */}
-    <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
-      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-        <div
-          key={day}
-          className="text-center font-semibold text-gray-600 text-xs sm:text-sm md:text-base border border-gray-200 p-1 sm:p-2"
-        >
-          {day}
+      <Card className="w-full mx-auto">
+        <CardContent className="p-4">
+          {/* Calendar header */}
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div
+                key={day}
+                className="text-center font-semibold text-gray-600 text-xs sm:text-sm md:text-base border border-gray-200 p-1 sm:p-2"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+            {renderCalendarDays()}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Add Event Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-10 px-5 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-600">Add Calendar Activity</h3>
+              <Button variant="ghost" size="sm" onClick={() => setIsModalOpen(false)} className="h-8 w-8 p-0">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <form className="space-y-4">
+              <input
+                type="text"
+                placeholder="Activity"
+                value={eventDetails.activity}
+                onChange={(e) => setEventDetails({ ...eventDetails, activity: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="date"
+                value={eventDetails.date}
+                onChange={(e) => setEventDetails({ ...eventDetails, date: e.target.value })}
+                className="w-full p-2 border rounded bg-transparent text-gray-600"
+              />
+              <input
+                type="time"
+                value={eventDetails.time}
+                onChange={(e) => setEventDetails({ ...eventDetails, time: e.target.value })}
+                className="w-full p-2 border rounded bg-transparent text-gray-600"
+              />
+              <input
+                type="text"
+                placeholder="Location"
+                value={eventDetails.location}
+                onChange={(e) => setEventDetails({ ...eventDetails, location: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+              <textarea
+                placeholder="Description"
+                value={eventDetails.description}
+                onChange={(e) => setEventDetails({ ...eventDetails, description: e.target.value })}
+                className="w-full p-2 border rounded"
+              ></textarea>
+              <select
+                value={eventDetails.priority_level}
+                onChange={(e) => setEventDetails({ ...eventDetails, priority_level: e.target.value as 'important' | 'normal' })}
+                className="w-full p-2 border rounded bg-transparent"
+              >
+                <option value="important" className='text-gray-600'>Important</option>
+                <option value="normal" className='text-gray-600'>Normal</option>
+              </select>
+              <select
+                value={eventDetails.color}
+                onChange={(e) => setEventDetails({ ...eventDetails, color: e.target.value as 'red' | 'blue' | 'green' })}
+                className="w-full p-2 border rounded bg-transparent"
+              >
+                <option value="red" className='text-gray-600'>Red</option>
+                <option value="blue" className='text-gray-600'>Blue</option>
+                <option value="green" className='text-gray-600'>Green</option>
+              </select>
+            </form>
+            <div className="mt-4 flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddEvent} className='text-gray-700 border'>Save</Button>
+            </div>
+          </div>
         </div>
-      ))}
-    </div>
-    
-    {/* Calendar grid */}
-    <div className="grid grid-cols-7 gap-1 sm:gap-2">
-      {renderCalendarDays()}
-    </div>
-  </CardContent>
-</Card>
+      )}
+      
+      {/* View Event Modal */}
+      {isViewModalOpen && selectedEvent && (
+        <div className="fixed inset-0 z-10 px-5 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-600">Event Details</h3>
+              <Button variant="ghost" size="sm" onClick={() => setIsViewModalOpen(false)} className="h-8 w-8 p-0">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className={`p-3 rounded-md ${
+                selectedEvent.color === 'blue' ? 'bg-blue-100' :
+                selectedEvent.color === 'red' ? 'bg-red-100' :
+                selectedEvent.color === 'green' ? 'bg-green-100' : 'bg-gray-100'
+              }`}>
+                <h4 className="text-xl font-bold">{selectedEvent.activity}</h4>
+                <div className="mt-2 text-sm">
+                  <p className="font-semibold">Time: <span className="font-normal">{selectedEvent.time}</span></p>
+                  <p className="font-semibold">Location: <span className="font-normal">{selectedEvent.location}</span></p>
+                  <p className="font-semibold mt-2">Description:</p>
+                  <p className="mt-1 whitespace-pre-line">{selectedEvent.description}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end">
+                <Button onClick={() => setIsViewModalOpen(false)} className="text-gray-700 border">
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

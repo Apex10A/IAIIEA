@@ -89,14 +89,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </Link>
 
             {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 max-w-xl mx-4 relative">
+            {/* <div className="hidden md:flex flex-1 max-w-xl mx-4 relative">
               <input 
                 type="search" 
                 placeholder="Search for movies, music, shows" 
                 className="w-full bg-white rounded-3xl px-10 py-3 outline-none"
               />
               <Search className="absolute top-1/2 -translate-y-1/2 left-3" />
-            </div>
+            </div> */}
 
             {/* Profile Dropdown */}
             <div className="relative">

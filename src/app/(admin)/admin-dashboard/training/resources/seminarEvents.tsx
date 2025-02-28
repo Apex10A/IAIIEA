@@ -2,9 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import AddFileModal from './AddFileModal';
-import * as Dialog from '@radix-ui/react-dialog';
+import Image from 'next/image';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { showToast } from '@/utils/toast';
+import { Trash2, Calendar, MapPin, Tag, ArrowLeft } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { useRouter } from 'next/navigation';
 
 // TypeScript interfaces
 interface Resource {
@@ -26,54 +30,98 @@ interface Conference {
 }
 
 interface ConferenceCardProps {
-  conference: Conference;
+  seminar: Conference;
+  onViewDetails: (seminar: Conference) => void;
   onViewResources: (conference: Conference) => void;
   onDeleteConference: (id: number) => void;
   onEditConference: (conference: Conference) => void;
 }
 
 const ConferenceCard: React.FC<ConferenceCardProps> = ({ 
-  conference, 
+  seminar, 
   onViewResources, 
+  onViewDetails,
   onDeleteConference,
   onEditConference 
 }) => {
-  const resourceCount = conference.resources?.length || 0;
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow">
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{conference.title}</h3>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">{conference.theme}</p>
+    <div className="rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div className="relative">
+        <div className="absolute z-10 bottom-5 left-5">
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+              seminar.status === "Completed"
+                ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+                : "bg-[#203A87] text-white hover:bg-[#152a61]"
+            }`}
+          >
+            {seminar.status}
+          </button>
         </div>
-        <span className="bg-blue-100 text-blue-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
-          {resourceCount} {resourceCount === 1 ? 'Resource' : 'Resources'}
-        </span>
+        <Image
+          src="/Meeting.png"
+          alt={seminar.title}
+          width={600}
+          height={400}
+          className="w-full h-[250px] object-cover"
+        />
       </div>
-      <div className="text-xs sm:text-sm text-gray-500">
-        <p className="mb-2">{conference.venue}</p>
-        <p>{conference.date}</p>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button 
-          onClick={() => onViewResources(conference)}
-          className="text-blue-600 hover:text-blue-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          View Resources
-        </button>
-        {/* <button 
-          onClick={() => onEditConference(conference)}
-          className="text-green-600 hover:text-green-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          Edit
-        </button> */}
-        <button 
-          onClick={() => onDeleteConference(conference.id)}
-          className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2"
-        >
-          Delete
-        </button>
+      <div className='p-4'>
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
+            {seminar.title}
+          </h1>
+        </div>
+        <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
+          {seminar.theme}
+        </p>
+        <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
+          {seminar.date}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button 
+            onClick={() => onViewDetails(seminar)}
+            className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
+          >
+            View Details
+          </button>
+          <div className="relative z-10 flex items-center">
+            <AlertDialog.Root>
+              <AlertDialog.Trigger asChild>
+                <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+              </AlertDialog.Trigger>
+              <AlertDialog.Portal>
+                <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                  <AlertDialog.Title className="text-lg font-semibold">
+                    Delete Conference
+                  </AlertDialog.Title>
+                  <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                    Are you sure you want to delete this seminar? This action cannot be undone.
+                  </AlertDialog.Description>
+                  <div className="flex justify-end gap-4">
+                    <AlertDialog.Cancel asChild>
+                      <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Cancel
+                      </button>
+                    </AlertDialog.Cancel>
+                    <AlertDialog.Action asChild>
+                      <button 
+                        onClick={() => onDeleteConference(seminar.id)}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                    </AlertDialog.Action>
+                  </div>
+                </AlertDialog.Content>
+              </AlertDialog.Portal>
+            </AlertDialog.Root>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -123,6 +171,82 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
   );
 };
 
+interface ConferenceDetailViewProps {
+  conference: Conference;
+  onBack: () => void;
+}
+
+const ConferenceDetailView: React.FC<ConferenceDetailViewProps> = ({ conference, onBack }) => {
+  return (
+    <div>
+      <div className="relative">
+        <button 
+          onClick={onBack}
+          className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Seminars
+        </button>
+        
+        <div className="absolute z-10 bottom-4 right-4">
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+              conference.status === "Completed"
+                ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+                : "bg-[#203A87] text-white hover:bg-[#152a61]"
+            }`}
+          >
+            {conference.status}
+          </button>
+        </div>
+        
+        <Image
+          src="/Meeting.png"
+          alt={conference.title}
+          width={800}
+          height={400}
+          className="w-full h-[300px] md:h-[400px] object-cover"
+        />
+      </div>
+      
+      <div className="p-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0B142F] mb-4">{conference.title}</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Seminar Details</h2>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Tag className="w-5 h-5 text-gray-600 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-600">Theme</p>
+                  <p className="font-medium">{conference.theme}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <Calendar className="w-5 h-5 text-gray-600 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-600">Date</p>
+                  <p className="font-medium">{conference.date}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <MapPin className="w-5 h-5 text-gray-600 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-600">Venue</p>
+                  <p className="font-medium">{conference.venue}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -130,6 +254,27 @@ const ConferenceResources: React.FC = () => {
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const [viewMode, setViewMode] = useState<'list' | 'details' | 'resources'>('list');
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.push('/dashboard'); // Adjust the path to your dashboard route
+  };
+
+  const handleViewDetails = (conference: Conference) => {
+    setSelectedConference(conference);
+    setViewMode('details');
+  };
+
+  const handleViewResources = (conference: Conference) => {
+    setSelectedConference(conference);
+    setViewMode('resources');
+  };
+
+  const handleBackToList = () => {
+    setSelectedConference(null);
+    setViewMode('list');
+  };
 
   const fetchConferences = async () => {
     try {
@@ -155,7 +300,6 @@ const ConferenceResources: React.FC = () => {
   }, []);
 
   const handleDeleteConference = async (id: number) => {
-
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_seminar`, {
         method: 'DELETE',
@@ -171,7 +315,6 @@ const ConferenceResources: React.FC = () => {
         setConferences(prev => prev.filter(conf => conf.id !== id));
       } else {
         throw new Error('Delete failed');
-        showToast.error('Failed to delete Seminar');
       }
     } catch (error) {
       console.error('Delete failed:', error);
@@ -180,7 +323,6 @@ const ConferenceResources: React.FC = () => {
   };
 
   const handleDeleteResource = async (resourceId: number) => {
-
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`, {
         method: 'DELETE',
@@ -211,7 +353,6 @@ const ConferenceResources: React.FC = () => {
         }
       } else {
         throw new Error('Delete failed');
-        showToast.error('Failed to delete resource');
       }
     } catch (error) {
       console.error('Delete failed:', error);
@@ -237,16 +378,37 @@ const ConferenceResources: React.FC = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6">
-      {selectedConference ? (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      {!selectedConference && (
+        <div className="p-4 flex justify-between items-center bg-gray-50 border-b">
+          <button 
+            onClick={handleBack}
+            className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </button>
+          <h1 className="text-xl font-semibold">Seminar Resources</h1>
+        </div>
+      )}
+
+      {viewMode === 'details' && selectedConference && (
+        <ConferenceDetailView 
+          conference={selectedConference}
+          onBack={handleBackToList}
+        />
+      )}
+      
+      {viewMode === 'resources' && selectedConference ? (
         // Resources View
-        <div>
+        <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <button 
-              onClick={() => setSelectedConference(null)}
+              onClick={handleBackToList}
               className="text-blue-600 hover:text-blue-800 flex items-center gap-2 text-sm sm:text-base"
             >
-              ← Back to Conferences
+              <ArrowLeft className="w-4 h-4" />
+              Back to Seminars
             </button>
           </div>
 
@@ -272,13 +434,13 @@ const ConferenceResources: React.FC = () => {
             </div>
           )}
         </div>
-      ) : (
+      ) : viewMode === 'list' && (
         // Conferences List View
-        <>
-          <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10">
+        <div className="p-6">
+          <div className="bg-gray-100 px-4 sm:px-5 py-3 mb-6 rounded-lg">
             <div className="flex justify-between items-center">
-              <h1 className="text-xl sm:text-2xl">Seminar Resources</h1>
-              <AddFileModal onSuccess={fetchConferences}/>
+              <h1 className="text-xl sm:text-2xl font-semibold">Seminar Resources</h1>
+              <AddFileModal onSuccess={fetchConferences} />
             </div>
           </div>
 
@@ -301,14 +463,15 @@ const ConferenceResources: React.FC = () => {
             {(selectedYear ? conferencesByYear[selectedYear] : conferences).map((conference) => (
               <ConferenceCard 
                 key={conference.id} 
-                conference={conference} 
-                onViewResources={setSelectedConference}
+                seminar={conference} 
+                onViewDetails={handleViewDetails}
+                onViewResources={() => handleViewResources(conference)}
                 onDeleteConference={handleDeleteConference}
                 onEditConference={() => {/* Add edit functionality */}}
               />
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -65,7 +65,7 @@ export default function DashboardClient() {
       'resources': <IAIIEAResources />,
       'Events' : <Events/>,
       'Seminar Participants':  <SeminarParticipants/>,
-      'Seminar Resources':  <SeminarResources/>,
+      'Seminars':  <SeminarResources/>,
       // Gallery: <Gallery />,
       Forum: <Forum />,
       Settings: <Settings />,

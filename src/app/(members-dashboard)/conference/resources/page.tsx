@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
+// import AddFileModal from './AddFileModal';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
@@ -101,7 +102,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         >
           View Details
         </button>
-        <AlertDialog.Root>
+        {/* <AlertDialog.Root>
           <AlertDialog.Trigger asChild>
             <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
@@ -134,7 +135,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
               </div>
             </AlertDialog.Content>
           </AlertDialog.Portal>
-        </AlertDialog.Root>
+        </AlertDialog.Root> */}
       </div>
     </div>
   );

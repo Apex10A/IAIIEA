@@ -22,8 +22,8 @@ import Payment from "@/app/(members-dashboard)/members-dashboard/payment/Payment
 import Settings from '@/app/(members-dashboard)/members-dashboard/settings/page';
 import Resources from "@/app/(members-dashboard)/conference/resources/page"
 import Participants from "@/app/(members-dashboard)/conference/participants/page"
-import Conferences from "@/app/(members-dashboard)/members-dashboard/conference/page"
-import SeminarResources from "@/app/(members-dashboard)/members-dashboard/training/resources/page"
+import Conferences from "@/app/(members-dashboard)/conference/resources/page"
+import SeminarResources from "@/app/(members-dashboard)/members-dashboard/resources/page"
 import SeminarDirectory from "@/app/(members-dashboard)/members-dashboard/training/participants/page"
 import ConfAnnouncement from "@/app/(members-dashboard)/members-dashboard/confAnnouncement/page"
 import SeminarParticipants from "@/app/(members-dashboard)/members-dashboard/training/participants/page"
@@ -59,6 +59,7 @@ export default function DashboardClient() {
       'Seminar Participants': <SeminarParticipants/>,
       'Seminar Announcements': <SeminarAnnouncements />,
       'Participants': <Participants/>,
+      'Seminar Resources' : <SeminarResources/>,
       // 'Seminars': <Resources/>,
       'Conferences': <Conferences/>,
       // 'Conference Portal': <ConferencePortal />,

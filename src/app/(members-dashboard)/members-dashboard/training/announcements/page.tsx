@@ -29,7 +29,7 @@ interface Seminar {
   theme: string;
   venue: string;
   date: string;
-  status: 'Ongoing' | 'Upcoming' | 'Completed';
+  status: 'Ongoing' | 'Incoming' | 'Completed';
   resources: any[];
 }
 
@@ -78,7 +78,7 @@ const SeminarAnnouncementsPage: React.FC = () => {
       if (data.status === "success") {
         // Filter only Ongoing or Upcoming seminars
         const activeSeminars = data.data.filter((seminar) => 
-          seminar.status === "Ongoing" || seminar.status === "Upcoming"
+          seminar.status === "Ongoing" || seminar.status === "Incoming"
         );
         setSeminars(activeSeminars);
       }
@@ -219,7 +219,7 @@ const SeminarAnnouncementsPage: React.FC = () => {
               )}
               
               <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium
-                ${seminar.status === 'Upcoming' 
+                ${seminar.status === 'Incoming' 
                   ? 'bg-blue-100 text-blue-800' 
                   : 'bg-green-100 text-green-800'
                 }`}
@@ -244,9 +244,9 @@ const SeminarAnnouncementsPage: React.FC = () => {
             <Card className="p-8">
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-medium text-gray-900">No Announcements Available</h3>
-                <p className="text-muted-foreground">
+                {/* <p className="text-muted-foreground">
                   Make payment to view announcements or check back later for updates.
-                </p>
+                </p> */}
               </div>
             </Card>
           ) : (

@@ -5,11 +5,17 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from '@/modules/ui/card';
 import { showToast } from '@/utils/toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/modules/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/modules/ui/table';
+import { Button } from '@/modules/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/modules/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Edit, Save } from 'lucide-react';
 
 // Interface for dues data
 interface DuesData {
@@ -31,10 +37,13 @@ const DuesSettings: React.FC = () => {
 
   // State for managing dues data
   const [duesData, setDuesData] = useState<DuesData | null>(null);
+  const [editData, setEditData] = useState<DuesData | null>(null);
   
   // State for managing loading and error states
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
   // State for selected currency
   const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
@@ -46,44 +55,83 @@ const DuesSettings: React.FC = () => {
       currency: currencyCode
     }).format(amount);
   };
+  
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   // Fetch dues data
-  useEffect(() => {
-    const fetchDuesData = async () => {
-      // Check if session and token are available
-      if (status !== 'authenticated' || !session?.user) {
-        setError('Not authenticated');
-        setIsLoading(false);
-        return;
-      }
+  const fetchDuesData = async () => {
+    // Check if session and token are available
+    if (status !== 'authenticated' || !session?.user) {
+      setError('Not authenticated');
+      setIsLoading(false);
+      return;
+    }
 
-      try {
-        setIsLoading(true);
-        const response = await axios.get(`${API_URL}/admin/dues_list`, {
-          headers: {
-            // Assuming Bearer token authentication
-            'Authorization': `Bearer ${bearerToken}` // Adjust based on your actual token storage
-          }
-        });
-        
-        if (response.data.status === 'success') {
-          setDuesData(response.data.data);
-          setError(null);
-        } else {
-          throw new Error(response.data.message || 'Failed to fetch dues data');
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`${API_URL}/admin/dues_list`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        setDuesData(null);
-      } finally {
-        setIsLoading(false);
+      });
+      
+      if (response.data.status === 'success') {
+        setDuesData(response.data.data);
+        setEditData(response.data.data);
+        setError(null);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch dues data');
       }
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setDuesData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDuesData();
   }, [session, status]);
+
+  // Handle input change for edit form
+  const handleInputChange = (field: keyof DuesData, value: string) => {
+    if (!editData) return;
+    
+    const numValue = parseFloat(value) || 0;
+    setEditData({
+      ...editData,
+      [field]: numValue
+    });
+  };
+
+  // Handle form submission for updating dues
+  const handleUpdateDues = async () => {
+    if (!editData || !bearerToken) return;
+    
+    setIsUpdating(true);
+    try {
+      const response = await axios.post(`${API_URL}/admin/dues_update`, editData, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data.status === 'success') {
+        showToast.success('Dues information updated successfully');
+        setDuesData(editData);
+        setIsDialogOpen(false);
+      } else {
+        throw new Error(response.data.message || 'Failed to update dues information');
+      }
+    } catch (err) {
+      showToast.error(err instanceof Error ? err.message : 'An error occurred while updating dues');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   // Render loading state
   if (isLoading) {
@@ -214,6 +262,140 @@ const DuesSettings: React.FC = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
+        <CardFooter className="flex justify-end">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-[#203a87] ">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Dues
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Update Dues Information</DialogTitle>
+                <DialogDescription>
+                  Update the membership and dues information for both USD and NGN.
+                </DialogDescription>
+              </DialogHeader>
+              {editData && (
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Label className="mt-2">Fee Type</Label>
+                    <Label className="mt-2 text-center">USD</Label>
+                    <Label className="mt-2 text-center">NGN</Label>
+                  </div>
+                  
+                  {/* Annual Dues */}
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <Label htmlFor="annual_dues_usd">Annual Dues</Label>
+                    <Input
+                      id="annual_dues_usd"
+                      type="number"
+                      value={editData.annual_dues_usd}
+                      onChange={(e) => handleInputChange('annual_dues_usd', e.target.value)}
+                    />
+                    <Input
+                      id="annual_dues_naira"
+                      type="number"
+                      value={editData.annual_dues_naira}
+                      onChange={(e) => handleInputChange('annual_dues_naira', e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Vetting Fee */}
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <Label htmlFor="vetting_fee_usd">Vetting Fee</Label>
+                    <Input
+                      id="vetting_fee_usd"
+                      type="number"
+                      value={editData.vetting_fee_usd}
+                      onChange={(e) => handleInputChange('vetting_fee_usd', e.target.value)}
+                    />
+                    <Input
+                      id="vetting_fee_naira"
+                      type="number"
+                      value={editData.vetting_fee_naira}
+                      onChange={(e) => handleInputChange('vetting_fee_naira', e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Publication Fee */}
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <Label htmlFor="publication_fee_usd">Publication Fee</Label>
+                    <Input
+                      id="publication_fee_usd"
+                      type="number"
+                      value={editData.publication_fee_usd}
+                      onChange={(e) => handleInputChange('publication_fee_usd', e.target.value)}
+                    />
+                    <Input
+                      id="publication_fee_naira"
+                      type="number"
+                      value={editData.publication_fee_naira}
+                      onChange={(e) => handleInputChange('publication_fee_naira', e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Individual Membership Fee */}
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <Label htmlFor="individual_membership_fee_usd">Individual Membership</Label>
+                    <Input
+                      id="individual_membership_fee_usd"
+                      type="number"
+                      value={editData.individual_membership_fee_usd}
+                      onChange={(e) => handleInputChange('individual_membership_fee_usd', e.target.value)}
+                    />
+                    <Input
+                      id="individual_membership_fee_naira"
+                      type="number"
+                      value={editData.individual_membership_fee_naira}
+                      onChange={(e) => handleInputChange('individual_membership_fee_naira', e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Institution Membership Fee */}
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <Label htmlFor="institution_membership_fee_usd">Institution Membership</Label>
+                    <Input
+                      id="institution_membership_fee_usd"
+                      type="number"
+                      value={editData.institution_membership_fee_usd}
+                      onChange={(e) => handleInputChange('institution_membership_fee_usd', e.target.value)}
+                    />
+                    <Input
+                      id="institution_membership_fee_naira"
+                      type="number"
+                      value={editData.institution_membership_fee_naira}
+                      onChange={(e) => handleInputChange('institution_membership_fee_naira', e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  className="bg-[#203a87]" 
+                  onClick={handleUpdateDues}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardFooter>
       </Card>
     </div>
   );

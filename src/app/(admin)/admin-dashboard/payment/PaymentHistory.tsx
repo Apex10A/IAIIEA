@@ -538,13 +538,3 @@ const PaymentHistory: React.FC = () => {
 };
 
 export default PaymentHistory;
-
-// import React from 'react'
-
-// const PaymentHistory = () => {
-//   return (
-//     <div>PaymentHistory</div>
-//   )
-// }
-
-// export default PaymentHistory

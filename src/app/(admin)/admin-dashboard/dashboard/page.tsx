@@ -120,6 +120,24 @@ export default function AdminDashboardPage() {
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-600">Admin Dashboard</h1>
         <h1 className="text-xl text-gray-600">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
       </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 ">
+        <div>
+          <h1>49</h1>
+          <p>Total members</p>
+        </div>
+        <div>
+          <h1>49</h1>
+          <p>Total members</p>
+        </div>
+        <div>
+          <h1>49</h1>
+          <p>Total members</p>
+        </div>
+        <div>
+          <h1>49</h1>
+          <p>Total members</p>
+        </div>
+      </div>
 
       {selectedItem ? (
         <div>

@@ -9,6 +9,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import Events from '@/app/(admin)/admin-dashboard/events/page';
 import BroadcastModal from "./BroadcastModal";
 import DailySchedule from "./DailyShedule";
+import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
 import Calendar from './calendar';
 import DailyMeals from './DailyMeals';
 import News from './News';
@@ -116,9 +117,12 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="px-6 py-10">
-      <div className="pb-10">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-600">Admin Dashboard</h1>
-        <h1 className="text-xl text-gray-600">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
+      <div className="pb-10 bg-[#0E1A3D] w-full ">
+       <div className="flex items-center gap-4 pb-10">
+       <DashboardIcon/>
+       <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
+       </div>
+        <h1 className="text-xl text-white">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-10">
         <div   className="bg-white shadow-md rounded-lg p-6

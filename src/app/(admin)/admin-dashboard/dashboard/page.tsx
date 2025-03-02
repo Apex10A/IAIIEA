@@ -188,8 +188,8 @@ export default function AdminDashboardPage() {
           }))}
         />
       )}
- <div className="grid ">
-     <div className="max-h-[600px] overflow-scroll my-20">
+ <div className="grid grid-cols-2 items-center">
+     <div className="max-h-[600px]  overflow-scroll my-20">
         <Conferences/>
       </div>
       <div className="max-h-[600px] overflow-scroll">

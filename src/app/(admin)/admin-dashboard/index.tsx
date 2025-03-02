@@ -118,7 +118,7 @@ export default function DashboardClient() {
         </button>
 
         <div
-          className={`fixed inset-y-0 left-0 transform pt-20 ${
+          className={`fixed inset-y-0 left-0 transform pt-5 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 md:z-0`}
         >
@@ -132,8 +132,8 @@ export default function DashboardClient() {
           />
         )}
 
-        <div className="flex-grow pt-40 md:pt-44 overflow-y-auto bg-[#F9FAFF]">
-          <div className="max-w-7xl mx-auto">{renderComponent()}</div>
+        <div className="flex-grow pt-40 md:pt-24 w-full overflow-y-auto bg-[#F9FAFF]">
+          <div className=" mx-auto">{renderComponent()}</div>
         </div>
       </div>
     </div>

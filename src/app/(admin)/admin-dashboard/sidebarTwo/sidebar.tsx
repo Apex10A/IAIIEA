@@ -42,6 +42,42 @@ const portalItems: NavItem[] = [
     requiredPortal: null,
     subItems: []
   },
+  {
+    name: 'Annual calendar', 
+    icon: MembersIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  {
+    name: 'Conference Schedule', 
+    icon: MembersIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  {
+    name: 'Daily Meals', 
+    icon: MembersIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  {
+    name: 'News', 
+    icon: MembersIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  {
+    name: 'Broadcast Message', 
+    icon: MembersIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  {
+    name: 'Speakers List', 
+    icon: MembersIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
   { 
     name: 'Membership Portal', 
     icon: MembersIcon,
@@ -75,6 +111,7 @@ const portalItems: NavItem[] = [
       { name: 'Broadcast', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   }
+ 
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }) => {
@@ -129,7 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveComponent, hasPaid = false }
       <div className="w-full">
         <motion.button
           className={`
-            w-full flex items-center justify-between p-3 rounded-lg
+            w-full flex items-center justify-between p-1 rounded-lg
             transition-colors duration-200
             ${isActive ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/5'}
             ${level > 0 ? 'ml-4' : ''}

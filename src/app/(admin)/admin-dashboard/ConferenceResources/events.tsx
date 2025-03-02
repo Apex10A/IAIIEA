@@ -60,7 +60,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
   };
 
   return (
-    <div className="rounded-lg shadow-md hover:shadow-lg transition-shadow">
+    <div className="rounded-lg  shadow-md hover:shadow-lg transition-shadow">
       <div className="relative">
         <div className="absolute z-20 bottom-5 left-5">
           <button

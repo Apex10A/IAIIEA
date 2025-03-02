@@ -507,8 +507,8 @@ const ConferenceResources: React.FC = () => {
           <div className="p-6">
             <div className="bg-gray-100 px-4 sm:px-5 py-3 mb-6 rounded-lg">
               <div className="flex justify-between items-center">
-                <h1 className="text-xl sm:text-2xl font-semibold">
-                  Seminar Resources
+                <h1 className="text-2xl font-bold">
+                  Seminar Events
                 </h1>
                 <AddFileModal onSuccess={fetchConferences} />
               </div>

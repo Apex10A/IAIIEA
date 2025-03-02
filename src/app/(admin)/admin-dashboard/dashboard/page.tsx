@@ -119,14 +119,15 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="px-6 py-10">
-      <div className="pb-10 bg-[#0E1A3D] w-full p-6 mb-10">
+     <div className="relative mb-32">
+     <div className="pb-10 bg-[#0E1A3D] w-full p-6 mb-10 ">
        <div className="flex items-center gap-4 pb-10">
        <DashboardIcon/>
        <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
        </div>
-        <h1 className="text-xl text-white">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1>
+        {/* <h1 className="text-xl text-white">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1> */}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-10 px-6 absolute top-20 w-full">
         <div   className="bg-white shadow-md rounded-lg p-6
             hover:shadow-xl transition-all duration-300
             flex flex-col items-start space-y-4 cursor-pointer">
@@ -152,9 +153,10 @@ export default function AdminDashboardPage() {
           <p>Total Seminars</p>
         </div>
       </div>
+     </div>
     
 
-      {selectedItem ? (
+      {/* {selectedItem ? (
         <div>
          <button 
   onClick={() => setSelectedItem(null)}
@@ -187,7 +189,7 @@ export default function AdminDashboardPage() {
             onClick: () => setSelectedItem(item)
           }))}
         />
-      )}
+      )} */}
  <div className="grid grid-cols-2 items-center">
      <div className="max-h-[600px]  overflow-scroll my-20">
         <Conferences/>

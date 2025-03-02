@@ -14,6 +14,8 @@ import Calendar from './calendar';
 import DailyMeals from './DailyMeals';
 import News from './News';
 import ConferenceSchedule from "./DailyShedule";
+import Conferences from "@/app/(admin)/admin-dashboard/ConferenceResources/events";
+import Seminars from "@/app/(admin)/admin-dashboard/training/resources/seminarEvents";
 
 // Define the type for dashboard items
 interface DashboardItem {
@@ -117,7 +119,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="px-6 py-10">
-      <div className="pb-10 bg-[#0E1A3D] w-full ">
+      <div className="pb-10 bg-[#0E1A3D] w-full p-6 mb-10">
        <div className="flex items-center gap-4 pb-10">
        <DashboardIcon/>
        <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
@@ -150,6 +152,7 @@ export default function AdminDashboardPage() {
           <p>Total Seminars</p>
         </div>
       </div>
+    
 
       {selectedItem ? (
         <div>
@@ -185,6 +188,15 @@ export default function AdminDashboardPage() {
           }))}
         />
       )}
+ <div className="grid ">
+     <div className="max-h-[600px] overflow-scroll my-20">
+        <Conferences/>
+      </div>
+      <div className="max-h-[600px] overflow-scroll">
+        <Seminars/>
+      </div>
+     </div>
+  
     </div>
   );
 }

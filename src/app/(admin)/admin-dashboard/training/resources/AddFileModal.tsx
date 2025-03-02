@@ -270,8 +270,8 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-          Create New Seminar
+        <button className="bg-[#203a87] text-white px-4 py-2 rounded-md transition-colors">
+          Add New Seminar
         </button>
       </Dialog.Trigger>
       

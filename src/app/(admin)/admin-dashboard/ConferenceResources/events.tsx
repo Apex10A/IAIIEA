@@ -492,7 +492,7 @@ const handleViewResources = (conference: Conference) => {
         <>
           <div className="px-4 sm:px-5 py-3 mb-6 mt-10">
             <div className="flex justify-between items-center">
-              <h1 className="text-xl sm:text-2xl">Conference Events</h1>
+              <h1 className="text-2xl font-bold">Conference Events</h1>
               <AddFileModal/>
             </div>
           </div>

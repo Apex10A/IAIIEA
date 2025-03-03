@@ -203,7 +203,7 @@ const Calendar = () => {
       days.push(
         <div
           key={dayData.day}
-          className="p-2 border border-gray-200 min-h-16 hover:bg-gray-50 cursor-pointer group"
+          className="p-2 border border-gray-400 min-h-16 hover:bg-gray-50 cursor-pointer group"
         >
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-start">
@@ -263,7 +263,7 @@ const Calendar = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-red-300 px-3 py-3 rounded-lg">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <div className="text-md md:text-xl font-semibold text-gray-600">

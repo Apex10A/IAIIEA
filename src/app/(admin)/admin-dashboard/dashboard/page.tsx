@@ -199,7 +199,7 @@ export default function AdminDashboardPage() {
         <Seminars/>
       </div>
      </div>
-    <div className="grid grid-cols-2 items-center">
+    <div className="grid grid-cols-2 items-center gap-10">
       <div>
         <Calendar/>
       </div>

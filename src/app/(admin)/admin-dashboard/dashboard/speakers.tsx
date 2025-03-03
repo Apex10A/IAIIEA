@@ -59,7 +59,7 @@ const DashboardSpeakers = () => {
   }, []);
 
   // Show only first 4 speakers on dashboard
-  const displaySpeakers = speakers.slice(0, 4);
+  const displaySpeakers = speakers.slice(0, 6);
 
   if (loading) {
     return (
@@ -68,7 +68,7 @@ const DashboardSpeakers = () => {
           <h2 className="text-xl font-semibold">Speakers</h2>
         </div>
         <div className="animate-pulse space-y-4">
-          {[...Array(4)].map((_, index) => (
+          {[...Array(6)].map((_, index) => (
             <div key={index} className="flex items-center space-x-4">
               <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
               <div className="flex-1">
@@ -108,7 +108,7 @@ const DashboardSpeakers = () => {
           No speakers available
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 min-h-[400px]">
           {displaySpeakers.map((speaker) => (
             <div key={speaker.id} className="flex items-center border-b pb-3 last:border-0">
               <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold mr-4">

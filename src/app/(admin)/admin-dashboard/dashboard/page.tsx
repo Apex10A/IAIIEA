@@ -13,6 +13,7 @@ import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
 import Calendar from './calendar';
 import DailyMeals from './DailyMeals';
 import News from './News';
+import Speakers from './speakers'
 import ConferenceSchedule from "./DailyShedule";
 import Conferences from "@/app/(admin)/admin-dashboard/ConferenceResources/events";
 import Seminars from "@/app/(admin)/admin-dashboard/training/resources/seminarEvents";
@@ -198,6 +199,14 @@ export default function AdminDashboardPage() {
         <Seminars/>
       </div>
      </div>
+    <div className="grid grid-cols-2 items-center">
+      <div>
+        <Calendar/>
+      </div>
+    <div>
+      <Speakers/>
+     </div>
+    </div>
   
     </div>
   );

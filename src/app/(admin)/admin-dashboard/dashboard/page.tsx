@@ -15,7 +15,7 @@ import DailyMeals from './DailyMeals';
 import News from './News';
 import Speakers from './speakers'
 import ConferenceSchedule from "./DailyShedule";
-import Conferences from "@/app/(admin)/admin-dashboard/ConferenceResources/events";
+import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
 import Seminars from "@/app/(admin)/admin-dashboard/training/resources/seminarEvents";
 
 // Define the type for dashboard items

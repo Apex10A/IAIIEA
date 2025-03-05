@@ -132,7 +132,7 @@ export default function DashboardClient() {
           />
         )}
 
-        <div className="flex-grow pt-40 md:pt-24 w-full overflow-y-auto bg-[#F9FAFF]">
+        <div className="flex-grow pt-40 md:pt-24 w-full overflow-y-auto bg-[#feffff]">
           <div className=" mx-auto">{renderComponent()}</div>
         </div>
       </div>

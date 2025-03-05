@@ -119,8 +119,8 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="px-6 py-10">
-     <div className="relative mb-32">
+    <div className="px-6 py-10 ">
+     <div className="relative ">
      <div className="pb-10 bg-[#0E1A3D] w-full p-6 mb-10 ">
        <div className="flex items-center gap-4 pb-10">
        <DashboardIcon/>
@@ -191,15 +191,15 @@ export default function AdminDashboardPage() {
           }))}
         />
       )} */}
- <div className="grid grid-cols-2 items-center">
-     <div className="max-h-[600px]  overflow-scroll my-20">
+ <div className="grid grid-cols-2 items-center px-6 mt-20 w-full">
+     <div className="max-h-[600px]  overflow-scroll">
         <Conferences/>
       </div>
       <div className="max-h-[600px] overflow-scroll">
         <Seminars/>
       </div>
      </div>
-    <div className="grid grid-cols-2 items-center gap-10">
+    <div className="grid grid-cols-2 items-center gap-10 px-6">
       <div>
         <Calendar/>
       </div>

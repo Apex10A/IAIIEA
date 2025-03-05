@@ -7,9 +7,9 @@ import { useSession } from "next-auth/react";
 interface Conference {
     id: string;
     title: string;
-    start_date: string;
+    date: string;
     location?: string;
-    status: 'upcoming' | 'ongoing' | 'completed';
+    status: 'Incoming' | 'ongoing' | 'completed';
   }
 
 const DashboardConferences = () => {
@@ -75,7 +75,7 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className=" rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Conferences</h2>
         </div>
@@ -106,14 +106,18 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-xl shadow-md p-6 border">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Conferences</h2>
-        <Link href="/conferences" className="flex items-center text-blue-600 hover:text-blue-800">
+      <div className="flex items-center gap-3">
+      <Calendar className="h-6 w-6 mb-1" />
+      <h2 className="text-xl font-semibold">Conferences</h2>
+      </div>
+        <Link href="/conferences" className="flex items-center bg-gray-200 px-3 py-1 text-sm rounded-lg">
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
       </div>
+      <hr className='mb-4'/>
 
       {displayConferences.length === 0 ? (
         <div className="text-gray-500 p-4 bg-gray-50 rounded text-center">
@@ -127,9 +131,9 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
               className="flex items-center border-b pb-3 last:border-0"
             >
               <div className="mr-4 flex flex-col items-center">
-                <Calendar className="h-6 w-6 text-blue-500 mb-1" />
+                {/* <Calendar className="h-6 w-6 text-blue-500 mb-1" /> */}
                 <span className="text-xs font-medium text-gray-500">
-                  {formatDate(conference.start_date)}
+                  {conference.date}
                 </span>
               </div>
               <div className="flex-1">
@@ -143,11 +147,13 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
               </div>
               <span 
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  conference.status === 'upcoming' 
+                  conference.status === 'Incoming' 
                     ? 'bg-green-100 text-green-800'
                     : conference.status === 'ongoing'
                     ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
+                     : conference.status === 'completed'
+                     ? 'bg-red-100 text-red-800'
+                     : 'bg-red-100 text-red-800'
                 }`}
               >
                 {conference.status || 'Unknown'}

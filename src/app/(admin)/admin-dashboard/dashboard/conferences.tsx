@@ -1,26 +1,78 @@
-// components/DashboardConferences.jsx
+// components/DashboardConferences.tsx
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Calendar, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { ChevronRight, Calendar, MapPin, Users } from 'lucide-react';
 import { useSession } from "next-auth/react";
 
+// Avatar Group Component
+const AvatarGroup = ({ members, totalMembers }: { members: any[], totalMembers: number }) => {
+  // Limit displayed avatars to 5
+  const displayedMembers = members.slice(0, 5);
+  const remainingMembers = Math.max(0, totalMembers - displayedMembers.length);
+
+  return (
+    <div className="flex items-center -space-x-3">
+      {displayedMembers.map((member, index) => (
+        <div 
+          key={member.id || index} 
+          className="relative w-8 h-8 border-2 border-white rounded-full overflow-hidden"
+          style={{ 
+            zIndex: 5 - index,
+            transform: `translateX(${index * 15}px)` 
+          }}
+        >
+          {member.profile_picture ? (
+            <Image 
+              src={member.profile_picture} 
+              alt={member.name || `Member ${index + 1}`} 
+              fill 
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-xs">
+              {(member.name || 'M')
+                .split(' ')
+                .map((n: string) => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase()}
+            </div>
+          )}
+        </div>
+      ))}
+      
+      {remainingMembers > 0 && (
+        <div 
+          className="relative w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium text-gray-700 border-2 border-white"
+          style={{ 
+            zIndex: 0,
+            transform: `translateX(${displayedMembers.length * 15}px)`
+          }}
+        >
+          +{remainingMembers}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface Conference {
-    id: string;
-    title: string;
-    date: string;
-    location?: string;
-    status: 'Incoming' | 'ongoing' | 'completed';
-  }
+  id: string;
+  title: string;
+  date: string;
+  location?: string;
+  status: 'Incoming' | 'ongoing' | 'completed';
+  members?: any[];
+  total_members?: number;
+}
 
 const DashboardConferences = () => {
-
-
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-const { data: session } = useSession();
-const bearerToken = session?.user?.token || session?.user?.userData?.token;
-    
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   useEffect(() => {
     const fetchConferences = async () => {
@@ -32,7 +84,6 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${bearerToken}`
           }
-          
         });
 
         if (!response.ok) {
@@ -58,7 +109,7 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
     };
 
     fetchConferences();
-  }, []);
+  }, [bearerToken]);
 
   // Format date helper
   const formatDate = (dateString: string) => {
@@ -75,7 +126,7 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   if (loading) {
     return (
-      <div className=" rounded-lg shadow p-6">
+      <div className="rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Conferences</h2>
         </div>
@@ -108,10 +159,10 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
   return (
     <div className="bg-white rounded-xl shadow-md p-6 border">
       <div className="flex justify-between items-center mb-4">
-      <div className="flex items-center gap-3">
-      <Calendar className="h-6 w-6 mb-1" />
-      <h2 className="text-xl font-semibold">Conferences</h2>
-      </div>
+        <div className="flex items-center gap-3">
+          <Calendar className="h-6 w-6 mb-1" />
+          <h2 className="text-xl font-semibold">Conferences</h2>
+        </div>
         <Link href="/conferences" className="flex items-center bg-gray-200 px-3 py-1 text-sm rounded-lg">
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
@@ -131,9 +182,8 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
               className="flex items-center border-b pb-3 last:border-0"
             >
               <div className="mr-4 flex flex-col items-center">
-                {/* <Calendar className="h-6 w-6 text-blue-500 mb-1" /> */}
                 <span className="text-xs font-medium text-gray-500">
-                  {conference.date}
+                  {formatDate(conference.date)}
                 </span>
               </div>
               <div className="flex-1">
@@ -144,6 +194,14 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
                     {conference.location}
                   </div>
                 )}
+                {/* Members Avatar Group */}
+                <div className="flex items-center mt-2 space-x-2">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <AvatarGroup 
+                    members={conference.members || []} 
+                    totalMembers={conference.total_members || 0} 
+                  />
+                </div>
               </div>
               <span 
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -151,9 +209,9 @@ const bearerToken = session?.user?.token || session?.user?.userData?.token;
                     ? 'bg-green-100 text-green-800'
                     : conference.status === 'ongoing'
                     ? 'bg-blue-100 text-blue-800'
-                     : conference.status === 'completed'
-                     ? 'bg-red-100 text-red-800'
-                     : 'bg-red-100 text-red-800'
+                    : conference.status === 'completed'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-red-100 text-red-800'
                 }`}
               >
                 {conference.status || 'Unknown'}

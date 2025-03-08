@@ -10,9 +10,11 @@ import DashboardHeader from '@/components/layout/header/DashboardHeader';
 
 // Pages
 import Dashboard from "@/app/(admin)/admin-dashboard/dashboard/page";
+import Calendar from '@/app/(admin)/admin-dashboard/dashboard/calendar';
 import Announcement from '@/app/(admin)/admin-dashboard/announcement/page';
 import ConferencePortal from '@/app/(members-dashboard)/members-dashboard/conference/page';
 import SeminarsWebinars from "@/app/(members-dashboard)/members-dashboard/seminars/page";
+import DailyMeals from '@/app/(admin)/admin-dashboard/dashboard/DailyMeals';
 import MembersDirectory from '@/app/(admin)/admin-dashboard/membersdirectory/page';
 import IAIIEAResources from '@/app/(admin)/admin-dashboard/resources/page';
 import Gallery from '@/app/(admin)/admin-dashboard/gallery/page';
@@ -21,13 +23,16 @@ import Payment from "@/app/(admin)/admin-dashboard/payment/Payment";
 import Settings from '@/app/(members-dashboard)/members-dashboard/settings/page';
 import Events from "@/app/(admin)/admin-dashboard/events/page"
 import ConferenceParticpants from '@/app/(admin)/admin-dashboard/ConferenceParticipants/participants'
-import  ConferenceResources  from '@/app/(admin)/admin-dashboard/ConferenceResources/page';
+import  ConferenceResources  from '@/app/(admin)/admin-dashboard/conferences/page';
 import SeminarParticipants from '@/app/(admin)/admin-dashboard/training/participants/page'
 import SeminarResources from '@/app/(admin)/admin-dashboard/training/resources/page'
 import MembersResorces from '@/app/(admin)/admin-dashboard/members-resources/page'
+import News from '@/app/(admin)/admin-dashboard/dashboard/News';
 import Messages from '@/app/(admin)/admin-dashboard/messages/page'
 import Broadcast from '@/app/(admin)/admin-dashboard/broadcast/page'
 import LoadingDashboard from './LoadingDashboard';
+import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
+import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
 
 // TypeScript interfaces
 interface ComponentMap {
@@ -51,6 +56,11 @@ export default function DashboardClient() {
   const renderComponent = (): JSX.Element => {
     const components: ComponentMap = {
       Dashboard: <Dashboard />,
+      'Annual calendar': <Calendar/>,
+      'Conference Schedule': <DailySchedule/>,
+      'Daily Meals': <DailyMeals/>,
+      'News': <News/>,
+      'Broadcast Message': <BroadcastModal/>,
       Announcement: <Announcement />,
       Payment: <Payment />,
       'Participants': <ConferenceParticpants/>,
@@ -132,7 +142,7 @@ export default function DashboardClient() {
           />
         )}
 
-        <div className="flex-grow pt-40 md:pt-24 w-full overflow-y-auto bg-[#feffff]">
+        <div className="flex-grow pt-40 md:pt-28 w-full overflow-y-auto bg-[#feffff] px-6">
           <div className=" mx-auto">{renderComponent()}</div>
         </div>
       </div>

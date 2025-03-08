@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import AdminDashboardGrid from "./DashboardGrid";
+// import AdminDashboardGrid from "@/app/(admin)/admin-dashboard/dashboard/";
 import { useSession } from "next-auth/react";
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import Events from '@/app/(admin)/admin-dashboard/events/page';
-import BroadcastModal from "./BroadcastModal";
-import DailySchedule from "./DailyShedule";
+import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
+import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
 import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
-import Calendar from './calendar';
-import DailyMeals from './DailyMeals';
-import News from './News';
-import Speakers from './speakers'
-import ConferenceSchedule from "./DailyShedule";
+import Calendar from '@/app/(admin)/admin-dashboard/dashboard/calendar';
+import DailyMeals from '@/app/(admin)/admin-dashboard/dashboard/DailyMeals';
+import News from '@/app/(admin)/admin-dashboard/dashboard/News';
+import Speakers from '@/app/(admin)/admin-dashboard/dashboard/speakers'
+import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
 import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
 import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
 
@@ -191,15 +191,15 @@ export default function AdminDashboardPage() {
           }))}
         />
       )} */}
- <div className="grid grid-cols-2 items-center px-6 mt-20 w-full">
-     <div className="max-h-[600px]  overflow-scroll">
+ <div className="grid grid-cols-2 items-center px-6 mt-20 gap-4 w-full">
+     <div className="">
         <Conferences/>
       </div>
-      <div className="max-h-[600px] overflow-scroll">
+      <div className="">
         <Seminars/>
       </div>
      </div>
-    <div className="grid grid-cols-2 items-center gap-10 px-6">
+    <div className="grid grid-cols-2 items-center gap-4 px-6 pt-5">
       <div>
         <Calendar/>
       </div>

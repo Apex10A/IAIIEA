@@ -1,4 +1,3 @@
-// components/DashboardConferences.tsx
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -62,13 +61,23 @@ interface Conference {
   title: string;
   date: string;
   location?: string;
-  status: 'Incoming' | 'ongoing' | 'completed';
+  venue?: string;
+  status: 'Incoming' | 'ongoing' | 'completed' | 'Completed';
   members?: any[];
   total_members?: number;
+  theme?: string;
+}
+
+interface ConferenceMembersData {
+  [conferenceId: string]: {
+    members: any[];
+    total: number;
+  }
 }
 
 const DashboardConferences = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
+  const [conferenceMembersData, setConferenceMembersData] = useState<ConferenceMembersData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -93,7 +102,20 @@ const DashboardConferences = () => {
         const data = await response.json();
         
         if (data.status === 'success') {
-          setConferences(data.data);
+          // Map the API response to our interface
+          const mappedConferences: Conference[] = data.data.map((conf: any) => ({
+            id: conf.id.toString(),
+            title: conf.title,
+            date: conf.date,
+            location: conf.venue,
+            status: conf.status,
+            theme: conf.theme
+          }));
+          
+          setConferences(mappedConferences);
+          
+          // Fetch members data for each conference
+          await fetchMembersForConferences(mappedConferences);
         } else {
           throw new Error(data.message || 'Failed to fetch conferences');
         }
@@ -108,17 +130,78 @@ const DashboardConferences = () => {
       }
     };
 
-    fetchConferences();
+    const fetchMembersForConferences = async (confs: Conference[]) => {
+      const membersData: ConferenceMembersData = {};
+      
+      // Only fetch for the first 3 conferences to display (optimization)
+      const conferencesToFetch = confs.slice(0, 3);
+      
+      try {
+        // Use Promise.all to fetch all member data concurrently
+        await Promise.all(conferencesToFetch.map(async (conf) => {
+          try {
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member/${conf.id}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${bearerToken}`
+                }
+              }
+            );
+            
+            if (!response.ok) {
+              throw new Error(`Failed to fetch members for conference ${conf.id}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+              membersData[conf.id] = {
+                members: data.data || [],
+                total: data.data?.length || 0
+              };
+            }
+          } catch (error) {
+            console.error(`Error fetching members for conference ${conf.id}:`, error);
+            // Initialize with empty data if fetching fails
+            membersData[conf.id] = {
+              members: [],
+              total: 0
+            };
+          }
+        }));
+        
+        setConferenceMembersData(membersData);
+      } catch (error) {
+        console.error('Error fetching conference members:', error);
+      }
+    };
+
+    if (bearerToken) {
+      fetchConferences();
+    }
   }, [bearerToken]);
 
   // Format date helper
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Date not specified';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
+    
+    // Handle date ranges like "May 05 To July 05, 2025"
+    if (dateString.toLowerCase().includes('to')) {
+      return dateString;
+    }
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
   };
 
   // Show only first 3 conferences on dashboard
@@ -157,13 +240,13 @@ const DashboardConferences = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 border">
+    <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 mb-1" />
           <h2 className="text-xl font-semibold">Conferences</h2>
         </div>
-        <Link href="/conferences" className="flex items-center bg-gray-200 px-3 py-1 text-sm rounded-lg">
+        <Link href="/admin-dashboard/conferences" className="flex items-center bg-gray-200 px-3 py-1 text-sm rounded-lg">
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
@@ -176,48 +259,57 @@ const DashboardConferences = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {displayConferences.map((conference) => (
-            <div 
-              key={conference.id} 
-              className="flex items-center border-b pb-3 last:border-0"
-            >
-              <div className="mr-4 flex flex-col items-center">
-                <span className="text-xs font-medium text-gray-500">
-                  {formatDate(conference.date)}
+          {displayConferences.map((conference) => {
+            const memberData = conferenceMembersData[conference.id] || { members: [], total: 0 };
+            
+            return (
+              <div 
+                key={conference.id} 
+                className="flex items-center border-b pb-3 last:border-0"
+              >
+                <div className="mr-4 flex flex-col items-center">
+                  {/* <span className="text-xs font-medium text-gray-500">
+                    {formatDate(conference.date)}
+                  </span> */}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-sm">{conference.title}</h3>
+                  {conference.location && (
+                    <div className="flex items-center text-xs text-gray-500">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {conference.location}
+                    </div>
+                  )}
+                  {/* Members Avatar Group */}
+                  <div className="flex items-center mt-2 space-x-2">
+                    <Users className="h-4 w-4 text-gray-500" />
+                    <span className="text-xs text-gray-600">
+                      {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
+                    </span>
+                    {memberData.members.length > 0 && (
+                      <AvatarGroup 
+                        members={memberData.members} 
+                        totalMembers={memberData.total} 
+                      />
+                    )}
+                  </div>
+                </div>
+                <span 
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    conference.status === 'Incoming' 
+                      ? 'bg-green-100 text-green-800'
+                      : conference.status === 'ongoing'
+                      ? 'bg-blue-100 text-blue-800'
+                      : conference.status === 'completed' || conference.status === 'Completed'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {conference.status || 'Unknown'}
                 </span>
               </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-sm">{conference.title}</h3>
-                {conference.location && (
-                  <div className="flex items-center text-xs text-gray-500">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {conference.location}
-                  </div>
-                )}
-                {/* Members Avatar Group */}
-                <div className="flex items-center mt-2 space-x-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <AvatarGroup 
-                    members={conference.members || []} 
-                    totalMembers={conference.total_members || 0} 
-                  />
-                </div>
-              </div>
-              <span 
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  conference.status === 'Incoming' 
-                    ? 'bg-green-100 text-green-800'
-                    : conference.status === 'ongoing'
-                    ? 'bg-blue-100 text-blue-800'
-                    : conference.status === 'completed'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {conference.status || 'Unknown'}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

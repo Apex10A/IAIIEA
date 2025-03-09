@@ -75,7 +75,11 @@ const BroadcastMail = () => {
   };
 
   return (
-    <Dialog.Root>
+    <div className="flex items-center justify-between">
+      <div>
+        <h1>Send Broadcast</h1>
+      </div>
+      <Dialog.Root>
       <Dialog.Trigger asChild>
         <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-sm md:text-[17px]">
           Send Broadcast Mail
@@ -166,6 +170,7 @@ const BroadcastMail = () => {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+    </div>
   );
 };
 

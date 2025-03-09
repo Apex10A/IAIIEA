@@ -30,6 +30,7 @@ import MembersResorces from '@/app/(admin)/admin-dashboard/members-resources/pag
 import News from '@/app/(admin)/admin-dashboard/dashboard/News';
 import Messages from '@/app/(admin)/admin-dashboard/messages/page'
 import Broadcast from '@/app/(admin)/admin-dashboard/broadcast/page'
+import SpeakersList from '@/app/(admin)/admin-dashboard/speakers/page'
 import LoadingDashboard from './LoadingDashboard';
 import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
 import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
@@ -61,6 +62,7 @@ export default function DashboardClient() {
       'Daily Meals': <DailyMeals/>,
       'News': <News/>,
       'Broadcast Message': <BroadcastModal/>,
+      'Speakers List': <SpeakersList/>,
       Announcement: <Announcement />,
       Payment: <Payment />,
       'Participants': <ConferenceParticpants/>,

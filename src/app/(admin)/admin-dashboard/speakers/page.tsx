@@ -1,4 +1,5 @@
 // pages/speakers.tsx
+"use client"
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useSession } from "next-auth/react";

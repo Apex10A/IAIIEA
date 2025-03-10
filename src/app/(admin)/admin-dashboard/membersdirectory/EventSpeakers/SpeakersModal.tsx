@@ -26,16 +26,7 @@ import { Input } from '@/components/ui/input'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 // Zod schema for speaker registration
-const SpeakerSchema = z.object({
-  title: z.enum(["Mr", "Mrs", "Ms", "Dr", "Prof"]),
-  f_name: z.string().min(1, "First name is required"),
-  m_name: z.string().optional(),
-  l_name: z.string().min(1, "Last name is required"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
-  email: z.string().email("Invalid email address"),
-  country: z.string().min(1, "Country is required"),
-  image: z.instanceof(File).optional()
-})
+c
 
 const AddSpeakers = () => {
   const { data: session } = useSession();

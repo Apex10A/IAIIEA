@@ -61,6 +61,13 @@ const portalItems: NavItem[] = [
     subItems: []
   },
   {
+    name: 'Forum', 
+    icon: ForumIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  
+  {
     name: 'News', 
     icon: MembersIcon,
     requiredPortal: 'seminar',
@@ -72,6 +79,7 @@ const portalItems: NavItem[] = [
     requiredPortal: 'seminar',
     subItems: []
   },
+
   {
     name: 'Speakers List', 
     icon: MembersIcon,
@@ -85,7 +93,6 @@ const portalItems: NavItem[] = [
     subItems: [
       { name: 'Directory', requiredPortal: 'membership', icon: MembersIcon },
       { name: 'Members Resources', requiredPortal: 'membership', icon: ResourcesIcon },
-      { name: 'Forum', requiredPortal: 'membership', icon: ForumIcon },
       { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon },
       // { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]

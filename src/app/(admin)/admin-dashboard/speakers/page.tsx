@@ -1,7 +1,5 @@
-// pages/speakers.tsx
 "use client"
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import { useSession } from "next-auth/react";
 import Image from 'next/image';
 
@@ -31,7 +29,8 @@ export default function SpeakersPage() {
     // Fetch speakers data when component mounts
     const fetchSpeakers = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`, {
+        // Changed to the correct endpoint for speakers
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/speakers_list`, {
           headers: {
             'Authorization': `Bearer ${bearerToken}`,
             'Content-Type': 'application/json',
@@ -57,17 +56,14 @@ export default function SpeakersPage() {
       }
     };
 
-    fetchSpeakers();
+    if (bearerToken) {
+      fetchSpeakers();
+    }
   }, [bearerToken]);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head>
-        <title>Conference Speakers</title>
-        <meta name="description" content="Our distinguished speakers" />
-      </Head>
-
-      <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+      <header className="bg-gradient-to-r from-[#203a87] to-indigo-700 text-white py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold text-center">Our Distinguished Speakers</h1>
           <p className="text-xl text-center mt-4 max-w-2xl mx-auto">
@@ -86,7 +82,7 @@ export default function SpeakersPage() {
             <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{error}</span>
           </div>
-        ) : (
+        ) : speakers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {speakers.map((speaker) => (
               <div 
@@ -97,12 +93,13 @@ export default function SpeakersPage() {
                   <Image
                     src={speaker.speaker_image}
                     alt={speaker.speaker_name}
-                    layout="fill"
-                    objectFit="cover"
-                    className="transition-transform duration-300 hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-300 hover:scale-105"
                     onError={(e) => {
+                      // Provide a fallback image if loading fails
                       const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-speaker.jpg'; // Fallback image
+                      target.src = '/placeholder-speaker.jpg';
                     }}
                   />
                 </div>
@@ -113,10 +110,12 @@ export default function SpeakersPage() {
               </div>
             ))}
           </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-xl text-gray-600">No speakers found. Please check back later.</p>
+          </div>
         )}
       </main>
-
-  
     </div>
   );
 }

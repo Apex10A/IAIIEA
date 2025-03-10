@@ -24,9 +24,25 @@ interface Conference {
   venue: string;
   date: string;
   status: string;
+  gallery: string[];
+  flyer: string;
+  sponsors: string[];
+  videos: string[];
   resources: Resource[];
 }
-
+interface ConferenceDetails {
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: string;
+  gallery: string[];
+  flyer: string;
+  sponsors: string[];
+  videos: string[];
+  resources: Resource[];
+}
 interface ConferenceCardProps {
   conference: Conference;
   onViewResources: (conference: Conference) => void;
@@ -65,7 +81,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         <div className="absolute z-20 bottom-5 left-5">
           <button
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-              conference.status === "Completed"
+              conference?.status === "Completed"
                 ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
                 : "bg-[#203A87] text-white hover:bg-[#152a61]"
             }`}
@@ -198,18 +214,45 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
 
 // New Conference Details Component
 interface ConferenceDetailsProps {
-  conference: Conference;
+  conferenceDetails: ConferenceDetails;
   onBack: () => void;
   onViewResources: (conference: Conference) => void;
 }
+interface ApiResponse<T> {
+  status: string;
+  message: string;
+  data: T;
+}
+
+
+const fetchConferenceDetails = async (
+  id: number,
+  bearerToken: string
+): Promise<ApiResponse<ConferenceDetails>> => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch conference details");
+  }
+
+  return await response.json();
+};
 
 const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
-  conference,
+  conferenceDetails,
   onBack,
   onViewResources,
 }) => {
+   const [conference, setConference] = useState<ConferenceDetails | null>(null);
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-8">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="relative">
           <button
@@ -344,11 +387,90 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
               </a>
             </p>
           </div>
+         
         </div>
       </div>
       
+      <div className="bg-white rounded-lg shadow-lg border p-6">
       <div>
-
+  <h1 className="text-2xl mb-3">Gallery</h1>
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    {conference.gallery && conference.gallery.length > 0 ? (
+      conference.gallery.map((imageUrl, index) => (
+        <div key={index} className="relative h-48 rounded-lg overflow-hidden">
+          <Image
+            src={imageUrl}
+            alt={`Gallery image ${index + 1}`}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ))
+    ) : (
+      <p className="text-gray-500">No gallery images available</p>
+    )}
+  </div>
+</div>
+          <div className="my-6">
+            <hr />
+          </div>
+          <div>
+            <h1 className="text-2xl mb-3">Papers</h1>
+           
+          </div>
+          <div>
+  <h1 className="text-2xl mb-3">Conference Flyer</h1>
+  {conference.flyer ? (
+    <div className="relative h-96 w-full rounded-lg overflow-hidden">
+      <Image
+        src={conference.flyer}
+        alt="Conference Flyer"
+        fill
+        className="object-contain"
+      />
+    </div>
+  ) : (
+    <p className="text-gray-500">No flyer available</p>
+  )}
+</div>
+<div className="my-6">
+  <hr />
+</div>
+          <div className="my-6">
+            <hr />
+          </div>
+          <div>
+            <h1 className="text-2xl mb-3">Conference Proceeding</h1>
+           
+          </div>
+          <div className="my-6">
+            <hr />
+          </div>
+          <div>
+            <h1 className="text-2xl mb-3">Conference Videos</h1>
+           
+          </div>
+          <div className="my-6">
+            <hr />
+          </div>
+          <div>
+            <h1 className="text-2xl mb-3">Resources</h1>
+           
+          </div>
+          <div className="my-6">
+            <hr />
+          </div>
+          <div>
+            <h1 className="text-2xl mb-3">Virtual access</h1>
+           
+          </div>
+          <div className="my-6">
+            <hr />
+          </div>
+          <div>
+            <h1 className="text-2xl mb-3">Meals</h1>
+           
+          </div>
       </div>
     </div>
   );

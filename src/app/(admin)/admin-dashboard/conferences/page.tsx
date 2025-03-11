@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
-import Events from '@/app/(admin)/admin-dashboard/conferences/eventspage'
+import Events from '@/app/(admin)/admin-dashboard/conferences/events'
 import Resources from '@/app/(admin)/admin-dashboard/conferences/ResourcesPage'
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 

@@ -86,12 +86,12 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
                 : "bg-[#203A87] text-white hover:bg-[#152a61]"
             }`}
           >
-            {conference.status}
+            {conference?.status}
           </button>
         </div>
         <Image
           src="/Meeting.png"
-          alt={conference.title}
+          alt={conference?.title}
           width={600}
           height={400}
           className="w-full h-[250px] object-cover"
@@ -100,7 +100,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
-            {conference.title}
+            {conference?.title}
           </h1>
         </div>
         <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
@@ -395,7 +395,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
       <div>
   <h1 className="text-2xl mb-3">Gallery</h1>
   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-    {conference.gallery && conference.gallery.length > 0 ? (
+    {conference && conference.gallery && conference.gallery.length > 0 ? (
       conference.gallery.map((imageUrl, index) => (
         <div key={index} className="relative h-48 rounded-lg overflow-hidden">
           <Image
@@ -420,7 +420,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           </div>
           <div>
   <h1 className="text-2xl mb-3">Conference Flyer</h1>
-  {conference.flyer ? (
+  {conference && conference.flyer ? (
     <div className="relative h-96 w-full rounded-lg overflow-hidden">
       <Image
         src={conference.flyer}

@@ -4,7 +4,7 @@ import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { Trash2, Calendar, MapPin, Tag, ArrowLeft, ExternalLink, Play } from "lucide-react";
+import { Trash2, Calendar, MapPin, Tag, ArrowLeft, ExternalLink, Play, Download, FileText } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
 
@@ -45,10 +45,106 @@ interface ConferenceDetails {
   work_shop: string[];
   important_date: string[];
   flyer: string;
-  meals: string[];
-  videos: string[];
   gallery: string[];
-  // Add other fields as needed
+  resources: {
+    resource_id: number;
+    resource_type: string | null;
+    caption: string;
+    date: string;
+    file: string;
+  }[];
+  videos: {
+    title?: string;
+    description?: string;
+    url: string;
+  }[];
+  meals: {
+    meal_id: number;
+    name: string;
+    image: string;
+  }[];
+  schedule: {
+    schedule_id: number;
+    day: string;
+    activity: string;
+    facilitator: string;
+    start: string;
+    end: string;
+    venue: string;
+    posted: string;
+  }[];
+  payments: {
+    early_bird_registration: {
+      virtual: {
+        usd: string;
+        naira: string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+    normal_registration: {
+      virtual: {
+        usd: string;
+        naira: string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+    late_registration: {
+      virtual: {
+        usd: string;
+        naira: string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+    tour: {
+      virtual: {
+        usd: number | string;
+        naira: number | string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+    annual_dues: {
+      virtual: {
+        usd: string;
+        naira: string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+    vetting_fee: {
+      virtual: {
+        usd: string;
+        naira: string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+    publication_fee: {
+      virtual: {
+        usd: string;
+        naira: string;
+      };
+      physical: {
+        usd: string;
+        naira: string;
+      };
+    };
+  };
 }
 interface ConferenceCardProps {
   conference: Conference;
@@ -280,7 +376,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
 
   // In your JSX, update the gallery section to use conferenceDetails
   return (
-    <div className="gap-8">
+    <div className="gap-8 grid grid-cols-2">
            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
              <div className="relative">
                <button
@@ -372,37 +468,11 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
               <div className="my-6">
                 <hr />
               </div>
-              <div>
-                <h1 className="text-2xl mb-3">Resources</h1>
-                <p>
-                  View{" "}
-                  <a href="" className="underline font-bold">
-                    Conference preceeding
-                  </a>
-                </p>
-                <div className="flex items-center gap-4 justify-between">
-                  <p>Get the conference resources by each speaker here</p>
-                  <button className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]">
-                    Resources
-                  </button>
-                </div>
-              </div>
-              <div className="my-6">
-                <hr />
-              </div>
+            
               <div>
                 <h1 className="text-2xl mb-3">Daily conference schedule</h1>
               </div>
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-                <h1 className="text-2xl mb-3">Meal Ticketing</h1>
-                <p>
-                  This are the list of food currently available for the day. Select
-                  any food of your choice
-                </p>
-              </div>
+             
               <div className="my-6">
                 <hr />
               </div>
@@ -430,6 +500,102 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                   </a>
                 </p>
               </div>
+              <div>
+  <h1 className="text-2xl mb-3">Registration Fees</h1>
+  {loading ? (
+    <p>Loading registration fees...</p>
+  ) : (
+    conferenceDetails && conferenceDetails.payments ? (
+      <div className="space-y-4">
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Early Bird Registration:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.early_bird_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.early_bird_registration.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.early_bird_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.early_bird_registration.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Normal Registration:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.normal_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.normal_registration.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.normal_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.normal_registration.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Late Registration:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.late_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.late_registration.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.late_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.late_registration.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Tour:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.tour.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.tour.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.tour.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.tour.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Annual Dues:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.annual_dues.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.annual_dues.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.annual_dues.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.annual_dues.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Vetting Fee:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.vetting_fee.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.vetting_fee.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.vetting_fee.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.vetting_fee.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Publication Fee:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.publication_fee.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.publication_fee.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.publication_fee.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.publication_fee.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <p className="text-gray-500">No registration fee information available</p>
+    )
+  )}
+</div>
     
             </div>
           </div>
@@ -538,16 +704,47 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                 <hr />
               </div>
               <div>
-                <h1 className="text-2xl mb-3">Resources</h1>
-    
+  <h1 className="text-2xl mb-3">Resources</h1>
+  {loading ? (
+    <p>Loading resources...</p>
+  ) : (
+    <div className="space-y-4">
+      {conferenceDetails && conferenceDetails.resources && conferenceDetails.resources.length > 0 ? (
+        conferenceDetails.resources.map((resource) => (
+          <div key={resource.resource_id} className="border rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-[#203A87] p-2 rounded-full mt-1">
+                <FileText className="w-5 h-5 text-white" />
               </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-gray-800 mb-1">{resource.caption || "Resource"}</h3>
+                {resource.date && (
+                  <p className="text-gray-500 text-sm">Date: {new Date(resource.date).toLocaleDateString()}</p>
+                )}
+                <div className="mt-3">
+                  <a 
+                    href={resource.file} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 rounded-lg font-semibold text-sm text-white bg-[#152a61] hover:bg-[#203A87] inline-flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" /> Download Resource
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">No resources available</p>
+      )}
+    </div>
+  )}
+</div>
               <div className="my-6">
                 <hr />
               </div>
-              <div>
-                <h1 className="text-2xl mb-3">Virtual access</h1>
-    
-              </div>
+            
               <div className="my-6">
                 <hr />
               </div>

@@ -191,7 +191,7 @@ export default function AdminDashboardPage() {
           }))}
         />
       )} */}
- <div className="grid grid-cols-2 items-center px-6 mt-20 gap-4 w-full">
+ <div className="grid grid-cols-1 md:grid-cols-2 items-center md:px-6 mt-20 gap-4 w-full">
      <div className="">
         <Conferences/>
       </div>
@@ -199,7 +199,7 @@ export default function AdminDashboardPage() {
         <Seminars/>
       </div>
      </div>
-    <div className="grid grid-cols-2 items-center gap-4 px-6 pt-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-4 md:px-6 pt-5">
       <div>
         <Calendar/>
       </div>

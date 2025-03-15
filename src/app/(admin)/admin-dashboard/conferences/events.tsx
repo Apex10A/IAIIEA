@@ -4,7 +4,7 @@ import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { Trash2, Calendar, MapPin, Tag, ArrowLeft } from "lucide-react";
+import { Trash2, Calendar, MapPin, Tag, ArrowLeft, ExternalLink, Play } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
 
@@ -23,7 +23,9 @@ interface Conference {
   theme: string;
   venue: string;
   date: string;
+  description: string;
   status: string;
+  meals: string[];
   gallery: string[];
   flyer: string;
   sponsors: string[];
@@ -32,16 +34,21 @@ interface Conference {
 }
 interface ConferenceDetails {
   id: number;
+  is_registered: boolean;
   title: string;
   theme: string;
   venue: string;
   date: string;
-  status: string;
-  gallery: string[];
+  start_date: string;
+  start_time: string;
+  sub_theme: string[];
+  work_shop: string[];
+  important_date: string[];
   flyer: string;
-  sponsors: string[];
+  meals: string[];
   videos: string[];
-  resources: Resource[];
+  gallery: string[];
+  // Add other fields as needed
 }
 interface ConferenceCardProps {
   conference: Conference;
@@ -214,7 +221,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
 
 // New Conference Details Component
 interface ConferenceDetailsProps {
-  conferenceDetails: ConferenceDetails;
+  conference: Conference;
   onBack: () => void;
   onViewResources: (conference: Conference) => void;
 }
@@ -223,7 +230,6 @@ interface ApiResponse<T> {
   message: string;
   data: T;
 }
-
 
 const fetchConferenceDetails = async (
   id: number,
@@ -246,235 +252,567 @@ const fetchConferenceDetails = async (
 };
 
 const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
-  conferenceDetails,
+  conference,
   onBack,
   onViewResources,
 }) => {
-   const [conference, setConference] = useState<ConferenceDetails | null>(null);
+  // Add a state to store the detailed conference data
+  const [conferenceDetails, setConferenceDetails] =
+    useState<ConferenceDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch conference details when component mounts
+  useEffect(() => {
+    const getConferenceDetails = async () => {
+      try {
+        const token = "YOUR_BEARER_TOKEN"; // Get this from your auth system
+        const response = await fetchConferenceDetails(conference.id, token);
+        setConferenceDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching conference details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getConferenceDetails();
+  }, [conference.id]);
+
+  // In your JSX, update the gallery section to use conferenceDetails
   return (
-    <div className="grid grid-cols-2 gap-8">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="relative">
-          <button
-            onClick={onBack}
-            className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </button>
-
-          <div className="absolute z-10 bottom-4 right-4">
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-                conference.status === "Completed"
-                  ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
-                  : "bg-[#203A87] text-white hover:bg-[#152a61]"
-              }`}
-            >
-              {conference.status}
-            </button>
-          </div>
-
-          <Image
-            src="/Meeting.png"
-            alt={conference.title}
-            width={800}
-            height={400}
-            className="w-full h-[300px] md:h-[400px] object-cover"
-          />
-        </div>
-
-        <div className="p-6 md:p-8">
-          <div className="flex items-center justify-between">
-            <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
-              {conference.title}
-            </h1>
-            <p>
-              100+ people registered{" "}
-              <a href="" className="underline font-bold">
-                access participant directory
-              </a>
-            </p>
-          </div>
-
-          <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
-            <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
-              {conference.theme}
-            </p>
-          </div>
-          <div className="mb-6">
-            <hr />
-          </div>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Date</h3>
-                <p className="text-base md:text-lg font-medium text-[#0B142F]">
-                  {conference.date}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Venue</h3>
-                <p className="text-base md:text-lg font-medium text-[#0B142F]">
-                  {conference.venue}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Resources</h1>
-            <p>
-              View{" "}
-              <a href="" className="underline font-bold">
-                Conference preceeding
-              </a>
-            </p>
-            <div className="flex items-center gap-4 justify-between">
-              <p>Get the conference resources by each speaker here</p>
-              <button className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]">
-                Resources
-              </button>
-            </div>
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Daily conference schedule</h1>
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Meal Ticketing</h1>
-            <p>
-              This are the list of food currently available for the day. Select
-              any food of your choice
-            </p>
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Join event for virtual attendees</h1>
-            <div className="flex items-center gap-4 justify-between">
-              <p>You can access the live event from here</p>
-              <button
-                onClick={() => onViewResources(conference)}
-                className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]"
+    <div className="gap-8">
+           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+             <div className="relative">
+               <button
+                onClick={onBack}
+                className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
               >
-                Join in
+                <ArrowLeft className="w-4 h-4" />
+                Back to Dashboard
               </button>
+    
+              <div className="absolute z-10 bottom-4 right-4">
+                <button
+                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+                    conference.status === "Completed"
+                      ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+                      : "bg-[#203A87] text-white hover:bg-[#152a61]"
+                  }`}
+                >
+                  {conference.status}
+                  {/* {loading ? "Loading..." : conferenceDetails?.is_registered ? "Registered" : "Not Registered"} */}
+                </button>
+              </div>
+    
+              <Image
+                src="/Meeting.png"
+                alt={conference.title}
+                width={800}
+                height={400}
+                className="w-full h-[300px] md:h-[400px] object-cover"
+              />
+            </div>
+    
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between">
+                <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
+                  {conferenceDetails?.title}
+                </h1>
+                <p>
+                  100+ people registered{" "}
+                  <a href="" className="underline font-bold">
+                    access participant directory
+                  </a>
+                </p>
+              </div>
+    
+              <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
+                <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
+                  {conference.theme}
+                </p>
+              </div>
+              <div className="mb-6">
+                <hr />
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Date</h3>
+                    <p className="text-base md:text-lg font-medium text-[#0B142F]">
+                      {conference.date}
+                    </p>
+                  </div>
+                </div>
+    
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Venue</h3>
+                    <p className="text-base md:text-lg font-medium text-[#0B142F]">
+                      {conference.venue}
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-4">
+                <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Sub-theme</h3>
+                <p className="text-sm font-medium text-gray-500">
+                  {conferenceDetails?.sub_theme}
+                  </p>
+                </div>
+                <div className="py-2">
+                <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Workshop</h3>
+                <p  className="text-sm font-medium text-gray-500">{conferenceDetails?.work_shop}</p>
+                </div>
+                <div>
+                <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Important Dates</h3>
+                <p  className="text-sm font-medium text-gray-500">{conferenceDetails?.important_date}</p>
+                </div>
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Resources</h1>
+                <p>
+                  View{" "}
+                  <a href="" className="underline font-bold">
+                    Conference preceeding
+                  </a>
+                </p>
+                <div className="flex items-center gap-4 justify-between">
+                  <p>Get the conference resources by each speaker here</p>
+                  <button className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]">
+                    Resources
+                  </button>
+                </div>
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Daily conference schedule</h1>
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Meal Ticketing</h1>
+                <p>
+                  This are the list of food currently available for the day. Select
+                  any food of your choice
+                </p>
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Join event for virtual attendees</h1>
+                <div className="flex items-center gap-4 justify-between">
+                  <p>You can access the live event from here</p>
+                  <button
+                    onClick={() => onViewResources(conference)}
+                    className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]"
+                  >
+                    Join in
+                  </button>
+                </div>
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Certification</h1>
+                <p>
+                  Complete the conference evaluation to{" "}
+                  <a href="" className="underline font-bold">
+                    access certificate
+                  </a>
+                </p>
+              </div>
+    
             </div>
           </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Certification</h1>
-            <p>
-              Complete the conference evaluation to{" "}
-              <a href="" className="underline font-bold">
-                access certificate
-              </a>
-            </p>
-          </div>
-         
+    
+          <div className="bg-white rounded-lg shadow-lg border p-6">
+          <div className="bg-white rounded-lg shadow-lg border p-6">
+        <div>
+          <h1 className="text-2xl mb-3">Gallery</h1>
+          {loading ? (
+            <p>Loading gallery...</p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {conferenceDetails &&
+              conferenceDetails.gallery &&
+              conferenceDetails.gallery.length > 0 ? (
+                conferenceDetails.gallery.map((imageUrl, index) => (
+                  <div
+                    key={index}
+                    className="relative h-48 rounded-lg overflow-hidden"
+                  >
+                    <Image
+                      src={imageUrl}
+                      alt={`Gallery image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No gallery images available</p>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Rest of your component... */}
       </div>
-      
-      <div className="bg-white rounded-lg shadow-lg border p-6">
-      <div>
-  <h1 className="text-2xl mb-3">Gallery</h1>
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-    {conference && conference.gallery && conference.gallery.length > 0 ? (
-      conference.gallery.map((imageUrl, index) => (
-        <div key={index} className="relative h-48 rounded-lg overflow-hidden">
+             
+              <div className="py-4">
+      <h1 className="text-2xl mb-3">Conference Flyer</h1>
+      {conferenceDetails && conferenceDetails.flyer ? (
+        <div className="relative h-96 w-full  rounded-lg overflow-hidden">
           <Image
-            src={imageUrl}
-            alt={`Gallery image ${index + 1}`}
-            fill
-            className="object-cover"
+            src={conferenceDetails?.flyer}
+            alt="Conference Flyer"
+           fill
+            className="object-contain"
           />
         </div>
-      ))
-    ) : (
-      <p className="text-gray-500">No gallery images available</p>
-    )}
-  </div>
-</div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Papers</h1>
-           
-          </div>
-          <div>
-  <h1 className="text-2xl mb-3">Conference Flyer</h1>
-  {conference && conference.flyer ? (
-    <div className="relative h-96 w-full rounded-lg overflow-hidden">
-      <Image
-        src={conference.flyer}
-        alt="Conference Flyer"
-        fill
-        className="object-contain"
-      />
+      ) : (
+        <p className="text-gray-500">No flyer available</p>
+      )}
     </div>
+    <div className="my-6">
+      <hr />
+    </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Conference Proceeding</h1>
+    
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+  <h1 className="text-2xl mb-3">Conference Videos</h1>
+  {loading ? (
+    <p>Loading videos...</p>
   ) : (
-    <p className="text-gray-500">No flyer available</p>
+    <div className="space-y-4">
+      {conferenceDetails && conferenceDetails.videos && conferenceDetails.videos.length > 0 ? (
+        conferenceDetails.videos.map((video, index) => (
+          <div key={index} className="border rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#203A87] p-2 rounded-full">
+                <Play className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-800">{video.title || `Video ${index + 1}`}</h3>
+                {video.description && (
+                  <p className="text-gray-600 text-sm">{video.description}</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-2">
+              <a 
+                href={video.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#203A87] font-medium hover:underline inline-flex items-center gap-1"
+              >
+                Watch video <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">No conference videos available</p>
+      )}
+    </div>
   )}
 </div>
-<div className="my-6">
-  <hr />
-</div>
-          <div className="my-6">
-            <hr />
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Resources</h1>
+    
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+                <h1 className="text-2xl mb-3">Virtual access</h1>
+    
+              </div>
+              <div className="my-6">
+                <hr />
+              </div>
+              <div>
+  <h1 className="text-2xl mb-3">Meals</h1>
+  {loading ? (
+    <p>Loading meals...</p>
+  ) : (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {conferenceDetails && conferenceDetails.meals && conferenceDetails.meals.length > 0 ? (
+        conferenceDetails.meals.map((meal) => (
+          <div key={meal.meal_id} className="border rounded-lg overflow-hidden">
+            <div className="relative h-48">
+              <Image
+                src={meal.image}
+                alt={meal.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="p-3 bg-white">
+              <h3 className="font-medium text-gray-800">{meal.name}</h3>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl mb-3">Conference Proceeding</h1>
-           
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Conference Videos</h1>
-           
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Resources</h1>
-           
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Virtual access</h1>
-           
-          </div>
-          <div className="my-6">
-            <hr />
-          </div>
-          <div>
-            <h1 className="text-2xl mb-3">Meals</h1>
-           
-          </div>
-      </div>
+        ))
+      ) : (
+        <p className="text-gray-500">No meals available</p>
+      )}
     </div>
+  )}
+</div>
+          </div>
+        </div>
   );
 };
+
+//   conference,
+//   onBack,
+//   onViewResources,
+// }) => {
+
+//   return (
+//     <div className="grid grid-cols-2 gap-8">
+//       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+//         <div className="relative">
+//           <button
+//             onClick={onBack}
+//             className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
+//           >
+//             <ArrowLeft className="w-4 h-4" />
+//             Back to Dashboard
+//           </button>
+
+//           <div className="absolute z-10 bottom-4 right-4">
+//             <button
+//               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+//                 conference.status === "Completed"
+//                   ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+//                   : "bg-[#203A87] text-white hover:bg-[#152a61]"
+//               }`}
+//             >
+//               {conference.status}
+//             </button>
+//           </div>
+
+//           <Image
+//             src="/Meeting.png"
+//             alt={conference.title}
+//             width={800}
+//             height={400}
+//             className="w-full h-[300px] md:h-[400px] object-cover"
+//           />
+//         </div>
+
+//         <div className="p-6 md:p-8">
+//           <div className="flex items-center justify-between">
+//             <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
+//               {conference.title}
+//             </h1>
+//             <p>
+//               100+ people registered{" "}
+//               <a href="" className="underline font-bold">
+//                 access participant directory
+//               </a>
+//             </p>
+//           </div>
+
+//           <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
+//             <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
+//               {conference.theme}
+//             </p>
+//           </div>
+//           <div className="mb-6">
+//             <hr />
+//           </div>
+//           <div className="flex flex-col gap-4">
+//             <div className="flex items-start gap-3">
+//               <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
+//               <div>
+//                 <h3 className="text-sm font-medium text-gray-500">Date</h3>
+//                 <p className="text-base md:text-lg font-medium text-[#0B142F]">
+//                   {conference.date}
+//                 </p>
+//               </div>
+//             </div>
+
+//             <div className="flex items-start gap-3">
+//               <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
+//               <div>
+//                 <h3 className="text-sm font-medium text-gray-500">Venue</h3>
+//                 <p className="text-base md:text-lg font-medium text-[#0B142F]">
+//                   {conference.venue}
+//                 </p>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Resources</h1>
+//             <p>
+//               View{" "}
+//               <a href="" className="underline font-bold">
+//                 Conference preceeding
+//               </a>
+//             </p>
+//             <div className="flex items-center gap-4 justify-between">
+//               <p>Get the conference resources by each speaker here</p>
+//               <button className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]">
+//                 Resources
+//               </button>
+//             </div>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Daily conference schedule</h1>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Meal Ticketing</h1>
+//             <p>
+//               This are the list of food currently available for the day. Select
+//               any food of your choice
+//             </p>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Join event for virtual attendees</h1>
+//             <div className="flex items-center gap-4 justify-between">
+//               <p>You can access the live event from here</p>
+//               <button
+//                 onClick={() => onViewResources(conference)}
+//                 className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]"
+//               >
+//                 Join in
+//               </button>
+//             </div>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Certification</h1>
+//             <p>
+//               Complete the conference evaluation to{" "}
+//               <a href="" className="underline font-bold">
+//                 access certificate
+//               </a>
+//             </p>
+//           </div>
+
+//         </div>
+//       </div>
+
+//       <div className="bg-white rounded-lg shadow-lg border p-6">
+//       <div>
+//   <h1 className="text-2xl mb-3">Gallery</h1>
+//   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+//     {conference && conference.gallery && conference.gallery.length > 0 ? (
+//       conference.gallery.map((imageUrl, index) => (
+//         <div key={index} className="relative h-48 rounded-lg overflow-hidden">
+//           <Image
+//             src={imageUrl}
+//             alt={`Gallery image ${index + 1}`}
+//             fill
+//             className="object-cover"
+//           />
+//         </div>
+//       ))
+//     ) : (
+//       <p className="text-gray-500">No gallery images available</p>
+//     )}
+//   </div>
+// </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Papers</h1>
+
+//           </div>
+//           <div>
+//   <h1 className="text-2xl mb-3">Conference Flyer</h1>
+//   {conference && conference.flyer ? (
+//     <div className="relative h-96 w-full rounded-lg overflow-hidden">
+//       <Image
+//         src={conference.flyer}
+//         alt="Conference Flyer"
+//         fill
+//         className="object-contain"
+//       />
+//     </div>
+//   ) : (
+//     <p className="text-gray-500">No flyer available</p>
+//   )}
+// </div>
+// <div className="my-6">
+//   <hr />
+// </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Conference Proceeding</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Conference Videos</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Resources</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Virtual access</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Meals</h1>
+
+//           </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 // Main component
 const ConferenceResources: React.FC = () => {

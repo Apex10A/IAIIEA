@@ -3,9 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useFlutterwave } from 'flutterwave-react-v3';
+import { showToast } from '@/utils/toast';
 import type { FlutterwaveConfig, FlutterWaveResponse } from 'flutterwave-react-v3/dist/types';
 import { Card, CardContent } from '@/components/ui/card';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -41,73 +44,86 @@ const PaymentPage: React.FC = () => {
   const [processingStates, setProcessingStates] = useState<Record<string, boolean>>({});
   const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
   const [selectedPlans, setSelectedPlans] = useState<Record<string, string>>({});
+  const [canceledPaymentId, setCanceledPaymentId] = useState<string | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   
   const { data: session, status } = useSession();
   const router = useRouter();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Function to fetch pending payments
   const fetchPendingPayments = async () => {
-    if (status === 'authenticated' && session?.user) {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pending_payments/`, {
-          headers: {
-            'Authorization': `Bearer ${bearerToken}`
-          }
-        });
-        
-        const data: ApiResponse<PendingPayment[]> = await response.json();
-        
-        if (data.status === 'success') {
-          setPendingPayments(data.data || []);
-
-          // Initialize selected plans for payments with sub_payments
-          const initialPlans: Record<string, string> = {};
-          data.data.forEach(payment => {
-            if (payment.sub_payments && typeof payment.sub_payments === 'object' && Object.keys(payment.sub_payments).length > 0) {
-              // Set default plan to the first one
-              const firstPlan = Object.keys(payment.sub_payments)[0];
-              initialPlans[payment.payment_id] = firstPlan;
-            }
-          });
-          setSelectedPlans(initialPlans);
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pending_payments/`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
         }
-      } catch (error) {
-        console.error('Error fetching pending payments:', error);
-      } finally {
-        setLoading(false);
+      });
+      const responseData = await response.json();
+      
+      // Check if the API returns data directly in the data field
+      if (responseData.status === "success" && Array.isArray(responseData.data)) {
+        setPendingPayments(responseData.data);
+      } else if (responseData.payments) {
+        // Fallback to the old structure if it exists
+        setPendingPayments(responseData.payments);
+      } else {
+        // If neither structure matches, set empty array
+        setPendingPayments([]);
+        console.error('Unexpected API response structure:', responseData);
       }
-    } else if (status === 'unauthenticated') {
-      router.push('/login');
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching pending payments:', error);
+      showToast.error('Failed to fetch pending payments');
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPendingPayments();
-  }, [status, session, router]);
+    if (session?.user) {
+      fetchPendingPayments();
+    } else {
+      setLoading(false);
+    }
+  }, [session]);
+
+  // Initialize selected plans with default values
+  useEffect(() => {
+    const initialPlans: Record<string, string> = {};
+    pendingPayments.forEach(payment => {
+      if (payment.sub_payments && 
+          typeof payment.sub_payments === 'object' && 
+          Object.keys(payment.sub_payments).length > 0) {
+        initialPlans[payment.payment_id] = Object.keys(payment.sub_payments)[0];
+      }
+    });
+    setSelectedPlans(prev => ({...prev, ...initialPlans}));
+  }, [pendingPayments]);
 
   const initiatePayment = async (payment: PendingPayment) => {
     if (!session?.user) {
       router.push('/login');
       return;
     }
-
+    
     setProcessingStates(prev => ({ ...prev, [payment.payment_id]: true }));
-
+    
     try {
       // Calculate amount based on selected plan if sub_payments exists
       let amount = payment.amount;
       const selectedPlan = selectedPlans[payment.payment_id];
-      
-      if (payment.sub_payments && typeof payment.sub_payments === 'object' && 
+     
+      if (payment.sub_payments && typeof payment.sub_payments === 'object' &&
           Object.keys(payment.sub_payments).length > 0 && selectedPlan) {
         if (typeof payment.sub_payments !== 'undefined' && !Array.isArray(payment.sub_payments)) {
           amount = payment.sub_payments[selectedPlan];
         }
       }
-
-      const userData = (session.user as any).userData as UserData;
       
+      const userData = (session.user as any).userData as UserData;
+     
       const config: FlutterwaveConfig = {
         public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
         tx_ref: `${payment.payment_id}-${Date.now()}`,
@@ -125,9 +141,9 @@ const PaymentPage: React.FC = () => {
         },
         payment_options: 'bank_transfer',
       };
-
+      
       const handleFlutterPayment = useFlutterwave(config);
-
+      
       handleFlutterPayment({
         callback: async (response: FlutterWaveResponse) => {
           await handlePaymentCallback(response, payment);
@@ -135,15 +151,18 @@ const PaymentPage: React.FC = () => {
         },
         onClose: () => {
           console.log('Payment modal closed');
+          setCanceledPaymentId(payment.payment_id);
+          setShowCancelDialog(true);
           setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
         },
       });
     } catch (error) {
       console.error('Payment initiation error:', error);
+      showToast.error('Payment initiation failed');
       setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
     }
   };
-
+  
   const handlePaymentCallback = async (
     transaction: FlutterWaveResponse,
     payment: PendingPayment
@@ -151,24 +170,25 @@ const PaymentPage: React.FC = () => {
     try {
       if (!session?.user) {
         console.error('Invalid session');
+        showToast.error('Invalid session');
         return;
       }
-      
+     
       const amountPaid = transaction.amount;
       let selectedPlan = '';
-      
-      if (payment.sub_payments && typeof payment.sub_payments === 'object' && 
+     
+      if (payment.sub_payments && typeof payment.sub_payments === 'object' &&
           Object.keys(payment.sub_payments).length > 0) {
         selectedPlan = selectedPlans[payment.payment_id] || '';
       }
-
+      
       const confirmPayload = {
         payment_id: payment.payment_id,
         processor_id: transaction.transaction_id?.toString() || '',
         paid: amountPaid,
         plan: selectedPlan || undefined
       };
-
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/confirm_payment/`, {
         method: 'POST',
         headers: {
@@ -177,15 +197,35 @@ const PaymentPage: React.FC = () => {
         },
         body: JSON.stringify(confirmPayload)
       });
-
+      
       const result = await response.json();
+      
       if (result.status === 'success') {
+        // Show success toast
+        showToast.success('Payment completed successfully!');
         // Refresh the pending payments list
         await fetchPendingPayments();
+      } else {
+        // Show error toast
+        showToast.error(result.message || 'Payment confirmation failed');
       }
     } catch (error) {
       console.error('Payment confirmation error:', error);
+      showToast.error('Payment confirmation failed');
     }
+  };
+
+  // Handle user confirming the canceled payment
+  const handleCancelConfirm = () => {
+    setShowCancelDialog(false);
+    setCanceledPaymentId(null);
+    showToast.error('Payment was canceled');
+  };
+
+  // Handle user dismissing the cancel dialog
+  const handleCancelDismiss = () => {
+    setShowCancelDialog(false);
+    setCanceledPaymentId(null);
   };
 
   const SkeletonCard = () => (
@@ -260,7 +300,7 @@ const PaymentPage: React.FC = () => {
     );
   };
   
-  if (loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="container mx-auto px-4 py-8 space-y-8">
         <SkeletonCard />
@@ -268,6 +308,11 @@ const PaymentPage: React.FC = () => {
         <SkeletonCard />
       </div>
     );
+  }
+  
+  if (status === "unauthenticated") {
+    router.push('/login');
+    return null;
   }
   
   return (
@@ -295,6 +340,37 @@ const PaymentPage: React.FC = () => {
           </div>
         </>
       )}
+      
+      {/* Cancel Payment Dialog */}
+      <AlertDialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+            <AlertDialog.Title className="text-lg font-semibold">
+              Cancel Payment
+            </AlertDialog.Title>
+            <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+              Are you sure you want to cancel this payment? You can make the payment later.
+            </AlertDialog.Description>
+            <div className="flex justify-end gap-4">
+              <AlertDialog.Cancel asChild>
+                <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                  Go Back
+                </button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action asChild>
+                <button 
+                  onClick={handleCancelConfirm} 
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                >
+                  Confirm Cancel
+                </button>
+              </AlertDialog.Action>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
+      
     </div>
   );
 };

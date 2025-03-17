@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
        </div>
         {/* <h1 className="text-xl text-white">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1> */}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-10 px-6 absolute top-20 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-10 px-6 absolute top-20 w-full h-auto">
         <div   className="bg-white shadow-md rounded-lg p-6
             hover:shadow-xl transition-all duration-300
             flex flex-col items-start space-y-4 cursor-pointer">
@@ -191,7 +191,7 @@ export default function AdminDashboardPage() {
           }))}
         />
       )} */}
- <div className="grid grid-cols-1 md:grid-cols-2 items-center md:px-6 mt-20 gap-4 w-full">
+ <div className="grid grid-cols-1 md:grid-cols-2 items-center md:px-6  mt-[550px] md:mt-20 gap-4 w-full">
      <div className="">
         <Conferences/>
       </div>

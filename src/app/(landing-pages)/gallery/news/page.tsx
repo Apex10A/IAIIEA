@@ -34,7 +34,7 @@ const Page = () => {
         
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/list_news`, {
           headers: {
-            'Authorization': `Bearer ${bearerToken}`
+            'Authorization': `Bearer ${`eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NDIzMzM3NjUsImV4cCI6MTc3Mzg2OTc2NSwidWlkIjoxLCJ1c2VyX3R5cGUiOiJhZG1pbiIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIn0.ZjVj1ZpHDVF6RteWrz-_PpWKn13yZz75jYTEf8Zvt-M`}`
           }
         });
         
@@ -128,7 +128,7 @@ const Page = () => {
                   src={selectedNews.image} 
                   alt={selectedNews.title} 
                   width={700} 
-                  height={400} 
+                  height={200} 
                   className='rounded-lg object-cover'
                 />
               ) : (

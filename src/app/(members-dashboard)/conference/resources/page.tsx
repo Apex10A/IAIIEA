@@ -546,31 +546,30 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                   </a>
                 </p>
               </div>
-   <section>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 border-b border-[#D5B93C] pb-2">Registration Information</h2>
-          
+   <section className="mt-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#000] mb-6 border-b border-[#D5B93C] pb-2">Registration Information</h2>
           <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {conferenceDetails && Object.entries(conferenceDetails.payments).map(
                   ([category, types], index) => (
-                    <div key={index} className="border-b border-white/10 pb-4 last:border-0">
-                      <h3 className="font-semibold capitalize text-[#000] mb-3">
+                    <div key={index} className="border-b border-white/10  last:border-0">
+                      <h3 className="font-semibold capitalize text-[#000]">
                         {category.replace(/_/g, " ")}
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="bg-white/10 p-3 rounded-md">
                           <div className="font-medium mb-1">Virtual</div>
-                          <div className="flex justify-between">
-                            <span className="text-[#000]">${types.virtual.usd}</span>
-                            <span className="text-[#000]">NGN {types.virtual.naira}</span>
+                          <div className="flex justify-between border px-3 py-2 rounded-md">
+                            <span className="text-[#000] opacity-[0.6]">${types.virtual.usd}</span>
+                            <span className="text-[#000] opacity-[0.6]">NGN {types.virtual.naira}</span>
                           </div>
                         </div>
                         <div className="bg-white/10 p-3 rounded-md">
                           <div className="font-medium mb-1">Physical</div>
-                          <div className="flex justify-between">
-                            <span className="text-[#000]">${types.physical.usd}</span>
-                            <span className="text-[#000]">NGN {types.physical.naira}</span>
+                          <div className="flex justify-between border px-3 py-2 rounded-md">
+                            <span className="text-[#000] opacity-[0.6]">${types.physical.usd}</span>
+                            <span className="text-[#000] opacity-[0.6]">NGN {types.physical.naira}</span>
                           </div>
                         </div>
                       </div>
@@ -598,7 +597,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           {loading ? (
             <p>Loading gallery...</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 cursor-pointer">
               {conferenceDetails &&
               conferenceDetails.gallery &&
               conferenceDetails.gallery.length > 0 ? (
@@ -624,22 +623,40 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
 
         {/* Rest of your component... */}
       </div>
-             
-              <div className="py-4">
-      <h1 className="text-2xl mb-3">Conference Flyer</h1>
-      {conferenceDetails && conferenceDetails.flyer ? (
-        <div className="relative h-96 w-full  rounded-lg overflow-hidden">
-          <Image
-            src={conferenceDetails?.flyer}
-            alt="Conference Flyer"
-           fill
-            className="object-contain"
-          />
-        </div>
-      ) : (
-        <p className="text-gray-500">No flyer available</p>
-      )}
+      <div className="py-4">
+  <h1 className="text-2xl mb-3">Conference Flyer</h1>
+  {conferenceDetails && conferenceDetails.flyer ? (
+    <div className="relative h-96 w-full rounded-lg overflow-hidden group">
+      <Image
+        src={conferenceDetails?.flyer}
+        alt="Conference Flyer"
+        fill
+        className="object-contain transition-all duration-300"
+      />
+      {/* Overlay that darkens on hover */}
+      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+      
+      {/* Download button that appears on hover */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 cursor-pointer group-hover:opacity-100 transition-opacity duration-300">
+        <a 
+          href={conferenceDetails?.flyer} 
+          download="conference-flyer"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+          onClick={(e) => {
+            e.stopPropagation();
+            // Optional: Add tracking or analytics here
+          }}
+        >
+          Download Flyer
+        </a>
+      </div>
     </div>
+  ) : (
+    <p className="text-gray-500">No flyer available</p>
+  )}
+</div>
     <div className="my-6">
       <hr />
     </div>

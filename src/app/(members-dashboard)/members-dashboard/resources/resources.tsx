@@ -105,10 +105,10 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
           {onDelete && resource.resource_id && (
             <AlertDialog.Root>
               <AlertDialog.Trigger asChild>
-                <button className="text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
+                {/* <button className="text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
                   <Trash2 className="w-4 h-4" />
                   <span className='text-sm'>Delete</span>
-                </button>
+                </button> */}
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
                 <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
@@ -180,7 +180,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Members Resources</h1>
-        <ResourceUploadModal onUpload={onUpload} />
+        {/* <ResourceUploadModal onUpload={onUpload} /> */}
       </div>
 
       <Tabs defaultValue="media" className="w-full">
@@ -279,10 +279,10 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {/* <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="outline" className="flex items-center gap-2">
           <Upload className="w-4 h-4" />
           Upload Resources
-        </Button> */}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

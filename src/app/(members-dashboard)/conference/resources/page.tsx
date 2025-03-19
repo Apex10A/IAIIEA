@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 // import AddFileModal from "./AddFileModal";
@@ -578,11 +579,11 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                 )}
               </div>
               
-              <div className="flex justify-center mt-6">
+              {/* <div className="flex justify-center mt-6">
                 <button className="bg-[#D5B93C] px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md">
                   Register Now
                 </button>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </section>

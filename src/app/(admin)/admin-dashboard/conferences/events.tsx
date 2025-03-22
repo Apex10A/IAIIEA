@@ -1,12 +1,10 @@
-"use client"
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { Trash2, Calendar, MapPin, Tag, ArrowLeft, ExternalLink, Play, Download, FileText, Check } from "lucide-react";
+import { Trash2, Calendar, MapPin, Tag, ArrowLeft, ExternalLink, Play, Download, FileText } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
 
@@ -224,10 +222,10 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         </button>
         <AlertDialog.Root>
           <AlertDialog.Trigger asChild>
-            {/* <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
+            <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
               Delete
-            </button> */}
+            </button>
           </AlertDialog.Trigger>
           <AlertDialog.Portal>
             <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
@@ -378,7 +376,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
 
   // In your JSX, update the gallery section to use conferenceDetails
   return (
-    <div className="gap-8 grid">
+    <div className="gap-8 grid grid-cols-2">
            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
              <div className="relative">
                <button
@@ -454,34 +452,17 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                 </div>
                 <div className="pt-4">
                 <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Sub-theme</h3>
-                <ul className="space-y-3">
-                  {conferenceDetails?.sub_theme.map((theme, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                      <span>{theme}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-sm font-medium text-gray-500">
+                  {conferenceDetails?.sub_theme}
+                  </p>
                 </div>
                 <div className="py-2">
                 <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Workshop</h3>
-                               <ul className="space-y-3">
-                                 {conferenceDetails?.work_shop.map((workshop, index) => (
-                                   <li key={index} className="flex items-start gap-2">
-                                     <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                                     <span>{workshop}</span>
-                                   </li>
-                                 ))}
-                               </ul>
+                <p  className="text-sm font-medium text-gray-500">{conferenceDetails?.work_shop}</p>
                 </div>
                 <div>
                 <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Important Dates</h3>
-               {conferenceDetails?.important_date.map((date, index) => (
-                                 <div key={index} className="flex items-start gap-2">
-                                   <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                                   <span>{date}</span>
-                                 </div>
-                               ))}
+                <p  className="text-sm font-medium text-gray-500">{conferenceDetails?.important_date}</p>
                 </div>
               </div>
               <div className="my-6">
@@ -490,34 +471,6 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
             
               <div>
                 <h1 className="text-2xl mb-3">Daily conference schedule</h1>
-                  <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
-                            <CardContent className="pt-6">
-                              {conferenceDetails?.schedule && conferenceDetails?.schedule.length > 0 ? (
-                                <div className="space-y-4">
-                                  {conferenceDetails?.schedule.map((item, index) => (
-                                    <div key={index} className="border-b border-white/10 pb-4 last:border-0">
-                                      <div className="flex flex-col sm:flex-row sm:justify-between">
-                                        <div className="font-semibold mb-2 sm:mb-0 text-[#222020]">
-                                          {`${item.start} - ${item.end}` || 'Time TBA'}
-                                        </div>
-                                        <div className="text-[#222020]">
-                                          {item.day || 'Date TBA'}
-                                        </div>
-                                      </div>
-                                      <div className="mt-2 text-[#222020]">{item.activity || 'Details coming soon'}</div>
-                                      {item.facilitator && (
-                                        <div className="mt-1 text-[#000]">
-                                          Facilitator: {item.facilitator}
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="text-center py-6 text-white/70">Schedule will be announced soon.</p>
-                              )}
-                            </CardContent>
-                          </Card>
               </div>
              
               <div className="my-6">
@@ -547,46 +500,102 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                   </a>
                 </p>
               </div>
-   <section className="mt-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#000] mb-6 border-b border-[#D5B93C] pb-2">Registration Information</h2>
-          <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {conferenceDetails && Object.entries(conferenceDetails.payments).map(
-                  ([category, types], index) => (
-                    <div key={index} className="border-b border-white/10  last:border-0">
-                      <h3 className="font-semibold capitalize text-[#000]">
-                        {category.replace(/_/g, " ")}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="bg-white/10 p-3 rounded-md">
-                          <div className="font-medium mb-1">Virtual</div>
-                          <div className="flex justify-between border px-3 py-2 rounded-md">
-                            <span className="text-[#000] opacity-[0.6]">${types.virtual.usd}</span>
-                            <span className="text-[#000] opacity-[0.6]">NGN {types.virtual.naira}</span>
-                          </div>
-                        </div>
-                        <div className="bg-white/10 p-3 rounded-md">
-                          <div className="font-medium mb-1">Physical</div>
-                          <div className="flex justify-between border px-3 py-2 rounded-md">
-                            <span className="text-[#000] opacity-[0.6]">${types.physical.usd}</span>
-                            <span className="text-[#000] opacity-[0.6]">NGN {types.physical.naira}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-              
-              {/* <div className="flex justify-center mt-6">
-                <button className="bg-[#D5B93C] px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md">
-                  Register Now
-                </button>
-              </div> */}
-            </CardContent>
-          </Card>
-        </section>
+              <div>
+  <h1 className="text-2xl mb-3">Registration Fees</h1>
+  {loading ? (
+    <p>Loading registration fees...</p>
+  ) : (
+    conferenceDetails && conferenceDetails.payments ? (
+      <div className="space-y-4">
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Early Bird Registration:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.early_bird_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.early_bird_registration.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.early_bird_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.early_bird_registration.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Normal Registration:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.normal_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.normal_registration.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.normal_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.normal_registration.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Late Registration:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.late_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.late_registration.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.late_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.late_registration.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Tour:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.tour.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.tour.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.tour.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.tour.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Annual Dues:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.annual_dues.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.annual_dues.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.annual_dues.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.annual_dues.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Vetting Fee:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.vetting_fee.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.vetting_fee.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.vetting_fee.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.vetting_fee.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-semibold text-lg mb-2">Publication Fee:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.publication_fee.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.publication_fee.virtual.usd).toLocaleString()}.00)
+            </div>
+            <div className="bg-white p-3 rounded border border-gray-200">
+              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.publication_fee.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.publication_fee.physical.usd).toLocaleString()}.00)
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <p className="text-gray-500">No registration fee information available</p>
+    )
+  )}
+</div>
     
             </div>
           </div>
@@ -598,7 +607,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           {loading ? (
             <p>Loading gallery...</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 cursor-pointer">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {conferenceDetails &&
               conferenceDetails.gallery &&
               conferenceDetails.gallery.length > 0 ? (
@@ -624,40 +633,22 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
 
         {/* Rest of your component... */}
       </div>
-      <div className="py-4">
-  <h1 className="text-2xl mb-3">Conference Flyer</h1>
-  {conferenceDetails && conferenceDetails.flyer ? (
-    <div className="relative h-96 w-full rounded-lg overflow-hidden group">
-      <Image
-        src={conferenceDetails?.flyer}
-        alt="Conference Flyer"
-        fill
-        className="object-contain transition-all duration-300"
-      />
-      {/* Overlay that darkens on hover */}
-      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-      
-      {/* Download button that appears on hover */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 cursor-pointer group-hover:opacity-100 transition-opacity duration-300">
-        <a 
-          href={conferenceDetails?.flyer} 
-          download="conference-flyer"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Optional: Add tracking or analytics here
-          }}
-        >
-          Download Flyer
-        </a>
-      </div>
+             
+              <div className="py-4">
+      <h1 className="text-2xl mb-3">Conference Flyer</h1>
+      {conferenceDetails && conferenceDetails.flyer ? (
+        <div className="relative h-96 w-full  rounded-lg overflow-hidden">
+          <Image
+            src={conferenceDetails?.flyer}
+            alt="Conference Flyer"
+           fill
+            className="object-contain"
+          />
+        </div>
+      ) : (
+        <p className="text-gray-500">No flyer available</p>
+      )}
     </div>
-  ) : (
-    <p className="text-gray-500">No flyer available</p>
-  )}
-</div>
     <div className="my-6">
       <hr />
     </div>
@@ -790,7 +781,237 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
   );
 };
 
+//   conference,
+//   onBack,
+//   onViewResources,
+// }) => {
 
+//   return (
+//     <div className="grid grid-cols-2 gap-8">
+//       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+//         <div className="relative">
+//           <button
+//             onClick={onBack}
+//             className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
+//           >
+//             <ArrowLeft className="w-4 h-4" />
+//             Back to Dashboard
+//           </button>
+
+//           <div className="absolute z-10 bottom-4 right-4">
+//             <button
+//               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+//                 conference.status === "Completed"
+//                   ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+//                   : "bg-[#203A87] text-white hover:bg-[#152a61]"
+//               }`}
+//             >
+//               {conference.status}
+//             </button>
+//           </div>
+
+//           <Image
+//             src="/Meeting.png"
+//             alt={conference.title}
+//             width={800}
+//             height={400}
+//             className="w-full h-[300px] md:h-[400px] object-cover"
+//           />
+//         </div>
+
+//         <div className="p-6 md:p-8">
+//           <div className="flex items-center justify-between">
+//             <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
+//               {conference.title}
+//             </h1>
+//             <p>
+//               100+ people registered{" "}
+//               <a href="" className="underline font-bold">
+//                 access participant directory
+//               </a>
+//             </p>
+//           </div>
+
+//           <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
+//             <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
+//               {conference.theme}
+//             </p>
+//           </div>
+//           <div className="mb-6">
+//             <hr />
+//           </div>
+//           <div className="flex flex-col gap-4">
+//             <div className="flex items-start gap-3">
+//               <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
+//               <div>
+//                 <h3 className="text-sm font-medium text-gray-500">Date</h3>
+//                 <p className="text-base md:text-lg font-medium text-[#0B142F]">
+//                   {conference.date}
+//                 </p>
+//               </div>
+//             </div>
+
+//             <div className="flex items-start gap-3">
+//               <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
+//               <div>
+//                 <h3 className="text-sm font-medium text-gray-500">Venue</h3>
+//                 <p className="text-base md:text-lg font-medium text-[#0B142F]">
+//                   {conference.venue}
+//                 </p>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Resources</h1>
+//             <p>
+//               View{" "}
+//               <a href="" className="underline font-bold">
+//                 Conference preceeding
+//               </a>
+//             </p>
+//             <div className="flex items-center gap-4 justify-between">
+//               <p>Get the conference resources by each speaker here</p>
+//               <button className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]">
+//                 Resources
+//               </button>
+//             </div>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Daily conference schedule</h1>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Meal Ticketing</h1>
+//             <p>
+//               This are the list of food currently available for the day. Select
+//               any food of your choice
+//             </p>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Join event for virtual attendees</h1>
+//             <div className="flex items-center gap-4 justify-between">
+//               <p>You can access the live event from here</p>
+//               <button
+//                 onClick={() => onViewResources(conference)}
+//                 className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]"
+//               >
+//                 Join in
+//               </button>
+//             </div>
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Certification</h1>
+//             <p>
+//               Complete the conference evaluation to{" "}
+//               <a href="" className="underline font-bold">
+//                 access certificate
+//               </a>
+//             </p>
+//           </div>
+
+//         </div>
+//       </div>
+
+//       <div className="bg-white rounded-lg shadow-lg border p-6">
+//       <div>
+//   <h1 className="text-2xl mb-3">Gallery</h1>
+//   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+//     {conference && conference.gallery && conference.gallery.length > 0 ? (
+//       conference.gallery.map((imageUrl, index) => (
+//         <div key={index} className="relative h-48 rounded-lg overflow-hidden">
+//           <Image
+//             src={imageUrl}
+//             alt={`Gallery image ${index + 1}`}
+//             fill
+//             className="object-cover"
+//           />
+//         </div>
+//       ))
+//     ) : (
+//       <p className="text-gray-500">No gallery images available</p>
+//     )}
+//   </div>
+// </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Papers</h1>
+
+//           </div>
+//           <div>
+//   <h1 className="text-2xl mb-3">Conference Flyer</h1>
+//   {conference && conference.flyer ? (
+//     <div className="relative h-96 w-full rounded-lg overflow-hidden">
+//       <Image
+//         src={conference.flyer}
+//         alt="Conference Flyer"
+//         fill
+//         className="object-contain"
+//       />
+//     </div>
+//   ) : (
+//     <p className="text-gray-500">No flyer available</p>
+//   )}
+// </div>
+// <div className="my-6">
+//   <hr />
+// </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Conference Proceeding</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Conference Videos</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Resources</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Virtual access</h1>
+
+//           </div>
+//           <div className="my-6">
+//             <hr />
+//           </div>
+//           <div>
+//             <h1 className="text-2xl mb-3">Meals</h1>
+
+//           </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// Main component
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

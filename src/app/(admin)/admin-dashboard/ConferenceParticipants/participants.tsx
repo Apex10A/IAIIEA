@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
@@ -11,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ChevronLeft } from "lucide-react"; // Import back arrow icon
 
 // Types
 interface Conference {
@@ -166,6 +168,15 @@ const ConferenceParticipantsPage = () => {
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
+  // Go back to conference list view
+  const handleBackToConferences = () => {
+    setSelectedConference(null);
+    setMembers([]);
+    setFilteredMembers([]);
+    setSelectedMembers([]);
+    setSearchTerm("");
+  };
+
   // Selection handlers
   const handleMemberSelect = (memberId: number) => {
     setSelectedMembers((prev) =>
@@ -174,6 +185,7 @@ const ConferenceParticipantsPage = () => {
         : [...prev, memberId]
     );
   };
+  
   // Function to get background color based on index
   const getBgColor = (index: number) => {
     const colors = ["bg-blue-50", "bg-amber-50", "bg-emerald-50"];
@@ -210,78 +222,116 @@ const ConferenceParticipantsPage = () => {
   return (
     <div className="min-h-screen px-4 sm:px-5 py-3 mb-6 mt-10">
       <div className="flex flex-col space-y-6">
-        {/* Conferences List */}
-        <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10">
-          <h1 className="text-xl sm:text-2xl">Conference Participants</h1>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {conferences.map((conference, index) => (
-            <div
-              key={conference.id}
-              className={`${getBgColor(
-                index
-              )} rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
+        {/* Page header - always visible */}
+        <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10 flex justify-between items-center">
+          <h1 className="text-xl sm:text-2xl">
+            {selectedConference 
+              ? `${selectedConference.title} - Participants` 
+              : "Conference Participants"}
+          </h1>
+          {selectedConference && (
+            <button
+              onClick={handleBackToConferences}
+              className="flex items-center bg-[#203A87] px-4 py-2 rounded-lg text-white hover:bg-[#152a61] transition-colors duration-300"
             >
-              <div className="relative">
-                <div className="absolute z-20 bottom-5 left-5">
-                  <button
-                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-                      conference.status === "Completed"
-                        ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
-                        : "bg-[#203A87] text-white hover:bg-[#152a61]"
-                    }`}
-                  >
-                    {conference.status}
-                  </button>
-                </div>
-                <Image
-                  src="/Meeting.png"
-                  alt={conference.title}
-                  width={600}
-                  height={400}
-                  className="w-full h-[250px] object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
-                    {conference.title}
-                  </h1>
-                  <span className="text-[#203A87] font-bold text-lg">
-                    {conference.title.split(" ")[1]}{" "}
-                    {/* Extract year from title */}
-                  </span>
-                </div>
-                <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
-                  {conference.theme}
-                </p>
-                <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
-                  {conference.date}
-                </p>
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setSelectedConference(conference)}
-                    className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
-                  >
-                    View Participants
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+              <ChevronLeft className="mr-1" size={18} />
+              Back to Conferences
+            </button>
+          )}
         </div>
 
-        {/* Participants Table - Only show if a conference is selected */}
-        {selectedConference && (
+        {/* Conferences List - Only show if no conference is selected */}
+        {!selectedConference ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {conferences.map((conference, index) => (
+              <div
+                key={conference.id}
+                className={`${getBgColor(
+                  index
+                )} rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
+              >
+                <div className="relative">
+                  <div className="absolute z-20 bottom-5 left-5">
+                    <button
+                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
+                        conference.status === "Completed"
+                          ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
+                          : "bg-[#203A87] text-white hover:bg-[#152a61]"
+                      }`}
+                    >
+                      {conference.status}
+                    </button>
+                  </div>
+                  <Image
+                    src="/Meeting.png"
+                    alt={conference.title}
+                    width={600}
+                    height={400}
+                    className="w-full h-[250px] object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
+                      {conference.title}
+                    </h1>
+                    <span className="text-[#203A87] font-bold text-lg">
+                      {conference.title.split(" ")[1]}{" "}
+                      {/* Extract year from title */}
+                    </span>
+                  </div>
+                  <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
+                    {conference.theme}
+                  </p>
+                  <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
+                    {conference.date}
+                  </p>
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={() => setSelectedConference(conference)}
+                      className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
+                    >
+                      View Participants
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Participants Table - Only show if a conference is selected */
           <div>
-            <div className="my-5">
-              <hr />
-            </div>
+            {/* Conference Card Summary */}
+            <Card className={`${getBgColor(0)} mb-6`}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-[#0B142F]">
+                      {selectedConference.title}
+                    </h2>
+                    <p className="text-[#0B142F] font-medium">
+                      {selectedConference.theme}
+                    </p>
+                    <p className="text-gray-600 mt-2">{selectedConference.date}</p>
+                  </div>
+                  <div>
+                    <span className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                      selectedConference.status === "Completed"
+                        ? "bg-[#f2e9c3] text-[#0B142F]"
+                        : "bg-[#203A87] text-white"
+                    }`}>
+                      {selectedConference.status}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-[24px] md:text-[28px] text-[#0B142F] font-[500] pb-1">
-                  {selectedConference.title} - Participants
-                </h1>
+                <h2 className="text-xl text-[#0B142F] font-medium">
+                  Participants ({filteredMembers.length})
+                </h2>
               </div>
               <div className="flex items-center space-x-4">
                 <input

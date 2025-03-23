@@ -3,10 +3,32 @@ import React from 'react';
 import { MapPin, Calendar, FileText, Images, Users, Video, DollarSign, Coffee } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import "@/app/index.css"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
 
 const ConferenceLandingPage = () => {
+
+  
+interface PaymentTier {
+  usd: string;
+  naira: string;
+}
+
+interface RegistrationType {
+  virtual: PaymentTier;
+  physical: PaymentTier;
+}
+
+interface ConferencePayments {
+  early_bird_registration: RegistrationType;
+  normal_registration: RegistrationType;
+  late_registration: RegistrationType;
+  tour: RegistrationType;
+  annual_dues: RegistrationType;
+  vetting_fee: RegistrationType;
+  publication_fee: RegistrationType;
+}
   interface ConferenceDetails {
     title: string;
     theme: string;
@@ -14,6 +36,7 @@ const ConferenceLandingPage = () => {
     date: string;
     sub_theme: string[];
     work_shop: string[];
+    payments: ConferencePayments;
     important_date: string[];
     gallery: string[];
     sponsors: string[];
@@ -59,7 +82,7 @@ const ConferenceLandingPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative h-screen bg-[#1A2A5C] text-white flex items-center">
+      <section className="relative h-screen conference-bg text-white flex items-center">
         <div className="container mx-auto px-6">
           <h1 className="text-6xl font-bold mb-4">{conferenceDetails.title}</h1>
           <p className="text-lg mb-8">{conferenceDetails.theme}</p>
@@ -75,7 +98,7 @@ const ConferenceLandingPage = () => {
           </div>
           <div>
             <Link href="/dashboard">
-            <button className="bg-[#D5B93C] text-[#031a] py-2 px-6 mt-8 rounded-sm uppercase font-semibold">Register</button>
+            <button className="bg-[#D5B93C] text-[#031a] py-2 px-6 mt-8 rounded-sm uppercase font-semibold">Access Portal</button>
             </Link>
           </div>
         </div>
@@ -157,13 +180,56 @@ const ConferenceLandingPage = () => {
                   key={index}
                   src={sponsor}
                   alt={`Sponsor ${index + 1}`}
-                  className="w-full h-32 object-contain"
+                    className="w-full h-64 object-cover rounded-lg shadow-lg"
                 />
               ))}
             </div>
           </div>
         </section>
       )}
+
+       <section className="mt-12 container mx-auto px-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-[#000] mb-6 border-b border-[#D5B93C] pb-2">Registration Information</h2>
+                <Card className="bg-white/5 backdrop-blur-sm border-none text-white">
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {conferenceDetails && Object.entries(conferenceDetails.payments).map(
+                        ([category, types], index) => (
+                          <div key={index} className="border-b border-white/10  last:border-0">
+                            <h3 className="font-semibold capitalize text-[#000]">
+                              {category.replace(/_/g, " ")}
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="bg-white/10 p-3 rounded-md">
+                                <div className="font-medium mb-1">Virtual</div>
+                                <div className="flex justify-between border px-3 py-2 rounded-md">
+                                  <span className="text-[#000] opacity-[0.6]">${types.virtual.usd}</span>
+                                  <span className="text-[#000] opacity-[0.6]">NGN {types.virtual.naira}</span>
+                                </div>
+                              </div>
+                              <div className="bg-white/10 p-3 rounded-md">
+                                <div className="font-medium mb-1">Physical</div>
+                                <div className="flex justify-between border px-3 py-2 rounded-md">
+                                  <span className="text-[#000] opacity-[0.6]">${types.physical.usd}</span>
+                                  <span className="text-[#000] opacity-[0.6]">NGN {types.physical.naira}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                    
+                    {/* <div className="flex justify-center mt-6">
+                      <button className="bg-[#D5B93C] px-8 py-3 font-bold uppercase text-[#0E1A3D] rounded-md">
+                        Register Now
+                      </button>
+                    </div> */}
+                  </CardContent>
+                </Card>
+              </section>
+          
+      
 
       {/* Meals */}
       {conferenceDetails.meals.length > 0 && (

@@ -166,9 +166,9 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
   const handleDelete = async () => {
     try {
       await onDeleteConference(conference.id);
-      showToast.success("Conference deleted successfully");
+      showToast.success("Seminar deleted successfully");
     } catch (error) {
-      showToast.error("Failed to delete conference");
+      showToast.error("Failed to delete seminar");
     }
   };
 
@@ -663,7 +663,7 @@ const ConferenceResources: React.FC = () => {
   const handleDeleteConference = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_seminar`,
         {
           method: "DELETE",
           headers: {

@@ -1,4 +1,3 @@
-
 "use client"
 import React from 'react'
 import Image from 'next/image'
@@ -7,161 +6,252 @@ import Carousel from "@/modules/ui/carousel"
 import { EmblaOptionsType } from 'embla-carousel'
 import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
+import { motion } from 'framer-motion';
+import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers } from 'react-icons/fa';
 
 interface Book {
-    id: number
-    name: string
-    overview: string
-    description: string
-    image: string
-    journalLink: string
-  }
-  
-const index: React.FC = () => {
-    const BooksData: Book[] = [
-        {
-          id: 1,
-          name: "Educational Innovations",
-          overview: "Journal of Innovations in Educational Assessment (JIEA)",
-          description: "Vol. 1, No. 1, May, 2019",
-          image: "/VolOne.png", // Replace with actual image paths
-          journalLink: "https://example.com/journal1"
-        },
-        {
-          id: 2,
-          name: "Assessment Practices",
-          overview: "Journal of Modern Educational Techniques",
-          description: "Vol. 2, No. 1, June, 2020",
-          image: "/VolTwo.png",
-          journalLink: "https://example.com/journal2"
-        },
-        {
-          id: 3,
-          name: "Innovative Learning",
-          overview: "International Journal of Learning Innovations",
-          description: "Vol. 3, No. 2, July, 2021",
-          image: "/VolThree.png",
-          journalLink: "https://example.com/journal3"
-        },
-        {
-          id: 4,
-          name: "Digital Education",
-          overview: "Journal of Digital Education",
-          description: "Vol. 4, No. 3, August, 2022",
-          image: "/VolFour.png",
-          journalLink: "https://example.com/journal4"
-        },
-        {
-          id: 5,
-          name: "Higher Education Assessment",
-          overview: "Journal of Higher Education",
-          description: "Vol. 5, No. 4, September, 2023",
-          image: "/VolFive.png",
-          journalLink: "https://example.com/journal5"
-        },
-        {
-          id: 6,
-          name: "Educational Reforms",
-          overview: "Journal of Educational Policy and Reforms",
-          description: "Vol. 6, No. 5, October, 2024",
-          image: "/VolOne.png",
-          journalLink: "https://example.com/journal6"
-        },
-        {
-          id: 7,
-          name: "Learning Analytics",
-          overview: "Journal of Learning Analytics",
-          description: "Vol. 7, No. 6, November, 2025",
-          image: "/VolTwo.png",
-          journalLink: "https://example.com/journal7"
-        },
-        {
-          id: 8,
-          name: "Global Education Trends",
-          overview: "Journal of Global Education",
-          description: "Vol. 8, No. 7, December, 2026",
-          image: "/VolThree.png",
-          journalLink: "https://example.com/journal8"
-        }
-      ]
+  id: number
+  name: string
+  overview: string
+  description: string
+  image: string
+  journalLink: string
+}
 
-      const OPTIONS: EmblaOptionsType = {}
-      const SLIDE_COUNT = 5
-      const SLIDES = Array.from(Array(SLIDE_COUNT).keys())
+const LandingPage: React.FC = () => {
+  const BooksData: Book[] = [
+    {
+      id: 1,
+      name: "Educational Innovations",
+      overview: "Journal of Innovations in Educational Assessment (JIEA)",
+      description: "Vol. 1, No. 1, May, 2019",
+      image: "/VolOne.png",
+      journalLink: "https://example.com/journal1"
+    },
+    // ... other book data
+  ]
+
+  const OPTIONS: EmblaOptionsType = {}
+  const SLIDE_COUNT = 5
+  const SLIDES = Array.from(Array(SLIDE_COUNT).keys())
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
+
   return (
-    <div>
-       <div>
-       <CarouselLandingPage/>
-       </div>
-       <div className='md:px-14 px-10 md:min-h-screen py-20 lg:flex justify-between bg-[#fff]'>
-    <div className='lg:w-1/2 pr-10 pb-7 lg:mb-0'>
-        <h1 className='text-[30px] lg:text-[60px] max-w-2xl font-[600] text-[#0B142F] leading-[60px] pb-3'>Who Are We</h1>
-        <p className='text-[18px] text-[#0B142F] max-w-xl pb-3 opacity-[0.8]'>We&apos;re IAIIEA, your partner in educational excellence. 
-        We are a community of passionate educators, researchers, and students dedicated to enhancing assessment practices in higher education</p>
-        <p className='text-[18px] text-[#0B142F] max-w-xl opacity-[0.8]'>We are committed to supporting your growth,whether you&apos;re a student seeking to enhance your learning or an educator looking to refine your teaching practices.</p>
-    </div>
-    <div className='lg:w-1/2 space-y-6'>
-        <div className='w-full'>
-            <Image 
-             src='/AboutOne.jpg'
-             alt='Team Members'
-             className='object-cover w-full rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-[1.02]'
-             width={1200}
-             height={600}
-            />
-        </div>
-        {/* <div className='w-full'>
-            <Image 
-             src='/AboutTwo.jpg'
-             alt='Team Members'
-             className='object-cover w-full rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-[1.02]'
-             width={1200}
-             height={600}
-            />
-        </div> */}
-    </div>
-</div>
-    <div>
-      <div className='flex lg:px-14 px-10 flex-col items-center justify-center min-h-screen pb-10 bg-[#fff]'>
-        <div>
-          <h1 className='text-[30px] lg:text-[60px] max-w-2xl mb-7 font-[600] text-[#0B142F] leading-[60px]'>Publications</h1>
-        </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-          {BooksData.map((book) => (
-            <div key={book.id} className='flex flex-col items-center max-w-xl '>
-              <div className='bg-[#E9EBF3] w-full rounded-t-2xl flex flex-col'>
-              <Image 
-                src={book.image}
-                alt={book.name}
-                width={250}
-                height={250}
-                className='mx-auto'
-              />
+    <div className="bg-white">
+      {/* Hero Section */}
+      <CarouselLandingPage/>
+
+      {/* About Section */}
+      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
+            <motion.div 
+              className="lg:w-1/2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
+            >
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B142F] mb-6 leading-tight">
+                The International Association for Innovations in Educational Assessment (IAIIEA)
+              </h1>
+              <p className="text-lg md:text-xl text-[#0B142F]/80 mb-6">
+                We are an Association for innovative assessment with the mission of promoting the Science and practice of innovations in educational assessment.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="text-[#D5B93C] mt-1">
+                    <FaGraduationCap size={24} />
+                  </div>
+                  <p className="text-lg text-[#0B142F]/80">
+                    Developing innovations in educational assessment at all levels
+                  </p>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="text-[#D5B93C] mt-1">
+                    <FaUsers size={24} />
+                  </div>
+                  <p className="text-lg text-[#0B142F]/80">
+                    Promoting educational assessment innovations for national and international cohesion
+                  </p>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="text-[#D5B93C] mt-1">
+                    <FaChalkboardTeacher size={24} />
+                  </div>
+                  <p className="text-lg text-[#0B142F]/80">
+                    Providing intensive capacity building for researchers, students, teachers, and other educational stakeholders
+                  </p>
+                </div>
               </div>
-              <div className='border w-full rounded-b-2xl px-6 py-5'>
-              <h2 className='text-[22px] font-[600] text-[#0B142F] pb-3'>{book.name}</h2>
-              <p className='text-[17px] text-[#0B142F]'>{book.overview}</p>
-              <p className='text-[17px] text-[#0B142F] '>{book.description}</p>
-              <a 
-                href={book.journalLink} 
-                className='text-[#203A87] underline flex items-center mt-2'>
-                View Journal <span className='ml-2'>&#x2192;</span>
-              </a>
+            </motion.div>
+
+            <motion.div 
+              className="lg:w-1/2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
+            >
+              <div className="relative rounded-xl overflow-hidden shadow-2xl">
+                <Image 
+                  src='/AboutOne.jpg'
+                  alt='IAIIEA Team Members'
+                  width={800}
+                  height={600}
+                  className="w-full h-auto object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1A3D] to-transparent opacity-70"></div>
+                <div className="absolute bottom-0 left-0 p-6 text-white">
+                  <h3 className="text-xl font-bold">Our Dedicated Team</h3>
+                  <p>Committed to advancing educational assessment worldwide</p>
+                </div>
               </div>
-            </div>
-          ))}
+            </motion.div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div className='lg:flex md:px-14 px-5 flex-col min-h-screen py-10 lg:py-20 bg-[#E9EBF3]'>
-        <div className='flex items-center justify-center mb-10'>
-            <h1 className='text-[30px] lg:text-[60px] max-w-2xl font-[500] text-[#0B142F] leading-[60px] pb-3'>Events</h1>
+      </section>
+
+      {/* Mission Pillars */}
+      <section className="py-16 bg-[#F8F9FC]">
+        <div className="container mx-auto px-4 md:px-8 lg:px-14">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.2
+                }
+              }
+            }}
+            className="grid md:grid-cols-3 gap-8"
+          >
+            <motion.div 
+              variants={fadeIn}
+              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="text-[#D5B93C] mb-4">
+                <FaGraduationCap size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Mission</h3>
+              <p className="text-[#0B142F]/80">
+              To advance innovative system that enhances quality assessment in terms of intellectual competence and the zeal to add value to our world.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeIn}
+              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="text-[#D5B93C] mb-4">
+                <FaUsers size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Vision</h3>
+              <p className="text-[#0B142F]/80">
+              IAIIEA has its vision to be a pace-setter and a world-class association for innovative educational assessment.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeIn}
+              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="text-[#D5B93C] mb-4">
+                <FaChalkboardTeacher size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Motto</h3>
+              <p className="text-[#0B142F]/80">
+              Innovation for excellence
+              </p>
+            </motion.div>
+          </motion.div>
         </div>
-        <RealConference/>
-        <RealSeminar/>
-    </div>
+      </section>
+
+      {/* Events Section */}
+      <section className="py-20 px-4 md:px-8 lg:px-14 bg-[#E9EBF3]">
+        <div className="container mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
+            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
+              Join our premier events designed to advance educational assessment practices worldwide
+            </p>
+          </motion.div>
+
+          <div className="space-y-16">
+            <RealConference/>
+            <RealSeminar/>
+          </div>
+        </div>
+      </section>
+
+      {/* Stakeholders Section */}
+      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+        <div className="container mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Who We Serve</h2>
+            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
+              We provide resources and training for all educational stakeholders
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.2
+                }
+              }
+            }}
+            className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6"
+          >
+            {[
+              { icon: <FaUserGraduate size={40} />, title: "Students", description: "Enhancing learning outcomes" },
+              { icon: <FaChalkboardTeacher size={40} />, title: "Teachers", description: "Improving assessment techniques" },
+              { icon: <FaGraduationCap size={40} />, title: "Researchers", description: "Advancing assessment science" },
+              { icon: <FaSchool size={40} />, title: "Institutions", description: "Implementing best practices" },
+              { icon: <FaUsers size={40} />, title: "Government", description: "Informing policy decisions" }
+            ].map((item, index) => (
+              <motion.div 
+                key={index}
+                variants={fadeIn}
+                className="bg-[#F8F9FC] p-6 rounded-lg text-center hover:bg-[#E9EBF3] transition-colors"
+              >
+                <div className="text-[#D5B93C] mb-4">{item.icon}</div>
+                <h3 className="text-xl font-bold text-[#0B142F] mb-2">{item.title}</h3>
+                <p className="text-[#0B142F]/80">{item.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
     </div>
   )
 }
 
-export default index
+export default LandingPage

@@ -12,6 +12,17 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      animation: {
+        // Ensures spin animation is available
+        spin: 'spin 1s linear infinite',
+      },
+      keyframes: {
+        // Explicitly define spin animation (though it's included by default)
+        spin: {
+          from: { transform: 'rotate(0deg)' },
+          to: { transform: 'rotate(360deg)' },
+        },
+      },
     },
   },
   plugins: [],

@@ -16,14 +16,21 @@ const LoadingSpinner = forwardRef<SVGSVGElement, SVGProps>(
         stroke={props.color ?? '#fff'}
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
+        fill="none"
         ref={ref}
-        className={cn('size-6', className)}
+        className={cn('size-6 animate-spin', className)}
         {...props}
       >
-        <g className="spinner_V8m1">
-          <circle cx="12" cy="12" r="9.5" fill="none" strokeWidth="3"></circle>
-        </g>
+        <circle
+          cx="12"
+          cy="12"
+          r="9.5"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="60"
+          strokeDashoffset="0"
+        />
       </svg>
     )
   }

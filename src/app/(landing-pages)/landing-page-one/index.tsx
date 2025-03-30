@@ -7,6 +7,7 @@ import { EmblaOptionsType } from 'embla-carousel'
 import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
 import { motion } from 'framer-motion';
+import Sponsors from './sponsors'
 import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers } from 'react-icons/fa';
 
 interface Book {
@@ -186,15 +187,16 @@ const LandingPage: React.FC = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
+            {/* <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
             <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
               Join our premier events designed to advance educational assessment practices worldwide
-            </p>
+            </p> */}
           </motion.div>
 
-          <div className="space-y-16">
+          <div className="">
             <RealConference/>
             <RealSeminar/>
+            <Sponsors/>
           </div>
         </div>
       </section>

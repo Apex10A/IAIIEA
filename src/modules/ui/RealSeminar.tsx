@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { FiCalendar, FiMapPin, FiBookOpen } from 'react-icons/fi';
+import { Skeleton } from '@radix-ui/themes';
 
 interface Seminar {
   id: number;
@@ -10,10 +13,11 @@ interface Seminar {
   date: string;
   status: string;
   resources: any[];
+  imageUrl?: string;
 }
 
 const SeminarCards = () => {
-  const [seminar, setSeminars] = useState<Seminar[]>([]);
+  const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -31,7 +35,12 @@ const SeminarCards = () => {
         const data = await response.json();
         
         if (data.status === "success") {
-          setSeminars(data.data);
+          // Add placeholder images if none provided
+          const seminarsWithImages = data.data.map((seminar: Seminar, index: number) => ({
+            ...seminar,
+            imageUrl: seminar.imageUrl || getDefaultImage(index)
+          }));
+          setSeminars(seminarsWithImages);
         } else {
           throw new Error(data.message || 'Failed to fetch seminars');
         }
@@ -45,13 +54,62 @@ const SeminarCards = () => {
     fetchSeminars();
   }, []);
 
-  const handleReadSeminar = (SeminarId: number) => {
-    router.push(`/seminar-landing-page?id=${SeminarId}`);
+  const getDefaultImage = (index: number) => {
+    const images = [
+      '/seminar-1.jpg',
+      '/seminar-2.jpg',
+      '/seminar-3.jpg',
+      '/seminar-4.jpg'
+    ];
+    return images[index % images.length];
   };
+
+  const handleReadSeminar = (seminarId: number) => {
+    router.push(`/seminar-landing-page?id=${seminarId}`);
+  };
+
+  const formatDate = (dateString: string) => {
+    const [datePart] = dateString.split('To').map(part => part.trim());
+    const date = new Date(datePart);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return { bg: 'bg-amber-100', text: 'text-amber-800', hover: 'hover:bg-amber-200' };
+      case 'upcoming':
+        return { bg: 'bg-blue-100', text: 'text-blue-800', hover: 'hover:bg-blue-200' };
+      case 'ongoing':
+        return { bg: 'bg-green-100', text: 'text-green-800', hover: 'hover:bg-green-200' };
+      default:
+        return { bg: 'bg-gray-100', text: 'text-gray-800', hover: 'hover:bg-gray-200' };
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-lg">Loading Seminars...</p>
+      <div className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-12 text-center">
+          Our Seminars
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="rounded-2xl overflow-hidden shadow-sm">
+              <Skeleton className="h-[250px] w-full" />
+              <div className="p-6 space-y-4">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-10 w-full mt-4" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -59,76 +117,105 @@ const SeminarCards = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-lg text-red-600">{error}</p>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg max-w-2xl mx-auto">
+          <h3 className="font-bold text-lg mb-2">Error Loading Seminars</h3>
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Function to get background color based on index
-  const getBgColor = (index: number) => {
-    const colors = ['bg-blue-50', 'bg-amber-50', 'bg-emerald-50'];
-    return colors[index % colors.length];
-  };
-
-  // Function to format date
-  const formatDate = (dateString: string) => {
-    const [datePart] = dateString.split('To').map(part => part.trim());
-    return datePart;
-  };
+  if (seminars.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-8 rounded-lg max-w-2xl mx-auto">
+          <h3 className="font-bold text-xl mb-2">No Seminars Available</h3>
+          <p className="mb-4">There are currently no seminars scheduled. Please check back later.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-16">
+      <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-12 text-center">
+        Our Seminars
+      </h2>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {seminar.map((conference, index) => (
-          <div
-            key={conference.id}
-            className={`${getBgColor(index)} rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden`}
+        {seminars.map((seminar, index) => (
+          <motion.div
+            key={seminar.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100"
           >
             <div className="relative">
-              <div className="absolute z-20 bottom-5 left-5">
-                <button
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-                    conference.status === 'Completed'
-                      ? 'bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]'
-                      : 'bg-[#203A87] text-white hover:bg-[#152a61]'
-                  }`}
-                >
-                  {conference.status}
-                </button>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
               <Image
-                src="/Meeting.png"
-                alt={conference.title}
+                src={seminar.imageUrl || '/Meeting.png'}
+                alt={seminar.title}
                 width={600}
                 height={400}
                 className="w-full h-[250px] object-cover"
               />
-            </div>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
-                  {conference.title}
-                </h1>
-                <span className="text-[#203A87] font-bold text-lg">
-                  {conference.title.split(' ')[1]} {/* Extract year from title */}
+              <div className="absolute bottom-4 left-4 z-20">
+                <span className={`${getStatusColor(seminar.status).bg} ${
+                  getStatusColor(seminar.status).text
+                } text-xs font-semibold px-3 py-1 rounded-full`}>
+                  {seminar.status}
                 </span>
               </div>
-              <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
-                {conference.theme}
-              </p>
-              <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
-                {conference.date}
-              </p>
-              <div className="flex items-center space-x-4">
-                <button 
-                  onClick={() => handleReadSeminar(conference.id)}
-                  className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
-                >
-                  Read
-                </button>
-              </div>
             </div>
-          </div>
+
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-bold text-[#0B142F] line-clamp-2">
+                  {seminar.title}
+                </h3>
+                <span className="bg-[#203A87]/10 text-[#203A87] text-sm font-semibold px-2 py-1 rounded">
+                  {seminar.title.split(' ')[1]}
+                </span>
+              </div>
+
+              <p className="text-[#0B142F]/90 mb-5 line-clamp-2">
+                {seminar.theme}
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center text-sm text-gray-600">
+                  <FiCalendar className="mr-2 text-[#203A87]" />
+                  <span>{formatDate(seminar.date)}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                  <FiMapPin className="mr-2 text-[#203A87]" />
+                  <span className="line-clamp-1">{seminar.venue}</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => handleReadSeminar(seminar.id)}
+                className="w-full bg-[#203A87] hover:bg-[#152a61] text-white font-medium py-3 rounded-lg transition-colors duration-300 flex items-center justify-center"
+              >
+                <FiBookOpen className="mr-2" />
+                View Details
+              </button>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>

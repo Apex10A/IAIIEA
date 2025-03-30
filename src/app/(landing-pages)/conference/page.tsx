@@ -292,7 +292,7 @@ export default function ConferencePage() {
           session?.user?.token || session?.user?.userData?.token;
 
         if (!bearerToken) {
-          throw new Error("Authentication token not found");
+          throw new Error("Please Login to view this page");
         }
 
         const confsResponse = await fetchConferences(bearerToken);

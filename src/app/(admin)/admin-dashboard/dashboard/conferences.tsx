@@ -248,7 +248,7 @@ const DashboardConferences = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]"
+      className="bg-white rounded-xl min-h-[400px]"
     >
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
@@ -291,12 +291,12 @@ const DashboardConferences = () => {
                       <p className="text-sm text-gray-600 mt-1">{conference.theme}</p>
                     )}
                     
-                    <div className="flex items-center mt-3 text-sm text-gray-500">
+                    <div className="md:flex items-center mt-3 text-sm text-gray-500">
                       <Calendar className="h-4 w-4 mr-1.5" />
-                      <span>{formatDate(conference.date)}</span>
+                      <span className='flex pb-3 md:pb-0'>{formatDate(conference.date)}</span>
                       {conference.location && (
                         <>
-                          <span className="mx-2">•</span>
+                          <span className="mx-2 hidden md:flex">•</span>
                           <MapPin className="h-4 w-4 mr-1.5" />
                           <span>{conference.location}</span>
                         </>

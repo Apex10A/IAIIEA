@@ -7,6 +7,7 @@ import { EmblaOptionsType } from 'embla-carousel'
 import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
 import { motion } from 'framer-motion';
+import Sponsors from './sponsors'
 import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers } from 'react-icons/fa';
 
 interface Book {
@@ -192,9 +193,10 @@ const LandingPage: React.FC = () => {
             </p> */}
           </motion.div>
 
-          <div className="space-y-16">
+          <div className="">
             <RealConference/>
             <RealSeminar/>
+            <Sponsors/>
           </div>
         </div>
       </section>

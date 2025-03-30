@@ -209,7 +209,7 @@ export default function LoginPage() {
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2">
-                      <LoadingSpinner className="size-5 animate-spin" />
+                      <LoadingSpinner className="size-5 animate-spin-fast" />
                       <span>Signing in...</span>
                     </div>
                   ) : (

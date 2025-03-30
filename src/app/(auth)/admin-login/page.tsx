@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import "@/app/index.css";
 import Link from "next/link";
 import { showToast } from "@/utils/toast";
 import Logo from '@/assets/auth/images/IAIIEA Logo I.png';

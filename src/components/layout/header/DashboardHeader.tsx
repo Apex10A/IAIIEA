@@ -162,7 +162,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       animate="visible"
                       exit="exit"
                       className={`
-                        absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl
+                        absolute right-0 top-10 mt-2 w-56 bg-white rounded-lg shadow-xl
                         overflow-hidden z-50 border border-gray-100
                       `}
                     >

@@ -1,259 +1,448 @@
-'use client'
+'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import React, { useState } from 'react'
-import { CiMail } from 'react-icons/ci'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/components/ui/use-toast'
+import React, { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@radix-ui/react-label';
+import * as Toggle from '@radix-ui/react-toggle';
+import { Loader2, Mail, Lock, User, Smartphone, Globe, Bell } from 'lucide-react';
+import { toast } from 'sonner';
+import * as Select from '@radix-ui/react-select';
 
-interface UserData {
-  f_name: string
-  l_name: string
-  email: string
-  image_url?: string
-  id: string
-  role: string[]
-}
-
-const ProfileSettingsContent = () => {
-  const { toast } = useToast()
-  const router = useRouter()
-  const { data: session, status, update } = useSession({
-    required: true,
-    onUnauthenticated() {
-      router.push('/login')
-    }
-  })
+export default function AccountSettings() {
+  const { data: session, update } = useSession();
+  const router = useRouter();
   
-  const [updating, setUpdating] = useState(false)
-  const [fullname, setFullname] = useState(
-    session?.user?.name || ''
-  )
-  const [image, setImage] = useState<File | Blob>()
-  const [uploadStatus, setUploadStatus] = useState('idle')
+  // Form states
+  const [profileForm, setProfileForm] = useState({
+    name: session?.user?.name || '',
+    email: session?.user?.email || '',
+    phone: session?.user?.phone || '',
+    bio: session?.user?.bio || ''
+  });
+  
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  
+  const [preferences, setPreferences] = useState({
+    darkMode: false,
+    notifications: true,
+    newsletter: true,
+    language: 'en'
+  });
+  
+  const [isLoading, setIsLoading] = useState({
+    profile: false,
+    password: false,
+    preferences: false
+  });
+  
+  const [activeTab, setActiveTab] = useState('profile');
 
-  // If session is loading
-  if (status === 'loading') {
-    return (
-      <div className="text-[#ff502a] flex justify-center items-center text-2xl">
-        Loading
-      </div>
-    )
-  }
+  // Handler functions
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({ ...prev, [name]: value }));
+  };
 
-  // Ensure we have a session
-  if (!session?.user) return null
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({ ...prev, [name]: value }));
+  };
 
-  const handleUpdateName = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setUpdating(true)
+  const handlePreferenceChange = (name: string, value: any) => {
+    setPreferences(prev => ({ ...prev, [name]: value }));
+  };
 
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(prev => ({ ...prev, profile: true }));
+    
     try {
-      // Update session with new name
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update session
       await update({
-        name: fullname
-      })
-
-      toast({
-        title: 'Profile Updated',
-        description: 'Your profile has been successfully updated.',
-        position: 'top-right',
-      })
-    } catch (error) {
-      toast({
-        title: 'Update Failed',
-        description: 'There was an error updating your profile. Please try again.',
-        variant: 'destructive',
-        position: 'top-right',
-      })
-    } finally {
-      setUpdating(false)
-    }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setImage(file)
-      handleUpload(file)
-    }
-  }
-
-  const handleRemovePhoto = async () => {
-    try {
-      setUploadStatus('deleting')
-      // Implement photo removal logic
-      // This might involve calling an API to remove the profile picture
+        ...session,
+        user: {
+          ...session?.user,
+          name: profileForm.name,
+          bio: profileForm.bio,
+          phone: profileForm.phone
+        }
+      });
       
-      toast({
-        title: 'Profile Picture Removed',
-        description: 'Your profile picture has been successfully removed.',
-      })
+      toast.success('Profile updated successfully');
     } catch (error) {
-      console.error('Error removing photo:', error)
-      toast({
-        title: 'Remove Failed',
-        description: 'There was an error removing your profile picture. Please try again.',
-        variant: 'destructive',
-      })
+      toast.error('Failed to update profile');
     } finally {
-      setUploadStatus('idle')
+      setIsLoading(prev => ({ ...prev, profile: false }));
     }
-  }
+  };
 
-  const handleUpload = async (file: File) => {
-    setUploadStatus('uploading')
-    try {
-      // Implement your image upload logic here
-      // This would typically involve:
-      // 1. Uploading to a storage service (e.g., cloudinary, s3)
-      // 2. Updating the session with the new image URL
-      
-      setUploadStatus('success')
-      toast({
-        title: 'Profile Picture Updated',
-        description: 'Your profile picture has been successfully updated.',
-        position: 'top-right',
-      })
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      setUploadStatus('error')
-      toast({
-        title: 'Upload Failed',
-        description: 'There was an error uploading your image. Please try again.',
-        variant: 'destructive',
-        position: 'top-right',
-      })
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
     }
-  }
+    
+    setIsLoading(prev => ({ ...prev, password: true }));
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('Password changed successfully');
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error) {
+      toast.error('Failed to change password');
+    } finally {
+      setIsLoading(prev => ({ ...prev, password: false }));
+    }
+  };
+
+  const handlePreferencesSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(prev => ({ ...prev, preferences: true }));
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      toast.success('Preferences updated');
+    } catch (error) {
+      toast.error('Failed to update preferences');
+    } finally {
+      setIsLoading(prev => ({ ...prev, preferences: false }));
+    }
+  };
+
 
   return (
-    <article className="space-y-10 p-6">
-      <div className='bg-gray-200 px-5 py-3 mb-6'>
-        <h1 className='text-lg md:text-2xl text-black'>Settings</h1>
+    <div className="max-w-4xl mx-auto p-4 md:p-6 bg-white rounded-lg shadow-sm">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Account Settings</h1>
+      
+      {/* Navigation Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          className={`px-4 py-2 font-medium text-sm md:text-base ${
+            activeTab === 'profile' 
+              ? 'text-blue-600 border-b-2 border-blue-600' 
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Profile
+        </button>
+        <button
+          className={`px-4 py-2 font-medium text-sm md:text-base ${
+            activeTab === 'security' 
+              ? 'text-blue-600 border-b-2 border-blue-600' 
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+          onClick={() => setActiveTab('security')}
+        >
+          Security
+        </button>
+        <button
+          className={`px-4 py-2 font-medium text-sm md:text-base ${
+            activeTab === 'preferences' 
+              ? 'text-blue-600 border-b-2 border-blue-600' 
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+          onClick={() => setActiveTab('preferences')}
+        >
+          Preferences
+        </button>
       </div>
-      <div className="md:items-center flex md:flex-row flex-col justify-center md:justify-between items-center space-x-4">
-        <div className="flex flex-col md:flex-row gap-4 md:gap-2 items-center relative">
-          <div className="relative">
-            <Avatar className="size-20 cursor-pointer md:size-30">
-              <AvatarImage
-                src={session.user.image || '/default-avatar.png'}
-                alt={session.user.name || 'User'}
-              />
-              <AvatarFallback className="bg-[#fef08a] uppercase cursor-pointer text-[#0e1a3d] font-bold text-[40px]">
-                {session.user.name?.[0] || 'U'}
-              </AvatarFallback>
-            </Avatar>
-
-            {uploadStatus === 'uploading' && (
-              <div className="absolute w-[80px] h-[80px] md:w-[80px] md:h-[80px] inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                <span className="text-white text-[16px]">Uploading...</span>
+      
+      {/* Profile Tab */}
+      {activeTab === 'profile' && (
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="flex flex-col items-center">
+              <Avatar className="w-24 h-24 mb-3">
+                <AvatarImage src={session?.user?.image || ''} className="bg-gray-100" />
+                <AvatarFallback className="text-2xl bg-gray-200 text-gray-700">
+                  {session?.user?.name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <Button variant="outline" size="sm" className="text-gray-700 border-gray-300">
+                Change Photo
+              </Button>
+            </div>
+            
+            <form onSubmit={handleProfileSubmit} className="flex-1 space-y-4">
+              <div>
+                <Label htmlFor="name" className="text-gray-700 mb-1 block">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="name"
+                    name="name"
+                    value={profileForm.name}
+                    onChange={handleProfileChange}
+                    className="pl-10 text-gray-800"
+                  />
+                </div>
               </div>
-            )}
-
-            {uploadStatus === 'deleting' && (
-              <div className="absolute w-[90px] h-[90px] md:w-[80px] md:h-[80px] inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                <span className="text-white">Deleting...</span>
+              
+              <div>
+                <Label htmlFor="email" className="text-gray-700 mb-1 block">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={profileForm.email}
+                    onChange={handleProfileChange}
+                    disabled
+                    className="pl-10 bg-gray-50 text-gray-600"
+                  />
+                </div>
               </div>
-            )}
-          </div>
-          <div className="flex flex-col items-center md:items-start pt-0 md:pt-2">
-            <h3 className="text-[20px] md:text-[24px] font-bold text-[#101828]">
-              {session.user.name}
-            </h3>
-            <p className='opacity-[0.7] italics'>{session.user.email}</p>
+              
+              <div>
+                <Label htmlFor="phone" className="text-gray-700 mb-1 block">Phone Number</Label>
+                <div className="relative">
+                  <Smartphone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={profileForm.phone}
+                    onChange={handleProfileChange}
+                    className="pl-10 text-gray-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="bio" className="text-gray-700 mb-1 block">Bio</Label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  value={profileForm.bio}
+                  onChange={handleProfileChange}
+                  rows={3}
+                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Tell us about yourself..."
+                />
+              </div>
+              
+              <div className="pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={isLoading.profile}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isLoading.profile ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
-
-        <form className="ml-0 md:ml-8">
-          <div className="flex items-center gap-2 justify-center md:my-0 my-4 md:justify-between">
-            <div className="flex items-center">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                onChange={handleFileChange}
-                accept="image/*"
+      )}
+      
+      {/* Security Tab */}
+      {activeTab === 'security' && (
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="currentPassword" className="text-gray-700 mb-1 block">Current Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                className="pl-10 text-gray-800"
+                required
               />
-              <label
-                htmlFor="file-upload"
-                className="w-[150px] cursor-pointer text-[#203a87] text-[16px] font-medium py-4 px-3 text-center bg-[#FEF08A] outline-none rounded-[6px]"
-              >
-                Upload photo
-              </label>
             </div>
-
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                handleRemovePhoto()
-              }}
-              className="py-4 px-3 text-center w-[180px] text-[#344054] outline-none rounded-lg text-[16px] font-medium border-[1px] flex"
+          </div>
+          
+          <div>
+            <Label htmlFor="newPassword" className="text-gray-700 mb-1 block">New Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                className="pl-10 text-gray-800"
+                required
+                minLength={8}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="confirmPassword" className="text-gray-700 mb-1 block">Confirm New Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                className="pl-10 text-gray-800"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="pt-2">
+            <Button 
+              type="submit" 
+              disabled={isLoading.password}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Remove photo
-            </button>
+              {isLoading.password ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Change Password'
+              )}
+            </Button>
           </div>
         </form>
-      </div>
-      <hr />
-
-      <form onSubmit={handleUpdateName}>
-        <div className=" max-w-[400px] flex flex-col gap-[27px] md:w-[425px] px-[25px]">
-          <div className="flex flex-col items-start">
-            <h4 className="text-[16px] md:text-[20px] font-bold text-black">Contact details</h4>
-            <p className="text-[16px] md:text-[18px] text-black">You can edit your name here.</p>
-          </div>
-          <hr />
-          <div className="flex flex-col">
-            <Label
-              className="mb-2 text-[16px] md:text-[18px] font-medium text-[#344054]"
-              htmlFor="fullname"
-            >
-              Full name
-            </Label>
-            <Input
-              type="text"
-              id="fullname"
-              name="fullname"
-              value={fullname}
-              onChange={(e) => setFullname(e.target.value)}
-              placeholder="Oliva Rhye"
-              className="placeholder:text-[16px] text-[16px] md:text-[17px] bg-white border-[1px] border-[#D0D5DD] focus:border-[1px] focus:border-[#94A3B8] text-black focus:outline-none rounded-lg h-[40px] py-[10px] px-[16px]"
-            />
-          </div>
-          <div className="flex flex-col">
-            <Label htmlFor="email" className="mb-2 text-[16px] md:text-[18px] font-medium text-black">
-              Email
-            </Label>
-            <div className="relative">
-              <Input
-                className="placeholder:text-[16px] text-[16px] md:text-[17px] bg-[#fafafa] border-[1px] border-[#D0D5DD] focus:border-[1px] focus:border-[#94A3B8] focus:outline-none rounded-lg h-[40px] py-[10px] pl-[46px] pr-[16px] text-[#344054]"
-                disabled
-                type="email"
-                placeholder="olivia@untitledui.com"
-                value={session.user.email || ''}
-              />
-              <CiMail className="text-[#D0D5DD] absolute inset-x-0 top-[6px] left-[-4px] w-[54px] h-[30px]" />
+      )}
+      
+      {/* Preferences Tab */}
+      {activeTab === 'preferences' && (
+        <form onSubmit={handlePreferencesSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="font-medium flex items-center gap-2 text-gray-800">
+              <Bell className="h-5 w-5 text-gray-700" />
+              Notifications
+            </h3>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label htmlFor="notifications" className="text-gray-700">Email Notifications</Label>
+                <p className="text-sm text-gray-600">Receive email notifications</p>
+              </div>
+              <Toggle.Root
+                id="notifications"
+                pressed={preferences.notifications}
+                onPressedChange={(pressed) => handlePreferenceChange('notifications', pressed)}
+                className="w-11 h-6 bg-gray-300 rounded-full relative data-[state=on]:bg-blue-600 transition-colors"
+              >
+                <span className="block w-5 h-5 bg-white rounded-full shadow-sm absolute top-0.5 left-0.5 data-[state=on]:left-[1.375rem] transition-all" />
+              </Toggle.Root>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label htmlFor="newsletter" className="text-gray-700">Newsletter</Label>
+                <p className="text-sm text-gray-600">Receive our monthly newsletter</p>
+              </div>
+              <Toggle.Root
+                id="newsletter"
+                pressed={preferences.newsletter}
+                onPressedChange={(pressed) => handlePreferenceChange('newsletter', pressed)}
+                className="w-11 h-6 bg-gray-300 rounded-full relative data-[state=on]:bg-blue-600 transition-colors"
+              >
+                <span className="block w-5 h-5 bg-white rounded-full shadow-sm absolute top-0.5 left-0.5 data-[state=on]:left-[1.375rem] transition-all" />
+              </Toggle.Root>
             </div>
           </div>
-
-          <div className="flex justify-start items-center">
-            <button
-              type="submit"
-              className="py-[8px] px-[14px] w-full md:w-[178px] border border-[#D0D5DD] outline-none rounded-lg text-[16px] md:text-[17px] font-[500] text-black"
-              disabled={updating}
-            >
-              {updating ? 'Saving...' : 'Save'}
-            </button>
+          
+          <div className="space-y-4">
+            <h3 className="font-medium flex items-center gap-2 text-gray-800">
+              <Globe className="h-5 w-5 text-gray-700" />
+              Language & Appearance
+            </h3>
+            
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <Label htmlFor="language" className="text-gray-700 mb-2 block">Language</Label>
+              <Select.Root
+                value={preferences.language}
+                onValueChange={(value) => handlePreferenceChange('language', value)}
+              >
+                <Select.Trigger className="inline-flex items-center justify-between w-full h-10 px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-800">
+                  <Select.Value placeholder="Select a language" />
+                  <Select.Icon className="text-gray-500" />
+                </Select.Trigger>
+                <Select.Content className="overflow-hidden bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                  <Select.Viewport className="p-1">
+                    <Select.Item value="en" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
+                      English
+                    </Select.Item>
+                    <Select.Item value="es" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
+                      Spanish
+                    </Select.Item>
+                    <Select.Item value="fr" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
+                      French
+                    </Select.Item>
+                    <Select.Item value="de" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
+                      German
+                    </Select.Item>
+                  </Select.Viewport>
+                </Select.Content>
+              </Select.Root>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label htmlFor="darkMode" className="text-gray-700">Dark Mode</Label>
+                <p className="text-sm text-gray-600">Toggle dark theme</p>
+              </div>
+              <Toggle.Root
+                id="darkMode"
+                pressed={preferences.darkMode}
+                onPressedChange={(pressed) => handlePreferenceChange('darkMode', pressed)}
+                className="w-11 h-6 bg-gray-300 rounded-full relative data-[state=on]:bg-blue-600 transition-colors"
+              >
+                <span className="block w-5 h-5 bg-white rounded-full shadow-sm absolute top-0.5 left-0.5 data-[state=on]:left-[1.375rem] transition-all" />
+              </Toggle.Root>
+            </div>
           </div>
-          <div className="h-[50px]"></div>
-        </div>
-      </form>
-    </article>
-  )
+          
+          <div className="pt-2">
+            <Button 
+              type="submit" 
+              disabled={isLoading.preferences}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isLoading.preferences ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Preferences'
+              )}
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
 }
-
-export default ProfileSettingsContent

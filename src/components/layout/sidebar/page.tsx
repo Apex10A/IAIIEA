@@ -123,7 +123,14 @@ const navigationItems: NavItem[] = [
       { id: "seminar-resources", name: 'Seminar Resources', requiredPortal: 'seminar', icon: ResourcesIcon },
       { id: "seminar-announcements", name: 'Seminar Announcements', requiredPortal: 'seminar', icon: AnnouncementIcon },
     ]
-  }
+  },
+  { 
+    id: "settings",
+    name: 'Settings', 
+    icon: DashboardIcon,
+    requiredPortal: null,
+    subItems: []
+  },
 ];
 
 const ModernSidebar: React.FC<SidebarProps> = ({ 

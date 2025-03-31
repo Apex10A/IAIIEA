@@ -536,5 +536,5 @@ const PaymentHistory: React.FC = () => {
     </div>
   );
 };
-
+''
 export default PaymentHistory;

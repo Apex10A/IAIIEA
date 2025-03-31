@@ -221,7 +221,7 @@ const DashboardConferences = () => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
+      <div className="bg-white rounded-xl shadow-md p-6 border min-h-[300px]">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6 text-[#0E1A3D]" />
@@ -250,7 +250,7 @@ const DashboardConferences = () => {
       animate={{ opacity: 1 }}
       className="bg-white rounded-xl min-h-[400px]"
     >
-      <div className="flex justify-between items-center mb-6">
+      {/* <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 text-[#0E1A3D]" />
           <h2 className="text-xl font-semibold text-gray-800">Conferences</h2>
@@ -262,7 +262,7 @@ const DashboardConferences = () => {
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
-      </div>
+      </div> */}
 
       {displayConferences.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500">
@@ -292,15 +292,15 @@ const DashboardConferences = () => {
                     )}
                     
                     <div className="md:flex items-center mt-3 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4 mr-1.5" />
-                      <span className='flex pb-3 md:pb-0'>{formatDate(conference.date)}</span>
+                      {/* <Calendar className="h-4 w-4 mr-1.5" /> */}
+                      {/* <span className='flex pb-3 md:pb-0'>{formatDate(conference.date)}</span>
                       {conference.location && (
                         <>
                           <span className="mx-2 hidden md:flex">•</span>
                           <MapPin className="h-4 w-4 mr-1.5" />
                           <span>{conference.location}</span>
                         </>
-                      )}
+                      )} */}
                     </div>
                     
                     <div className="flex items-center mt-3">

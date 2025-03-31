@@ -1,15 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
-import "@/app/index.css"
 import { redirect } from 'next/navigation';
-
-// Components
-import Sidebar from '@/components/layout/sidebar/page';
-import DashboardHeader from '@/components/layout/header/DashboardHeader';
-import LoadingDashboard from '@/app/(admin)/admin-dashboard/LoadingDashboard'
-
+import "@/app/index.css"
+import { motion, AnimatePresence } from 'framer-motion';
 // Pages
 import Dashboard from "@/app/(members-dashboard)/members-dashboard/dash/index";
 import Announcement from '@/app/(members-dashboard)/members-dashboard/notification/Notification';
@@ -28,15 +23,32 @@ import SeminarDirectory from "@/app/(members-dashboard)/members-dashboard/traini
 import ConfAnnouncement from "@/app/(members-dashboard)/members-dashboard/confAnnouncement/page"
 import SeminarParticipants from "@/app/(members-dashboard)/members-dashboard/training/participants/page"
 import SeminarAnnouncements from "@/app/(members-dashboard)/members-dashboard/training/announcements/page"
+// Components
+import Sidebar from '@/components/layout/sidebar/page';
+import DashboardHeader from '@/components/layout/header/DashboardHeader';
+import LoadingDashboard from '@/app/(admin)/admin-dashboard/LoadingDashboard'
+
+// Import your page components
+// ... (keep your existing imports)
 
 // TypeScript interfaces
+type ComponentKey = 
+  | 'Dashboard' | 'Announcement' | 'Payment' 
+  | 'Seminar Directory' | 'Conference Announcements' 
+  | 'Seminars' | 'Seminar Participants' 
+  | 'Seminar Announcements' | 'Participants' 
+  | 'Seminar Resources' | 'Conferences' 
+  | 'Seminars / Webinars' | 'Directory' 
+  | 'IAIIEA Resources' | 'Forum' | 'Settings';
+
 interface ComponentMap {
   [key: string]: JSX.Element;
 }
 
 export default function DashboardClient() {
-  const [activeComponent, setActiveComponent] = useState<string>('Dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [activeComponent, setActiveComponent] = useState<ComponentKey>('Dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -44,8 +56,28 @@ export default function DashboardClient() {
     },
   });
 
+  // Check mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(prev => !prev);
+  };
+
+  const closeSidebar = () => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
   };
 
   const renderComponent = (): JSX.Element => {
@@ -53,94 +85,88 @@ export default function DashboardClient() {
       Dashboard: <Dashboard />,
       Announcement: <Announcement />,
       Payment: <Payment />,
-      'Seminar Directory': <SeminarDirectory/>,
+      'Seminar Directory': <SeminarDirectory />,
       'Conference Announcements': <ConfAnnouncement />,
-      'Seminars': <SeminarResources/>,
-      'Seminar Participants': <SeminarParticipants/>,
+      'Seminars': <SeminarResources />,
+      'Seminar Participants': <SeminarParticipants />,
       'Seminar Announcements': <SeminarAnnouncements />,
-      'Participants': <Participants/>,
-      'Seminar Resources' : <SeminarResources/>,
-      // 'Seminars': <Resources/>,
-      'Conferences': <Conferences/>,
-      // 'Conference Portal': <ConferencePortal />,
+      'Participants': <Participants />,
+      'Seminar Resources': <SeminarResources />,
+      'Conferences': <Conferences />,
       'Seminars / Webinars': <SeminarsWebinars />,
       'Directory': <MembersDirectory />,
       'IAIIEA Resources': <IAIIEAResources />,
       Forum: <Forum />,
       Settings: <Settings />,
     };
-  
-    // Ensure Dashboard is rendered if activeComponent is not in the map or is undefined
+
     return components[activeComponent] || components['Dashboard'];
   };
+
   // Loading state while checking session
   if (status === 'loading') {
-    return (
-      <LoadingDashboard/>
-    );
+    return <LoadingDashboard />;
   }
 
   // Render loading screen or redirect if session is unavailable
   if (!session?.user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-        <p className="pt-3 font-medium text-gray-600">Redirecting to login...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-lg font-medium text-gray-600">Authenticating...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <DashboardHeader 
-          isSidebarOpen={isSidebarOpen} 
-          toggleSidebar={toggleSidebar} 
-        />
-      </div>
+    <div className="h-screen flex flex-col bg-[#F9FAFF] overflow-hidden">
+      {/* Header */}
+      <DashboardHeader 
+        isSidebarOpen={isSidebarOpen} 
+        toggleSidebar={toggleSidebar} 
+      />
 
-      <div className="flex flex-grow h-full">
-        {/* <button
-          className="fixed left-4 top-20 z-50 p-2 rounded-md bg-white shadow-md md:hidden"
-          onClick={toggleSidebar}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+      <div className="flex flex-1 overflow-hidden pt-16"> {/* Adjust pt based on header height */}
+        {/* Sidebar with overlay */}
+        <AnimatePresence>
+          {/* Mobile overlay */}
+          {isSidebarOpen && isMobile && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+              onClick={closeSidebar}
             />
-          </svg>
-        </button> */}
+          )}
 
-        <div
-          className={`fixed inset-y-0 left-0 transform ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 md:z-0`}
-        >
-          <Sidebar 
-            setActiveComponent={setActiveComponent} 
-            isMobileOpen={isSidebarOpen} 
-            onMobileToggle={toggleSidebar} 
-          />
-        </div>
+          {/* Sidebar */}
+          <motion.div
+            initial={isMobile ? { x: -300 } : false}
+            animate={isMobile ? 
+              { x: isSidebarOpen ? 0 : -300 } : 
+              { x: 0 }
+            }
+            exit={isMobile ? { x: -300 } : undefined}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className={`fixed md:relative inset-y-0 left-0 z-30 md:z-0 w-64 flex-shrink-0`}
+          >
+            <Sidebar 
+               setActiveComponent={setActiveComponent} 
+              isMobileOpen={isSidebarOpen} 
+              onMobileToggle={toggleSidebar} 
+            />
+          </motion.div>
+        </AnimatePresence>
 
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-            onClick={toggleSidebar}
-          />
-        )}
-
-        <div className="flex-grow pt-40 md:pt-44 md:pl-10 overflow-y-auto bg-[#F9FAFF]">
-          <div className="max-w-7xl mx-auto">{renderComponent()}</div>
-        </div>
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto bg-[#F9FAFF]">
+          <div className="p-4 md:p-6 max-w-7xl mx-auto">
+            {renderComponent()}
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { Plus, Trash2, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, Image as ImageIcon, Loader2 } from 'lucide-react';
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { showToast } from '@/utils/toast';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import * as AspectRatio from "@radix-ui/react-aspect-ratio";
 
 interface Conference {
   id: number;
@@ -34,10 +36,12 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
     name: string;
     image: File | null;
     conferenceId: number | null;
+    previewImage: string | null;
   }>({
     name: "",
     image: null,
     conferenceId: null,
+    previewImage: null,
   });
     
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +55,7 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
       setMealDetails((prev) => ({
         ...prev,
         image: file,
+        previewImage: URL.createObjectURL(file)
       }));
     }
   };
@@ -79,7 +84,12 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
       if (!response.ok) throw new Error('Failed to add meal');
 
       onMealAdded(mealDetails.conferenceId);
-      setMealDetails({ name: '', image: null, conferenceId: null });
+      setMealDetails({ 
+        name: '', 
+        image: null, 
+        conferenceId: null,
+        previewImage: null 
+      });
       showToast.success('Meal added successfully');
     } catch (error) {
       console.error('Error adding meal:', error);
@@ -97,24 +107,32 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-sm md:text-[17px]">
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" />
           Add Meal
-        </button>
+        </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[95vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none z-50">
-          <Dialog.Title className="text-md md:text-xl text-gray-600 font-bold mb-4">Add New Meal</Dialog.Title>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[90vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-xl focus:outline-none z-50">
+          <div className="flex items-center justify-between mb-4">
+            <Dialog.Title className="text-xl font-semibold text-gray-800">Add New Meal</Dialog.Title>
+            <Dialog.Close asChild>
+              <button className="rounded-sm opacity-70 hover:opacity-100">
+                <Cross2Icon className="h-5 w-5" />
+              </button>
+            </Dialog.Close>
+          </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-600">Select Conference</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Conference</label>
               <Select 
                 value={mealDetails.conferenceId?.toString() || ""} 
                 onValueChange={handleConferenceChange}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Conference" />
+                  <SelectValue placeholder="Select a conference" />
                 </SelectTrigger>
                 <SelectContent>
                   {conferences.map((conference) => (
@@ -127,50 +145,67 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Meal Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Meal Name</label>
               <input
                 type="text"
                 value={mealDetails.name}
                 onChange={(e) => setMealDetails(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-2 border rounded-md text-gray-600"
+                className="w-full px-3 py-2 border rounded-md text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 placeholder="Enter meal name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-600">Meal Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full px-3 py-2 border rounded-md text-gray-600"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Meal Image</label>
+              <div className="flex items-center gap-4">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                  {mealDetails.previewImage ? (
+                    <img 
+                      src={mealDetails.previewImage} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-4 text-gray-500">
+                      <ImageIcon className="h-8 w-8 mb-2" />
+                      <span className="text-sm">Click to upload image</span>
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange}
+                    className="hidden" 
+                  />
+                </label>
+              </div>
             </div>
           </div>
 
           <div className="mt-6 flex justify-end gap-3">
             <Dialog.Close asChild>
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+              <Button variant="outline">
                 Cancel
-              </button>
+              </Button>
             </Dialog.Close>
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#203a87] rounded-md hover:bg-[#152a61] disabled:opacity-50"
+              className="gap-2"
             >
-              {isLoading ? 'Adding...' : 'Add Meal'}
-            </button>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Add Meal
+                </>
+              )}
+            </Button>
           </div>
-
-          <Dialog.Close asChild>
-            <button
-              className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100"
-              aria-label="Close"
-            >
-              <Cross2Icon />
-            </button>
-          </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
@@ -304,24 +339,54 @@ const ConferenceMeals = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      <div className="space-y-6">
+        <div className="flex justify-between items-center flex-col sm:flex-row gap-4">
+          <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="h-10 w-64 bg-gray-200 rounded animate-pulse" />
+            <div className="h-10 w-32 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <AspectRatio.Root ratio={16 / 9}>
+                <div className="w-full h-full bg-gray-200 animate-pulse" />
+              </AspectRatio.Root>
+              <CardContent className="p-4">
+                <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+              </CardContent>
+              <CardFooter className="flex justify-end p-4 pt-0">
+                <div className="h-9 w-20 bg-gray-200 rounded animate-pulse" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-red-500 p-4 rounded bg-red-50">
-        {error}
-      </div>
+      <Card>
+        <CardContent className="p-6 text-center">
+          <div className="text-red-500 mb-4">{error}</div>
+          <Button onClick={fetchConferences} variant="outline">
+            Retry
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-col sm:flex-row gap-4">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-600">Conference Meals</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Conference Meals</h2>
+          <p className="text-sm text-gray-500">Manage meals for your conferences</p>
+        </div>
         
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <div className="w-full sm:w-64">
@@ -353,57 +418,89 @@ const ConferenceMeals = () => {
       </div>
 
       {isFetchingMeals ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <AspectRatio.Root ratio={16 / 9}>
+                <div className="w-full h-full bg-gray-200 animate-pulse" />
+              </AspectRatio.Root>
+              <CardContent className="p-4">
+                <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+              </CardContent>
+              <CardFooter className="flex justify-end p-4 pt-0">
+                <div className="h-9 w-20 bg-gray-200 rounded animate-pulse" />
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       ) : selectedConferenceId ? (
         <>
           {meals.length === 0 ? (
             <Card>
-              <CardContent className="p-6">
-                <p className="text-center text-gray-500">No meals available for this conference yet.</p>
+              <CardContent className="p-8 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-4">
+                  <ImageIcon className="h-6 w-6 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">No meals yet</h3>
+                <p className="text-sm text-gray-500 mb-4">Get started by adding a new meal</p>
+                <MealsModal 
+                  onMealAdded={(id) => {
+                    fetchMeals(id);
+                    setSelectedConferenceId(id);
+                  }} 
+                  conferences={conferences} 
+                />
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {meals.map((meal) => (
-                <Card key={meal.meal_id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video relative overflow-hidden bg-gray-100">
-                    {meal.image ? (
-                      <img
-                        src={meal.image}
-                        alt={meal.name}
-                        className="object-cover w-full h-full"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder-meal.jpg';
-                          target.alt = 'Meal image not available';
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">
-                        No image available
-                      </div>
-                    )}
-                  </div>
+                <Card key={meal.meal_id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <AspectRatio.Root ratio={16 / 9}>
+                    <div className="w-full h-full bg-gray-100 relative overflow-hidden">
+                      {meal.image ? (
+                        <img
+                          src={meal.image}
+                          alt={meal.name}
+                          className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder-meal.jpg';
+                            target.alt = 'Meal image not available';
+                          }}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          <ImageIcon className="h-12 w-12" />
+                        </div>
+                      )}
+                    </div>
+                  </AspectRatio.Root>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg">{meal.name}</h3>
+                    <h3 className="font-semibold text-lg mb-2">{meal.name}</h3>
+                    <Badge variant="outline" className="text-xs">
+                      Meal ID: {meal.meal_id}
+                    </Badge>
                   </CardContent>
                   <CardFooter className="flex justify-end p-4 pt-0">
                     <Button 
                       variant="destructive" 
                       size="sm" 
-                      onClick={() => handleDeleteMeal(meal.meal_id)}
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this meal?')) {
+                          handleDeleteMeal(meal.meal_id);
+                        }
+                      }}
                       disabled={isDeleting === meal.meal_id}
+                      className="gap-1"
                     >
                       {isDeleting === meal.meal_id ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <>
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </>
+                        <Trash2 className="h-4 w-4" />
                       )}
+                      Delete
                     </Button>
                   </CardFooter>
                 </Card>
@@ -413,8 +510,12 @@ const ConferenceMeals = () => {
         </>
       ) : (
         <Card>
-          <CardContent className="p-6">
-            <p className="text-center text-gray-500">Please select a conference to view meals.</p>
+          <CardContent className="p-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mb-4">
+              <ChevronDown className="h-6 w-6 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">Select a conference</h3>
+            <p className="text-sm text-gray-500">Choose a conference to view its meals</p>
           </CardContent>
         </Card>
       )}

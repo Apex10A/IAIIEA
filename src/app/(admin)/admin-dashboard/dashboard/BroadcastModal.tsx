@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross2Icon } from "@radix-ui/react-icons";
+import { Cross2Icon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { showToast } from '@/utils/toast';
@@ -19,7 +19,7 @@ const BroadcastMail = () => {
 
   const handleSubmit = async () => {
     if (!organizationEmail || !recipients || !subject || !messageToSend) {
-      alert("Please fill in all required fields.");
+      showToast.error("Please fill in all required fields.");
       return;
     }
 
@@ -42,7 +42,6 @@ const BroadcastMail = () => {
       );
 
       showToast.success("Broadcast mail sent successfully!");
-      console.log(response.data);
       // Reset form
       setOrganizationEmail("");
       setRecipients("");
@@ -50,126 +49,135 @@ const BroadcastMail = () => {
       setMessageToSend("");
     } catch (error) {
       console.error("Error sending broadcast mail:", error);
-      showToast.error("Error sending broadcast mail")
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError ( "An error occurred while sending the mail.")
-        showToast.error("An error occurred while sending the mail.")
-      }
-   
-    } 
-    // catch (error) {
-    //   console.error(error);
-    //   if (error instanceof Error) {
-    //     setError(error.message);
-    //   } else {
-    //     setError("An error occurred while creating the schedule");
-    //   }
-    // }
-    
-    
-    finally {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred while sending the mail.";
+      setError(errorMessage);
+      showToast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="flex items-center justify-between">
-      {/* <div>
-        <h1>Send Broadcast</h1>
-      </div> */}
       <Dialog.Root>
-      <Dialog.Trigger asChild>
-        <button className="bg-[#203a87] font-semibold text-white px-5 py-3 rounded-lg text-sm md:text-[17px]">
-          Send Broadcast Mail
-        </button>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[95vh] w-[90vw] max-w-[725px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none z-50">
-          <h1 className="text-xl md:text-2xl text-center text-gray-600">Broadcast Mail</h1>
-
-          <div className="grid gap-4 mt-5">
-            <div className="max-w-[60%]">
-              <label htmlFor="organizationEmail" className="block mb-2 text-gray-600">
-                Organization's Email Address
-              </label>
-              <input
-                id="organizationEmail"
-                value={organizationEmail}
-                onChange={(e) => setOrganizationEmail(e.target.value)}
-                className="w-full h-[35px] px-[10px] rounded-[4px] shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                placeholder="Enter organization's email address"
-              />
+        <Dialog.Trigger asChild>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-md">
+            <EnvelopeClosedIcon className="w-5 h-5" />
+            Send Broadcast Mail
+          </button>
+        </Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[600px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-xl focus:outline-none z-50 overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <Dialog.Title className="text-2xl font-bold text-gray-800">
+                Broadcast Email
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button
+                  className="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors"
+                  aria-label="Close"
+                >
+                  <Cross2Icon className="w-5 h-5" />
+                </button>
+              </Dialog.Close>
             </div>
 
-            <div className="max-w-[60%]">
-              <label htmlFor="recipients" className="block mb-2 text-gray-600">
-                Recipients
-              </label>
-              <input
-                id="recipients"
-                value={recipients}
-                onChange={(e) => setRecipients(e.target.value)}
-                className="w-full h-[35px] px-[10px] rounded-[4px] shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                placeholder="Enter recipients (comma-separated)"
-              />
+            <div className="space-y-5">
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700">
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="organizationEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                  Organization's Email Address *
+                </label>
+                <input
+                  id="organizationEmail"
+                  type="email"
+                  value={organizationEmail}
+                  onChange={(e) => setOrganizationEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., contact@yourorg.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="recipients" className="block text-sm font-medium text-gray-700 mb-1">
+                  Recipients *
+                  <span className="text-xs text-gray-500 ml-1">(comma-separated emails)</span>
+                </label>
+                <input
+                  id="recipients"
+                  value={recipients}
+                  onChange={(e) => setRecipients(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., user1@example.com, user2@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject *
+                </label>
+                <input
+                  id="subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Email subject line"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="messageToSend" className="block text-sm font-medium text-gray-700 mb-1">
+                  Message *
+                </label>
+                <textarea
+                  id="messageToSend"
+                  value={messageToSend}
+                  onChange={(e) => setMessageToSend(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[150px]"
+                  placeholder="Write your message here..."
+                />
+              </div>
             </div>
 
-            <div className="max-w-[60%]">
-              <label htmlFor="subject" className="block mb-2 text-gray-600">
-                Subject
-              </label>
-              <input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full h-[35px] px-[10px] rounded-[4px] shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                placeholder="Enter email subject"
-              />
-            </div>
-
-            <div className="max-w-[60%]">
-              <label htmlFor="messageToSend" className="block mb-2 text-gray-600">
-                Message
-              </label>
-              <textarea
-                id="messageToSend"
-                value={messageToSend}
-                onChange={(e) => setMessageToSend(e.target.value)}
-                className="w-full h-[100px] px-[10px] rounded-[4px] shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-                placeholder="Enter your message"
-              />
-            </div>
-          </div>
-
-          <div className="mt-[25px] flex justify-end gap-[10px]">
-            <Dialog.Close asChild>
-              <button className="bg-gray-200 text-gray-800 hover:bg-gray-300 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none">
-                Cancel
+            <div className="mt-6 flex justify-end gap-3">
+              <Dialog.Close asChild>
+                <button 
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </Dialog.Close>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-2 disabled:opacity-70"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <EnvelopeClosedIcon className="w-4 h-4" />
+                    Send Email
+                  </>
+                )}
               </button>
-            </Dialog.Close>
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="bg-[#203a87] text-white hover:bg-opacity-90 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none"
-            >
-              {loading ? "Sending..." : "Send"}
-            </button>
-          </div>
-
-          <Dialog.Close asChild>
-            <button
-              className="absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
-              aria-label="Close"
-            >
-              <Cross2Icon />
-            </button>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 };

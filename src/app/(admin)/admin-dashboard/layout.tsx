@@ -10,7 +10,7 @@ import DashboardHeader from '@/components/layout/header/DashboardHeader';
 
 // Pages
 import Dashboard from "@/app/(admin)/admin-dashboard/dashboard/page";
-import Calendar from '@/app/(admin)/admin-dashboard/dashboard/calendar';
+import Calendar from '@/app/(admin)/admin-dashboard/calendar/page';
 import Announcement from '@/app/(admin)/admin-dashboard/announcement/page';
 import ConferencePortal from '@/app/(members-dashboard)/members-dashboard/conference/page';
 import SeminarsWebinars from "@/app/(members-dashboard)/members-dashboard/seminars/page";

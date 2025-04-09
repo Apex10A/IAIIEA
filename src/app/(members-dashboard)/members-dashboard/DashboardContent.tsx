@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { SkeletonLoader } from './SkeletonLoader';
 import { UserDataType } from '@/app/(members-dashboard)/members-dashboard/dash/types';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import Calendar from "./calendar"
 
 interface DashboardContentProps {
   user: UserDataType | null;
@@ -137,6 +138,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           <p className="text-sm text-purple-600">You have no new notifications</p>
         </div>
       </div>
+
+     <div className='pt-10'>
+     <Calendar/>
+     </div>
     </div>
   );
 };

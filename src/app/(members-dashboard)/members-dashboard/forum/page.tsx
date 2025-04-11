@@ -469,7 +469,7 @@ const ForumPage: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    {(isAdmin || currentUserId === question.user_id) && (
+                    {/* {(isAdmin || currentUserId === question.user_id) && (
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
@@ -497,7 +497,7 @@ const ForumPage: React.FC = () => {
                           )}
                         </button>
                       </div>
-                    )}
+                    )} */}
                   </div>
 
                   {isEditing === question.forum_id ? (

@@ -187,12 +187,12 @@ const SeminarCards = () => {
                 <h3 className="text-xl font-bold text-[#0B142F] line-clamp-2">
                   {seminar.title}
                 </h3>
-                <span className="bg-[#203A87]/10 text-[#203A87] text-sm font-semibold px-2 py-1 rounded">
+                {/* <span className="bg-[#203A87]/10 text-[#203A87] text-sm font-semibold px-2 py-1 rounded">
                   {seminar.title.split(' ')[1]}
-                </span>
+                </span> */}
               </div>
 
-              <p className="text-[#0B142F]/90 mb-5 line-clamp-2">
+              <p className="text-[#0B142F] mb-5 line-clamp-2">
                 {seminar.theme}
               </p>
 

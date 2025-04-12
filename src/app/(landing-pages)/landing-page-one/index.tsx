@@ -196,13 +196,13 @@ const LandingPage: React.FC = () => {
           <div className="">
             <RealConference/>
             <RealSeminar/>
-            <Sponsors/>
+            {/* <Sponsors/> */}
           </div>
         </div>
       </section>
 
       {/* Stakeholders Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+      {/* <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
         <div className="container mx-auto">
           <motion.div
             initial="hidden"
@@ -251,7 +251,7 @@ const LandingPage: React.FC = () => {
             ))}
           </motion.div>
         </div>
-      </section>
+      </section> */}
     </div>
   )
 }

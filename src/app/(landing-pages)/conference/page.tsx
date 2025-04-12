@@ -330,6 +330,37 @@ export default function ConferencePage() {
     );
   }
 
+   // Check if user is registered
+   if (!conference.is_registered) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen conference-bg p-8 text-center">
+        <Book className="w-16 h-16 text-[#D5B93C] mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-4">Registration Required</h2>
+        <p className="text-white/70 max-w-md mb-6">
+          You need to register for this conference to access the details.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button 
+            className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
+            onClick={() => window.location.href = `/`}
+          >
+            Back to Conferences
+          </Button>
+          {/* <Button 
+            className="bg-[#203A87] hover:bg-[#152a61] text-white"
+            onClick={() => {
+              // Navigate to registration page or show registration modal
+              // You can implement your registration flow here
+              window.location.href = `/register?conferenceId=${conference.id}`;
+            }}
+          >
+            Register Now
+          </Button> */}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
       {/* Header with Countdown and Button */}

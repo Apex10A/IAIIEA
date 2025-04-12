@@ -56,10 +56,7 @@ const SeminarCards = () => {
 
   const getDefaultImage = (index: number) => {
     const images = [
-      '/seminar-1.jpg',
-      '/seminar-2.jpg',
-      '/seminar-3.jpg',
-      '/seminar-4.jpg'
+      '/Meeting.png',
     ];
     return images[index % images.length];
   };
@@ -149,7 +146,7 @@ const SeminarCards = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 ">
       <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-12 text-center">
         Our Conferences
       </h2>
@@ -167,7 +164,7 @@ const SeminarCards = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
               <Image
-                src={seminar.imageUrl || '/Meeting.png'}
+                src={'/Meeting.png'}
                 alt={seminar.title}
                 width={600}
                 height={400}

@@ -167,7 +167,7 @@ const SeminarCards = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
               <Image
-                src={seminar.imageUrl || '/Meeting.png'}
+                src={'/Meeting.png'}
                 alt={seminar.title}
                 width={600}
                 height={400}

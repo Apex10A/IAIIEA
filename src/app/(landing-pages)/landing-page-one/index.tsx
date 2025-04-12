@@ -20,17 +20,17 @@ interface Book {
 }
 
 const LandingPage: React.FC = () => {
-  const BooksData: Book[] = [
-    {
-      id: 1,
-      name: "Educational Innovations",
-      overview: "Journal of Innovations in Educational Assessment (JIEA)",
-      description: "Vol. 1, No. 1, May, 2019",
-      image: "/VolOne.png",
-      journalLink: "https://example.com/journal1"
-    },
-    // ... other book data
-  ]
+  // const BooksData: Book[] = [
+  //   {
+  //     id: 1,
+  //     name: "Educational Innovations",
+  //     overview: "Journal of Innovations in Educational Assessment (JIEA)",
+  //     description: "Vol. 1, No. 1, May, 2019",
+  //     image: "/VolOne.png",
+  //     journalLink: "https://example.com/journal1"
+  //   },
+  //   // ... other book data
+  // ]
 
   const OPTIONS: EmblaOptionsType = {}
   const SLIDE_COUNT = 5

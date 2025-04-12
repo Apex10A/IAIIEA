@@ -22,7 +22,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "IAIIEA Organization",
-  description: "IAIIEA Organization",
+  description: "Innovating assessment practices to better support education",
 };
 
 function Loading() {

@@ -1,11 +1,12 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import "@/app/index.css";
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, MapPin, Clock, Book, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+// import { Skeleton } from "@/components/ui/skeleton";
 
 interface PaymentTier {
   usd: string;
@@ -241,9 +242,35 @@ const Carousel = ({ items, showArrows = true }: { items: string[]; showArrows?: 
   );
 };
 
+// Loading Skeleton
+// const LoadingSkeleton = () => (
+//   <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full space-y-8">
+//     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+//       <Skeleton className="h-24 w-full md:w-1/2" />
+//       <Skeleton className="h-12 w-48" />
+//     </div>
+    
+//     <div className="space-y-4">
+//       <Skeleton className="h-12 w-3/4" />
+//       <div className="flex gap-4">
+//         <Skeleton className="h-6 w-32" />
+//         <Skeleton className="h-6 w-32" />
+//         <Skeleton className="h-6 w-32" />
+//       </div>
+//     </div>
+    
+//     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//       <Skeleton className="h-64" />
+//       <Skeleton className="h-64" />
+//     </div>
+    
+//     <Skeleton className="h-64" />
+//   </div>
+// );
+
+// Main Component
 export default function ConferencePage() {
   const { data: session, status } = useSession();
-  const searchParams = useSearchParams();
   const [conference, setConference] = useState<ConferenceDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -256,40 +283,29 @@ export default function ConferencePage() {
       try {
         setLoading(true);
         const bearerToken = session?.user?.token || session?.user?.userData?.token;
-        const conferenceId = searchParams.get('id');
 
         if (!bearerToken) {
           throw new Error("Please login to view this page");
         }
 
-        if (!conferenceId) {
-          throw new Error("No conference ID provided");
-        }
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${bearerToken}`,
-            },
-          }
+        const confsResponse = await fetchConferences(bearerToken);
+        const activeConf = confsResponse.data.find(
+          (conf) => conf.status === "Ongoing" || conf.status === "Incoming"
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch conference details");
-        }
-
-        const data = await response.json();
-        
-        if (data.status === "success") {
-          setConference(data.data);
+        if (activeConf) {
+          const detailsResponse = await fetchConferenceDetails(
+            activeConf.id,
+            bearerToken
+          );
+          setConference(detailsResponse.data);
           
-          const { start_date, start_time } = data.data;
+          const { start_date, start_time } = detailsResponse.data;
           const dateTimeString = `${start_date}T${start_time}`;
           const conferenceDateTime = new Date(dateTimeString);
           setConferenceDate(conferenceDateTime);
         } else {
-          throw new Error(data.message || "Failed to load conference details");
+          setError("No upcoming or ongoing conferences found");
         }
       } catch (err) {
         setError(
@@ -301,30 +317,20 @@ export default function ConferencePage() {
     };
 
     loadConference();
-  }, [session, status, searchParams]);
+  }, [session, status]);
 
-  // ... (keep the rest of your component code including CountdownTimer, Carousel, etc.)
-
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center min-h-screen conference-bg p-8 text-center">
-        <Book className="w-16 h-16 text-[#D5B93C] mb-4 animate-pulse" />
-        <h2 className="text-2xl font-bold text-white mb-2">Loading Conference...</h2>
-      </div>
-    );
-  }
+  // if (status === "loading" || loading) {
+  //   return <LoadingSkeleton />;
+  // }
 
   if (error || !conference) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen conference-bg p-8 text-center">
         <Book className="w-16 h-16 text-[#D5B93C] mb-4" />
         <h2 className="text-2xl font-bold text-white mb-2">Conference Information</h2>
-        <p className="text-white/70 max-w-md mb-6">{error}</p>
-        <Button 
-          className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
-          onClick={() => window.location.href = '/conferences'}
-        >
-          Back to Conferences
+        <p className="text-white/70 max-w-md">{error}</p>
+        <Button className="mt-6 bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]">
+          Back to Home
         </Button>
       </div>
     );

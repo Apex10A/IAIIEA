@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -35,7 +36,6 @@ const SeminarCards = () => {
         const data = await response.json();
         
         if (data.status === "success") {
-          // Add placeholder images if none provided
           const seminarsWithImages = data.data.map((seminar: Seminar, index: number) => ({
             ...seminar,
             imageUrl: seminar.imageUrl || getDefaultImage(index)
@@ -62,7 +62,8 @@ const SeminarCards = () => {
   };
 
   const handleReadSeminar = (conferenceId: number) => {
-    router.push(`/conference-landing-page?id=${conferenceId}`);
+    // Navigate to the conference details page with the conference ID
+    router.push(`/conference?id=${conferenceId}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -146,7 +147,7 @@ const SeminarCards = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 ">
+    <div className="container mx-auto px-4">
       <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-12 text-center">
         Our Conferences
       </h2>
@@ -164,7 +165,7 @@ const SeminarCards = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
               <Image
-                src={'/Meeting.png'}
+                src={seminar.imageUrl || '/Meeting.png'}
                 alt={seminar.title}
                 width={600}
                 height={400}
@@ -184,9 +185,6 @@ const SeminarCards = () => {
                 <h3 className="text-xl font-bold text-[#0B142F] line-clamp-2">
                   {seminar.title}
                 </h3>
-                {/* <span className="bg-[#203A87]/10 text-[#203A87] text-sm font-semibold px-2 py-1 rounded">
-                  {seminar.title.split(' ')[1]}
-                </span> */}
               </div>
 
               <p className="text-[#0B142F] mb-5 line-clamp-2">

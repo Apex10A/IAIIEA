@@ -264,7 +264,7 @@ const Header = () => {
           >
             <div className="flex justify-between items-center p-6 border-b border-gray-700">
               <Link href="/" onClick={toggleMobileMenu}>
-                <Image src={Logo} alt="Logo" width={120} height={50} />
+                <Image src={Logo} alt="Logo" width={70} height={50} />
               </Link>
               <button 
                 onClick={toggleMobileMenu} 
@@ -395,7 +395,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <Image src={Logo} alt="Logo" width={160} height={70} className="h-12 w-auto" />
+              <Image src={Logo} alt="Logo" width={100} height={70} className="" />
             </Link>
           </div>
 

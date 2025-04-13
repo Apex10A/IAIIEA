@@ -322,7 +322,7 @@ export default function ConferencePage() {
         <p className="text-white/70 max-w-md mb-6">{error}</p>
         <Button 
           className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
-          onClick={() => window.location.href = '/conferences'}
+          onClick={() => window.location.href = '/'}
         >
           Back to Conferences
         </Button>

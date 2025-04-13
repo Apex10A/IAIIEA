@@ -364,9 +364,6 @@ export default function ConferencePage() {
   if (showLimitedView) {
     return (
       <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
-          <div className="w-full md:w-auto">
-            {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
-          </div>
         {/* Basic Conference Info */}
         <div className="mb-12 mt-8">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">

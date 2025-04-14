@@ -229,7 +229,7 @@ const Calendar = () => {
               <ChevronLeft className="h-4 w-4 text-black" />
             </Button>
             <span className="text-md font-medium text-gray-700 min-w-[120px] text-center">
-              {currentMonth.title} {currentYear}
+              {/* {currentMonth.title} {currentYear} */} {currentMonth.title} 
             </span>
             <Button 
               variant="outline" 
@@ -245,7 +245,7 @@ const Calendar = () => {
 
       {/* Calendar Grid */}
       <div className='w-full overflow-x-auto'>
-      <Card className="mx-auto min-w-[1200px]">
+      <Card className="mx-auto min-w-[1200px] lg:w-full">
         <CardContent className="p-4">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">

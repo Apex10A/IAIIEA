@@ -179,7 +179,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Members Resources</h1>
+        <h1 className="text-2xl font-bold text-gray-700">Members Resources</h1>
         {/* <ResourceUploadModal onUpload={onUpload} /> */}
       </div>
 

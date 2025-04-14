@@ -163,7 +163,7 @@ export default function DashboardClient() {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-[#F9FAFF]">
-          <div className="p-4 md:p-6 max-w-7xl mx-auto">
+          <div className="p-4 md:p-6 max-w-8xl mx-auto">
             {renderComponent()}
           </div>
         </main>

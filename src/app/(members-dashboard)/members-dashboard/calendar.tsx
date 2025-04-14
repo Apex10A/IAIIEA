@@ -298,7 +298,7 @@ const Calendar = () => {
                 selectedEvent.color === 'green' ? 'bg-green-50 border border-green-100' : 
                 'bg-gray-50 border border-gray-100'
               }`}>
-                <h4 className="text-lg font-bold mb-2">{selectedEvent.activity}</h4>
+                <h4 className="text-lg font-bold mb-2 text-gray-700">{selectedEvent.activity}</h4>
                 
                 <div className="space-y-3">
                   <div className="flex items-start">

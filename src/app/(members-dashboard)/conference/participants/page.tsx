@@ -224,7 +224,7 @@ const ConferenceParticipantsPage = () => {
       <div className="flex flex-col space-y-6">
         {/* Page header - always visible */}
         <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6 mt-10 flex justify-between items-center">
-          <h1 className="text-xl sm:text-2xl">
+          <h1 className="text-xl sm:text-2xl text-gray-700">
             {selectedConference 
               ? `${selectedConference.title} - Participants` 
               : "Conference Participants"}

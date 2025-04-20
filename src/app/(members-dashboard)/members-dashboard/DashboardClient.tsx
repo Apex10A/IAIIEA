@@ -37,7 +37,7 @@ type ComponentKey =
   | 'Seminar Directory' | 'Conference Announcements' 
   | 'Seminars' | 'Seminar Participants' 
   | 'Seminar Announcements' | 'Participants' 
-  | 'Conferences' 
+  | 'Conferences' | 'Seminars'
   | 'Seminars / Webinars' | 'Directory' 
   | 'IAIIEA Resources' | 'Forum' | 'Settings';
 
@@ -87,11 +87,11 @@ export default function DashboardClient() {
       Payment: <Payment />,
       'Seminar Directory': <SeminarDirectory />,
       'Conference Announcements': <ConfAnnouncement />,
-      'Seminars': <SeminarResources />,
+      // 'Seminars': <SeminarResources />,
       'Seminar Participants': <SeminarParticipants />,
       'Seminar Announcements': <SeminarAnnouncements />,
       'Participants': <Participants />,
-      'Seminar Resources': <SeminarsWebinars />,
+      'Seminars': <SeminarsWebinars />,
       'Conferences': <Conferences />,
       'Seminars / Webinars': <SeminarsWebinars />,
       'Directory': <MembersDirectory />,

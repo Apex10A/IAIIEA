@@ -179,14 +179,14 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Members Resources</h1>
+        <h1 className="text-2xl font-bold text-[#000]">Members Resources</h1>
         <ResourceUploadModal onUpload={onUpload} />
       </div>
 
       <Tabs defaultValue="media" className="w-full">
         <TabsList>
-          <TabsTrigger value="media">Media Resources</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="media" className="text-[#000]">Media Resources</TabsTrigger>
+          <TabsTrigger value="documents" className="text-[#000]">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="media">

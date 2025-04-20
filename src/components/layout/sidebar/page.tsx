@@ -120,7 +120,7 @@ const navigationItems: NavItem[] = [
     requiredPortal: 'seminar',
     subItems: [
       { id: "seminar-participants", name: 'Seminar Participants', requiredPortal: 'seminar', icon: MembersIcon },
-      { id: "seminar-resources", name: 'Seminar Resources', requiredPortal: 'seminar', icon: ResourcesIcon },
+      { id: "seminar-resources", name: 'Seminars', requiredPortal: 'seminar', icon: ResourcesIcon },
       { id: "seminar-announcements", name: 'Seminar Announcements', requiredPortal: 'seminar', icon: AnnouncementIcon },
     ]
   },

@@ -245,12 +245,12 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         >
           View Details
         </button>
-        <button
+        {/* <button
           onClick={() => onViewResources(conference)}
           className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-gray-700 text-sm font-medium transition-colors"
         >
           View Resources
-        </button>
+        </button> */}
       </div>
     </div>
   );
@@ -373,10 +373,10 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+        {/* <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
           <Plus className="w-4 h-4" />
           Add Resource
-        </button>
+        </button> */}
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
@@ -1023,9 +1023,9 @@ const ConferenceResources: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-1">
                   No resources yet
                 </h3>
-                <p className="text-gray-500">
+                {/* <p className="text-gray-500">
                   Add resources to make them available to attendees
-                </p>
+                </p> */}
               </div>
             )}
           </div>

@@ -245,12 +245,12 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         >
           View Details
         </button>
-        <button
+        {/* <button
           onClick={() => onViewResources(conference)}
           className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-gray-700 text-sm font-medium transition-colors"
         >
           View Resources
-        </button>
+        </button> */}
       </div>
     </div>
   );

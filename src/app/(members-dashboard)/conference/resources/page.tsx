@@ -166,96 +166,6 @@ interface ConferenceDetails {
   };
 }
 
-interface ConferenceCardProps {
-  conference: Conference;
-  onViewResources: (conference: Conference) => void;
-  onViewDetails: (conference: Conference) => void;
-  onDeleteConference: (id: number) => void;
-  onEditConference: (conference: Conference) => void;
-}
-
-const ConferenceCard: React.FC<ConferenceCardProps> = ({
-  conference,
-  onViewResources,
-  onViewDetails,
-  onDeleteConference,
-  onEditConference,
-}) => {
-  const resourceCount = conference.resources?.length || 0;
-
-  const handleDelete = async () => {
-    try {
-      await onDeleteConference(conference.id);
-      showToast.success("Conference deleted successfully");
-    } catch (error) {
-      showToast.error("Failed to delete conference");
-    }
-  };
-
-  return (
-    <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
-      <div className="relative group">
-        <div className="absolute z-20 bottom-5 left-5">
-          <span
-            className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
-              conference?.status === "Completed"
-                ? "bg-amber-100 text-amber-800"
-                : "bg-blue-100 text-blue-800"
-            }`}
-          >
-            {conference?.status}
-          </span>
-        </div>
-        <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
-          {conference.flyer ? (
-            <Image
-              src={conference.flyer}
-              alt={conference.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <FileText className="w-12 h-12" />
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <h2 className="text-gray-900 text-lg font-semibold line-clamp-2">
-            {conference.title}
-          </h2>
-          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
-            {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
-          </span>
-        </div>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {conference.theme}
-        </p>
-        <div className="flex items-center text-gray-500 text-xs mb-4">
-          <Calendar className="w-3 h-3 mr-1" />
-          <span>{conference.date}</span>
-        </div>
-      </div>
-      <div className="px-4 pb-4 grid grid-cols-2 gap-2">
-        <button
-          onClick={() => onViewDetails(conference)}
-          className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
-        >
-          View Details
-        </button>
-        {/* <button
-          onClick={() => onViewResources(conference)}
-          className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-gray-700 text-sm font-medium transition-colors"
-        >
-          View Resources
-        </button> */}
-      </div>
-    </div>
-  );
-};
-
 interface ResourceCardProps {
   resource: Resource;
   onDelete: (resourceId: number) => void;
@@ -473,62 +383,20 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({
 
 interface ConferenceDetailsProps {
   conference: Conference;
+  conferenceDetails: ConferenceDetails | null;
+  loading: boolean;
   onBack: () => void;
   onViewResources: (conference: Conference) => void;
 }
 
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
-const fetchConferenceDetails = async (
-  id: number,
-  bearerToken: string
-): Promise<ApiResponse<ConferenceDetails>> => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch conference details");
-  }
-
-  return await response.json();
-};
-
-const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
+const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   conference,
+  conferenceDetails,
+  loading,
   onBack,
   onViewResources,
 }) => {
-  const [conferenceDetails, setConferenceDetails] =
-    useState<ConferenceDetails | null>(null);
-  const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const { data: session } = useSession();
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
-
-  useEffect(() => {
-    const getConferenceDetails = async () => {
-      try {
-        const response = await fetchConferenceDetails(conference.id, bearerToken);
-        setConferenceDetails(response.data);
-      } catch (error) {
-        console.error("Error fetching conference details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getConferenceDetails();
-  }, [conference.id, bearerToken]);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -550,18 +418,26 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
     );
   }
 
+  if (!conferenceDetails) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Failed to load conference details</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <button
+      {/* <button
         onClick={onBack}
         className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to conferences
-      </button>
+      </button> */}
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="relative h-[400px] bg-gray-100">
+        {/* <div className="relative h-[400px] bg-gray-100">
           {conferenceDetails?.flyer ? (
             <Image
               src={conferenceDetails.flyer}
@@ -577,17 +453,20 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
             {conference.status}
           </div>
-        </div>
+        </div> */}
 
         <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {conference.title}
           </h1>
-          <p className="text-lg text-blue-600 font-medium mb-4">
+          <p className="text-gray-800 ">171 people have registered for this conference</p>
+          </div>
+          <p className="text-2xl text-gray-800 uppercase font-bold mb-4">
             {conference.theme}
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-5">
             <div className="flex items-start gap-3">
               <Calendar className="w-5 h-5 text-gray-500 mt-0.5" />
               <div>
@@ -606,235 +485,242 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
             </div>
           </div>
 
-          <div className="space-y-4">
-            {/* <div className="border-b border-gray-200 pb-4">
-              <button
-                onClick={() => toggleSection("description")}
-                className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-              >
-                <span>Description</span>
-                {expandedSection === "description" ? (
-                  <ChevronUp className="w-5 h-5" />
-                ) : (
-                  <ChevronDown className="w-5 h-5" />
-                )}
-              </button>
-              {expandedSection === "description" && (
-                <div className="mt-2 text-gray-600">
-                  {conference.description || "No description available"}
+          {!conferenceDetails.is_registered && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    You need to register for this conference to view all details.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {conferenceDetails.is_registered && (
+            <div className="space-y-4">
+              {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
+                <div className="border-b border-gray-200 pb-4">
+                  <button
+                    onClick={() => toggleSection("schedule")}
+                    className="flex justify-between items-center w-full text-left font-medium text-gray-900"
+                  >
+                    <span>Schedule</span>
+                    {expandedSection === "schedule" ? (
+                      <ChevronUp className="w-5 h-5" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5" />
+                    )}
+                  </button>
+                  {expandedSection === "schedule" && (
+                    <div className="mt-4 space-y-4">
+                      {conferenceDetails.schedule.map((item, index) => (
+                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium">{item.activity}</h3>
+                              {item.facilitator && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Facilitator: {item.facilitator}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium">
+                                {item.day}, {item.start} - {item.end}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {item.venue}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
-            </div> */}
 
-            {/* {conferenceDetails?.sub_theme && conferenceDetails.sub_theme.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("subThemes")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Sub Themes</span>
-                  {expandedSection === "subThemes" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "subThemes" && (
-                  <ul className="mt-2 space-y-2">
-                    {conferenceDetails.sub_theme.map((theme, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{theme}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {conferenceDetails?.work_shop && conferenceDetails.work_shop.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("workshops")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Workshops</span>
-                  {expandedSection === "workshops" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "workshops" && (
-                  <ul className="mt-2 space-y-2">
-                    {conferenceDetails.work_shop.map((workshop, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{workshop}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )} */}
-
-            {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("schedule")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Schedule</span>
-                  {expandedSection === "schedule" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "schedule" && (
-                  <div className="mt-4 space-y-4">
-                    {conferenceDetails.schedule.map((item, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-medium">{item.activity}</h3>
-                            {item.facilitator && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                Facilitator: {item.facilitator}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium">
-                              {item.day}, {item.start} - {item.end}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {item.venue}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-                    {conferenceDetails?.schedule.map((item, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-medium">{item.activity}</h3>
-                            {item.facilitator && (
-                              <p className="text-sm text-gray-600 mt-1">
-                                Facilitator: {item.facilitator}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium">
-                              {item.day}, {item.start} - {item.end}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {item.venue}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-      
-            {conferenceDetails?.payments && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("payments")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Payment Information</span>
-                  {expandedSection === "payments" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "payments" && (
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(conferenceDetails.payments).map(
-                      ([category, types], index) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-medium text-sm mb-2 capitalize">
-                            {category.replace(/_/g, " ")}
-                          </h3>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Virtual:</span>
-                              <span>
-                                ${types.virtual.usd} / NGN {types.virtual.naira}
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span>Physical:</span>
-                              <span>
-                                ${types.physical.usd} / NGN {types.physical.naira}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )
+              {conferenceDetails?.payments && (
+                <div className="border-b border-gray-200 pb-4">
+                  <button
+                    onClick={() => toggleSection("payments")}
+                    className="flex justify-between items-center w-full text-left font-medium text-gray-900"
+                  >
+                    <span>Payment Information</span>
+                    {expandedSection === "payments" ? (
+                      <ChevronUp className="w-5 h-5" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5" />
                     )}
+                  </button>
+                  {expandedSection === "payments" && (
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(conferenceDetails.payments).map(
+                        ([category, types], index) => (
+                          <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                            <h3 className="font-medium text-sm mb-2 capitalize">
+                              {category.replace(/_/g, " ")}
+                            </h3>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span>Virtual:</span>
+                                <span>
+                                  ${types.virtual.usd} / NGN {types.virtual.naira}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span>Physical:</span>
+                                <span>
+                                  ${types.physical.usd} / NGN {types.physical.naira}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {conferenceDetails.is_registered && (
+        <>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Gallery</h2>
+            {conferenceDetails?.gallery && conferenceDetails.gallery.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {conferenceDetails.gallery.map((imageUrl, index) => (
+                  <div
+                    key={index}
+                    className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
+                  >
+                    <Image
+                      src={imageUrl}
+                      alt={`Gallery image ${index + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform"
+                    />
                   </div>
-                )}
+                ))}
               </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No gallery images available</p>
             )}
           </div>
-        </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Gallery</h2>
-        {conferenceDetails?.gallery && conferenceDetails.gallery.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {conferenceDetails.gallery.map((imageUrl, index) => (
-              <div
-                key={index}
-                className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Resources</h2>
+              <button
+                onClick={() => onViewResources(conference)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
               >
-                <Image
-                  src={imageUrl}
-                  alt={`Gallery image ${index + 1}`}
-                  fill
-                  className="object-cover hover:scale-105 transition-transform"
-                />
+                View all resources <ExternalLink className="w-4 h-4" />
+              </button>
+            </div>
+            {conferenceDetails?.resources && conferenceDetails.resources.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {conferenceDetails.resources.slice(0, 4).map((resource) => (
+                  <ResourceCard
+                    key={resource.resource_id}
+                    resource={resource}
+                    onDelete={() => {}}
+                  />
+                ))}
               </div>
-            ))}
+            ) : (
+              <p className="text-gray-500 text-center py-8">No resources available</p>
+            )}
           </div>
-        ) : (
-          <p className="text-gray-500 text-center py-8">No gallery images available</p>
-        )}
-      </div>
+        </>
+      )}
+    </div>
+  );
+};
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Resources</h2>
-          <button
-            onClick={() => onViewResources(conference)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+interface ConferenceCardProps {
+  conference: Conference;
+  onViewResources: (conference: Conference) => void;
+  onViewDetails: (conference: Conference) => void;
+}
+
+const ConferenceCard: React.FC<ConferenceCardProps> = ({
+  conference,
+  onViewResources,
+  onViewDetails,
+}) => {
+  const resourceCount = conference.resources?.length || 0;
+
+  return (
+    <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
+      <div className="relative group">
+        <div className="absolute z-20 bottom-5 left-5">
+          <span
+            className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
+              conference?.status === "Completed"
+                ? "bg-amber-100 text-amber-800"
+                : "bg-blue-100 text-blue-800"
+            }`}
           >
-            View all resources <ExternalLink className="w-4 h-4" />
-          </button>
+            {conference?.status}
+          </span>
         </div>
-        {conferenceDetails?.resources && conferenceDetails.resources.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {conferenceDetails.resources.slice(0, 4).map((resource) => (
-              <ResourceCard
-                key={resource.resource_id}
-                resource={resource}
-                onDelete={() => {}}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-center py-8">No resources available</p>
-        )}
+        <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
+          {conference.flyer ? (
+            <Image
+              src={conference.flyer}
+              alt={conference.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              <FileText className="w-12 h-12" />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <h2 className="text-gray-900 text-lg font-semibold line-clamp-2">
+            {conference.title}
+          </h2>
+          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
+            {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
+          </span>
+        </div>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {conference.theme}
+        </p>
+        <div className="flex items-center text-gray-500 text-xs mb-4">
+          <Calendar className="w-3 h-3 mr-1" />
+          <span>{conference.date}</span>
+        </div>
+      </div>
+      <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+        <button
+          onClick={() => onViewDetails(conference)}
+          className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
+        >
+          View Details
+        </button>
+        <button
+          onClick={() => onViewResources(conference)}
+          className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-gray-700 text-sm font-medium transition-colors"
+        >
+          View Resources
+        </button>
       </div>
     </div>
   );
@@ -843,13 +729,10 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [selectedConference, setSelectedConference] =
-    useState<Conference | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "details" | "resources">(
-    "list"
-  );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "details" | "resources">("list");
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
@@ -869,6 +752,13 @@ const ConferenceResources: React.FC = () => {
           }
         );
         setConferences(sortedConferences);
+        
+        // Automatically select the latest conference (first in the sorted array)
+        if (sortedConferences.length > 0) {
+          const latestConference = sortedConferences[0];
+          setSelectedConference(latestConference);
+          fetchConferenceDetails(latestConference.id);
+        }
       }
     } catch (error) {
       console.error("Error fetching conferences:", error);
@@ -878,81 +768,40 @@ const ConferenceResources: React.FC = () => {
     }
   };
 
+  const fetchConferenceDetails = async (id: number) => {
+    try {
+      setDetailsLoading(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch conference details");
+      }
+
+      const data = await response.json();
+      setConferenceDetails(data.data);
+    } catch (error) {
+      console.error("Error fetching conference details:", error);
+      showToast.error("Failed to load conference details");
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchConferences();
   }, []);
 
-  const handleDeleteConference = async (id: number) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: id }),
-        }
-      );
-
-      if (response.ok) {
-        showToast.success("Conference deleted successfully");
-        setConferences((prev) => prev.filter((conf) => conf.id !== id));
-      } else {
-        throw new Error("Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      showToast.error("Failed to delete conference");
-    }
-  };
-
-  const handleDeleteResource = async (resourceId: number) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ resource_id: resourceId }),
-        }
-      );
-
-      if (response.ok) {
-        if (selectedConference) {
-          const updatedResources = selectedConference.resources.filter(
-            (resource) => resource.resource_id !== resourceId
-          );
-          setSelectedConference({
-            ...selectedConference,
-            resources: updatedResources,
-          });
-
-          setConferences((prev) =>
-            prev.map((conf) =>
-              conf.id === selectedConference.id
-                ? { ...conf, resources: updatedResources }
-                : conf
-            )
-          );
-        }
-        showToast.success("Resource deleted successfully");
-      } else {
-        throw new Error("Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      showToast.error("Failed to delete resource");
-    }
-  };
-
   const handleViewDetails = (conference: Conference) => {
     setSelectedConference(conference);
     setViewMode("details");
+    fetchConferenceDetails(conference.id);
   };
 
   const handleViewResources = (conference: Conference) => {
@@ -960,36 +809,16 @@ const ConferenceResources: React.FC = () => {
     setViewMode("resources");
   };
 
-  const handleBackToDashboard = () => {
+  const handleBackToList = () => {
     setViewMode("list");
-    setSelectedConference(null);
-  };
-
-  const handleResourceAdded = () => {
-    if (selectedConference) {
-      fetchConferences();
-      handleViewResources(selectedConference);
+    // Reset to show the latest conference details
+    if (conferences.length > 0) {
+      setSelectedConference(conferences[0]);
+      fetchConferenceDetails(conferences[0].id);
     }
   };
 
-  const conferencesByYear = conferences.reduce(
-    (acc: Record<string, Conference[]>, conference) => {
-      const year = conference.title.match(/\d{4}/)?.[0] || "Unknown Year";
-      if (!acc[year]) {
-        acc[year] = [];
-      }
-      acc[year].push(conference);
-      return acc;
-    },
-    {}
-  );
-
-  const filteredConferences = conferences.filter((conference) =>
-    conference.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conference.theme.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  if (loading && viewMode === "list") {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -997,13 +826,13 @@ const ConferenceResources: React.FC = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {viewMode === "resources" && selectedConference ? (
+  if (viewMode === "resources" && selectedConference) {
+    return (
+      <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <button
-              onClick={handleBackToDashboard}
+              onClick={handleBackToList}
               className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -1011,7 +840,7 @@ const ConferenceResources: React.FC = () => {
             </button>
             <AddResourceModal
               conferenceId={selectedConference.id}
-              onSuccess={handleResourceAdded}
+              onSuccess={() => fetchConferences()}
             />
           </div>
 
@@ -1034,7 +863,7 @@ const ConferenceResources: React.FC = () => {
                   <ResourceCard
                     key={resource.resource_id}
                     resource={resource}
-                    onDelete={handleDeleteResource}
+                    onDelete={() => {}}
                   />
                 ))}
               </div>
@@ -1053,82 +882,56 @@ const ConferenceResources: React.FC = () => {
             )}
           </div>
         </div>
-      ) : viewMode === "details" && selectedConference ? (
-        <ConferenceDetails
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {viewMode === "details" && selectedConference ? (
+        <ConferenceDetailsView
           conference={selectedConference}
-          onBack={handleBackToDashboard}
+          conferenceDetails={conferenceDetails}
+          loading={detailsLoading}
+          onBack={handleBackToList}
           onViewResources={handleViewResources}
         />
       ) : (
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Conference Events</h1>
-              <p className="text-gray-600">
-                Browse and manage all conference events
-              </p>
-            </div>
-            <div className="relative w-full md:w-64">
-              <input
-                type="text"
-                placeholder="Search conferences..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        <div className="space-y-8">
+          {/* Latest Conference Section */}
+          {selectedConference && conferenceDetails && (
+            <div className="space-y-4">
+              {/* <h2 className="text-2xl font-bold text-gray-900">Current Conference</h2> */}
+              <ConferenceDetailsView
+                conference={selectedConference}
+                conferenceDetails={conferenceDetails}
+                loading={detailsLoading}
+                onBack={handleBackToList}
+                onViewResources={handleViewResources}
               />
-              <div className="absolute left-3 top-2.5 text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
             </div>
-          </div>
+          )}
 
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button
-              onClick={() => setSelectedYear(null)}
-              className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
-                !selectedYear
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                >
-                  {/* {year} ({conferencesByYear[year].length}) */}
-                </button>
-            </div>
-  
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-              {(selectedYear ? conferencesByYear[selectedYear] : conferences).map(
-                (conference) => (
+          {/* Past Conferences Section */}
+          {conferences.length > 1 && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-gray-900">Past Conferences</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {conferences.slice(1).map((conference) => (
                   <ConferenceCard
                     key={conference.id}
                     conference={conference}
                     onViewResources={handleViewResources}
                     onViewDetails={handleViewDetails}
-                    onDeleteConference={handleDeleteConference}
-                    onEditConference={() => {
-                      /* Add edit functionality */
-                    }}
                   />
-                )
-              )}
+                ))}
+              </div>
             </div>
-     </div>
-        )}
-      </div>
-    );
-  };
-  
-  export default ConferenceResources;
-  
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ConferenceResources;

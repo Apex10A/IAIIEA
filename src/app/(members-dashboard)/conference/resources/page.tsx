@@ -514,7 +514,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     onClick={() => toggleSection("schedule")}
                     className="flex justify-between items-center w-full text-left font-medium text-gray-900"
                   >
-                    <span>Schedules</span>
+                    {/* <span>Schedules</span> */}
                     {/* {expandedSection === "schedule" ? (
                       <ChevronUp className="w-5 h-5" />
                     ) : (
@@ -523,7 +523,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   </button>
                  
                     <div className="mt-4 space-y-4">
-                      {conferenceDetails.schedule.map((item, index) => (
+                      {/* {conferenceDetails.schedule.map((item, index) => (
                         <div key={index} className="bg-gray-50 p-4 rounded-lg">
                           <div className="flex justify-between items-start">
                             <div>
@@ -544,7 +544,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                             </div>
                           </div>
                         </div>
-                      ))}
+                      ))} */}
 
                     </div>
               
@@ -658,12 +658,13 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">This are the list of food currently available for the day. Select any food of your choice</p>
             {conferenceDetails?.meals && conferenceDetails.meals.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {conferenceDetails.meals.map((item, index) => (
                   <div
                     key={index}
-                    className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
+                    className="h-60 relative rounded-lg overflow-hidden bg-gray-100"
                   >
                     <Image
                       src={item.image}
@@ -671,14 +672,54 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                       fill
                       className="object-cover hover:scale-105 transition-transform"
                     />
-                    <p>{item.name}</p>
+                  <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-2 rounded-t-lg">
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">{item.name}</h2>
+                    <div>
+                      <button   className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">select meal</button>
+                    </div>
                   </div>
+                  </div>
+                  
                 ))}
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">No Meals available</p>
             )}
           </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Videos</h2>
+            {conferenceDetails?.videos && conferenceDetails.videos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {conferenceDetails.videos.map((video, index) => (
+                  <div key={index} className="relative h-40 rounded-lg overflow-hidden bg-gray-100">
+                    <Image
+                      src={video.url}
+                      alt={`Video ${index + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No videos available</p>
+            )}
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Certification</h2>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">You can download your certificate of attendance here</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Join event for virtual attendees</h2>
+            <div className="flex items-center gap-3">
+            <p className="text-gray-600 text-sm line-clamp-2">You can access the live event from here</p>
+            <button className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Join the live call</button>
+            </div>
+            </div>
+          
           
 
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -767,7 +808,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         </p>
         <div className="flex items-center text-gray-500 text-xs mb-4">
           <Calendar className="w-3 h-3 mr-1" />
-          <span>{conference.date}</span>
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{conference.date}</p>
         </div>
       </div>
       <div className="px-4 pb-4 grid grid-cols-2 gap-2">

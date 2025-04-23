@@ -428,13 +428,13 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* <button
+      <button
         onClick={onBack}
         className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to conferences
-      </button> */}
+      </button>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         {/* <div className="relative h-[400px] bg-gray-100">
@@ -502,22 +502,26 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             </div>
           )}
 
-          {conferenceDetails.is_registered && (
-            <div className="space-y-4">
+
+        </div>
+      </div>
+
+      {conferenceDetails.is_registered && (
+            <div className="space-y-4 mt-10">
               {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
                 <div className="border-b border-gray-200 pb-4">
                   <button
                     onClick={() => toggleSection("schedule")}
                     className="flex justify-between items-center w-full text-left font-medium text-gray-900"
                   >
-                    <span>Schedule</span>
-                    {expandedSection === "schedule" ? (
+                    <span>Schedules</span>
+                    {/* {expandedSection === "schedule" ? (
                       <ChevronUp className="w-5 h-5" />
                     ) : (
                       <ChevronDown className="w-5 h-5" />
-                    )}
+                    )} */}
                   </button>
-                  {expandedSection === "schedule" && (
+                 
                     <div className="mt-4 space-y-4">
                       {conferenceDetails.schedule.map((item, index) => (
                         <div key={index} className="bg-gray-50 p-4 rounded-lg">
@@ -541,13 +545,15 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                           </div>
                         </div>
                       ))}
+
                     </div>
-                  )}
+              
                 </div>
               )}
 
               {conferenceDetails?.payments && (
-                <div className="border-b border-gray-200 pb-4">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="border-b border-gray-200 pb-4">
                   <button
                     onClick={() => toggleSection("payments")}
                     className="flex justify-between items-center w-full text-left font-medium text-gray-900"
@@ -587,12 +593,10 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     </div>
                   )}
                 </div>
+              </div>
               )}
             </div>
           )}
-
-        </div>
-      </div>
 
       {conferenceDetails.is_registered && (
         <>
@@ -618,6 +622,39 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <p className="text-gray-500 text-center py-8">No gallery images available</p>
             )}
           </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Conference Schedules</h2>
+            {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {conferenceDetails.schedule.map((item, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{item.activity}</h3>
+                      {item.facilitator && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Facilitator: {item.facilitator}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {item.day}, {item.start} - {item.end}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {item.venue}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No schedules available</p>
+            )}
+          </div>
+          
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">

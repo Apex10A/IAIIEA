@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     domains: [
       'iaiiea.org',
+      'api.dicebear.com',
       'res.cloudinary.com'
     ],
   },

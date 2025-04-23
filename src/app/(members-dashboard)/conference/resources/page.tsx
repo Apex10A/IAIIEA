@@ -654,6 +654,31 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <p className="text-gray-500 text-center py-8">No schedules available</p>
             )}
           </div>
+
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
+            {conferenceDetails?.meals && conferenceDetails.meals.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {conferenceDetails.meals.map((item, index) => (
+                  <div
+                    key={index}
+                    className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
+                  >
+                    <Image
+                      src={item.image}
+                      alt={`Gallery image ${index + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform"
+                    />
+                    <p>{item.name}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No Meals available</p>
+            )}
+          </div>
           
 
           <div className="bg-white rounded-lg shadow-md p-6">

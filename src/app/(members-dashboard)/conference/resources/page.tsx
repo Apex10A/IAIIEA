@@ -561,7 +561,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
       </button>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="relative h-64 bg-gray-100">
+        <div className="relative h-[400px] bg-gray-100">
           {conferenceDetails?.flyer ? (
             <Image
               src={conferenceDetails.flyer}
@@ -593,7 +593,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
               <div>
                 <p className="text-sm text-gray-500">Date</p>
                 <p className="font-medium">
-                  {formatDate(conference.date)}
+                  {conference.date}
                 </p>
               </div>
             </div>
@@ -607,7 +607,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           </div>
 
           <div className="space-y-4">
-            <div className="border-b border-gray-200 pb-4">
+            {/* <div className="border-b border-gray-200 pb-4">
               <button
                 onClick={() => toggleSection("description")}
                 className="flex justify-between items-center w-full text-left font-medium text-gray-900"
@@ -624,9 +624,9 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                   {conference.description || "No description available"}
                 </div>
               )}
-            </div>
+            </div> */}
 
-            {conferenceDetails?.sub_theme && conferenceDetails.sub_theme.length > 0 && (
+            {/* {conferenceDetails?.sub_theme && conferenceDetails.sub_theme.length > 0 && (
               <div className="border-b border-gray-200 pb-4">
                 <button
                   onClick={() => toggleSection("subThemes")}
@@ -676,7 +676,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                   </ul>
                 )}
               </div>
-            )}
+            )} */}
 
             {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
               <div className="border-b border-gray-200 pb-4">
@@ -720,6 +720,29 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
               </div>
             )}
 
+                    {conferenceDetails?.schedule.map((item, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium">{item.activity}</h3>
+                            {item.facilitator && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                Facilitator: {item.facilitator}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">
+                              {item.day}, {item.start} - {item.end}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {item.venue}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+      
             {conferenceDetails?.payments && (
               <div className="border-b border-gray-200 pb-4">
                 <button

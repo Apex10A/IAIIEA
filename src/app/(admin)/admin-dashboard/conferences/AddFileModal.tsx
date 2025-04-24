@@ -15,6 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface FormData {
   // Step 1 data
@@ -41,27 +45,33 @@ interface FormData {
   standard_naira: string;
   standard_usd: string;
   standard_package: string[];
-  selectedSpeakers: number[];
+  selectedSpeakers: Array<{
+    speaker_id: number;
+    occupation: string;
+  }>;
 }
+
 type Speaker = {
   speaker_id: number;
   speaker_name: string;
+  speaker_title?: string;
+  speaker_picture?: string;
 };
 
-type SelectedSpeaker = {
-  speaker_id: number;
-  occupation: string;
-};
+const ROLES = [
+  "Workshop Facilitator",
+  "Key Note Address",
+  "Guest Speaker"
+];
 
 const AddConferenceModal = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [token, setToken] = useState<string>('');
   const [availableSpeakers, setAvailableSpeakers] = useState<Speaker[]>([]);
-  const [selectedSpeakers, setSelectedSpeakers] = useState<SelectedSpeaker[]>([]); 
+  const [selectedSpeakers, setSelectedSpeakers] = useState<FormData['selectedSpeakers']>([]); 
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -92,17 +102,6 @@ const AddConferenceModal = () => {
     fetchSpeakers();
   }, []);
 
-  // const handleSpeakerSelect = (value: any) => {
-  //   // Add new speaker with default occupation
-  //   const newSpeaker = {
-  //     speaker_id: Number(value),
-  //     occupation: "Workshop Facilitator" // default value, can be changed
-  //   };
-    
-  //   setSelectedSpeakers(prev => [...prev, newSpeaker]);
-  //   handleInputChange('selectedSpeakers', [...selectedSpeakers, newSpeaker]);
-  // };
-  
   const fetchSpeakers = async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/speakers_list`, {
@@ -112,104 +111,96 @@ const AddConferenceModal = () => {
       });
       const data = await response.json();
       if (data.status === "success") {
-        console.log('Speaker data:', data.data);
         setAvailableSpeakers(data.data);
       }
     } catch (error) {
       console.error('Error fetching speakers:', error);
+      showToast.error('Failed to load speakers');
     }
   };
+
   const handleSpeakerSelect = (value: string) => {
-    const newSpeaker = {
-      speaker_id: Number(value),
-      occupation: "Workshop Facilitator" // default value
-    };
-    
-    const updatedSpeakers = [...selectedSpeakers, newSpeaker];
-    setSelectedSpeakers(updatedSpeakers);
-    handleInputChange('selectedSpeakers', updatedSpeakers);
+    const speakerId = Number(value);
+    if (!selectedSpeakers.some(s => s.speaker_id === speakerId)) {
+      const newSpeaker = {
+        speaker_id: speakerId,
+        occupation: "Workshop Facilitator"
+      };
+      setSelectedSpeakers(prev => [...prev, newSpeaker]);
+    }
   };
 
   const handleRoleChange = (index: number, occupation: string) => {
-    const updatedSpeakers = selectedSpeakers.map((s, i) => 
-      i === index ? { ...s, occupation } : s
+    setSelectedSpeakers(prev => 
+      prev.map((s, i) => i === index ? { ...s, occupation } : s)
     );
-    setSelectedSpeakers(updatedSpeakers);
-    handleInputChange('selectedSpeakers', updatedSpeakers);
   };
 
   const removeSpeaker = (index: number) => {
-    const updatedSpeakers = selectedSpeakers.filter((_, i) => i !== index);
-    setSelectedSpeakers(updatedSpeakers);
-    handleInputChange('selectedSpeakers', updatedSpeakers);
+    setSelectedSpeakers(prev => prev.filter((_, i) => i !== index));
   };
-
-  const roles = [
-    "Workshop Facilitator",
-    "Key Note Address",
-    "Guest Speaker"
-  ];
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleArrayInputChange = (field: 'subthemes_input' | 'workshops_input' | 'important_date' | 'basic_package' | 'premium_package' | 'standard_package', index: number, value: string) => {
+  const handlePaymentChange = (
+    field: 'basic_naira' | 'basic_usd' | 'premium_naira' | 'premium_usd' | 'standard_naira' | 'standard_usd',
+    value: string
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handlePackageItemChange = (
+    packageType: 'basic' | 'premium' | 'standard',
+    index: number,
+    value: string
+  ) => {
     setFormData(prev => {
-      const newArray = [...prev[field]];
-      newArray[index] = value;
-      return {
-        ...prev,
-        [field]: newArray
-      };
+      const newPackage = [...prev[`${packageType}_package`]];
+      newPackage[index] = value;
+      return { ...prev, [`${packageType}_package`]: newPackage };
     });
   };
-
-  const addArrayItem = (field: 'subthemes_input' | 'workshops_input' | 'important_date' | 'basic_package' | 'premium_package' | 'standard_package',) => {
+  const addPackageItem = (packageType: 'basic' | 'premium' | 'standard') => {
     setFormData(prev => ({
       ...prev,
-      [field]: [...prev[field], '']
+      [`${packageType}_package`]: [...prev[`${packageType}_package`], '']
     }));
   };
-
-  const removeArrayItem = (field: 'subthemes_input' | 'workshops_input' | 'important_date' | 'basic_package' | 'premium_package' | 'standard_package', index: number) => {
+  
+  const removePackageItem = (packageType: 'basic' | 'premium' | 'standard', index: number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
+      [`${packageType}_package`]: prev[`${packageType}_package`].filter((_, i) => i !== index)
     }));
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, field: 'flyer' | 'gallery' | 'sponsors' | 'videos') => {
-      const files = event.target.files as FileList;
-      if (!files) return;
-  
-      if (field === 'flyer') {
-        setFormData(prev => ({
-          ...prev,
-          [field]: files[0]
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          [field]: [...Array.from(files)]
-        }));
-      }
-    };
+    const files = event.target.files;
+    if (!files) return;
+
+    if (field === 'flyer') {
+      setFormData(prev => ({ ...prev, [field]: files[0] }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: [...Array.from(files)] }));
+    }
+  };
 
   const handleStepOneSubmit = async () => {
+    setIsLoading(true);
     const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'flyer' && value) {
-        formDataToSend.append(key, value);
-      } else if (Array.isArray(value)) {
-        formDataToSend.append(key, JSON.stringify(value));
-      } else if (value !== null) {
-        formDataToSend.append(key, value.toString());
-      }
-    });
+    
+    // Append all step 1 fields
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('theme', formData.theme);
+    formDataToSend.append('venue', formData.venue);
+    formDataToSend.append('start', formData.start);
+    formDataToSend.append('end', formData.end);
+    formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
+    formDataToSend.append('workshops_input', JSON.stringify(formData.workshops_input));
+    formDataToSend.append('important_date', JSON.stringify(formData.important_date));
+    if (formData.flyer) formDataToSend.append('flyer', formData.flyer);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_conference/1`, {
@@ -221,28 +212,31 @@ const AddConferenceModal = () => {
       });
       
       const data = await response.json();
-      console.log('Step 1 Response:', data);
-      if (data.status === "success" && data.data?.token) {  // Changed this line
-        setToken(data.data.token);  // Changed this line
+      if (data.status === "success" && data.data?.token) {
+        setToken(data.data.token);
         setCurrentStep(2);
       } else {
-        console.error('No token in response:', data);
-        showToast.error('Failed to get token from server');
+        showToast.error(data.message || 'Failed to get token from server');
       }
     } catch (error) {
       console.error('Error submitting step 1:', error);
       showToast.error('Failed to submit conference details');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleStepTwoSubmit = async () => {
+    setIsLoading(true);
     const formDataToSend = new FormData();
     formDataToSend.append('token', token);
     
+    // Append media files
     formData.gallery.forEach(file => formDataToSend.append('gallery[]', file));
     formData.sponsors.forEach(file => formDataToSend.append('sponsors[]', file));
     formData.videos.forEach(file => formDataToSend.append('videos[]', file));
     
+    // Append payment data in the flat structure the backend expects
     formDataToSend.append('basic_naira', formData.basic_naira);
     formDataToSend.append('basic_usd', formData.basic_usd);
     formDataToSend.append('basic_package', JSON.stringify(formData.basic_package));
@@ -252,9 +246,10 @@ const AddConferenceModal = () => {
     formDataToSend.append('standard_naira', formData.standard_naira);
     formDataToSend.append('standard_usd', formData.standard_usd);
     formDataToSend.append('standard_package', JSON.stringify(formData.standard_package));
-    formDataToSend.append('speakers', JSON.stringify(formData.selectedSpeakers));
-    console.log(token)
-
+    
+    // Append speakers
+    formDataToSend.append('speakers', JSON.stringify(selectedSpeakers));
+  
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_conference/2`, {
         method: 'POST',
@@ -267,509 +262,709 @@ const AddConferenceModal = () => {
       const data = await response.json();
       if (data.status === "success") {
         showToast.success('Conference created successfully');
+        // Close modal or reset form here
+      } else {
+        showToast.error(data.message || 'Failed to create conference');
       }
     } catch (error) {
       console.error('Error submitting step 2:', error);
       showToast.error('Failed to submit conference details');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <button className="bg-[#203a87] text-white px-4 py-2 rounded-lg text-sm sm:text-base">
+        <Button className="bg-[#203a87] hover:bg-[#1a2f6d]">
           Add New Conference
-        </button>
+        </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[700px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none z-50 overflow-y-auto">
-          <Dialog.Title className="text-xl font-medium mb-4">
-            {currentStep === 1 ? 'Add Conference - Step 1' : 'Add Conference - Step 2'}
+        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg focus:outline-none z-50 overflow-y-auto">
+          <Dialog.Title className="text-2xl font-bold mb-4 text-[#000]">
+            {currentStep === 1 ? 'Create Conference - Basic Details' : 'Create Conference - Additional Details'}
           </Dialog.Title>
           
           {currentStep === 1 ? (
-            // Step 1 Form
-            <div className="max-w-5xl mx-auto p-6 space-y-8">
-            {/* Basic Information */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Basic Information</h3>
-                
-                <div className="space-y-4">
-                  {/* Title */}
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right text-sm font-medium text-gray-700">Title</label>
-                    <input
-                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            <div className="space-y-6">
+              {/* Basic Information Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Basic Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Conference Title</Label>
+                    <Input
+                      id="title"
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
+                      placeholder="Enter conference title"
                     />
                   </div>
-      
-                  {/* Theme */}
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right text-sm font-medium text-gray-700">Theme</label>
-                    <input
-                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="theme">Theme</Label>
+                    <Input
+                      id="theme"
                       value={formData.theme}
                       onChange={(e) => handleInputChange('theme', e.target.value)}
+                      placeholder="Enter conference theme"
                     />
                   </div>
-      
-                  {/* Venue */}
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right text-sm font-medium text-gray-700">Venue</label>
-                    <input
-                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="venue">Venue</Label>
+                    <Input
+                      id="venue"
                       value={formData.venue}
                       onChange={(e) => handleInputChange('venue', e.target.value)}
+                      placeholder="Enter venue location"
                     />
                   </div>
-      
-                  {/* Dates */}
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right text-sm font-medium text-gray-700">Start Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.start}
-                      onChange={(e) => handleInputChange('start', e.target.value)}
-                    />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="start">Start Date & Time</Label>
+                      <Input
+                        id="start"
+                        type="datetime-local"
+                        value={formData.start}
+                        onChange={(e) => handleInputChange('start', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="end">End Date & Time</Label>
+                      <Input
+                        id="end"
+                        type="datetime-local"
+                        value={formData.end}
+                        onChange={(e) => handleInputChange('end', e.target.value)}
+                      />
+                    </div>
                   </div>
-      
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right text-sm font-medium text-gray-700">End Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      className="col-span-3 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.end}
-                      onChange={(e) => handleInputChange('end', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-      
-            {/* Additional Information */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Additional Details</h3>
-      
-                {/* Subthemes */}
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right text-sm font-medium text-gray-700">Subthemes</label>
-                  <div className="col-span-3 space-y-2">
-                    {formData.subthemes_input.map((subtheme, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={subtheme}
-                          onChange={(e) => handleArrayInputChange('subthemes_input', index, e.target.value)}
-                        />
-                        <button
-                          onClick={() => removeArrayItem('subthemes_input', index)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('subthemes_input')}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      <PlusIcon className="w-4 h-4" /> Add Subtheme
-                    </button>
-                  </div>
-                </div>
-      
-                {/* Workshops */}
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right text-sm font-medium text-gray-700">Workshops</label>
-                  <div className="col-span-3 space-y-2">
-                    {formData.workshops_input.map((workshop, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={workshop}
-                          onChange={(e) => handleArrayInputChange('workshops_input', index, e.target.value)}
-                        />
-                        <button
-                          onClick={() => removeArrayItem('workshops_input', index)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('workshops_input')}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      <PlusIcon className="w-4 h-4" /> Add Workshop
-                    </button>
-                  </div>
-                </div>
-      
-                {/* Important Dates */}
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <label className="text-right text-sm font-medium text-gray-700">Important Dates</label>
-                  <div className="col-span-3 space-y-2">
-                    {formData.important_date.map((date, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={date}
-                          onChange={(e) => handleArrayInputChange('important_date', index, e.target.value)}
-                          placeholder="e.g., Abstract Submission 2024-05-01"
-                        />
-                        <button
-                          onClick={() => removeArrayItem('important_date', index)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('important_date')}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      <PlusIcon className="w-4 h-4" /> Add Important Date
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-      
-            {/* Flyer Upload */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-3 mb-6">Event Flyer</h3>
-                <ImageUpload 
-                  onFileChange={(files: File[]) => {
-                    const syntheticEvent = {
-                      target: {
-                        files: (() => {
-                          const dataTransfer = new DataTransfer();
-                          files.forEach(file => dataTransfer.items.add(file));
-                          return dataTransfer.files;
-                        })()
-                      }
-                    } as React.ChangeEvent<HTMLInputElement>;
-                    handleFileChange(syntheticEvent, 'flyer');
-                  }} 
-                />
-              </div>
-            </div>
-      
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3">
-              <Dialog.Close asChild>
-                <button className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
-                  Cancel
-                </button>
-              </Dialog.Close>
-              <button
-                onClick={handleStepOneSubmit}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Next Step
-              </button>
-            </div>
-          </div>
-            ) : (
-            // Step 2 Form
-<div className="max-w-5xl mx-auto p-6 space-y-8">
-      {/* File Upload Section */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Media Upload</h3>
-          
-          {/* Gallery Images */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm font-medium text-gray-700">Gallery Images</label>
-            <div className="col-span-3">
-              <input
-                type="file"
-                multiple
-                onChange={(e) => handleFileChange(e, 'gallery')}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                accept="image/*"
-              />
-            </div>
-          </div>
+                </CardContent>
+              </Card>
 
-          {/* Sponsors Images */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm font-medium text-gray-700">Sponsors Images</label>
-            <div className="col-span-3">
-              <input
-                type="file"
-                multiple
-                onChange={(e) => handleFileChange(e, 'sponsors')}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                accept="image/*"
-              />
-            </div>
-          </div>
-
-          {/* Videos */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm font-medium text-gray-700">Videos</label>
-            <div className="col-span-3">
-              <input
-                type="file"
-                multiple
-                onChange={(e) => handleFileChange(e, 'videos')}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                accept="video/*"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Packages Section */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 space-y-8">
-          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Package Details</h3>
-
-          {/* Basic Package */}
-          <div className="space-y-6">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-md font-medium text-gray-900 mb-4">Basic Package</h4>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <label className="text-right text-sm font-medium text-gray-700">Pricing</label>
-                <div className="col-span-3 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      placeholder="Naira Price"
-                      type="number"
-                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.basic_naira}
-                      onChange={(e) => handleInputChange('basic_naira', e.target.value)}
-                    />
-                    <input
-                      placeholder="USD Price"
-                      type="number"
-                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.basic_usd}
-                      onChange={(e) => handleInputChange('basic_usd', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    {formData.basic_package.map((subtheme, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={subtheme}
-                          onChange={(e) => handleArrayInputChange('basic_package', index, e.target.value)}
-                        />
-                        <button
-                          onClick={() => removeArrayItem('basic_package', index)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('basic_package')}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      <PlusIcon className="w-4 h-4" /> Add Package Item
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Standard Package */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-md font-medium text-gray-900 mb-4">Standard Package</h4>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <label className="text-right text-sm font-medium text-gray-700">Pricing</label>
-                <div className="col-span-3 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      placeholder="Naira Price"
-                      type="number"
-                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.standard_naira}
-                      onChange={(e) => handleInputChange('standard_naira', e.target.value)}
-                    />
-                    <input
-                      placeholder="USD Price"
-                      type="number"
-                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.standard_usd}
-                      onChange={(e) => handleInputChange('standard_usd', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    {formData.standard_package.map((subtheme, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={subtheme}
-                          onChange={(e) => handleArrayInputChange('standard_package', index, e.target.value)}
-                        />
-                        <button
-                          onClick={() => removeArrayItem('standard_package', index)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('standard_package')}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      <PlusIcon className="w-4 h-4" /> Add Package Item
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Package */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-md font-medium text-gray-900 mb-4">Premium Package</h4>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <label className="text-right text-sm font-medium text-gray-700">Pricing</label>
-                <div className="col-span-3 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      placeholder="Naira Price"
-                      type="number"
-                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.premium_naira}
-                      onChange={(e) => handleInputChange('premium_naira', e.target.value)}
-                    />
-                    <input
-                      placeholder="USD Price"
-                      type="number"
-                      className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.premium_usd}
-                      onChange={(e) => handleInputChange('premium_usd', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    {formData.premium_package.map((subtheme, index) => (
-                      <div key={index} className="flex gap-2">
-                        <input
-                          className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={subtheme}
-                          onChange={(e) => handleArrayInputChange('premium_package', index, e.target.value)}
-                        />
-                        <button
-                          onClick={() => removeArrayItem('premium_package', index)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addArrayItem('premium_package')}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      <PlusIcon className="w-4 h-4" /> Add Package Item
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Speakers Section */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900 border-b pb-3">Speakers</h3>
-          <div className="grid grid-cols-4 items-start gap-4">
-            <label className="text-right text-sm font-medium text-gray-700">Add Speakers</label>
-            <div className="col-span-3 space-y-4">
-              <Select onValueChange={handleSpeakerSelect}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Add a speaker" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSpeakers.map((speaker) => (
-                    <SelectItem
-                      key={speaker.speaker_id}
-                      value={speaker.speaker_id.toString()}
-                      disabled={selectedSpeakers.some(s => s.speaker_id === speaker.speaker_id)}
-                    >
-                      {speaker.speaker_name}
-                    </SelectItem>
+              {/* Subthemes Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Subthemes</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {formData.subthemes_input.map((subtheme, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Input
+                        value={subtheme}
+                        onChange={(e) => {
+                          const newSubthemes = [...formData.subthemes_input];
+                          newSubthemes[index] = e.target.value;
+                          handleInputChange('subthemes_input', newSubthemes);
+                        }}
+                        placeholder="Enter subtheme"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const newSubthemes = formData.subthemes_input.filter((_, i) => i !== index);
+                          handleInputChange('subthemes_input', newSubthemes);
+                        }}
+                      >
+                        <TrashIcon className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleInputChange('subthemes_input', [...formData.subthemes_input, ''])}
+                  >
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Add Subtheme
+                  </Button>
+                </CardContent>
+              </Card>
 
-              <div className="space-y-3">
-                {selectedSpeakers.map((selected, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <span className="min-w-[150px] font-medium">
-                      {availableSpeakers.find(s => s.speaker_id === selected.speaker_id)?.speaker_name}
-                    </span>
-                    <Select
-                      value={selected.occupation}
-                      onValueChange={(occupation) => handleRoleChange(index, occupation)}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Select role" />
+              {/* Workshops Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workshops</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {formData.workshops_input.map((workshop, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Input
+                        value={workshop}
+                        onChange={(e) => {
+                          const newWorkshops = [...formData.workshops_input];
+                          newWorkshops[index] = e.target.value;
+                          handleInputChange('workshops_input', newWorkshops);
+                        }}
+                        placeholder="Enter workshop title"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const newWorkshops = formData.workshops_input.filter((_, i) => i !== index);
+                          handleInputChange('workshops_input', newWorkshops);
+                        }}
+                      >
+                        <TrashIcon className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => handleInputChange('workshops_input', [...formData.workshops_input, ''])}
+                  >
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Add Workshop
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Important Dates Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Important Dates</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {formData.important_date.map((date, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <Input
+                        value={date}
+                        onChange={(e) => {
+                          const newDates = [...formData.important_date];
+                          newDates[index] = e.target.value;
+                          handleInputChange('important_date', newDates);
+                        }}
+                        placeholder="e.g., Abstract Submission 2024-05-01"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const newDates = formData.important_date.filter((_, i) => i !== index);
+                          handleInputChange('important_date', newDates);
+                        }}
+                      >
+                        <TrashIcon className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => handleInputChange('important_date', [...formData.important_date, ''])}
+                  >
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Add Important Date
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Flyer Upload */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Event Flyer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ImageUpload 
+                    onFileChange={(files: File[]) => {
+                      const syntheticEvent = {
+                        target: {
+                          files: (() => {
+                            const dataTransfer = new DataTransfer();
+                            files.forEach(file => dataTransfer.items.add(file));
+                            return dataTransfer.files;
+                          })()
+                        }
+                      } as React.ChangeEvent<HTMLInputElement>;
+                      handleFileChange(syntheticEvent, 'flyer');
+                    }} 
+                  />
+                  {formData.flyer && (
+                    <p className="mt-2 text-sm text-gray-600">
+                      Selected file: {formData.flyer.name}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-end gap-3">
+                <Dialog.Close asChild>
+                  <Button variant="outline" className='text-[#000]'>
+                    Cancel
+                  </Button>
+                </Dialog.Close>
+                <Button
+                  onClick={handleStepOneSubmit}
+                  disabled={isLoading}
+                  className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                >
+                  {isLoading ? 'Processing...' : 'Next Step'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Media Upload Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Media Upload</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Gallery Images</Label>
+                    <Input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileChange(e, 'gallery')}
+                      accept="image/*"
+                    />
+                    {formData.gallery.length > 0 && (
+                      <p className="text-sm text-gray-600">
+                        {formData.gallery.length} file(s) selected
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Sponsors Images</Label>
+                    <Input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileChange(e, 'sponsors')}
+                      accept="image/*"
+                    />
+                    {formData.sponsors.length > 0 && (
+                      <p className="text-sm text-gray-600">
+                        {formData.sponsors.length} file(s) selected
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Videos</Label>
+                    <Input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileChange(e, 'videos')}
+                      accept="video/*"
+                    />
+                    {formData.videos.length > 0 && (
+                      <p className="text-sm text-gray-600">
+                        {formData.videos.length} file(s) selected
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Packages Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Package Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Basic Package */}
+                  <div className="border rounded-lg p-4">
+  <h4 className="font-medium mb-4">Basic Package</h4>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div className="space-y-2">
+      <Label>Price (Naira)</Label>
+      <Input
+        type="number"
+        value={formData.basic_naira}
+        onChange={(e) => handlePaymentChange('basic_naira', e.target.value)}
+        placeholder="Enter Naira price"
+        required
+      />
+    </div>
+    <div className="space-y-2">
+      <Label>Price (USD)</Label>
+      <Input
+        type="number"
+        value={formData.basic_usd}
+        onChange={(e) => handlePaymentChange('basic_usd', e.target.value)}
+        placeholder="Enter USD price"
+        required
+      />
+    </div>
+  </div>
+  
+  <div className="space-y-2">
+    <Label>Package Inclusions</Label>
+    {formData.basic_package.map((item, index) => (
+      <div key={index} className="flex gap-2 items-center">
+        <Input
+          value={item}
+          onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
+          placeholder="Enter package item"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => removePackageItem('basic', index)}
+        >
+          <TrashIcon className="w-4 h-4 text-red-500" />
+        </Button>
+      </div>
+    ))}
+    <Button
+      variant="outline"
+      onClick={() => addPackageItem('basic')}
+    >
+      <PlusIcon className="w-4 h-4 mr-2" />
+      Add Package Item
+    </Button>
+  </div>
+</div>
+
+<div className="border rounded-lg p-4">
+  <h4 className="font-medium mb-4">Standard Package</h4>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div className="space-y-2">
+      <Label>Price (Naira)</Label>
+      <Input
+        type="number"
+        value={formData.standard_naira}
+        onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
+        placeholder="Enter Naira price"
+        required
+      />
+    </div>
+    <div className="space-y-2">
+      <Label>Price (USD)</Label>
+      <Input
+        type="number"
+        value={formData.standard_usd}
+        onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
+        placeholder="Enter USD price"
+        required
+      />
+    </div>
+  </div>
+  
+  <div className="space-y-2">
+    <Label>Package Inclusions</Label>
+    {formData.standard_package.map((item, index) => (
+      <div key={index} className="flex gap-2 items-center">
+        <Input
+          value={item}
+          onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
+          placeholder="Enter package item"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => removePackageItem('standard', index)}
+        >
+          <TrashIcon className="w-4 h-4 text-red-500" />
+        </Button>
+      </div>
+    ))}
+    <Button
+      variant="outline"
+      onClick={() => addPackageItem('standard')}
+    >
+      <PlusIcon className="w-4 h-4 mr-2" />
+      Add Package Item
+    </Button>
+  </div>
+</div>
+
+
+<div className="border rounded-lg p-4">
+  <h4 className="font-medium mb-4">Premium Package</h4>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div className="space-y-2">
+      <Label>Price (Naira)</Label>
+      <Input
+        type="number"
+        value={formData.premium_naira}
+        onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
+        placeholder="Enter Naira price"
+        required
+      />
+    </div>
+    <div className="space-y-2">
+      <Label>Price (USD)</Label>
+      <Input
+        type="number"
+        value={formData.premium_usd}
+        onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
+        placeholder="Enter USD price"
+        required
+      />
+    </div>
+  </div>
+  
+  <div className="space-y-2">
+    <Label>Package Inclusions</Label>
+    {formData.premium_package.map((item, index) => (
+      <div key={index} className="flex gap-2 items-center">
+        <Input
+          value={item}
+          onChange={(e) => handlePackageItemChange('premium', index, e.target.value)}
+          placeholder="Enter package item"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => removePackageItem('premium', index)}
+        >
+          <TrashIcon className="w-4 h-4 text-red-500" />
+        </Button>
+      </div>
+    ))}
+    <Button
+      variant="outline"
+      onClick={() => addPackageItem('premium')}
+    >
+      <PlusIcon className="w-4 h-4 mr-2" />
+      Add Package Item
+    </Button>
+  </div>
+</div>
+
+
+                  {/* Standard Package */}
+                  {/* <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Standard Package</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Virtual Attendance (USD)</Label>
+                        <Input
+                          type="number"
+                          value={formData.standard_usd}
+                          onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Virtual Attendance (Naira)</Label>
+                        <Input
+                          type="number"
+                          value={formData.standard_naira}
+                          onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Physical Attendance (USD)</Label>
+                        <Input
+                          type="number"
+                          value={formData.payments.standard.physical.usd}
+                          onChange={(e) => handlePaymentChange('standard', 'physical', 'usd', e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Physical Attendance (Naira)</Label>
+                        <Input
+                          type="number"
+                          value={formData.payments.standard.physical.naira}
+                          onChange={(e) => handlePaymentChange('standard', 'physical', 'naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Package Inclusions</Label>
+                      {formData.payments.standard.package.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={item}
+                            onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
+                            placeholder="Enter package item"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePackageItem('standard', index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => addPackageItem('standard')}
+                      >
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        Add Package Item
+                      </Button>
+                    </div>
+                  </div> */}
+
+                  {/* Premium Package */}
+                  {/* <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Premium Package</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Virtual Attendance (USD)</Label>
+                        <Input
+                          type="number"
+                          value={formData.payments.premium.virtual.usd}
+                          onChange={(e) => handlePaymentChange('premium', 'virtual', 'usd', e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Virtual Attendance (Naira)</Label>
+                        <Input
+                          type="number"
+                          value={formData.payments.premium.virtual.naira}
+                          onChange={(e) => handlePaymentChange('premium', 'virtual', 'naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Physical Attendance (USD)</Label>
+                        <Input
+                          type="number"
+                          value={formData.payments.premium.physical.usd}
+                          onChange={(e) => handlePaymentChange('premium', 'physical', 'usd', e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Physical Attendance (Naira)</Label>
+                        <Input
+                          type="number"
+                          value={formData.payments.premium.physical.naira}
+                          onChange={(e) => handlePaymentChange('premium', 'physical', 'naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Package Inclusions</Label>
+                      {formData.payments.premium.package.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={item}
+                            onChange={(e) => handlePackageItemChange('premium', index, e.target.value)}
+                            placeholder="Enter package item"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePackageItem('premium', index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => addPackageItem('premium')}
+                      >
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        Add Package Item
+                      </Button>
+                    </div>
+                  </div> */}
+                </CardContent>
+              </Card>
+
+              {/* Speakers Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Speakers</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Add Speaker</Label>
+                    <Select onValueChange={handleSpeakerSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a speaker" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roles.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {role}
+                        {availableSpeakers.map((speaker) => (
+                          <SelectItem
+                            key={speaker.speaker_id}
+                            value={speaker.speaker_id.toString()}
+                            disabled={selectedSpeakers.some(s => s.speaker_id === speaker.speaker_id)}
+                          >
+                            {speaker.speaker_name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <button
-                      onClick={() => removeSpeaker(index)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors ml-auto"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
                   </div>
-                ))}
+
+                  <div className="space-y-3">
+                    {selectedSpeakers.map((selected, index) => {
+                      const speaker = availableSpeakers.find(s => s.speaker_id === selected.speaker_id);
+                      return (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <p className="font-medium">{speaker?.speaker_name}</p>
+                            <p className="text-sm text-gray-600">{speaker?.speaker_title}</p>
+                          </div>
+                          <Select
+                            value={selected.occupation}
+                            onValueChange={(occupation) => handleRoleChange(index, occupation)}
+                          >
+                            <SelectTrigger className="w-48">
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ROLES.map((role) => (
+                                <SelectItem key={role} value={role}>
+                                  {role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeSpeaker(index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentStep(1)}
+                  className='text-[#000]'
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={handleStepTwoSubmit}
+                  disabled={isLoading}
+                  className='bg-[#203a87] hover:bg-[#1a2f6d]'
+                >
+                  {isLoading ? 'Creating Conference...' : 'Create Conference'}
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => setCurrentStep(1)}
-          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          onClick={handleStepTwoSubmit}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Create Conference
-        </button>
-      </div>
-    </div>
           )}
 
           <Dialog.Close asChild>
             <button
-              className="absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
+              className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
               aria-label="Close"
             >
-              <Cross2Icon />
+              <Cross2Icon className="h-5 w-5" />
             </button>
           </Dialog.Close>
         </Dialog.Content>

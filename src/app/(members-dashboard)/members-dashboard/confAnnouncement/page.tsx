@@ -167,7 +167,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       });
 
       if (response.ok) {
-        showToast('Announcement created successfully!', 'success');
+        showToast.success('Announcement created successfully!');
         fetchAnnouncements();
         setIsCreateModalOpen(false);
         setCurrentAnnouncement({
@@ -184,7 +184,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       }
     } catch (error) {
       console.error('Error creating announcement:', error);
-      showToast('Failed to create announcement', 'error');
+      showToast.error('Failed to create announcement');
     }
   };
 
@@ -201,7 +201,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       });
 
       if (response.ok) {
-        showToast('Announcement deleted successfully!', 'success');
+        showToast.success('Announcement deleted successfully!');
         fetchAnnouncements();
         setIsDeleteModalOpen(false);
         setSelectedAnnouncementId(null);
@@ -210,7 +210,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       }
     } catch (error) {
       console.error('Error deleting announcement:', error);
-      showToast('Failed to delete announcement', 'error');
+      showToast.error('Failed to delete announcement');
     }
   };
 
@@ -237,7 +237,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       });
 
       if (response.ok) {
-        showToast('Announcement updated successfully!', 'success');
+        showToast.success('Announcement updated successfully!');
         fetchAnnouncements();
         setIsEditModalOpen(false);
         setCurrentAnnouncement({
@@ -254,7 +254,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       }
     } catch (error) {
       console.error('Error updating announcement:', error);
-      showToast('Failed to update announcement', 'error');
+      showToast.error('Failed to update announcement');
     }
   };
 
@@ -316,10 +316,10 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       <p className="text-gray-500 mt-1">
         There are no announcements to display at this time.
       </p>
-      <Button className="mt-4" onClick={() => setIsCreateModalOpen(true)}>
+      {/* <Button className="mt-4" onClick={() => setIsCreateModalOpen(true)}>
         <PlusIcon className="h-4 w-4 mr-2" />
         Create Announcement
-      </Button>
+      </Button> */}
     </div>
   );
 
@@ -335,14 +335,14 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
         
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            {/* <Button className="gap-2">
               <PlusIcon size={16} />
               Create Announcement
-            </Button>
+            </Button> */}
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Create New Announcement</DialogTitle>
+              {/* <DialogTitle>Create New Announcement</DialogTitle> */}
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
@@ -411,14 +411,14 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
                 </Select>
               </div>
             </div>
-            <DialogFooter>
+            {/* <DialogFooter>
               <Button 
                 onClick={handleCreateAnnouncement}
                 disabled={!currentAnnouncement.title || !currentAnnouncement.description}
               >
                 Create Announcement
               </Button>
-            </DialogFooter>
+            </DialogFooter> */}
           </DialogContent>
         </Dialog>
       </div>

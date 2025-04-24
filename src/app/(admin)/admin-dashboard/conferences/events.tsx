@@ -224,10 +224,10 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         </button>
         <AlertDialog.Root>
           <AlertDialog.Trigger asChild>
-            {/* <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
+            <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
               Delete
-            </button> */}
+            </button>
           </AlertDialog.Trigger>
           <AlertDialog.Portal>
             <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />

@@ -422,14 +422,14 @@ const ConferenceParticipantsPage = () => {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="w-12">
+                              {/* <TableHead className="w-12">
                                 <input
                                   type="checkbox"
                                   checked={isAllSelected}
                                   onChange={handleSelectAll}
                                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
-                              </TableHead>
+                              </TableHead> */}
                               <TableHead>Name</TableHead>
                               <TableHead>Email</TableHead>
                               <TableHead>Country</TableHead>
@@ -440,14 +440,14 @@ const ConferenceParticipantsPage = () => {
                           <TableBody>
                             {currentMembers.map((member) => (
                               <TableRow key={member.id} className="hover:bg-gray-50">
-                                <TableCell>
+                                {/* <TableCell>
                                   <input
                                     type="checkbox"
                                     checked={selectedMembers.includes(member.id)}
                                     onChange={() => handleMemberSelect(member.id)}
                                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                   />
-                                </TableCell>
+                                </TableCell> */}
                                 <TableCell>
                                   <div className="flex items-center space-x-3">
                                     <img

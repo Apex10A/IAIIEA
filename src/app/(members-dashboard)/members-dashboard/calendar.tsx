@@ -245,7 +245,7 @@ const Calendar = () => {
 
       {/* Calendar Grid */}
       <div className='w-full overflow-x-auto'>
-      <Card className="mx-auto min-w-[1200px] lg:w-full">
+      <Card className="mx-auto min-w-[1200px] lg:min-w-full">
         <CardContent className="p-4">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">

@@ -1,286 +1,208 @@
-"use client";
-import React from 'react';
-import Image from 'next/image';
+'use client'
+import React from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import CarouselLandingPage from "./CarouselLandingPage"
+import Carousel from "@/modules/ui/carousel"
+import { EmblaOptionsType } from 'embla-carousel'
+import RealConference from "@/modules/ui/RealConference";
+import RealSeminar from "@/modules/ui/RealSeminar";
 import { motion } from 'framer-motion';
-import { FiArrowRight } from 'react-icons/fi';
+import Sponsors from './sponsors'
+import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight } from 'react-icons/fa';
 
-const SponsorsPage = () => {
-  // Sponsor data with different tiers
-  const sponsors = {
-    platinum: [
-      { id: 1, name: 'TechEdu', logo: '/sponsors/techedu.png', url: 'https://techedu.com' },
-      { id: 2, name: 'LearnSphere', logo: '/sponsors/learnsphere.png', url: 'https://learnsphere.org' }
-    ],
-    gold: [
-      { id: 3, name: 'EduInnovate', logo: '/sponsors/eduinnovate.png', url: 'https://eduinnovate.com' },
-      { id: 4, name: 'FutureLearn', logo: '/sponsors/futurelearn.png', url: 'https://futurelearn.io' },
-      { id: 5, name: 'SmartAssess', logo: '/sponsors/smartassess.png', url: 'https://smartassess.com' }
-    ],
-    silver: [
-      { id: 6, name: 'EduTools', logo: '/sponsors/edutools.png', url: 'https://edutools.com' },
-      { id: 7, name: 'AssessmentPro', logo: '/sponsors/assessmentpro.png', url: 'https://assessmentpro.com' },
-      { id: 8, name: 'LearnRight', logo: '/sponsors/learnright.png', url: 'https://learnright.com' },
-      { id: 9, name: 'EduMetrics', logo: '/sponsors/edumetrics.png', url: 'https://edumetrics.com' }
-    ],
-    partners: [
-      { id: 10, name: 'GlobalEd', logo: '/sponsors/globaled.png', url: 'https://globaled.org' },
-      { id: 11, name: 'TeachForward', logo: '/sponsors/teachforward.png', url: 'https://teachforward.com' },
-      { id: 12, name: 'EduConnect', logo: '/sponsors/educonnect.png', url: 'https://educonnect.world' }
-    ]
-  };
+interface Book {
+  id: number
+  name: string
+  overview: string
+  description: string
+  image: string
+  journalLink: string
+}
 
-  // Animation variants
-  const container = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
+const LandingPage: React.FC = () => {
+  const OPTIONS: EmblaOptionsType = {}
+  const SLIDE_COUNT = 5
+  const SLIDES = Array.from(Array(SLIDE_COUNT).keys())
 
   const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.8 } }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
   return (
-    <div className="bg-white py-20 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white">
       {/* Hero Section */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-        className="text-center mb-16"
-      >
-        <h1 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">
-          Our Valued Sponsors
-        </h1>
-        <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
-          We gratefully acknowledge the support of our sponsors who make our events and initiatives possible.
-        </p>
-      </motion.div>
+      <CarouselLandingPage/>
 
-      {/* Platinum Sponsors */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        variants={container}
-        viewport={{ once: true, margin: "-100px" }}
-        className="mb-20"
-      >
-        <div className="text-center mb-10">
-          <motion.h2 variants={fadeIn} className="text-3xl font-bold text-[#0B142F] mb-2">
-            Platinum Sponsors
-          </motion.h2>
-          <motion.div variants={fadeIn} className="w-20 h-1 bg-[#D5B93C] mx-auto"></motion.div>
-        </div>
-        
-        <motion.div 
-          variants={container}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
-        >
-          {sponsors.platinum.map((sponsor) => (
+      {/* About Section - Modified with "Our Journey" */}
+      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
             <motion.div 
-              key={sponsor.id}
-              variants={item}
-              whileHover={{ y: -5 }}
-              className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
+              className="lg:w-1/2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
             >
-              <div className="flex flex-col items-center">
-                <div className="relative w-64 h-32 mb-6">
-                  <Image
-                    src={sponsor.logo}
-                    alt={sponsor.name}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <a 
-                  href={sponsor.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-[#203A87] hover:text-[#152a61] font-medium mt-4"
-                >
-                  Visit website <FiArrowRight className="ml-2" />
-                </a>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B142F] mb-6 leading-tight">
+                The International Association for Innovations in Educational Assessment (IAIIEA)
+              </h1>
+              
+              {/* Our Journey Section */}
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-[#0B142F] mb-4">Our Journey So Far</h2>
+                <p className="text-lg text-[#0B142F]/80 mb-4">
+                  The International Association for Innovations in Educational Assessment (IAIIEA) was established on 9th October, 2018. That was when the Association was registered with the Federal Republic of Nigeria via the Corporate Affairs Commission (CAC) Abuja, Nigeria.
+                </p>
+                <p className="text-lg text-[#0B142F]/80 mb-6">
+                  The Association came into limelight on 24th November, 2018 when the maiden conference was held in Abuja, the capital city of Nigeria, West Africa. It was indeed an academic conference. The conference took place at the Public Service Institute of Nigeria along Kubwa Express Road, Abuja.
+                </p>
+                <Link href="/about/history" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
+                  Read More <FaArrowRight className="ml-2" />
+                </Link>
               </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.section>
 
-      {/* Gold Sponsors */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        variants={container}
-        viewport={{ once: true, margin: "-100px" }}
-        className="mb-20"
-      >
-        <div className="text-center mb-10">
-          <motion.h2 variants={fadeIn} className="text-3xl font-bold text-[#0B142F] mb-2">
-            Gold Sponsors
-          </motion.h2>
-          <motion.div variants={fadeIn} className="w-20 h-1 bg-[#D5B93C] mx-auto"></motion.div>
-        </div>
-        
-        <motion.div 
-          variants={container}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
-        >
-          {sponsors.gold.map((sponsor) => (
-            <motion.div 
-              key={sponsor.id}
-              variants={item}
-              whileHover={{ y: -5 }}
-              className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
-            >
-              <div className="flex flex-col items-center">
-                <div className="relative w-48 h-24 mb-4">
-                  <Image
-                    src={sponsor.logo}
-                    alt={sponsor.name}
-                    fill
-                    className="object-contain"
-                  />
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="text-[#D5B93C] mt-1">
+                    <FaGraduationCap size={24} />
+                  </div>
+                  <p className="text-lg text-[#0B142F]/80">
+                    Developing innovations in educational assessment at all levels
+                  </p>
                 </div>
-                <a 
-                  href={sponsor.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-[#203A87] hover:text-[#152a61] font-medium text-sm mt-2"
-                >
-                  Visit website <FiArrowRight className="ml-1" />
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.section>
-
-      {/* Silver Sponsors */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        variants={container}
-        viewport={{ once: true, margin: "-100px" }}
-        className="mb-20"
-      >
-        <div className="text-center mb-10">
-          <motion.h2 variants={fadeIn} className="text-3xl font-bold text-[#0B142F] mb-2">
-            Silver Sponsors
-          </motion.h2>
-          <motion.div variants={fadeIn} className="w-20 h-1 bg-[#D5B93C] mx-auto"></motion.div>
-        </div>
-        
-        <motion.div 
-          variants={container}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-7xl mx-auto"
-        >
-          {sponsors.silver.map((sponsor) => (
-            <motion.div 
-              key={sponsor.id}
-              variants={item}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
-            >
-              <div className="flex flex-col items-center">
-                <div className="relative w-32 h-16 mb-2">
-                  <Image
-                    src={sponsor.logo}
-                    alt={sponsor.name}
-                    fill
-                    className="object-contain"
-                  />
+                <div className="flex items-start gap-4">
+                  <div className="text-[#D5B93C] mt-1">
+                    <FaUsers size={24} />
+                  </div>
+                  <p className="text-lg text-[#0B142F]/80">
+                    Promoting educational assessment innovations for national and international cohesion
+                  </p>
                 </div>
-                <a 
-                  href={sponsor.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-[#203A87] hover:text-[#152a61] font-medium text-xs mt-1"
-                >
-                  Visit <FiArrowRight className="ml-1" />
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.section>
-
-      {/* Partners */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        variants={container}
-        viewport={{ once: true, margin: "-100px" }}
-        className="mb-20"
-      >
-        <div className="text-center mb-10">
-          <motion.h2 variants={fadeIn} className="text-3xl font-bold text-[#0B142F] mb-2">
-            Partners
-          </motion.h2>
-          <motion.div variants={fadeIn} className="w-20 h-1 bg-[#D5B93C] mx-auto"></motion.div>
-        </div>
-        
-        <motion.div 
-          variants={container}
-          className="flex flex-wrap justify-center gap-6 max-w-7xl mx-auto"
-        >
-          {sponsors.partners.map((sponsor) => (
-            <motion.div 
-              key={sponsor.id}
-              variants={item}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
-            >
-              <div className="flex flex-col items-center">
-                <div className="relative w-28 h-14">
-                  <Image
-                    src={sponsor.logo}
-                    alt={sponsor.name}
-                    fill
-                    className="object-contain"
-                  />
+                <div className="flex items-start gap-4">
+                  <div className="text-[#D5B93C] mt-1">
+                    <FaChalkboardTeacher size={24} />
+                  </div>
+                  <p className="text-lg text-[#0B142F]/80">
+                    Providing intensive capacity building for researchers, students, teachers, and other educational stakeholders
+                  </p>
                 </div>
               </div>
             </motion.div>
-          ))}
-        </motion.div>
-      </motion.section>
 
-      {/* Become a Sponsor CTA */}
-      <motion.section
-        initial="hidden"
-        whileInView="visible"
-        variants={fadeIn}
-        viewport={{ once: true }}
-        className="bg-[#0E1A3D] rounded-2xl p-8 md:p-12 text-center max-w-6xl mx-auto"
-      >
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-          Interested in becoming a sponsor?
-        </h2>
-        <p className="text-white/80 mb-6 max-w-3xl mx-auto">
-          Join our prestigious group of sponsors and gain visibility among education professionals and institutions worldwide.
-        </p>
-        <button className="bg-[#D5B93C] hover:bg-[#c4aa36] text-[#0B142F] font-bold py-3 px-8 rounded-lg transition-colors duration-300">
-          Contact Us
-        </button>
-      </motion.section>
+            <motion.div 
+              className="lg:w-1/2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
+            >
+              <div className="relative rounded-xl overflow-hidden shadow-2xl">
+                <Image 
+                  src='/AboutOne.jpg'
+                  alt='IAIIEA Team Members'
+                  width={800}
+                  height={600}
+                  className="w-full h-auto object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1A3D] to-transparent opacity-70"></div>
+                <div className="absolute bottom-0 left-0 p-6 text-white">
+                  <h3 className="text-xl font-bold">Our Dedicated Team</h3>
+                  <p>Committed to advancing educational assessment worldwide</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Pillars */}
+      <section className="py-16 bg-[#F8F9FC]">
+        <div className="container mx-auto px-4 md:px-8 lg:px-14">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.2
+                }
+              }
+            }}
+            className="grid md:grid-cols-3 gap-8"
+          >
+            <motion.div 
+              variants={fadeIn}
+              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="text-[#D5B93C] mb-4">
+                <FaGraduationCap size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Mission</h3>
+              <p className="text-[#0B142F]/80">
+                To advance innovative system that enhances quality assessment in terms of intellectual competence and the zeal to add value to our world.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeIn}
+              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="text-[#D5B93C] mb-4">
+                <FaUsers size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Vision</h3>
+              <p className="text-[#0B142F]/80">
+                IAIIEA has its vision to be a pace-setter and a world-class association for innovative educational assessment.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              variants={fadeIn}
+              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <div className="text-[#D5B93C] mb-4">
+                <FaChalkboardTeacher size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Motto</h3>
+              <p className="text-[#0B142F]/80">
+                Innovation for excellence
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Events Section */}
+      <section className="py-20 px-4 md:px-8 lg:px-14 bg-[#E9EBF3]">
+        <div className="container mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-16"
+          >
+            {/* <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
+            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
+              Join our premier events designed to advance educational assessment practices worldwide
+            </p> */}
+          </motion.div>
+
+          <div className="">
+            <RealConference/>
+            <RealSeminar/>
+            {/* <Sponsors/> */}
+          </div>
+        </div>
+      </section>
     </div>
-  );
-};
+  )
+}
 
-export default SponsorsPage;
+export default LandingPage

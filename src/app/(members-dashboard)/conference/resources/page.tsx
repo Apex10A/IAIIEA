@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import {
@@ -709,7 +710,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
             <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Certification</h2>
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">You can download your certificate of attendance here</p>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold">here</Link></p>
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">

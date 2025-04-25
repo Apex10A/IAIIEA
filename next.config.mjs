@@ -7,7 +7,8 @@ const nextConfig = {
     domains: [
       'iaiiea.org',
       'api.dicebear.com',
-      'res.cloudinary.com'
+      'res.cloudinary.com',
+      'images.unsplash.com'
     ],
   },
 };

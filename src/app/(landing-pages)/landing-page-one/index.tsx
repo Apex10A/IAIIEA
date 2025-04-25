@@ -9,7 +9,7 @@ import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
 import { motion } from 'framer-motion';
 import Sponsors from './sponsors'
-import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight } from 'react-icons/fa';
+import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight, FaBookOpen } from 'react-icons/fa';
 
 interface Book {
   id: number
@@ -29,6 +29,16 @@ const LandingPage: React.FC = () => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
+  const publications = [
+    {
+      id: 1,
+      title: "JOURNAL OF INNOVATIONS IN EDUCATIONAL ASSESSMENT (JIEA)",
+      volume: "VOL.1, NO.1, May, 2019",
+      image: "/journal-cover.jpg", // Replace with your actual image path
+      link: "https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1"
+    }
+    // Add more publications here if needed
+  ];
 
   return (
     <div className="bg-white">
@@ -59,7 +69,7 @@ const LandingPage: React.FC = () => {
                 <p className="text-lg text-[#0B142F]/80 mb-6">
                   The Association came into limelight on 24th November, 2018 when the maiden conference was held in Abuja, the capital city of Nigeria, West Africa. It was indeed an academic conference. The conference took place at the Public Service Institute of Nigeria along Kubwa Express Road, Abuja.
                 </p>
-                <Link href="/about" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
+                <Link href="/about/history" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
                   Read More <FaArrowRight className="ml-2" />
                 </Link>
               </div>
@@ -175,6 +185,62 @@ const LandingPage: React.FC = () => {
               </p>
             </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+       {/* Publications Section */}
+       <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+        <div className="container mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Publications</h2>
+            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
+              Explore our academic contributions to educational assessment
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {publications.map((pub) => (
+              <motion.div
+                key={pub.id}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeIn}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+              >
+                <div className="relative h-64">
+                  <Image
+                    src={pub.image}
+                    alt={pub.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center mb-4">
+                    <FaBookOpen className="text-[#D5B93C] mr-2" size={24} />
+                    <h3 className="text-xl font-bold text-[#0B142F]">PUBLICATIONS</h3>
+                  </div>
+                  <h4 className="text-lg font-semibold text-[#0B142F] mb-2">{pub.title}</h4>
+                  <p className="text-[#0B142F]/80 mb-4">{pub.volume}</p>
+                  <Link 
+                    href={pub.link} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white rounded-lg hover:bg-[#C4A93C] transition-colors"
+                  >
+                    View Publication <FaArrowRight className="ml-2" />
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 

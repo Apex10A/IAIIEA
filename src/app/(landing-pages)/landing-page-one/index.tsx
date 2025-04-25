@@ -34,7 +34,7 @@ const LandingPage: React.FC = () => {
       id: 1,
       title: "JOURNAL OF INNOVATIONS IN EDUCATIONAL ASSESSMENT (JIEA)",
       volume: "VOL.1, NO.1, May, 2019",
-      image: "/journal-cover.jpg", // Replace with your actual image path
+      image: "/book.png", // Replace with your actual image path
       link: "https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1"
     }
     // Add more publications here if needed
@@ -69,7 +69,7 @@ const LandingPage: React.FC = () => {
                 <p className="text-lg text-[#0B142F]/80 mb-6">
                   The Association came into limelight on 24th November, 2018 when the maiden conference was held in Abuja, the capital city of Nigeria, West Africa. It was indeed an academic conference. The conference took place at the Public Service Institute of Nigeria along Kubwa Express Road, Abuja.
                 </p>
-                <Link href="/about/history" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
+                <Link href="/about" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
                   Read More <FaArrowRight className="ml-2" />
                 </Link>
               </div>

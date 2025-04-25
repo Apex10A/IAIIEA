@@ -1,6 +1,7 @@
-"use client"
+'use client'
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import CarouselLandingPage from "./CarouselLandingPage"
 import Carousel from "@/modules/ui/carousel"
 import { EmblaOptionsType } from 'embla-carousel'
@@ -8,7 +9,7 @@ import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
 import { motion } from 'framer-motion';
 import Sponsors from './sponsors'
-import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers } from 'react-icons/fa';
+import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight } from 'react-icons/fa';
 
 interface Book {
   id: number
@@ -20,18 +21,6 @@ interface Book {
 }
 
 const LandingPage: React.FC = () => {
-  // const BooksData: Book[] = [
-  //   {
-  //     id: 1,
-  //     name: "Educational Innovations",
-  //     overview: "Journal of Innovations in Educational Assessment (JIEA)",
-  //     description: "Vol. 1, No. 1, May, 2019",
-  //     image: "/VolOne.png",
-  //     journalLink: "https://example.com/journal1"
-  //   },
-  //   // ... other book data
-  // ]
-
   const OPTIONS: EmblaOptionsType = {}
   const SLIDE_COUNT = 5
   const SLIDES = Array.from(Array(SLIDE_COUNT).keys())
@@ -46,7 +35,7 @@ const LandingPage: React.FC = () => {
       {/* Hero Section */}
       <CarouselLandingPage/>
 
-      {/* About Section */}
+      {/* About Section - Modified with "Our Journey" */}
       <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
@@ -60,9 +49,21 @@ const LandingPage: React.FC = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B142F] mb-6 leading-tight">
                 The International Association for Innovations in Educational Assessment (IAIIEA)
               </h1>
-              <p className="text-lg md:text-xl text-[#0B142F]/80 mb-6">
-                We are an Association for innovative assessment with the mission of promoting the Science and practice of innovations in educational assessment.
-              </p>
+              
+              {/* Our Journey Section */}
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-[#0B142F] mb-4">Our Journey So Far</h2>
+                <p className="text-lg text-[#0B142F]/80 mb-4">
+                  The International Association for Innovations in Educational Assessment (IAIIEA) was established on 9th October, 2018. That was when the Association was registered with the Federal Republic of Nigeria via the Corporate Affairs Commission (CAC) Abuja, Nigeria.
+                </p>
+                <p className="text-lg text-[#0B142F]/80 mb-6">
+                  The Association came into limelight on 24th November, 2018 when the maiden conference was held in Abuja, the capital city of Nigeria, West Africa. It was indeed an academic conference. The conference took place at the Public Service Institute of Nigeria along Kubwa Express Road, Abuja.
+                </p>
+                <Link href="/about" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
+                  Read More <FaArrowRight className="ml-2" />
+                </Link>
+              </div>
+
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="text-[#D5B93C] mt-1">
@@ -144,7 +145,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Mission</h3>
               <p className="text-[#0B142F]/80">
-              To advance innovative system that enhances quality assessment in terms of intellectual competence and the zeal to add value to our world.
+                To advance innovative system that enhances quality assessment in terms of intellectual competence and the zeal to add value to our world.
               </p>
             </motion.div>
 
@@ -157,7 +158,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Vision</h3>
               <p className="text-[#0B142F]/80">
-              IAIIEA has its vision to be a pace-setter and a world-class association for innovative educational assessment.
+                IAIIEA has its vision to be a pace-setter and a world-class association for innovative educational assessment.
               </p>
             </motion.div>
 
@@ -170,7 +171,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Motto</h3>
               <p className="text-[#0B142F]/80">
-              Innovation for excellence
+                Innovation for excellence
               </p>
             </motion.div>
           </motion.div>
@@ -200,58 +201,6 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Stakeholders Section */}
-      {/* <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
-        <div className="container mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Who We Serve</h2>
-            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
-              We provide resources and training for all educational stakeholders
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.2
-                }
-              }
-            }}
-            className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6"
-          >
-            {[
-              { icon: <FaUserGraduate size={40} />, title: "Students", description: "Enhancing learning outcomes" },
-              { icon: <FaChalkboardTeacher size={40} />, title: "Teachers", description: "Improving assessment techniques" },
-              { icon: <FaGraduationCap size={40} />, title: "Researchers", description: "Advancing assessment science" },
-              { icon: <FaSchool size={40} />, title: "Institutions", description: "Implementing best practices" },
-              { icon: <FaUsers size={40} />, title: "Government", description: "Informing policy decisions" }
-            ].map((item, index) => (
-              <motion.div 
-                key={index}
-                variants={fadeIn}
-                className="bg-[#F8F9FC] p-6 rounded-lg text-center hover:bg-[#E9EBF3] transition-colors"
-              >
-                <div className="text-[#D5B93C] mb-4">{item.icon}</div>
-                <h3 className="text-xl font-bold text-[#0B142F] mb-2">{item.title}</h3>
-                <p className="text-[#0B142F]/80">{item.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section> */}
     </div>
   )
 }

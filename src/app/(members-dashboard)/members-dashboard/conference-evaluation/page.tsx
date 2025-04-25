@@ -112,19 +112,84 @@ const ConferenceEvaluationForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateSection(2)) {
-      // Here you would typically submit to your backend
-      showToast.success('Thank you for your feedback!', {
+// Add this function to your component
+const generateCertificate = (name: string) => {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1003" height="757" viewBox="0 0 1003 757" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="1001" height="755" fill="#FFFDF7"/>
+  <rect x="1" y="1" width="1001" height="755" stroke="#D5B93C" stroke-width="2" stroke-dasharray="250 250"/>
+  
+  <!-- Main content (shortened for brevity, include your full SVG paths here) -->
+  <path d="M296.488 140.48C288.872 140.48 282.248..." fill="#203A87"/>
+  
+  <!-- Name Section - This is where we'll insert the attendee's name -->
+  <text x="50%" y="380" font-family="Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#203A87">
+    ${escapeHtml(name)}
+  </text>
+  
+  <!-- Certificate text -->
+  <text x="50%" y="420" font-family="Arial" font-size="18" text-anchor="middle" fill="#0B142F">
+    has successfully completed the conference
+  </text>
+  
+  <!-- Rest of your SVG content -->
+  <path d="M521.816 176V153.6H531.48C532.888..." fill="#D5B93C"/>
+  <path d="M71.8 524.152C73.576 524.152 75.128..." fill="#203A87"/>
+  <path d="M412.12 271.06V272.54H408.32V285H406.5V272.54H402.68V271.06H412.12Z" fill="#0B142F"/>
+</svg>`;
+};
+
+// Helper function to safely escape HTML
+const escapeHtml = (str: string) => {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+// Update your handleSubmit function
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (validateSection(2)) {
+    try {
+      // Generate certificate with user's name
+      const certificateSvg = generateCertificate(formData.name);
+      
+      // Create download link
+      const svgBlob = new Blob([certificateSvg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${formData.name.replace(/\s+/g, '_')}_conference_certificate.svg`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      showToast.success('Thank you for your feedback! Certificate downloaded.', {
         icon: <CheckCircle className="text-green-500" />,
-        style: {
-          background: '#f0f4ff',
-          color: '#203a87',
-        },
       });
+      
+      // Submit form data to your backend
+      // await submitToBackend(formData);
+      
+    } catch (error) {
+      showToast.error('Error generating certificate', {
+        icon: <AlertCircle className="text-red-500" />,
+      });
+      console.error(error);
     }
-  };
+  }
+};
+  
+
 
   const RadioOption: React.FC<{ 
     name: string; 

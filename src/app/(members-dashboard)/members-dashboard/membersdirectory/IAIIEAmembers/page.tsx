@@ -370,14 +370,14 @@ const Page = () => {
       <Table className='min-w-[1200px] text-black'>
       <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">
+              {/* <TableHead className="w-[50px]">
                 <input 
                   type="checkbox" 
                   checked={isAllSelected}
                   onChange={handleSelectAll}
                   className="form-checkbox h-5 w-5 text-blue-600"
                 />
-              </TableHead>
+              </TableHead> */}
               <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
@@ -396,14 +396,14 @@ const Page = () => {
         // Toggle dropdown or close if already open
         setActiveDropdownId(activeDropdownId === member.id ? null : member.id);
       }}>
-                  <TableCell>
+                  {/* <TableCell>
                     <input 
                       type="checkbox" 
                       checked={selectedMembers.includes(member.id)}
                       onChange={() => handleMemberSelect(member.id)}
                       className="form-checkbox h-5 w-5 text-blue-600"
                     />
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className='text-slate-600'>{member.id}</TableCell>
                   <TableCell className="flex items-center space-x-2 text-slate-600">
                     <img 

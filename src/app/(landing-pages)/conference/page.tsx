@@ -495,10 +495,14 @@ export default function ConferencePage() {
         {/* Flyer Section */}
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-            Conference Flyer
+          Call for paper flyer
           </h2>
+          <p className="text-white max-w-[60%]">We invite submissions for IAIIEA conference 2024. We seek innovative research and insights on a topic which aligns with the conference theme. Please submit your abstract by [deadline] to iaiiea2024@iaiiea.org. The paper should, specifically, address issues outlined in the associated sub-themes. 
+
+</p>
+<button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Download flyer</button>
           
-          {conference.flyer ? (
+          {/* {conference.flyer ? (
             <div className="flex justify-center">
               <img 
                 src={conference.flyer} 
@@ -513,7 +517,7 @@ export default function ConferencePage() {
             <div className="text-center py-12 text-white/70">
               Flyer will be available soon.
             </div>
-          )}
+          )} */}
         </section>
 
         {/* Registration Section - Only show if logged in */}

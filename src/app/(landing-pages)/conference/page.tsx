@@ -575,9 +575,29 @@ export default function ConferencePage() {
     Conference Fees
   </h2>
 
+  {/* Current Plan Indicator */}
+  {conference.is_registered && (
+    <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
+      <div className="flex items-center gap-3">
+        <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />
+        <div>
+          <p className="font-bold text-white">You're registered for:</p>
+          <p className="text-white">
+            {conference.current_plan ? 
+              `${conference.current_plan.charAt(0).toUpperCase() + conference.current_plan.slice(1)} Access` : 
+              'This conference'}
+          </p>
+        </div>
+      </div>
+    </div>
+  )}
+
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
     {/* Basic Access */}
-    <div className="bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 border-[#D5B93C]/30">
+    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+      conference.is_registered && conference.current_plan === 'basic' ? 
+      'border-[#D5B93C]' : 'border-[#D5B93C]/30'
+    }`}>
       <div className="p-6">
         <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
         
@@ -605,22 +625,48 @@ export default function ConferencePage() {
             </ul>
           </div>
           
-          <button 
-            className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-            onClick={handleRegisterClick}
-          >
-            Register Basic
-          </button>
+          {conference.is_registered ? (
+            conference.current_plan === 'basic' ? (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Your Current Plan
+              </button>
+            ) : (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Already Registered
+              </button>
+            )
+          ) : (
+            <button 
+              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+              onClick={() => {
+                setSelectedPlan('basic');
+                handleRegisterClick();
+              }}
+            >
+              Register Basic
+            </button>
+          )}
         </div>
       </div>
     </div>
 
     {/* Standard Access */}
-    <div className="bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 border-[#D5B93C] transform md:-translate-y-2">
-      <div className="p-6">
-        <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
-          POPULAR
-        </div>
+    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 transform md:-translate-y-2 ${
+      conference.is_registered && conference.current_plan === 'standard' ? 
+      'border-[#D5B93C]' : 'border-[#D5B93C]'
+    }`}>
+      <div className="p-6 relative">
+        {!conference.is_registered && (
+          <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
+            POPULAR
+          </div>
+        )}
         <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Standard Access</h3>
         
         <div className="space-y-4">
@@ -651,18 +697,42 @@ export default function ConferencePage() {
             </ul>
           </div>
           
-          <button 
-            className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-            onClick={handleRegisterClick}
-          >
-            Register Standard
-          </button>
+          {conference.is_registered ? (
+            conference.current_plan === 'standard' ? (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Your Current Plan
+              </button>
+            ) : (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Already Registered
+              </button>
+            )
+          ) : (
+            <button 
+              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+              onClick={() => {
+                setSelectedPlan('standard');
+                handleRegisterClick();
+              }}
+            >
+              Register Standard
+            </button>
+          )}
         </div>
       </div>
     </div>
 
     {/* Premium Access */}
-    <div className="bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 border-[#D5B93C]/30">
+    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+      conference.is_registered && conference.current_plan === 'premium' ? 
+      'border-[#D5B93C]' : 'border-[#D5B93C]/30'
+    }`}>
       <div className="p-6">
         <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Premium Access</h3>
         
@@ -694,12 +764,33 @@ export default function ConferencePage() {
             </ul>
           </div>
           
-          <button 
-            className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-            onClick={handleRegisterClick}
-          >
-            Register Premium
-          </button>
+          {conference.is_registered ? (
+            conference.current_plan === 'premium' ? (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Your Current Plan
+              </button>
+            ) : (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Already Registered
+              </button>
+            )
+          ) : (
+            <button 
+              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+              onClick={() => {
+                setSelectedPlan('premium');
+                handleRegisterClick();
+              }}
+            >
+              Register Premium
+            </button>
+          )}
         </div>
       </div>
     </div>

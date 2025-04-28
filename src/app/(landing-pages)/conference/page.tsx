@@ -4,7 +4,17 @@ import "@/app/index.css";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, MapPin, Clock, Book, Check, ChevronLeft, ChevronRight, User, LogIn } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Book,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  User,
+  LogIn,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -84,27 +94,29 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
   });
 
   useEffect(() => {
     const calculateTimeLeft = () => {
       const difference = targetDate.getTime() - new Date().getTime();
-      
+
       if (difference <= 0) {
         return { days: 0, hours: 0, minutes: 0, seconds: 0 };
       }
-      
+
       return {
         days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        hours: Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        ),
         minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((difference % (1000 * 60)) / 1000)
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
       };
     };
 
     setTimeLeft(calculateTimeLeft());
-    
+
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
@@ -116,11 +128,16 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
     <div className="flex justify-center mb-6 md:mb-0">
       <div className="grid grid-cols-4 gap-2 md:gap-4 text-center">
         {Object.entries(timeLeft).map(([unit, value]) => (
-          <div key={unit} className="bg-white/10 backdrop-blur-sm rounded-lg p-3 min-w-[60px]">
+          <div
+            key={unit}
+            className="bg-white/10 backdrop-blur-sm rounded-lg p-3 min-w-[60px]"
+          >
             <div className="text-xl md:text-2xl lg:text-3xl font-bold text-white">
-              {String(value).padStart(2, '0')}
+              {String(value).padStart(2, "0")}
             </div>
-            <div className="text-white/80 text-xs md:text-sm capitalize">{unit}</div>
+            <div className="text-white/80 text-xs md:text-sm capitalize">
+              {unit}
+            </div>
           </div>
         ))}
       </div>
@@ -128,31 +145,37 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
   );
 };
 
-const Carousel = ({ items, showArrows = true }: { items: string[]; showArrows?: boolean }) => {
+const Carousel = ({
+  items,
+  showArrows = true,
+}: {
+  items: string[];
+  showArrows?: boolean;
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  
+
   const goToPrevious = () => {
-    setCurrentIndex(prev => (prev - 1 + items.length) % items.length);
+    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   };
-  
+
   const goToNext = () => {
-    setCurrentIndex(prev => (prev + 1) % items.length);
+    setCurrentIndex((prev) => (prev + 1) % items.length);
   };
-  
+
   return (
     <div className="relative group">
       <div className="flex items-center justify-center">
         {showArrows && items.length > 1 && (
           <>
-            <button 
+            <button
               onClick={goToPrevious}
               className="absolute left-0 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 transition-colors opacity-0 group-hover:opacity-100"
               aria-label="Previous"
             >
               <ChevronLeft className="w-5 h-5 text-white" />
             </button>
-            
-            <button 
+
+            <button
               onClick={goToNext}
               className="absolute right-0 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 transition-colors opacity-0 group-hover:opacity-100"
               aria-label="Next"
@@ -161,32 +184,34 @@ const Carousel = ({ items, showArrows = true }: { items: string[]; showArrows?: 
             </button>
           </>
         )}
-        
+
         <div className="flex justify-center items-center gap-4 my-4 overflow-hidden w-full">
           {items.length > 0 ? (
             <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden">
-              <img 
-                src={items[currentIndex] || "/placeholder.jpg"} 
+              <img
+                src={items[currentIndex] || "/placeholder.jpg"}
                 alt={`Item ${currentIndex + 1}`}
-                className="w-full h-full object-cover transition-transform duration-500 ease-in-out" 
+                className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.jpg";
                 }}
               />
             </div>
           ) : (
-            <div className="text-white opacity-70 py-12">No items available</div>
+            <div className="text-white opacity-70 py-12">
+              No items available
+            </div>
           )}
         </div>
       </div>
-      
+
       {items.length > 1 && (
         <div className="flex justify-center mt-4 gap-2">
           {items.map((_, idx) => (
             <button
               key={idx}
               className={`h-2 w-2 rounded-full transition-all ${
-                idx === currentIndex ? 'bg-[#D5B93C] w-4' : 'bg-white/30'
+                idx === currentIndex ? "bg-[#D5B93C] w-4" : "bg-white/30"
               }`}
               onClick={() => setCurrentIndex(idx)}
               aria-label={`Go to item ${idx + 1}`}
@@ -214,7 +239,7 @@ export default function ConferencePage() {
     const loadConference = async () => {
       try {
         setLoading(true);
-        const conferenceId = searchParams.get('id');
+        const conferenceId = searchParams.get("id");
 
         if (!conferenceId) {
           throw new Error("No conference ID provided");
@@ -224,9 +249,11 @@ export default function ConferencePage() {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
           {
-            headers: session?.user?.token ? {
-              Authorization: `Bearer ${session.user.token}`,
-            } : {}
+            headers: session?.user?.token
+              ? {
+                  Authorization: `Bearer ${session.user.token}`,
+                }
+              : {},
           }
         );
 
@@ -245,7 +272,9 @@ export default function ConferencePage() {
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load conference details"
+          err instanceof Error
+            ? err.message
+            : "Failed to load conference details"
         );
       } finally {
         setLoading(false);
@@ -287,8 +316,8 @@ export default function ConferencePage() {
           },
           body: JSON.stringify({
             id: conference.id,
-            plan: selectedPlan
-          })
+            plan: selectedPlan,
+          }),
         }
       );
 
@@ -297,7 +326,7 @@ export default function ConferencePage() {
       }
 
       const paymentData = await response.json();
-      
+
       // Redirect to payment gateway or handle payment flow
       // This would depend on your payment provider integration
       // For Flutterwave, you would typically redirect to their payment page
@@ -308,7 +337,6 @@ export default function ConferencePage() {
 
       // In a real implementation, you would handle the payment callback
       // and verify payment with /confirm_payment/ endpoint
-
     } catch (err) {
       console.error("Payment error:", err);
       showToast.error("Failed to initiate payment");
@@ -321,7 +349,9 @@ export default function ConferencePage() {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen conference-bg p-8 text-center">
         <Book className="w-16 h-16 text-[#D5B93C] mb-4 animate-pulse" />
-        <h2 className="text-2xl font-bold text-white mb-2">Loading Conference...</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Loading Conference...
+        </h2>
       </div>
     );
   }
@@ -330,11 +360,13 @@ export default function ConferencePage() {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen conference-bg p-8 text-center">
         <Book className="w-16 h-16 text-[#D5B93C] mb-4" />
-        <h2 className="text-2xl font-bold text-white mb-2">Conference Information</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Conference Information
+        </h2>
         <p className="text-white/70 max-w-md mb-6">{error}</p>
-        <Button 
+        <Button
           className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
-          onClick={() => window.location.href = '/'}
+          onClick={() => (window.location.href = "/")}
         >
           Back to Conferences
         </Button>
@@ -349,7 +381,7 @@ export default function ConferencePage() {
         <div className="w-full md:w-auto">
           {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
         </div>
-        <Button 
+        <Button
           className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
           onClick={handleRegisterClick}
         >
@@ -364,7 +396,7 @@ export default function ConferencePage() {
           )}
         </Button>
       </div>
-      
+
       {/* Hero Section */}
       <div className="mb-12 mt-8">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">
@@ -380,13 +412,15 @@ export default function ConferencePage() {
             <span>{conference.venue}</span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-            <span className={`px-2 py-1 text-xs rounded-full ${
-              conference.status === "Completed" 
-                ? "bg-red-100 text-red-800" 
-                : conference.status === "Ongoing" 
-                  ? "bg-green-100 text-green-800" 
+            <span
+              className={`px-2 py-1 text-xs rounded-full ${
+                conference.status === "Completed"
+                  ? "bg-red-100 text-red-800"
+                  : conference.status === "Ongoing"
+                  ? "bg-green-100 text-green-800"
                   : "bg-blue-100 text-blue-800"
-            }`}>
+              }`}
+            >
               {conference.status}
             </span>
           </div>
@@ -400,7 +434,7 @@ export default function ConferencePage() {
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Overview
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Sub-themes */}
             <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
@@ -436,7 +470,7 @@ export default function ConferencePage() {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Important Dates */}
           <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors mt-8">
             <CardHeader>
@@ -445,7 +479,10 @@ export default function ConferencePage() {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {conference.important_date.map((date, index) => (
-                  <div key={index} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 bg-white/5 p-3 rounded-lg"
+                  >
                     <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                     <span>{date}</span>
                   </div>
@@ -460,11 +497,14 @@ export default function ConferencePage() {
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Speakers
           </h2>
-          
+
           {conference.speakers?.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {conference.speakers.map((speaker, index) => (
-                <Card key={index} className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
+                <Card
+                  key={index}
+                  className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors"
+                >
                   <CardContent className="p-0">
                     <div className="relative h-48 w-full">
                       <img
@@ -478,8 +518,12 @@ export default function ConferencePage() {
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-1">{speaker.name}</h3>
-                      <p className="text-[#D5B93C] text-sm mb-2">{speaker.title}</p>
-                      <p className="text-white/70 text-sm">{speaker.portfolio}</p>
+                      <p className="text-[#D5B93C] text-sm mb-2">
+                        {speaker.title}
+                      </p>
+                      <p className="text-white/70 text-sm">
+                        {speaker.portfolio}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -495,13 +539,19 @@ export default function ConferencePage() {
         {/* Flyer Section */}
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-          Call for paper flyer
+            Call for paper flyer
           </h2>
-          <p className="text-white max-w-[60%]">We invite submissions for IAIIEA conference 2024. We seek innovative research and insights on a topic which aligns with the conference theme. Please submit your abstract by [deadline] to iaiiea2024@iaiiea.org. The paper should, specifically, address issues outlined in the associated sub-themes. 
+          <p className="text-white max-w-[60%]">
+            We invite submissions for IAIIEA conference 2024. We seek innovative
+            research and insights on a topic which aligns with the conference
+            theme. Please submit your abstract by [deadline] to
+            iaiiea2024@iaiiea.org. The paper should, specifically, address
+            issues outlined in the associated sub-themes.
+          </p>
+          <button className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">
+            Download flyer
+          </button>
 
-</p>
-<button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Download flyer</button>
-          
           {/* {conference.flyer ? (
             <div className="flex justify-center">
               <img 
@@ -520,60 +570,170 @@ export default function ConferencePage() {
           )} */}
         </section>
 
-        <div className="flex items-center justify-between">
-        <div className="bg-[#F9F5E2]">
-         <div>
-            <h1>Conference Fees</h1>
-          </div>
-          <div>
-           <p>Basic Access</p>
-           <p>$29.99 </p>
-           <p>N30,000 </p>
-           <p>Includes: Conference materials, networking, some meals</p>
-           <button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Register</button>
-          </div>
-         </div>
+        <div className="my-12">
+  <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
+    Conference Fees
+  </h2>
 
-          <div className="bg-[#DEE1ED]">
-         <div>
-            <h1>Conference Fees</h1>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {/* Basic Access */}
+    <div className="bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 border-[#D5B93C]/30">
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
+        
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-[#0E1A3D]">${conference.payments.basic.virtual.usd}</p>
+            <p className="text-lg text-gray-700">{conference.payments.basic.virtual.naira}</p>
           </div>
-          <div>
-           <p>Premium Access</p>
-           <p>$29.99 </p>
-           <p>N30,000 </p>
-           <p>Includes: Conference materials, networking, some meals</p>
-           <button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Register</button>
+          
+          <div className="pt-2">
+            <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Conference materials</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Virtual access to sessions</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Digital certificate</span>
+              </li>
+            </ul>
           </div>
-         </div>
-
-          <div className="bg-[#F9F5E2]">
-         <div>
-            <h1>Conference Fees</h1>
-          </div>
-          <div>
-           <p>Standard Access</p>
-           <p>$29.99 </p>
-           <p>N30,000 </p>
-           <p>Includes: Conference materials, networking, some meals</p>
-           <button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Register</button>
-          </div>
-         </div> 
+          
+          <button 
+            className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+            onClick={handleRegisterClick}
+          >
+            Register Basic
+          </button>
         </div>
+      </div>
+    </div>
+
+    {/* Standard Access */}
+    <div className="bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 border-[#D5B93C] transform md:-translate-y-2">
+      <div className="p-6">
+        <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
+          POPULAR
+        </div>
+        <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Standard Access</h3>
+        
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-[#0E1A3D]">${conference.payments.standard.virtual.usd}</p>
+            <p className="text-lg text-gray-700">{conference.payments.standard.virtual.naira}</p>
+          </div>
+          
+          <div className="pt-2">
+            <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Everything in Basic</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Physical attendance</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Lunch & refreshments</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Printed materials</span>
+              </li>
+            </ul>
+          </div>
+          
+          <button 
+            className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+            onClick={handleRegisterClick}
+          >
+            Register Standard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Premium Access */}
+    <div className="bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 border-[#D5B93C]/30">
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Premium Access</h3>
+        
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-[#0E1A3D]">${conference.payments.premium.virtual.usd}</p>
+            <p className="text-lg text-gray-700">{conference.payments.premium.virtual.naira}</p>
+          </div>
+          
+          <div className="pt-2">
+            <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Everything in Standard</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>VIP seating</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Networking dinner</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                <span>Exclusive gifts</span>
+              </li>
+            </ul>
+          </div>
+          
+          <button 
+            className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+            onClick={handleRegisterClick}
+          >
+            Register Premium
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Physical/Virtual Toggle */}
+  <div className="flex justify-center mt-8">
+    <div className="bg-white/10 p-1 rounded-full">
+      <button className="px-4 py-2 rounded-full bg-[#D5B93C] text-[#0E1A3D] font-medium">
+        Virtual
+      </button>
+      <button className="px-4 py-2 rounded-full text-white font-medium">
+        Physical
+      </button>
+    </div>
+  </div>
+</div>
 
         {/* Registration Section - Only show if logged in */}
-        {session && (
+        {/* {session && (
           <section>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
               Registration Information
             </h2>
-            
+
             <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {Object.entries(conference.payments).map(
                     ([category, types], index) => (
-                      <div key={index} className="border-b border-white/10 pb-6 last:border-0">
+                      <div
+                        key={index}
+                        className="border-b border-white/10 pb-6 last:border-0"
+                      >
                         <h3 className="font-semibold text-lg capitalize text-[#D5B93C] mb-4">
                           {category.replace(/_/g, " ")}
                         </h3>
@@ -582,22 +742,30 @@ export default function ConferencePage() {
                             <div className="font-medium mb-2">Virtual</div>
                             <div className="flex justify-between items-center">
                               <span className="text-sm opacity-80">USD</span>
-                              <span className="font-bold">${types.virtual.usd}</span>
+                              <span className="font-bold">
+                                ${types.virtual.usd}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center mt-2">
                               <span className="text-sm opacity-80">NGN</span>
-                              <span className="font-bold">{types.virtual.naira}</span>
+                              <span className="font-bold">
+                                {types.virtual.naira}
+                              </span>
                             </div>
                           </div>
                           <div className="bg-white/10 p-4 rounded-lg hover:bg-white/15 transition-colors">
                             <div className="font-medium mb-2">Physical</div>
                             <div className="flex justify-between items-center">
                               <span className="text-sm opacity-80">USD</span>
-                              <span className="font-bold">${types.physical.usd}</span>
+                              <span className="font-bold">
+                                ${types.physical.usd}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center mt-2">
                               <span className="text-sm opacity-80">NGN</span>
-                              <span className="font-bold">{types.physical.naira}</span>
+                              <span className="font-bold">
+                                {types.physical.naira}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -608,7 +776,7 @@ export default function ConferencePage() {
               </CardContent>
             </Card>
           </section>
-        )}
+        )} */}
       </div>
 
       {/* Payment Modal */}
@@ -616,7 +784,7 @@ export default function ConferencePage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <h3 className="text-xl font-bold mb-4">Select Payment Plan</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Plan</label>
@@ -633,14 +801,14 @@ export default function ConferencePage() {
               </div>
 
               <div className="flex justify-end gap-3 mt-6">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowPaymentModal(false)}
                   disabled={paymentProcessing}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
                   onClick={handlePaymentSubmit}
                   disabled={paymentProcessing}

@@ -520,6 +520,47 @@ export default function ConferencePage() {
           )} */}
         </section>
 
+        <div className="flex items-center justify-between">
+        <div className="bg-[#F9F5E2]">
+         <div>
+            <h1>Conference Fees</h1>
+          </div>
+          <div>
+           <p>Basic Access</p>
+           <p>$29.99 </p>
+           <p>N30,000 </p>
+           <p>Includes: Conference materials, networking, some meals</p>
+           <button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Register</button>
+          </div>
+         </div>
+
+          <div className="bg-[#DEE1ED]">
+         <div>
+            <h1>Conference Fees</h1>
+          </div>
+          <div>
+           <p>Premium Access</p>
+           <p>$29.99 </p>
+           <p>N30,000 </p>
+           <p>Includes: Conference materials, networking, some meals</p>
+           <button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Register</button>
+          </div>
+         </div>
+
+          <div className="bg-[#F9F5E2]">
+         <div>
+            <h1>Conference Fees</h1>
+          </div>
+          <div>
+           <p>Standard Access</p>
+           <p>$29.99 </p>
+           <p>N30,000 </p>
+           <p>Includes: Conference materials, networking, some meals</p>
+           <button  className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold p-3 rounded-md mt-3">Register</button>
+          </div>
+         </div> 
+        </div>
+
         {/* Registration Section - Only show if logged in */}
         {session && (
           <section>

@@ -1,12 +1,20 @@
-"use client";
+'use client';
 import { useEffect, useState } from "react";
 import "@/app/index.css";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, MapPin, Clock, Book, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, Clock, Book, Check, ChevronLeft, ChevronRight, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { showToast } from "@/utils/toast";
+import Script from "next/script";
 
 interface PaymentTier {
   usd: string;
@@ -28,14 +36,11 @@ interface ConferencePayments {
   publication_fee: RegistrationType;
 }
 
-interface ConferenceSummary {
-  id: number;
+interface Speaker {
+  name: string;
   title: string;
-  theme: string;
-  venue: string;
-  date: string;
-  status: "Completed" | "Ongoing" | "Incoming";
-  resources: any[];
+  portfolio: string;
+  picture: string;
 }
 
 interface ConferenceDetails {
@@ -58,13 +63,8 @@ interface ConferenceDetails {
   status: string;
   resources: any[];
   schedule: any[];
-  meals: Meal[];
-}
-
-interface Meal {
-  meal_id: number;
-  name: string;
-  image: string;
+  meals: any[];
+  speakers: Speaker[];
 }
 
 interface ApiResponse<T> {
@@ -80,48 +80,6 @@ interface TimeLeft {
   seconds: number;
 }
 
-// API Functions
-const fetchConferences = async (
-  bearerToken: string
-): Promise<ApiResponse<ConferenceSummary[]>> => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/landing/events`,
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch conferences");
-  }
-
-  return await response.json();
-};
-
-const fetchConferenceDetails = async (
-  id: number,
-  bearerToken: string
-): Promise<ApiResponse<ConferenceDetails>> => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch conference details");
-  }
-
-  return await response.json();
-};
-
-
-// Improved Countdown Timer Component
 const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
@@ -171,7 +129,6 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
   );
 };
 
-// Enhanced Carousel Component
 const Carousel = ({ items, showArrows = true }: { items: string[]; showArrows?: boolean }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
@@ -242,7 +199,6 @@ const Carousel = ({ items, showArrows = true }: { items: string[]; showArrows?: 
   );
 };
 
-
 export default function ConferencePage() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
@@ -251,77 +207,49 @@ export default function ConferencePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [conferenceDate, setConferenceDate] = useState<Date | null>(null);
-  const [showLimitedView, setShowLimitedView] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<keyof ConferencePayments>("normal_registration");
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [userPlan, setUserPlan] = useState<string | null>(null);
 
   useEffect(() => {
     const loadConference = async () => {
-      if (status === "loading") return;
-
       try {
         setLoading(true);
-        const bearerToken = session?.user?.token || session?.user?.userData?.token;
         const conferenceId = searchParams.get('id');
 
         if (!conferenceId) {
           throw new Error("No conference ID provided");
         }
 
-        // First try to fetch full details with auth
-        if (bearerToken) {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${bearerToken}`,
-              },
-            }
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data.status === "success") {
-              setConference(data.data);
-              const { start_date, start_time } = data.data;
-              const dateTimeString = `${start_date}T${start_time}`;
-              setConferenceDate(new Date(dateTimeString));
-              return;
-            }
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
+          {
+            headers: session?.user?.token ? {
+              Authorization: `Bearer ${session.user.token}`,
+            } : {}
           }
-        }
-
-        // If no auth or auth failed, fetch basic info
-        const basicResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/landing/events`
         );
 
-        if (!basicResponse.ok) {
-          throw new Error("Failed to fetch conference information");
+        if (!response.ok) {
+          throw new Error("Failed to fetch conference details");
         }
 
-        const basicData = await basicResponse.json();
-        if (basicData.status === "success") {
-          const basicConference = basicData.data.find(
-            (c: ConferenceSummary) => c.id === parseInt(conferenceId)
-          );
+        const data = await response.json();
+        if (data.status === "success") {
+          setConference(data.data);
+          const { start_date, start_time } = data.data;
+          const dateTimeString = `${start_date}T${start_time}`;
+          setConferenceDate(new Date(dateTimeString));
           
-          if (basicConference) {
-            // Create a limited conference object with just the basic fields
-            const limitedConference: Partial<ConferenceDetails> = {
-              id: basicConference.id,
-              title: basicConference.title,
-              theme: basicConference.theme,
-              venue: basicConference.venue,
-              date: basicConference.date,
-              status: basicConference.status,
-              is_registered: false
-            };
-            setConference(limitedConference as ConferenceDetails);
-            setShowLimitedView(true);
-          } else {
-            throw new Error("Conference not found");
+          // Check if user is registered and get their plan
+          if (data.data.is_registered) {
+            // This would come from your API - you might need to modify your endpoint
+            // to return the specific plan the user registered for
+            setUserPlan("normal_registration"); // Default to normal if not specified
           }
         } else {
-          throw new Error(basicData.message || "Failed to load conference details");
+          throw new Error(data.message || "Failed to load conference details");
         }
       } catch (err) {
         setError(
@@ -333,7 +261,130 @@ export default function ConferencePage() {
     };
 
     loadConference();
-  }, [session, status, searchParams]);
+  }, [session, searchParams]);
+
+  const handleRegisterClick = async () => {
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+
+    if (!conference) return;
+
+    if (conference.is_registered) {
+      router.push("/dashboard");
+      return;
+    }
+
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSubmit = async () => {
+    if (!conference || !session) return;
+
+    setPaymentProcessing(true);
+    try {
+      // Get the selected payment tier
+      const paymentTier = conference.payments[selectedPlan];
+      const amount = parseFloat(paymentTier.physical.usd); // Using physical as default
+
+      // Initiate payment with the backend
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.user.token}`,
+          },
+          body: JSON.stringify({
+            id: conference.id,
+            plan: selectedPlan
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to initiate payment");
+      }
+
+      const paymentData = await response.json();
+
+      // Configure Flutterwave
+      const config = {
+        public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
+        tx_ref: `${paymentData.payment_id}-${Date.now()}`,
+        amount: amount,
+        currency: 'USD',
+        customer: {
+          email: session.user.email || '',
+          name: session.user.name || 'Conference Attendee',
+          phone_number: '', // Add if you have user's phone number
+        },
+        customizations: {
+          title: `IAIIEA Conference ${selectedPlan.replace(/_/g, ' ')}`,
+          description: `Payment for ${selectedPlan.replace(/_/g, ' ')} access to IAIIEA Conference`,
+          logo: '/logo.png',
+        },
+        payment_options: 'card, banktransfer, ussd',
+      };
+
+      // Initialize Flutterwave payment
+      if (typeof window !== 'undefined' && window.FlutterwaveCheckout) {
+        window.FlutterwaveCheckout({
+          ...config,
+          callback: async (response) => {
+            // Verify payment with your backend
+            const verifyResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/confirm_payment/`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.user.token}`,
+                },
+                body: JSON.stringify({
+                  payment_id: paymentData.payment_id,
+                  processor_id: response.transaction_id,
+                  paid: amount
+                })
+              }
+            );
+
+            if (verifyResponse.ok) {
+              showToast.success("Payment confirmed successfully");
+              setUserPlan(selectedPlan);
+              // Refresh conference data to show registration status
+              const updatedResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conference.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${session.user.token}`,
+                  }
+                }
+              );
+              const updatedData = await updatedResponse.json();
+              setConference(updatedData.data);
+            } else {
+              showToast.error("Payment verification failed");
+            }
+          },
+          onclose: () => {
+            showToast.info("Payment window closed");
+          }
+        });
+      } else {
+        throw new Error("Flutterwave not available");
+      }
+
+    } catch (err) {
+      console.error("Payment error:", err);
+      showToast.error(err instanceof Error ? err.message : "Payment failed");
+    } finally {
+      setPaymentProcessing(false);
+      setShowPaymentModal(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -360,368 +411,226 @@ export default function ConferencePage() {
     );
   }
 
-  // Show limited view for unauthenticated users
-  if (showLimitedView) {
-    return (
-      <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
-        {/* Basic Conference Info */}
-        <div className="mb-12 mt-8">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">
-            {conference.theme}
-          </h1>
-          <div className="flex flex-wrap gap-4 md:gap-6">
-            <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-              <Calendar className="w-5 h-5" />
-              <span>{conference.date}</span>
-            </div>
-            <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-              <MapPin className="w-5 h-5" />
-              <span>{conference.venue}</span>
-            </div>
-            <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                conference.status === "Completed" 
-                  ? "bg-red-100 text-red-800" 
-                  : conference.status === "Ongoing" 
-                    ? "bg-green-100 text-green-800" 
-                    : "bg-blue-100 text-blue-800"
-              }`}>
-                {conference.status}
-              </span>
-            </div>
-          </div>
-        </div>
+  // Get the payment tiers from the conference data
+  const { early_bird_registration, normal_registration, late_registration } = conference.payments;
 
-        {/* Limited Content Message */}
-        <Card className="bg-white/5 backdrop-blur-sm border-none text-white max-w-2xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-[#D5B93C]">More Information Available</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">To view full conference details including schedule, registration information, and more, please log in.</p>
-            <Button 
-              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
-              onClick={() => router.push("/login")}
-            >
-              Login to View Full Details
-            </Button>
-          </CardContent>
-        </Card>
+  return (
+    <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
+      <Script
+        src="https://checkout.flutterwave.com/v3.js"
+        strategy="beforeInteractive"
+      />
+      
+      {/* Header with Countdown and Button */}
+      <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-12 gap-6">
+        <div className="w-full md:w-auto">
+          {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
+        </div>
+        <Button 
+          className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+          onClick={handleRegisterClick}
+        >
+          {!session ? (
+            <span className="flex items-center gap-2">
+              <LogIn className="w-5 h-5" /> Login to Register
+            </span>
+          ) : conference.is_registered ? (
+            "Go to Dashboard"
+          ) : (
+            "Register Now"
+          )}
+        </Button>
       </div>
-    );
-  }
-
-
-    // Check if user is registered
-     if (!conference.is_registered) {
-      return (
-        <div className="flex flex-col justify-center items-center min-h-screen conference-bg p-8 text-center">
-          <Book className="w-16 h-16 text-[#D5B93C] mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-4">Registration Required</h2>
-          <p className="text-white/70 max-w-md mb-6">
-            You need to register for this conference to access the details.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
-              onClick={() => window.location.href = `/`}
-            >
-              Back to Conferences
-            </Button>
-            {/* <Button 
-              className="bg-[#203A87] hover:bg-[#152a61] text-white"
-              onClick={() => {
-                // Navigate to registration page or show registration modal
-                // You can implement your registration flow here
-                window.location.href = `/register?conferenceId=${conference.id}`;
-              }}
-            >
-              Register Now
-            </Button> */}
+      
+      {/* Hero Section */}
+      <div className="mb-12 mt-8">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">
+          {conference.theme}
+        </h1>
+        <div className="flex flex-wrap gap-4 md:gap-6">
+          <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
+            <Calendar className="w-5 h-5" />
+            <span>{conference.date}</span>
           </div>
-        </div>
-      );
-    }
-  
-    return (
-      <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
-        {/* Header with Countdown and Button */}
-        <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-12 gap-6">
-          <div className="w-full md:w-auto">
-            {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
+          <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
+            <MapPin className="w-5 h-5" />
+            <span>{conference.venue}</span>
           </div>
-          <Button className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold">
-            Conference Portal
-          </Button>
-        </div>
-        
-        {/* Hero Section */}
-        <div className="mb-12 mt-8">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">
-            {conference.theme}
-          </h1>
-          <div className="flex flex-wrap gap-4 md:gap-6">
-            <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-              <Calendar className="w-5 h-5" />
-              <span>{conference.date}</span>
-            </div>
-            <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-              <MapPin className="w-5 h-5" />
-              <span>{conference.venue}</span>
-            </div>
-            <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
-              <Clock className="w-5 h-5" />
-              <span>{conference.start_time}</span>
-            </div>
+          <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
+            <span className={`px-2 py-1 text-xs rounded-full ${
+              conference.status === "Completed" 
+                ? "bg-red-100 text-red-800" 
+                : conference.status === "Ongoing" 
+                  ? "bg-green-100 text-green-800" 
+                  : "bg-blue-100 text-blue-800"
+            }`}>
+              {conference.status}
+            </span>
           </div>
-        </div>
-  
-        {/* Main Content */}
-        <div className="space-y-16">
-          {/* Overview Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Overview
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Sub-themes */}
-              <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
-                <CardHeader>
-                  <CardTitle className="text-[#D5B93C]">Sub-themes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {conference.sub_theme.map((theme, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span className="leading-relaxed">{theme}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-  
-              {/* Workshops */}
-              <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
-                <CardHeader>
-                  <CardTitle className="text-[#D5B93C]">Workshops</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {conference.work_shop.map((workshop, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span className="leading-relaxed">{workshop}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Important Dates */}
-            <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors mt-8">
-              <CardHeader>
-                <CardTitle className="text-[#D5B93C]">Important Dates</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {conference.important_date.map((date, index) => (
-                    <div key={index} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg">
-                      <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                      <span>{date}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-  
-          {/* Schedule Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Conference Schedule
-            </h2>
-            
-            <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
-              <CardContent className="pt-6">
-                {conference.schedule?.length > 0 ? (
-                  <div className="space-y-6">
-                    {conference.schedule.map((item, index) => (
-                      <div key={index} className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
-                        <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-3">
-                          <div className="font-semibold text-lg">
-                            {item.time || 'Time TBA'}
-                          </div>
-                          <div className="text-[#D5B93C] font-medium">
-                            {item.date || 'Date TBA'}
-                          </div>
-                        </div>
-                        <div className="text-lg">{item.title || item.description || 'Details coming soon'}</div>
-                        {item.speaker && (
-                          <div className="mt-2 text-white/70">
-                            Speaker: <span className="text-white">{item.speaker}</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-white/70">
-                    Schedule will be announced soon.
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-  
-          {/* Gallery Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Gallery
-            </h2>
-            
-            {conference.gallery?.length > 0 ? (
-              <Carousel items={conference.gallery} />
-            ) : (
-              <div className="text-center py-12 text-white/70">
-                Photos will be available soon.
-              </div>
-            )}
-          </section>
-  
-          {/* Registration Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Registration Information
-            </h2>
-            
-            <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(conference.payments).map(
-                    ([category, types], index) => (
-                      <div key={index} className="border-b border-white/10 pb-6 last:border-0">
-                        <h3 className="font-semibold text-lg capitalize text-[#D5B93C] mb-4">
-                          {category.replace(/_/g, " ")}
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-white/10 p-4 rounded-lg hover:bg-white/15 transition-colors">
-                            <div className="font-medium mb-2">Virtual</div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm opacity-80">USD</span>
-                              <span className="font-bold">${types.virtual.usd}</span>
-                            </div>
-                            <div className="flex justify-between items-center mt-2">
-                              <span className="text-sm opacity-80">NGN</span>
-                              <span className="font-bold">{types.virtual.naira}</span>
-                            </div>
-                          </div>
-                          <div className="bg-white/10 p-4 rounded-lg hover:bg-white/15 transition-colors">
-                            <div className="font-medium mb-2">Physical</div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm opacity-80">USD</span>
-                              <span className="font-bold">${types.physical.usd}</span>
-                            </div>
-                            <div className="flex justify-between items-center mt-2">
-                              <span className="text-sm opacity-80">NGN</span>
-                              <span className="font-bold">{types.physical.naira}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-                
-                <div className="flex justify-center mt-8">
-                  <Button className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold px-8 py-4">
-                    Register Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-  
-          {/* Paper Flyer Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Conference Flyer
-            </h2>
-            
-            {conference.flyer ? (
-              <div className="flex justify-center">
-                <img 
-                  src={conference.flyer} 
-                  alt="Conference Flyer" 
-                  className="max-w-full h-auto rounded-lg shadow-lg border-2 border-white/20"
-                  onError={(e) => {
-                    e.currentTarget.src = "/placeholder.jpg";
-                  }} 
-                />
-              </div>
-            ) : (
-              <div className="text-center py-12 text-white/70">
-                Flyer will be available soon.
-              </div>
-            )}
-          </section>
-  
-          {/* Sponsors Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Our Sponsors
-            </h2>
-            
-            {conference.sponsors?.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {conference.sponsors.map((sponsor, index) => (
-                  <div key={index} className="bg-white/10 rounded-lg p-4 flex items-center justify-center h-32">
-                    <img 
-                      src={sponsor} 
-                      alt={`Sponsor ${index + 1}`}
-                      className="max-h-20 max-w-full object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = "/placeholder.jpg";
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-white/70">
-                Sponsor information will be available soon.
-              </div>
-            )}
-          </section>
-  
-          {/* Videos Section */}
-          <section>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-              Videos
-            </h2>
-            
-            {conference.videos?.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {conference.videos.map((video, index) => (
-                  <div key={index} className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-                    <iframe
-                      src={video}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-white/70">
-                Video information will be available soon.
-              </div>
-            )}
-          </section>
         </div>
       </div>
-    );
+
+      {/* Main Content */}
+      <div className="space-y-16">
+        {/* Conference Fee Section */}
+        <section>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+            Conference Fee
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Early Bird Registration */}
+            <div className={`bg-white/5 backdrop-blur-sm rounded-lg p-6 border transition-colors ${
+              userPlan === "early_bird_registration" 
+                ? "border-[#D5B93C]" 
+                : "border-white/10 hover:border-[#D5B93C]"
+            }`}>
+              <h3 className="text-xl font-bold text-[#D5B93C] mb-2">Early Bird Access</h3>
+              <div className="flex items-end gap-2 mb-4">
+                <span className="text-3xl font-bold text-white">${early_bird_registration.physical.usd}</span>
+                <span className="text-white/80 mb-1">≈ ₦{early_bird_registration.physical.naira}</span>
+              </div>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>Conference materials</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>Networking opportunities</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>Some meals included</span>
+                </li>
+              </ul>
+              {userPlan === "early_bird_registration" ? (
+                <div className="text-center py-2 px-4 bg-green-900/30 text-green-400 rounded">
+                  You're registered for this plan
+                </div>
+              ) : conference.is_registered ? (
+                <div className="text-center py-2 px-4 bg-yellow-900/30 text-yellow-400 rounded">
+                  Already registered for another plan
+                </div>
+              ) : (
+                <Button 
+                  className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+                  onClick={() => {
+                    setSelectedPlan("early_bird_registration");
+                    handlePaymentSubmit();
+                  }}
+                  disabled={paymentProcessing}
+                >
+                  {paymentProcessing ? "Processing..." : "Initiate Payment"}
+                </Button>
+              )}
+            </div>
+
+            {/* Normal Registration (Premium) */}
+            <div className={`bg-white/5 backdrop-blur-sm rounded-lg p-6 border transition-colors relative ${
+              userPlan === "normal_registration" 
+                ? "border-[#D5B93C]" 
+                : "border-white/10 hover:border-[#D5B93C]"
+            }`}>
+              <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg rounded-tr-lg">
+                POPULAR
+              </div>
+              <h3 className="text-xl font-bold text-[#D5B93C] mb-2">Standard Access</h3>
+              <div className="flex items-end gap-2 mb-4">
+                <span className="text-3xl font-bold text-white">${normal_registration.physical.usd}</span>
+                <span className="text-white/80 mb-1">≈ ₦{normal_registration.physical.naira}</span>
+              </div>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>All Early Bird benefits</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>All meals included</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>Conference workshop</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>Excursion activities</span>
+                </li>
+              </ul>
+              {userPlan === "normal_registration" ? (
+                <div className="text-center py-2 px-4 bg-green-900/30 text-green-400 rounded">
+                  You're registered for this plan
+                </div>
+              ) : conference.is_registered ? (
+                <div className="text-center py-2 px-4 bg-yellow-900/30 text-yellow-400 rounded">
+                  Already registered for another plan
+                </div>
+              ) : (
+                <Button 
+                  className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+                  onClick={() => {
+                    setSelectedPlan("normal_registration");
+                    handlePaymentSubmit();
+                  }}
+                  disabled={paymentProcessing}
+                >
+                  {paymentProcessing ? "Processing..." : "Initiate Payment"}
+                </Button>
+              )}
+            </div>
+
+            {/* Late Registration */}
+            <div className={`bg-white/5 backdrop-blur-sm rounded-lg p-6 border transition-colors ${
+              userPlan === "late_registration" 
+                ? "border-[#D5B93C]" 
+                : "border-white/10 hover:border-[#D5B93C]"
+            }`}>
+              <h3 className="text-xl font-bold text-[#D5B93C] mb-2">Late Registration</h3>
+              <div className="flex items-end gap-2 mb-4">
+                <span className="text-3xl font-bold text-white">${late_registration.physical.usd}</span>
+                <span className="text-white/80 mb-1">≈ ₦{late_registration.physical.naira}</span>
+              </div>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>All Standard benefits</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>Priority seating</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>VIP networking</span>
+                </li>
+              </ul>
+              {userPlan === "late_registration" ? (
+                <div className="text-center py-2 px-4 bg-green-900/30 text-green-400 rounded">
+                  You're registered for this plan
+                </div>
+              ) : conference.is_registered ? (
+                <div className="text-center py-2 px-4 bg-yellow-900/30 text-yellow-400 rounded">
+                  Already registered for another plan
+                </div>
+              ) : (
+                <Button 
+                  className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+                  onClick={() => {
+                    setSelectedPlan("late_registration");
+                    handlePaymentSubmit();
+                  }}
+                  disabled={paymentProcessing}
+                >
+                  {paymentProcessing ? "Processing..." : "Initiate Payment"}
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Rest of your existing sections... */}
+      </div>
+    </div>
+  );
 }

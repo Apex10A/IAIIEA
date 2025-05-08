@@ -247,6 +247,7 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
   );
 };
 
+
 const VideoAdsSection = ({ videos }: { videos: string[] }) => {
   if (videos.length === 0) return <section className="my-12">
   <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
@@ -287,7 +288,15 @@ const VideoAdsSection = ({ videos }: { videos: string[] }) => {
 };
 
 const SponsorsSection = ({ sponsors }: { sponsors: Sponsor[] }) => {
-  if (sponsors.length === 0) return null;
+  if (sponsors.length === 0) return <section className="my-12">
+  <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+   Sponsors
+  </h2>
+  <div className="bg-white/5 rounded-lg p-8 text-center">
+    <p className="text-white/70">No Sponsors available yet</p>
+  </div>
+</section>;
+;
 
   return (
     <section className="my-12">

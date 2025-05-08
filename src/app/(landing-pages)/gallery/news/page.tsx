@@ -1,13 +1,17 @@
-
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '@/app/index.css';
 import Image from 'next/image';
 import Upcoming from './UpcomingSeminars';
 import ActiveConferences from './UpcomingConferences';
 import { format, parseISO } from 'date-fns';
 import { useSession } from 'next-auth/react';
-import { ChevronLeft, ChevronRight, RefreshCw, Calendar, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, Calendar, Clock, Bold, Italic, Underline, Image as ImageIcon, Plus, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 interface NewsItem {
   news_id: string;
@@ -25,8 +29,19 @@ const NewsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [newNews, setNewNews] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    image: null as File | null
+  });
   const itemsPerPage = 5;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchNews = async () => {
     try {
@@ -109,6 +124,101 @@ const NewsPage = () => {
     fetchNews();
   };
 
+  // Rich text formatting functions
+  const formatText = (formatType: 'bold' | 'italic' | 'underline') => {
+    if (!descriptionRef.current) return;
+    
+    const textarea = descriptionRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    
+    if (!selectedText) return;
+    
+    let formattedText = '';
+    switch (formatType) {
+      case 'bold':
+        formattedText = `<strong>${selectedText}</strong>`;
+        break;
+      case 'italic':
+        formattedText = `<em>${selectedText}</em>`;
+        break;
+      case 'underline':
+        formattedText = `<u>${selectedText}</u>`;
+        break;
+    }
+    
+    const newValue = 
+      textarea.value.substring(0, start) + 
+      formattedText + 
+      textarea.value.substring(end);
+    
+    setNewNews({ ...newNews, description: newValue });
+    
+    // Focus back on the textarea and restore selection
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start, start + formattedText.length);
+    }, 0);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewNews({ ...newNews, image: e.target.files[0] });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFormError(null);
+    
+    try {
+      if (!newNews.image) {
+        throw new Error('Cover image is required');
+      }
+      
+      const formData = new FormData();
+      formData.append('title', newNews.title);
+      formData.append('description', newNews.description);
+      formData.append('date', newNews.date);
+      formData.append('time', newNews.time);
+      formData.append('image', newNews.image);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add_news`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
+        },
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to add news');
+      }
+      
+      if (result.status === 'success') {
+        setShowAddModal(false);
+        setNewNews({
+          title: '',
+          description: '',
+          date: '',
+          time: '',
+          image: null
+        });
+        refreshNews();
+      } else {
+        throw new Error(result.message || 'Failed to add news');
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Loading state using basic divs
   const LoadingPlaceholder = () => (
     <div className="space-y-6 animate-pulse">
@@ -127,6 +237,17 @@ const NewsPage = () => {
     <div className='flex flex-col lg:flex-row gap-6 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'>
       {/* Main content */}
       <div className='lg:w-[70%] w-full bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6'>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">News & Updates</h1>
+          <Button 
+            onClick={() => setShowAddModal(true)}
+            className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add News
+          </Button>
+        </div>
+
         {loading ? (
           <LoadingPlaceholder />
         ) : error ? (
@@ -298,6 +419,149 @@ const NewsPage = () => {
         <Upcoming/>
         <ActiveConferences/>
       </div>
+
+      {/* Add News Modal */}
+      <Modal 
+        isOpen={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          setFormError(null);
+        }}
+        title="Add New News"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-md text-red-700 dark:text-red-300">
+              {formError}
+            </div>
+          )}
+          
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={newNews.title}
+              onChange={(e) => setNewNews({ ...newNews, title: e.target.value })}
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={newNews.date}
+              onChange={(e) => setNewNews({ ...newNews, date: e.target.value })}
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="time">Time</Label>
+            <Input
+              id="time"
+              type="time"
+              value={newNews.time}
+              onChange={(e) => setNewNews({ ...newNews, time: e.target.value })}
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="image">Cover Image (Required)</Label>
+            <div className="mt-1 flex items-center gap-2">
+              <Label 
+                htmlFor="image-upload"
+                className="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 flex items-center gap-2"
+              >
+                <ImageIcon className="w-4 h-4" />
+                {newNews.image ? newNews.image.name : 'Choose Image'}
+              </Label>
+              <Input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                required
+              />
+              {newNews.image && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setNewNews({ ...newNews, image: null })}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <div className="mb-2 flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => formatText('bold')}
+              >
+                <Bold className="w-4 h-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => formatText('italic')}
+              >
+                <Italic className="w-4 h-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => formatText('underline')}
+              >
+                <Underline className="w-4 h-4" />
+              </Button>
+            </div>
+            <Textarea
+              id="description"
+              ref={descriptionRef}
+              value={newNews.description}
+              onChange={(e) => setNewNews({ ...newNews, description: e.target.value })}
+              rows={8}
+              required
+            />
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Use HTML tags or the buttons above to format text
+            </p>
+          </div>
+          
+          <div className="flex justify-end gap-4 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowAddModal(false);
+                setFormError(null);
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

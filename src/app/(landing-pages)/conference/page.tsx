@@ -161,7 +161,18 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
 const GalleryCarousel = ({ images }: { images: string[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (images.length === 0) return null;
+  if (images.length === 0) {
+    return (
+      <section className="my-12">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+          Gallery
+        </h2>
+        <div className="bg-white/5 rounded-lg p-8 text-center">
+          <p className="text-white/70">No gallery images available yet</p>
+        </div>
+      </section>
+    );
+  }
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -207,7 +218,7 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
                 <ChevronRight className="w-6 h-6 text-white" />
               </button>
             </>
-          )}
+          ) }
         </div>
         
         {/* Thumbnail Navigation */}
@@ -237,7 +248,14 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
 };
 
 const VideoAdsSection = ({ videos }: { videos: string[] }) => {
-  if (videos.length === 0) return null;
+  if (videos.length === 0) return <section className="my-12">
+  <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+   Video Ads
+  </h2>
+  <div className="bg-white/5 rounded-lg p-8 text-center">
+    <p className="text-white/70">No Video Ads available yet</p>
+  </div>
+</section>;
 
   return (
     <section className="my-12">
@@ -842,14 +860,15 @@ export default function ConferencePage() {
         </section>
 
         {/* Flyer Section */}
+      
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-            Call for paper flyer
+            Call for papers 
           </h2>
           <p className="text-white max-w-[60%]">
             We invite submissions for IAIIEA conference 2024. We seek innovative
             research and insights on a topic which aligns with the conference
-            theme. Please submit your abstract by [deadline] to
+            theme. Please <a href="https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1" className='underline font-bold text-[#D5B93C]'>submit</a> your abstract by [deadline] to
             iaiiea2024@iaiiea.org. The paper should, specifically, address
             issues outlined in the associated sub-themes.
           </p>

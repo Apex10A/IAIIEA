@@ -38,10 +38,17 @@ interface RegistrationType {
 }
 
 interface ConferencePayments {
-  basic: RegistrationType;
-  standard: RegistrationType;
-  premium: RegistrationType;
-  [key: string]: RegistrationType;
+  basic?: RegistrationType;
+  standard?: RegistrationType;
+  premium?: RegistrationType;
+  early_bird_registration?: RegistrationType;
+  normal_registration?: RegistrationType;
+  late_registration?: RegistrationType;
+  tour?: RegistrationType;
+  annual_dues?: RegistrationType;
+  vetting_fee?: RegistrationType;
+  publication_fee?: RegistrationType;
+  [key: string]: any;
 }
 
 interface Speaker {
@@ -49,6 +56,12 @@ interface Speaker {
   title: string;
   portfolio: string;
   picture: string;
+}
+
+interface Sponsor {
+  name: string;
+  logo: string;
+  website?: string;
 }
 
 interface ConferenceDetails {
@@ -66,7 +79,7 @@ interface ConferenceDetails {
   important_date: string[];
   flyer: string;
   gallery: string[];
-  sponsors: string[];
+  sponsors: Sponsor[];
   videos: string[];
   payments: ConferencePayments;
   status: string;
@@ -166,11 +179,11 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
       
       <div className="relative group">
         {/* Main Image */}
-        <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden">
+        <div className="relative h-64 md:h-96 w-full max-w-4xl mx-auto rounded-lg overflow-hidden">
           <img
             src={images[currentIndex]}
             alt={`Gallery image ${currentIndex + 1}`}
-            className=" h-full object-cover transition-opacity duration-300"
+            className="w-full h-full object-contain transition-opacity duration-300 bg-black"
             onError={(e) => {
               e.currentTarget.src = "/placeholder.jpg";
             }}
@@ -199,7 +212,7 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
         
         {/* Thumbnail Navigation */}
         {images.length > 1 && (
-          <div className="flex gap-2 mt-4 overflow-x-auto py-2">
+          <div className="flex gap-2 mt-4 overflow-x-auto py-2 justify-center">
             {images.map((img, idx) => (
               <button
                 key={idx}
@@ -252,6 +265,121 @@ const VideoAdsSection = ({ videos }: { videos: string[] }) => {
         ))}
       </div>
     </section>
+  );
+};
+
+const SponsorsSection = ({ sponsors }: { sponsors: Sponsor[] }) => {
+  if (sponsors.length === 0) return null;
+
+  return (
+    <section className="my-12">
+      <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+        Sponsors
+      </h2>
+      
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {sponsors.map((sponsor, index) => (
+          <div key={index} className="bg-white/5 rounded-lg p-6 flex items-center justify-center">
+            <a 
+              href={sponsor.website || '#'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex flex-col items-center"
+            >
+              <img
+                src={sponsor.logo}
+                alt={sponsor.name}
+                className="h-20 object-contain"
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder.jpg";
+                }}
+              />
+              <span className="text-white mt-2 text-center">{sponsor.name}</span>
+            </a>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const PaymentPlanCard = ({
+  title,
+  priceUsd,
+  priceNaira,
+  features,
+  isCurrentPlan,
+  isRegistered,
+  isPopular = false,
+  onClick,
+  attendanceType,
+}: {
+  title: string;
+  priceUsd: string;
+  priceNaira: string;
+  features: string[];
+  isCurrentPlan: boolean;
+  isRegistered: boolean;
+  isPopular?: boolean;
+  onClick: () => void;
+  attendanceType: 'virtual' | 'physical';
+}) => {
+  return (
+    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${isCurrentPlan ? 'border-[#D5B93C]' : isPopular ? 'border-[#D5B93C]' : 'border-[#D5B93C]/30'} ${isPopular ? 'transform md:-translate-y-2' : ''}`}>
+      <div className="p-6 relative">
+        {isPopular && !isRegistered && (
+          <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
+            POPULAR
+          </div>
+        )}
+        <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">{title}</h3>
+        
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-[#0E1A3D]">
+              ${priceUsd}
+            </p>
+            <p className="text-lg text-gray-700">
+              {priceNaira}
+            </p>
+          </div>
+          
+          <div className="pt-2">
+            <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+            <ul className="space-y-2 text-sm text-gray-700">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {isRegistered ? (
+            isCurrentPlan ? (
+              <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
+                Your Current Plan
+              </div>
+            ) : (
+              <button 
+                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                disabled
+              >
+                Already Registered
+              </button>
+            )
+          ) : (
+            <button 
+              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+              onClick={onClick}
+            >
+              Register {title}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -320,6 +448,11 @@ export default function ConferencePage() {
   const handleRegisterClick = async () => {
     if (!conference) return;
 
+    if (conference.status === "Completed") {
+      showToast.error("You cannot register for a conference that has been completed");
+      return;
+    }
+
     if (conference.is_registered) {
       router.push("/dashboard");
       return;
@@ -380,6 +513,145 @@ export default function ConferencePage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const renderPaymentPlans = () => {
+    if (!conference) return null;
+
+    // Check for different conference payment structures
+    if (conference.payments.early_bird_registration) {
+      // Conference with early bird, normal, late registration structure
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <PaymentPlanCard
+            title="Early Bird"
+            priceUsd={conference.payments.early_bird_registration[attendanceType].usd}
+            priceNaira={conference.payments.early_bird_registration[attendanceType].naira}
+            features={[
+              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
+              'Conference materials',
+              'Digital certificate',
+              'Early bird discount'
+            ]}
+            isCurrentPlan={conference.is_registered && conference.current_plan === 'early_bird_registration'}
+            isRegistered={conference.is_registered}
+            isPopular
+            onClick={() => {
+              setSelectedPlan('early_bird_registration');
+              handleRegisterClick();
+            }}
+            attendanceType={attendanceType}
+          />
+
+          <PaymentPlanCard
+            title="Normal"
+            priceUsd={conference.payments.normal_registration[attendanceType].usd}
+            priceNaira={conference.payments.normal_registration[attendanceType].naira}
+            features={[
+              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
+              'Conference materials',
+              'Digital certificate',
+              'Standard registration'
+            ]}
+            isCurrentPlan={conference.is_registered && conference.current_plan === 'normal_registration'}
+            isRegistered={conference.is_registered}
+            onClick={() => {
+              setSelectedPlan('normal_registration');
+              handleRegisterClick();
+            }}
+            attendanceType={attendanceType}
+          />
+
+          <PaymentPlanCard
+            title="Late"
+            priceUsd={conference.payments.late_registration[attendanceType].usd}
+            priceNaira={conference.payments.late_registration[attendanceType].naira}
+            features={[
+              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
+              'Conference materials',
+              'Digital certificate',
+              'Late registration'
+            ]}
+            isCurrentPlan={conference.is_registered && conference.current_plan === 'late_registration'}
+            isRegistered={conference.is_registered}
+            onClick={() => {
+              setSelectedPlan('late_registration');
+              handleRegisterClick();
+            }}
+            attendanceType={attendanceType}
+          />
+        </div>
+      );
+    } else if (conference.payments.basic) {
+      // Conference with basic, standard, premium structure
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <PaymentPlanCard
+            title="Basic"
+            priceUsd={conference.payments.basic[attendanceType].usd}
+            priceNaira={conference.payments.basic[attendanceType].naira}
+            features={[
+              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
+              'Conference materials',
+              'Digital certificate'
+            ]}
+            isCurrentPlan={conference.is_registered && conference.current_plan === 'basic'}
+            isRegistered={conference.is_registered}
+            onClick={() => {
+              setSelectedPlan('basic');
+              handleRegisterClick();
+            }}
+            attendanceType={attendanceType}
+          />
+
+          <PaymentPlanCard
+            title="Standard"
+            priceUsd={conference.payments.standard[attendanceType].usd}
+            priceNaira={conference.payments.standard[attendanceType].naira}
+            features={[
+              'Everything in Basic',
+              attendanceType === 'virtual' ? 'Enhanced virtual experience' : 'Physical attendance',
+              attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking',
+              attendanceType === 'physical' ? 'Printed materials' : 'Digital goodies'
+            ]}
+            isCurrentPlan={conference.is_registered && conference.current_plan === 'standard'}
+            isRegistered={conference.is_registered}
+            isPopular
+            onClick={() => {
+              setSelectedPlan('standard');
+              handleRegisterClick();
+            }}
+            attendanceType={attendanceType}
+          />
+
+          <PaymentPlanCard
+            title="Premium"
+            priceUsd={conference.payments.premium[attendanceType].usd}
+            priceNaira={conference.payments.premium[attendanceType].naira}
+            features={[
+              'Everything in Standard',
+              attendanceType === 'virtual' ? 'VIP virtual lounge' : 'VIP seating',
+              attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner',
+              'Exclusive gifts'
+            ]}
+            isCurrentPlan={conference.is_registered && conference.current_plan === 'premium'}
+            isRegistered={conference.is_registered}
+            onClick={() => {
+              setSelectedPlan('premium');
+              handleRegisterClick();
+            }}
+            attendanceType={attendanceType}
+          />
+        </div>
+      );
+    } else {
+      // Fallback for other payment structures
+      return (
+        <div className="text-white">
+          <p>Registration information will be available soon.</p>
+        </div>
+      );
+    }
   };
 
   if (loading) {
@@ -572,12 +844,12 @@ export default function ConferencePage() {
         {/* Flyer Section */}
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-            Call for papers 
+            Call for paper flyer
           </h2>
           <p className="text-white max-w-[60%]">
             We invite submissions for IAIIEA conference 2024. We seek innovative
             research and insights on a topic which aligns with the conference
-            theme. Please <a href="https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1" className='underline font-bold text-[#D5B93C]'>submit</a> your abstract by [deadline] to
+            theme. Please submit your abstract by [deadline] to
             iaiiea2024@iaiiea.org. The paper should, specifically, address
             issues outlined in the associated sub-themes.
           </p>
@@ -597,6 +869,9 @@ export default function ConferencePage() {
         {/* Video Ads Section */}
         <VideoAdsSection videos={conference.videos} />
 
+        {/* Sponsors Section */}
+        <SponsorsSection sponsors={conference.sponsors} />
+
         {/* Conference Fees Section */}
         <div className="my-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
@@ -611,7 +886,9 @@ export default function ConferencePage() {
                 <div>
                   <p className="font-bold text-white">You're registered for:</p>
                   <p className="text-white">
-                    {conference.current_plan.charAt(0).toUpperCase() + conference.current_plan.slice(1)} Access ({attendanceType})
+                    {conference.current_plan.split('_').map(word => 
+                      word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ')} Access ({attendanceType})
                   </p>
                 </div>
               </div>
@@ -636,212 +913,7 @@ export default function ConferencePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Basic Access */}
-            <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
-              conference.is_registered && conference.current_plan === 'basic' ? 
-              'border-[#D5B93C]' : 'border-[#D5B93C]/30'
-            }`}>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
-                
-                <div className="space-y-4">
-                  {/* <div className="text-center">
-                    <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${conference.payments.basic.virtual.usd}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {conference.payments.basic.virtual.naira}
-                    </p>
-                  </div> */}
-                  
-                  <div className="pt-2">
-                    <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
-                    <ul className="space-y-2 text-sm text-gray-700">
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>Conference materials</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>{attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>Digital certificate</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  {conference.is_registered ? (
-                    conference.current_plan === 'basic' ? (
-                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                        Your Current Plan
-                      </div>
-                    ) : (
-                      <button 
-                        className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
-                        disabled
-                      >
-                        Already Registered
-                      </button>
-                    )
-                  ) : (
-                    <button 
-                      className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-                      onClick={() => {
-                        setSelectedPlan('basic');
-                        handleRegisterClick();
-                      }}
-                    >
-                      Register Basic
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Standard Access */}
-            <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 transform md:-translate-y-2 ${
-              conference.is_registered && conference.current_plan === 'standard' ? 
-              'border-[#D5B93C]' : 'border-[#D5B93C]'
-            }`}>
-              <div className="p-6 relative">
-                {!conference.is_registered && (
-                  <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
-                    POPULAR
-                  </div>
-                )}
-                <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Standard Access</h3>
-                
-                <div className="space-y-4">
-                  {/* <div className="text-center">
-                    <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${conference.payments.standard[attendanceType].usd}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {conference.payments.standard[attendanceType].naira}
-                    </p>
-                  </div> */}
-                  
-                  <div className="pt-2">
-                    <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
-                    <ul className="space-y-2 text-sm text-gray-700">
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>Everything in Basic</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>{attendanceType === 'virtual' ? 'Enhanced virtual experience' : 'Physical attendance'}</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>{attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking'}</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>{attendanceType === 'physical' ? 'Printed materials' : 'Digital goodies'}</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  {conference.is_registered ? (
-                    conference.current_plan === 'standard' ? (
-                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                        Your Current Plan
-                      </div>
-                    ) : (
-                      <button 
-                        className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
-                        disabled
-                      >
-                        Already Registered
-                      </button>
-                    )
-                  ) : (
-                    <button 
-                      className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-                      onClick={() => {
-                        setSelectedPlan('standard');
-                        handleRegisterClick();
-                      }}
-                    >
-                      Register Standard
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Access */}
-            <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
-              conference.is_registered && conference.current_plan === 'premium' ? 
-              'border-[#D5B93C]' : 'border-[#D5B93C]/30'
-            }`}>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Premium Access</h3>
-                
-                <div className="space-y-4">
-                  {/* <div className="text-center">
-                    <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${conference.payments.premium[attendanceType].usd}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {conference.payments.premium[attendanceType].naira}
-                    </p>
-                  </div> */}
-                  
-                  <div className="pt-2">
-                    <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
-                    <ul className="space-y-2 text-sm text-gray-700">
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>Everything in Standard</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>{attendanceType === 'virtual' ? 'VIP virtual lounge' : 'VIP seating'}</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>{attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner'}</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                        <span>Exclusive gifts</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  {conference.is_registered ? (
-                    conference.current_plan === 'premium' ? (
-                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                        Your Current Plan
-                      </div>
-                    ) : (
-                      <button 
-                        className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
-                        disabled
-                      >
-                        Already Registered
-                      </button>
-                    )
-                  ) : (
-                    <button 
-                      className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-                      onClick={() => {
-                        setSelectedPlan('premium');
-                        handleRegisterClick();
-                      }}
-                    >
-                      Register Premium
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          {renderPaymentPlans()}
         </div>
       </div>
 
@@ -859,9 +931,24 @@ export default function ConferencePage() {
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
+                    {conference.payments.early_bird_registration && (
+                      <SelectItem value="early_bird_registration">Early Bird</SelectItem>
+                    )}
+                    {conference.payments.normal_registration && (
+                      <SelectItem value="normal_registration">Normal</SelectItem>
+                    )}
+                    {conference.payments.late_registration && (
+                      <SelectItem value="late_registration">Late</SelectItem>
+                    )}
+                    {conference.payments.basic && (
+                      <SelectItem value="basic">Basic</SelectItem>
+                    )}
+                    {conference.payments.standard && (
+                      <SelectItem value="standard">Standard</SelectItem>
+                    )}
+                    {conference.payments.premium && (
+                      <SelectItem value="premium">Premium</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

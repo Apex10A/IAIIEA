@@ -145,81 +145,113 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
   );
 };
 
-const Carousel = ({
-  items,
-  showArrows = true,
-}: {
-  items: string[];
-  showArrows?: boolean;
-}) => {
+const GalleryCarousel = ({ images }: { images: string[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  if (images.length === 0) return null;
+
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % items.length);
+    setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
   return (
-    <div className="relative group">
-      <div className="flex items-center justify-center">
-        {showArrows && items.length > 1 && (
-          <>
-            <button
-              onClick={goToPrevious}
-              className="absolute left-0 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 transition-colors opacity-0 group-hover:opacity-100"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="w-5 h-5 text-white" />
-            </button>
-
-            <button
-              onClick={goToNext}
-              className="absolute right-0 z-10 p-2 rounded-full bg-white/20 hover:bg-white/40 transition-colors opacity-0 group-hover:opacity-100"
-              aria-label="Next"
-            >
-              <ChevronRight className="w-5 h-5 text-white" />
-            </button>
-          </>
-        )}
-
-        <div className="flex justify-center items-center gap-4 my-4 overflow-hidden w-full">
-          {items.length > 0 ? (
-            <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden">
-              <img
-                src={items[currentIndex] || "/placeholder.jpg"}
-                alt={`Item ${currentIndex + 1}`}
-                className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.jpg";
-                }}
-              />
-            </div>
-          ) : (
-            <div className="text-white opacity-70 py-12">
-              No items available
-            </div>
+    <section className="my-12">
+      <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+        Gallery
+      </h2>
+      
+      <div className="relative group">
+        {/* Main Image */}
+        <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden">
+          <img
+            src={images[currentIndex]}
+            alt={`Gallery image ${currentIndex + 1}`}
+            className=" h-full object-cover transition-opacity duration-300"
+            onError={(e) => {
+              e.currentTarget.src = "/placeholder.jpg";
+            }}
+          />
+          
+          {/* Navigation Arrows */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={goToPrevious}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-6 h-6 text-white" />
+              </button>
+              <button
+                onClick={goToNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
+                aria-label="Next"
+              >
+                <ChevronRight className="w-6 h-6 text-white" />
+              </button>
+            </>
           )}
         </div>
+        
+        {/* Thumbnail Navigation */}
+        {images.length > 1 && (
+          <div className="flex gap-2 mt-4 overflow-x-auto py-2">
+            {images.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden transition-all ${idx === currentIndex ? 'ring-2 ring-[#D5B93C]' : 'opacity-70 hover:opacity-100'}`}
+              >
+                <img
+                  src={img}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.jpg";
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+    </section>
+  );
+};
 
-      {items.length > 1 && (
-        <div className="flex justify-center mt-4 gap-2">
-          {items.map((_, idx) => (
-            <button
-              key={idx}
-              className={`h-2 w-2 rounded-full transition-all ${
-                idx === currentIndex ? "bg-[#D5B93C] w-4" : "bg-white/30"
-              }`}
-              onClick={() => setCurrentIndex(idx)}
-              aria-label={`Go to item ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+const VideoAdsSection = ({ videos }: { videos: string[] }) => {
+  if (videos.length === 0) return null;
+
+  return (
+    <section className="my-12">
+      <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+        Video Ads
+      </h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {videos.map((video, index) => (
+          <div key={index} className="bg-white/5 rounded-lg overflow-hidden">
+            <div className="relative pt-[56.25%]"> {/* 16:9 aspect ratio */}
+              <video
+                controls
+                className="absolute top-0 left-0 w-full h-full object-cover"
+                poster="/video-poster.jpg"
+              >
+                <source src={video} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div className="p-4">
+              <h3 className="text-white font-medium">Promotional Video {index + 1}</h3>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 
@@ -559,6 +591,12 @@ export default function ConferencePage() {
           </Button>
         </section>
 
+        {/* Gallery Section */}
+        <GalleryCarousel images={conference.gallery} />
+
+        {/* Video Ads Section */}
+        <VideoAdsSection videos={conference.videos} />
+
         {/* Conference Fees Section */}
         <div className="my-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
@@ -608,14 +646,14 @@ export default function ConferencePage() {
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
                 
                 <div className="space-y-4">
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${conference.payments.basic[attendanceType].usd}
+                      ${conference.payments.basic.virtual.usd}
                     </p>
                     <p className="text-lg text-gray-700">
-                      {conference.payments.basic[attendanceType].naira}
+                      {conference.payments.basic.virtual.naira}
                     </p>
-                  </div>
+                  </div> */}
                   
                   <div className="pt-2">
                     <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
@@ -677,14 +715,14 @@ export default function ConferencePage() {
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Standard Access</h3>
                 
                 <div className="space-y-4">
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <p className="text-3xl font-bold text-[#0E1A3D]">
                       ${conference.payments.standard[attendanceType].usd}
                     </p>
                     <p className="text-lg text-gray-700">
                       {conference.payments.standard[attendanceType].naira}
                     </p>
-                  </div>
+                  </div> */}
                   
                   <div className="pt-2">
                     <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
@@ -745,14 +783,14 @@ export default function ConferencePage() {
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Premium Access</h3>
                 
                 <div className="space-y-4">
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <p className="text-3xl font-bold text-[#0E1A3D]">
                       ${conference.payments.premium[attendanceType].usd}
                     </p>
                     <p className="text-lg text-gray-700">
                       {conference.payments.premium[attendanceType].naira}
                     </p>
-                  </div>
+                  </div> */}
                   
                   <div className="pt-2">
                     <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>

@@ -1,11 +1,31 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
-import EditConferenceModal from './EditEvents';
 import { useSession } from "next-auth/react";
-import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
+import EditConferenceModal from './EditEvents';
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { Trash2, Calendar, MapPin, Tag, ArrowLeft, ExternalLink, Play, Download, FileText } from "lucide-react";
+import {
+  Trash2,
+  Calendar,
+  MapPin,
+  Tag,
+  ArrowLeft,
+  ExternalLink,
+  Play,
+  Download,
+  FileText,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Plus,
+  FileUp
+} from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
 
@@ -20,62 +40,20 @@ interface Resource {
 
 interface Conference {
   id: number;
-  is_registered?: boolean;
   title: string;
   theme: string;
   venue: string;
   date: string;
-  start_date: string;
-  start_time: string;
-  sub_theme: string[];
-  work_shop: string[];
-  important_date: string[];
-  flyer: string;
+  description: string;
+  status: string;
+  meals: string[];
   gallery: string[];
+  flyer: string;
   sponsors: string[];
   videos: string[];
-  payments: {
-    basic?: {
-      virtual: { usd: string; naira: string };
-      physical: { usd: string; naira: string };
-      package?: string[];
-    };
-    standard?: {
-      virtual: { usd: string; naira: string };
-      physical: { usd: string; naira: string };
-      package?: string[];
-    };
-    premium?: {
-      virtual: { usd: string; naira: string };
-      physical: { usd: string; naira: string };
-      package?: string[];
-    };
-    early_bird_registration?: {
-      virtual: { usd: string; naira: string };
-      physical: { usd: string; naira: string };
-    };
-    normal_registration?: {
-      virtual: { usd: string; naira: string };
-      physical: { usd: string; naira: string };
-    };
-    late_registration?: {
-      virtual: { usd: string; naira: string };
-      physical: { usd: string; naira: string };
-    };
-  };
-  speakers: Array<{
-    speaker_id: number;
-    name: string;
-    title: string;
-    portfolio: string;
-    picture: string;
-    occupation?: string;
-  }>;
-  resources?: any[];
-  schedule?: any[];
-  meals?: any[];
-  status?: string;
+  resources: Resource[];
 }
+
 interface ConferenceDetails {
   id: number;
   is_registered: boolean;
@@ -85,7 +63,7 @@ interface ConferenceDetails {
   date: string;
   start_date: string;
   start_time: string;
-  sub_theme: string[];
+  sub_theme?: string[];
   work_shop: string[];
   important_date: string[];
   flyer: string;
@@ -190,144 +168,6 @@ interface ConferenceDetails {
     };
   };
 }
-interface ConferenceCardProps {
-  conference: Conference;
-  onViewResources: (conference: Conference) => void;
-  onViewDetails: (conference: Conference) => void;
-  onDeleteConference: (id: number) => void;
-  onEditConference: (conference: Conference) => void;
-}
-
-const ConferenceCard: React.FC<ConferenceCardProps> = ({
-  conference,
-  onViewResources,
-  onViewDetails,
-  onDeleteConference,
-  onEditConference,
-}) => {
-  const fullConference: Conference = {
-    id: conference.id,
-    title: conference.title,
-    theme: conference.theme,
-    venue: conference.venue,
-    date: conference.date,
-    start_date: conference.start_date || '',
-    start_time: conference.start_time || '',
-    sub_theme: conference.sub_theme || [],
-    work_shop: conference.work_shop || [],
-    important_date: conference.important_date || [],
-    flyer: conference.flyer || '',
-    gallery: conference.gallery || [],
-    sponsors: conference.sponsors || [],
-    videos: conference.videos || [],
-    payments: conference.payments || {},
-    speakers: conference.speakers || [],
-    status: conference.status || 'Upcoming'
-  };
-
-  const resourceCount = conference.resources?.length || 0;
-
-  const handleDelete = async () => {
-    try {
-      await onDeleteConference(conference.id);
-      showToast.success("Conference deleted successfully");
-    } catch (error) {
-      showToast.error("Failed to delete conference");
-    }
-  };
-
-  // Function to get background color based on index
-  const getBgColor = (index: number) => {
-    const colors = ["bg-blue-50", "bg-amber-50", "bg-emerald-50"];
-    return colors[index % colors.length];
-  };
-
-  return (
-    <div className="rounded-lg  shadow-md hover:shadow-lg transition-shadow">
-      <div className="relative">
-        <div className="absolute z-20 bottom-5 left-5">
-          <button
-            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-              conference?.status === "Completed"
-                ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
-                : "bg-[#203A87] text-white hover:bg-[#152a61]"
-            }`}
-          >
-            {conference?.status}
-          </button>
-        </div>
-        <Image
-          src="/Meeting.png"
-          alt={conference?.title}
-          width={600}
-          height={400}
-          className="w-full h-[250px] object-cover"
-        />
-      </div>
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-[#0B142F] text-2xl lg:text-4xl font-semibold">
-            {conference?.title}
-          </h1>
-        </div>
-        <p className="text-[#0B142F] text-base lg:text-lg font-medium mb-4 line-clamp-2">
-          {conference.theme}
-        </p>
-        <p className="text-gray-600 text-sm lg:text-base font-medium mb-6">
-          {conference.date}
-        </p>
-      </div>
-      <div className="mt-4 flex justify-between gap-2 px-4 pb-4">
-        <button
-          onClick={() => onViewDetails(conference)}
-          className="bg-[#203A87] px-4 py-3 rounded-lg text-white font-medium hover:bg-[#152a61] transition-colors duration-300 flex-grow sm:flex-grow-0"
-        >
-          View Details
-        </button>
-        <EditConferenceModal 
-          conference={fullConference} 
-          onSuccess={onEditConference} 
-        />
-        
-        <AlertDialog.Root>
-          <AlertDialog.Trigger asChild>
-            <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </button>
-          </AlertDialog.Trigger>
-          <AlertDialog.Portal>
-            <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
-            <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
-              <AlertDialog.Title className="text-lg font-semibold">
-                Delete Conference
-              </AlertDialog.Title>
-              <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                Are you sure you want to delete this conference? This action
-                cannot be undone.
-              </AlertDialog.Description>
-              <div className="flex justify-end gap-4">
-                <AlertDialog.Cancel asChild>
-                  <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Cancel
-                  </button>
-                </AlertDialog.Cancel>
-                <AlertDialog.Action asChild>
-                  <button
-                    onClick={handleDelete}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </AlertDialog.Action>
-              </div>
-            </AlertDialog.Content>
-          </AlertDialog.Portal>
-        </AlertDialog.Root>
-      </div>
-    </div>
-  );
-};
 
 interface ResourceCardProps {
   resource: Resource;
@@ -338,7 +178,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     });
   };
@@ -353,748 +193,666 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-      <div className="flex justify-between items-start">
+    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow">
+      <div className="flex items-start gap-3">
+        <div className="bg-blue-50 p-2 rounded-lg">
+          <FileText className="w-5 h-5 text-blue-600" />
+        </div>
         <div className="flex-1">
-          <h3 className="text-sm sm:text-lg font-semibold text-gray-900 mb-2">
-            {resource.caption}
-          </h3>
-          <p className="text-xs sm:text-sm text-gray-600 mb-4">
-            Added on: {formatDate(resource.date)}
+          <div className="flex justify-between items-start">
+            <h3 className="text-sm font-medium text-gray-900 mb-1">
+              {resource.caption}
+            </h3>
+            <button
+              onClick={handleDelete}
+              className="text-gray-400 hover:text-red-500 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mb-3">
+            Added on {formatDate(resource.date)}
           </p>
           {resource.file && (
             <a
               href={resource.file}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
             >
-              Download Resource
+              <Download className="w-3 h-3 mr-1.5" />
+              Download
             </a>
           )}
         </div>
-        <button
-          onClick={() => onDelete(resource.resource_id)}
-          className="text-red-600 hover:text-red-800 text-sm"
-        >
-          Delete
-        </button>
       </div>
     </div>
   );
 };
 
-// New Conference Details Component
+
+
+
+interface AddResourceModalProps {
+  conferenceId: number;
+  onSuccess: () => void;
+}
+
+const AddResourceModal: React.FC<AddResourceModalProps> = ({
+  conferenceId,
+  onSuccess,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [caption, setCaption] = useState("");
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file || !caption) return;
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("caption", caption);
+      formData.append("conference_id", conferenceId.toString());
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/add_resource`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to add resource");
+      }
+
+      showToast.success("Resource added successfully");
+      setOpen(false);
+      onSuccess();
+    } catch (error) {
+      console.error("Error adding resource:", error);
+      showToast.error("Failed to add resource");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger asChild>
+        <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+          <Plus className="w-4 h-4" />
+          Add Resource
+        </button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-white rounded-lg shadow-lg p-6 focus:outline-none">
+          <div className="flex justify-between items-center mb-4">
+            <Dialog.Title className="text-lg font-semibold">
+              Add New Resource
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button className="text-gray-500 hover:text-gray-700">
+                <Cross2Icon className="w-5 h-5" />
+              </button>
+            </Dialog.Close>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resource File
+                </label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="space-y-1 text-center">
+                    {file ? (
+                      <div className="text-sm text-gray-600">
+                        {file.name} ({Math.round(file.size / 1024)} KB)
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex justify-center">
+                          <FileUp className="w-12 h-12 text-gray-400" />
+                        </div>
+                        <div className="flex text-sm text-gray-600">
+                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                            <span>Upload a file</span>
+                            <input
+                              type="file"
+                              className="sr-only"
+                              onChange={(e) =>
+                                setFile(e.target.files?.[0] || null)
+                              }
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          PDF, DOCX, PPTX up to 10MB
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="caption"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Caption
+                </label>
+                <input
+                  type="text"
+                  id="caption"
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+              </Dialog.Close>
+              <button
+                type="submit"
+                disabled={loading || !file || !caption}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? "Uploading..." : "Upload Resource"}
+              </button>
+            </div>
+          </form>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
 interface ConferenceDetailsProps {
   conference: Conference;
+  conferenceDetails: ConferenceDetails | null;
+  loading: boolean;
   onBack: () => void;
   onViewResources: (conference: Conference) => void;
 }
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
-const fetchConferenceDetails = async (
-  id: number,
-  bearerToken: string
-): Promise<ApiResponse<ConferenceDetails>> => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch conference details");
-  }
-
-  return await response.json();
-};
-
-const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
+const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   conference,
+  conferenceDetails,
+  loading,
   onBack,
   onViewResources,
 }) => {
-  // Add a state to store the detailed conference data
-  const [conferenceDetails, setConferenceDetails] =
-    useState<ConferenceDetails | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  // Fetch conference details when component mounts
-  useEffect(() => {
-    const getConferenceDetails = async () => {
-      try {
-        const token = "YOUR_BEARER_TOKEN"; // Get this from your auth system
-        const response = await fetchConferenceDetails(conference.id, token);
-        setConferenceDetails(response.data);
-      } catch (error) {
-        console.error("Error fetching conference details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
 
-    getConferenceDetails();
-  }, [conference.id]);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
-  // In your JSX, update the gallery section to use conferenceDetails
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (!conferenceDetails) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Failed to load conference details</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="gap-8 grid grid-cols-2">
-           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-             <div className="relative">
-               <button
-                onClick={onBack}
-                className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </button>
-    
-              <div className="absolute z-10 bottom-4 right-4">
-                <button
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-                    conference.status === "Completed"
-                      ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
-                      : "bg-[#203A87] text-white hover:bg-[#152a61]"
-                  }`}
-                >
-                  {conference.status}
-                  {/* {loading ? "Loading..." : conferenceDetails?.is_registered ? "Registered" : "Not Registered"} */}
-                </button>
-              </div>
-    
-              <Image
-                src="/Meeting.png"
-                alt={conference.title}
-                width={800}
-                height={400}
-                className="w-full h-[300px] md:h-[400px] object-cover"
-              />
+    <div className="space-y-6">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to conferences
+      </button>
+
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        {/* <div className="relative h-[400px] bg-gray-100">
+          {conferenceDetails?.flyer ? (
+            <Image
+              src={conferenceDetails.flyer}
+              alt={conference.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              <FileText className="w-16 h-16" />
             </div>
-    
-            <div className="p-6 md:p-8">
-              <div className="flex items-center justify-between">
-                <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
-                  {conferenceDetails?.title}
-                </h1>
-                <p>
-                  100+ people registered{" "}
-                  <a href="" className="underline font-bold">
-                    access participant directory
-                  </a>
+          )}
+          <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
+            {conference.status}
+          </div>
+        </div> */}
+
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {conference.title}
+          </h1>
+          <p className="text-gray-800 ">171 people have registered for this conference</p>
+          </div>
+          <p className="text-2xl text-gray-800 uppercase font-bold mb-4">
+            {conference.theme}
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-5">
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-gray-500 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Date</p>
+                <p className="font-medium text-gray-500">
+                  {conference.date}
                 </p>
               </div>
-    
-              <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
-                <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
-                  {conference.theme}
-                </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Venue</p>
+                <p className="font-medium text-gray-500">{conference.venue}</p>
               </div>
-              <div className="mb-6">
-                <hr />
-              </div>
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start gap-3">
-                  <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Date</h3>
-                    <p className="text-base md:text-lg font-medium text-[#0B142F]">
-                      {conference.date}
-                    </p>
-                  </div>
+            </div>
+          </div>
+
+          {!conferenceDetails.is_registered && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
                 </div>
-    
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Venue</h3>
-                    <p className="text-base md:text-lg font-medium text-[#0B142F]">
-                      {conference.venue}
-                    </p>
-                  </div>
-                </div>
-                <div className="pt-4">
-                <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Sub-theme</h3>
-                <p className="text-sm font-medium text-gray-500">
-                  {conferenceDetails?.sub_theme}
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    You need to register for this conference to view all details.
                   </p>
                 </div>
-                <div className="py-2">
-                <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Workshop</h3>
-                <p  className="text-sm font-medium text-gray-500">{conferenceDetails?.work_shop}</p>
-                </div>
-                <div>
-                <h3 className="text-base md:text-lg font-medium text-[#0B142F]">Important Dates</h3>
-                <p  className="text-sm font-medium text-gray-500">{conferenceDetails?.important_date}</p>
-                </div>
               </div>
-              <div className="my-6">
-                <hr />
-              </div>
-            
-              <div>
-                <h1 className="text-2xl mb-3">Daily conference schedule</h1>
-              </div>
-             
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-                <h1 className="text-2xl mb-3">Join event for virtual attendees</h1>
-                <div className="flex items-center gap-4 justify-between">
-                  <p>You can access the live event from here</p>
-                  <button
-                    onClick={() => onViewResources(conference)}
-                    className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]"
-                  >
-                    Join in
-                  </button>
-                </div>
-              </div>
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-                <h1 className="text-2xl mb-3">Certification</h1>
-                <p>
-                  Complete the conference evaluation to{" "}
-                  <a href="" className="underline font-bold">
-                    access certificate
-                  </a>
-                </p>
-              </div>
-              <div>
-  <h1 className="text-2xl mb-3">Registration Fees</h1>
-  {loading ? (
-    <p>Loading registration fees...</p>
-  ) : (
-    conferenceDetails && conferenceDetails.payments ? (
-      <div className="space-y-4">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Early Bird Registration:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.early_bird_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.early_bird_registration.virtual.usd).toLocaleString()}.00)
             </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.early_bird_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.early_bird_registration.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Normal Registration:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.normal_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.normal_registration.virtual.usd).toLocaleString()}.00)
-            </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.normal_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.normal_registration.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Late Registration:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.late_registration.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.late_registration.virtual.usd).toLocaleString()}.00)
-            </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.late_registration.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.late_registration.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Tour:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.tour.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.tour.virtual.usd).toLocaleString()}.00)
-            </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.tour.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.tour.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Annual Dues:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.annual_dues.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.annual_dues.virtual.usd).toLocaleString()}.00)
-            </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.annual_dues.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.annual_dues.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Vetting Fee:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.vetting_fee.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.vetting_fee.virtual.usd).toLocaleString()}.00)
-            </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.vetting_fee.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.vetting_fee.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-2">Publication Fee:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Virtual:</span> NGN{Number(conferenceDetails.payments.publication_fee.virtual.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.publication_fee.virtual.usd).toLocaleString()}.00)
-            </div>
-            <div className="bg-white p-3 rounded border border-gray-200">
-              <span className="font-medium">Physical:</span> NGN{Number(conferenceDetails.payments.publication_fee.physical.naira).toLocaleString()}.00 (${Number(conferenceDetails.payments.publication_fee.physical.usd).toLocaleString()}.00)
-            </div>
-          </div>
+          )}
+
+
         </div>
       </div>
-    ) : (
-      <p className="text-gray-500">No registration fee information available</p>
-    )
-  )}
-</div>
-    
+
+      {conferenceDetails.is_registered && (
+            <div className="space-y-4 mt-10">
+              {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
+                <div className="border-b border-gray-200 pb-4">
+                  <button
+                    onClick={() => toggleSection("schedule")}
+                    className="flex justify-between items-center w-full text-left font-medium text-gray-900"
+                  >
+                    {/* <span>Schedules</span> */}
+                    {/* {expandedSection === "schedule" ? (
+                      <ChevronUp className="w-5 h-5" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5" />
+                    )} */}
+                  </button>
+                 
+                    <div className="mt-4 space-y-4">
+                      {/* {conferenceDetails.schedule.map((item, index) => (
+                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium">{item.activity}</h3>
+                              {item.facilitator && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Facilitator: {item.facilitator}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium">
+                                {item.day}, {item.start} - {item.end}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                {item.venue}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))} */}
+
+                    </div>
+              
+                </div>
+              )}
+
             </div>
-          </div>
-    
-          <div className="bg-white rounded-lg shadow-lg border p-6">
-          <div className="bg-white rounded-lg shadow-lg border p-6">
-        <div>
-          <h1 className="text-2xl mb-3">Gallery</h1>
-          {loading ? (
-            <p>Loading gallery...</p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {conferenceDetails &&
-              conferenceDetails.gallery &&
-              conferenceDetails.gallery.length > 0 ? (
-                conferenceDetails.gallery.map((imageUrl, index) => (
+          )}
+
+      {conferenceDetails.is_registered && (
+        <>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Gallery</h2>
+            {conferenceDetails?.gallery && conferenceDetails.gallery.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {conferenceDetails.gallery.map((imageUrl, index) => (
                   <div
                     key={index}
-                    className="relative h-48 rounded-lg overflow-hidden"
+                    className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
                   >
                     <Image
                       src={imageUrl}
                       alt={`Gallery image ${index + 1}`}
                       fill
-                      className="object-cover"
+                      className="object-cover hover:scale-105 transition-transform"
                     />
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No gallery images available</p>
-              )}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No gallery images available</p>
+            )}
+          </div>
 
-        {/* Rest of your component... */}
-      </div>
-             
-              <div className="py-4">
-      <h1 className="text-2xl mb-3">Conference Flyer</h1>
-      {conferenceDetails && conferenceDetails.flyer ? (
-        <div className="relative h-96 w-full  rounded-lg overflow-hidden">
-          <Image
-            src={conferenceDetails?.flyer}
-            alt="Conference Flyer"
-           fill
-            className="object-contain"
-          />
-        </div>
-      ) : (
-        <p className="text-gray-500">No flyer available</p>
-      )}
-    </div>
-    <div className="my-6">
-      <hr />
-    </div>
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-                <h1 className="text-2xl mb-3">Conference Proceeding</h1>
-    
-              </div>
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-  <h1 className="text-2xl mb-3">Conference Videos</h1>
-  {loading ? (
-    <p>Loading videos...</p>
-  ) : (
-    <div className="space-y-4">
-      {conferenceDetails && conferenceDetails.videos && conferenceDetails.videos.length > 0 ? (
-        conferenceDetails.videos.map((video, index) => (
-          <div key={index} className="border rounded-lg p-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#203A87] p-2 rounded-full">
-                <Play className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-800">{video.title || `Video ${index + 1}`}</h3>
-                {video.description && (
-                  <p className="text-gray-600 text-sm">{video.description}</p>
-                )}
-              </div>
-            </div>
-            <div className="mt-2">
-              <a 
-                href={video.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#203A87] font-medium hover:underline inline-flex items-center gap-1"
-              >
-                Watch video <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500">No conference videos available</p>
-      )}
-    </div>
-  )}
-</div>
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-  <h1 className="text-2xl mb-3">Resources</h1>
-  {loading ? (
-    <p>Loading resources...</p>
-  ) : (
-    <div className="space-y-4">
-      {conferenceDetails && conferenceDetails.resources && conferenceDetails.resources.length > 0 ? (
-        conferenceDetails.resources.map((resource) => (
-          <div key={resource.resource_id} className="border rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <div className="bg-[#203A87] p-2 rounded-full mt-1">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-800 mb-1">{resource.caption || "Resource"}</h3>
-                {resource.date && (
-                  <p className="text-gray-500 text-sm">Date: {new Date(resource.date).toLocaleDateString()}</p>
-                )}
-                <div className="mt-3">
-                  <a 
-                    href={resource.file} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-lg font-semibold text-sm text-white bg-[#152a61] hover:bg-[#203A87] inline-flex items-center gap-2"
-                  >
-                    <Download className="w-4 h-4" /> Download Resource
-                  </a>
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Conference Schedules</h2>
+            {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {conferenceDetails.schedule.map((item, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{item.activity}</h3>
+                      {item.facilitator && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Facilitator: {item.facilitator}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {item.day}, {item.start} - {item.end}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {item.venue}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No schedules available</p>
+            )}
           </div>
-        ))
-      ) : (
-        <p className="text-gray-500">No resources available</p>
+
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">This are the list of food currently available for the day. Select any food of your choice</p>
+            {conferenceDetails?.meals && conferenceDetails.meals.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {conferenceDetails.meals.map((item, index) => (
+                  <div
+                    key={index}
+                    className="h-60 relative rounded-lg overflow-hidden bg-gray-100"
+                  >
+                    <Image
+                      src={item.image}
+                      alt={`Gallery image ${index + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform"
+                    />
+                  <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-2 rounded-t-lg">
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">{item.name}</h2>
+                    <div>
+                      <button   className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">select meal</button>
+                    </div>
+                  </div>
+                  </div>
+                  
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No Meals available</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Videos</h2>
+            {conferenceDetails?.videos && conferenceDetails.videos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {conferenceDetails.videos.map((video, index) => (
+                  <div key={index} className="relative h-40 rounded-lg overflow-hidden bg-gray-100">
+                    <Image
+                      src={video.url}
+                      alt={`Video ${index + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No videos available</p>
+            )}
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Certification</h2>
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold">here</Link></p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Join event for virtual attendees</h2>
+            <div className="flex items-center gap-3">
+            <p className="text-gray-600 text-sm line-clamp-2">You can access the live event from here</p>
+            <button className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Join the live call</button>
+            </div>
+            </div>
+          
+          
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Resources</h2>
+              <button
+                onClick={() => onViewResources(conference)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+              >
+                View all resources <ExternalLink className="w-4 h-4" />
+              </button>
+            </div>
+            {conferenceDetails?.resources && conferenceDetails.resources.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {conferenceDetails.resources.slice(0, 4).map((resource) => (
+                  <ResourceCard
+                    key={resource.resource_id}
+                    resource={resource}
+                    onDelete={() => {}}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No resources available</p>
+            )}
+          </div>
+        </>
       )}
     </div>
-  )}
-</div>
-              <div className="my-6">
-                <hr />
-              </div>
-            
-              <div className="my-6">
-                <hr />
-              </div>
-              <div>
-  <h1 className="text-2xl mb-3">Meals</h1>
-  {loading ? (
-    <p>Loading meals...</p>
-  ) : (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {conferenceDetails && conferenceDetails.meals && conferenceDetails.meals.length > 0 ? (
-        conferenceDetails.meals.map((meal) => (
-          <div key={meal.meal_id} className="border rounded-lg overflow-hidden">
-            <div className="relative h-48">
-              <Image
-                src={meal.image}
-                alt={meal.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-3 bg-white">
-              <h3 className="font-medium text-gray-800">{meal.name}</h3>
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500">No meals available</p>
-      )}
-    </div>
-  )}
-</div>
-          </div>
-        </div>
   );
 };
 
-//   conference,
-//   onBack,
-//   onViewResources,
-// }) => {
+interface ConferenceCardProps {
+  conference: Conference;
+  onEditConference: () => void; // Add this
+  onDeleteConference: (conferenceId: number) => void; // Add this
+  onViewResources: (conference: Conference) => void;
+  onViewDetails: (conference: Conference) => void;
+}
 
-//   return (
-//     <div className="grid grid-cols-2 gap-8">
-//       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-//         <div className="relative">
-//           <button
-//             onClick={onBack}
-//             className="absolute z-10 top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white/90 rounded-lg text-gray-700 hover:bg-white transition-colors"
-//           >
-//             <ArrowLeft className="w-4 h-4" />
-//             Back to Dashboard
-//           </button>
+const ConferenceCard: React.FC<ConferenceCardProps> = ({
+  conference,
+  onViewResources,
+  onViewDetails,
+  onEditConference,
+  onDeleteConference,
+}) => {
+  const resourceCount = conference.resources?.length || 0;
+  const handleDelete = async () => {
+    try {
+      await onDeleteConference(conference.id);
+      showToast.success("Conference deleted successfully");
+    } catch (error) {
+      showToast.error("Failed to delete conference");
+    }
+  };
 
-//           <div className="absolute z-10 bottom-4 right-4">
-//             <button
-//               className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 ${
-//                 conference.status === "Completed"
-//                   ? "bg-[#f2e9c3] text-[#0B142F] hover:bg-[#e9dba3]"
-//                   : "bg-[#203A87] text-white hover:bg-[#152a61]"
-//               }`}
-//             >
-//               {conference.status}
-//             </button>
-//           </div>
+  return (
+    <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
+      <div className="relative group">
+        <div className="absolute z-20 bottom-5 left-5">
+          <span
+            className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
+              conference?.status === "Completed"
+                ? "bg-amber-100 text-amber-800"
+                : "bg-blue-100 text-blue-800"
+            }`}
+          >
+            {conference?.status}
+          </span>
+        </div>
+        <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
+          {conference.flyer ? (
+            <Image
+              src={conference.flyer}
+              alt={conference.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              <FileText className="w-12 h-12" />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <h2 className="text-gray-900 text-lg font-semibold line-clamp-2">
+            {conference.title}
+          </h2>
+          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
+            {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
+          </span>
+        </div>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {conference.theme}
+        </p>
+        <div className="flex items-center text-gray-500 text-xs mb-4">
+          <Calendar className="w-3 h-3 mr-1" />
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{conference.date}</p>
+        </div>
+      </div>
+      <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+        <button
+          onClick={() => onViewDetails(conference)}
+          className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
+        >
+          View Details
+        </button>
+        <button
+          onClick={() => onViewResources(conference)}
+          className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-gray-700 text-sm font-medium transition-colors"
+        >
+          View Resources
+        </button>
+          <EditConferenceModal 
+                    conference={conference} 
+                  onSuccess={onEditConference} 
+                />
+          <AlertDialog.Root>
+                  <AlertDialog.Trigger asChild>
+                      <Button variant="outline" className="text-[#203a87]">
+                              Delete Conference
+                            </Button>
+                  </AlertDialog.Trigger>
+                  <AlertDialog.Portal>
+                    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                      <AlertDialog.Title className="">
+                     
+                              <span className="text-lg font-semibold text-gray-900">Delete Conference</span>
+                          
+                      </AlertDialog.Title>
+                      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                        Are you sure you want to delete this conference? This action
+                        cannot be undone.
+                      </AlertDialog.Description>
+                      <div className="flex justify-end gap-4">
+                        <AlertDialog.Cancel asChild>
+                          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                            Cancel
+                          </button>
+                        </AlertDialog.Cancel>
+                        <AlertDialog.Action asChild>
+                           <Button variant="outline" className="text-[#203a87]">
+                                   Delete Conference
+                                 </Button>
+                        </AlertDialog.Action>
+                      </div>
+                    </AlertDialog.Content>
+                  </AlertDialog.Portal>
+                </AlertDialog.Root>
+      </div>
+    </div>
+  );
+};
 
-//           <Image
-//             src="/Meeting.png"
-//             alt={conference.title}
-//             width={800}
-//             height={400}
-//             className="w-full h-[300px] md:h-[400px] object-cover"
-//           />
-//         </div>
-
-//         <div className="p-6 md:p-8">
-//           <div className="flex items-center justify-between">
-//             <h1 className="text-gray-700 text-base md:text-lg leading-relaxed">
-//               {conference.title}
-//             </h1>
-//             <p>
-//               100+ people registered{" "}
-//               <a href="" className="underline font-bold">
-//                 access participant directory
-//               </a>
-//             </p>
-//           </div>
-
-//           <div className="bg-gray-50 p-4 md:p-6 rounded-lg mb-6">
-//             <p className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">
-//               {conference.theme}
-//             </p>
-//           </div>
-//           <div className="mb-6">
-//             <hr />
-//           </div>
-//           <div className="flex flex-col gap-4">
-//             <div className="flex items-start gap-3">
-//               <Calendar className="w-5 h-5 text-[#203A87] mt-1" />
-//               <div>
-//                 <h3 className="text-sm font-medium text-gray-500">Date</h3>
-//                 <p className="text-base md:text-lg font-medium text-[#0B142F]">
-//                   {conference.date}
-//                 </p>
-//               </div>
-//             </div>
-
-//             <div className="flex items-start gap-3">
-//               <MapPin className="w-5 h-5 text-[#203A87] mt-1" />
-//               <div>
-//                 <h3 className="text-sm font-medium text-gray-500">Venue</h3>
-//                 <p className="text-base md:text-lg font-medium text-[#0B142F]">
-//                   {conference.venue}
-//                 </p>
-//               </div>
-//             </div>
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Resources</h1>
-//             <p>
-//               View{" "}
-//               <a href="" className="underline font-bold">
-//                 Conference preceeding
-//               </a>
-//             </p>
-//             <div className="flex items-center gap-4 justify-between">
-//               <p>Get the conference resources by each speaker here</p>
-//               <button className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]">
-//                 Resources
-//               </button>
-//             </div>
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Daily conference schedule</h1>
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Meal Ticketing</h1>
-//             <p>
-//               This are the list of food currently available for the day. Select
-//               any food of your choice
-//             </p>
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Join event for virtual attendees</h1>
-//             <div className="flex items-center gap-4 justify-between">
-//               <p>You can access the live event from here</p>
-//               <button
-//                 onClick={() => onViewResources(conference)}
-//                 className="px-4 py-2 rounded-lg font-semibold text-sm transition-colors duration-300 text-[#fff] bg-[#152a61]"
-//               >
-//                 Join in
-//               </button>
-//             </div>
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Certification</h1>
-//             <p>
-//               Complete the conference evaluation to{" "}
-//               <a href="" className="underline font-bold">
-//                 access certificate
-//               </a>
-//             </p>
-//           </div>
-
-//         </div>
-//       </div>
-
-//       <div className="bg-white rounded-lg shadow-lg border p-6">
-//       <div>
-//   <h1 className="text-2xl mb-3">Gallery</h1>
-//   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-//     {conference && conference.gallery && conference.gallery.length > 0 ? (
-//       conference.gallery.map((imageUrl, index) => (
-//         <div key={index} className="relative h-48 rounded-lg overflow-hidden">
-//           <Image
-//             src={imageUrl}
-//             alt={`Gallery image ${index + 1}`}
-//             fill
-//             className="object-cover"
-//           />
-//         </div>
-//       ))
-//     ) : (
-//       <p className="text-gray-500">No gallery images available</p>
-//     )}
-//   </div>
-// </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Papers</h1>
-
-//           </div>
-//           <div>
-//   <h1 className="text-2xl mb-3">Conference Flyer</h1>
-//   {conference && conference.flyer ? (
-//     <div className="relative h-96 w-full rounded-lg overflow-hidden">
-//       <Image
-//         src={conference.flyer}
-//         alt="Conference Flyer"
-//         fill
-//         className="object-contain"
-//       />
-//     </div>
-//   ) : (
-//     <p className="text-gray-500">No flyer available</p>
-//   )}
-// </div>
-// <div className="my-6">
-//   <hr />
-// </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Conference Proceeding</h1>
-
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Conference Videos</h1>
-
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Resources</h1>
-
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Virtual access</h1>
-
-//           </div>
-//           <div className="my-6">
-//             <hr />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl mb-3">Meals</h1>
-
-//           </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// Main component
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [selectedConference, setSelectedConference] =
-    useState<Conference | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "details" | "resources">(
-    "list"
-  );
+  const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "details" | "resources">("list");
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   const fetchConferences = async () => {
     try {
+      setLoading(true);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/landing/events`
       );
@@ -1108,11 +866,45 @@ const ConferenceResources: React.FC = () => {
           }
         );
         setConferences(sortedConferences);
+        
+        // Automatically select the latest conference (first in the sorted array)
+        if (sortedConferences.length > 0) {
+          const latestConference = sortedConferences[0];
+          setSelectedConference(latestConference);
+          fetchConferenceDetails(latestConference.id);
+        }
       }
     } catch (error) {
       console.error("Error fetching conferences:", error);
+      showToast.error("Failed to load conferences");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchConferenceDetails = async (id: number) => {
+    try {
+      setDetailsLoading(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch conference details");
+      }
+
+      const data = await response.json();
+      setConferenceDetails(data.data);
+    } catch (error) {
+      console.error("Error fetching conference details:", error);
+      showToast.error("Failed to load conference details");
+    } finally {
+      setDetailsLoading(false);
     }
   };
 
@@ -1120,78 +912,10 @@ const ConferenceResources: React.FC = () => {
     fetchConferences();
   }, []);
 
-  const handleDeleteConference = async (id: number) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: id }),
-        }
-      );
-
-      if (response.ok) {
-        showToast.success("Conference deleted successfully");
-        setConferences((prev) => prev.filter((conf) => conf.id !== id));
-      } else {
-        throw new Error("Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      showToast.error("Failed to delete conference");
-    }
-  };
-
-  const handleDeleteResource = async (resourceId: number) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ resource_id: resourceId }),
-        }
-      );
-
-      if (response.ok) {
-        if (selectedConference) {
-          const updatedResources = selectedConference.resources.filter(
-            (resource) => resource.resource_id !== resourceId
-          );
-          setSelectedConference({
-            ...selectedConference,
-            resources: updatedResources,
-          });
-
-          // Update the conferences list as well
-          setConferences((prev) =>
-            prev.map((conf) =>
-              conf.id === selectedConference.id
-                ? { ...conf, resources: updatedResources }
-                : conf
-            )
-          );
-        }
-        showToast.success("Resource deleted successfully");
-      } else {
-        throw new Error("Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      showToast.error("Failed to delete resource");
-    }
-  };
-
   const handleViewDetails = (conference: Conference) => {
     setSelectedConference(conference);
     setViewMode("details");
+    fetchConferenceDetails(conference.id);
   };
 
   const handleViewResources = (conference: Conference) => {
@@ -1199,129 +923,128 @@ const ConferenceResources: React.FC = () => {
     setViewMode("resources");
   };
 
-  const handleBackToDashboard = () => {
+  const handleBackToList = () => {
     setViewMode("list");
-    setSelectedConference(null);
+    // Reset to show the latest conference details
+    if (conferences.length > 0) {
+      setSelectedConference(conferences[0]);
+      fetchConferenceDetails(conferences[0].id);
+    }
   };
-
-  const conferencesByYear = conferences.reduce(
-    (acc: Record<string, Conference[]>, conference) => {
-      const year = conference.title.match(/\d{4}/)?.[0] || "Unknown Year";
-      if (!acc[year]) {
-        acc[year] = [];
-      }
-      acc[year].push(conference);
-      return acc;
-    },
-    {}
-  );
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (viewMode === "resources" && selectedConference) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={handleBackToList}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to conferences
+            </button>
+            <AddResourceModal
+              conferenceId={selectedConference.id}
+              onSuccess={() => fetchConferences()}
+            />
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {selectedConference.title}
+                </h1>
+                <p className="text-gray-600">{selectedConference.theme}</p>
+              </div>
+              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
+                {selectedConference.resources?.length || 0} resources
+              </span>
+            </div>
+
+            {selectedConference.resources?.length ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {selectedConference.resources.map((resource) => (
+                  <ResourceCard
+                    key={resource.resource_id}
+                    resource={resource}
+                    onDelete={() => {}}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-10 h-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  No resources yet
+                </h3>
+                <p className="text-gray-500">
+                  Add resources to make them available to attendees
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6">
-      {viewMode === "resources" && selectedConference ? (
-        // Resources View
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <button
-              onClick={handleBackToDashboard}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 transition-colors rounded-lg hover:bg-gray-100 hover:text-gray-900"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Dashboard
-            </button>
-            <AddFileModal />
-          </div>
-
-          <div className="bg-gray-200 px-4 sm:px-5 py-3 mb-6">
-            <h1 className="text-xl sm:text-2xl font-semibold">
-              {selectedConference.title}
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">
-              {selectedConference.theme}
-            </p>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              {selectedConference.date}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {selectedConference.resources?.map((resource) => (
-              <ResourceCard
-                key={resource.resource_id}
-                resource={resource}
-                onDelete={handleDeleteResource}
-              />
-            ))}
-          </div>
-
-          {(!selectedConference.resources ||
-            selectedConference.resources.length === 0) && (
-            <div className="text-center py-12 text-gray-600">
-              No resources available for this conference.
-            </div>
-          )}
-        </div>
-      ) : viewMode === "details" && selectedConference ? (
-        // Conference Details View
-        <ConferenceDetails
+    <div className="container mx-auto px-4 py-8">
+      {viewMode === "details" && selectedConference ? (
+        <ConferenceDetailsView
           conference={selectedConference}
-          onBack={handleBackToDashboard}
+          conferenceDetails={conferenceDetails}
+          loading={detailsLoading}
+          onBack={handleBackToList}
           onViewResources={handleViewResources}
         />
       ) : (
-        // Conferences List View
-        <>
-          <div className="px-4 sm:px-5 py-3 mb-6 mt-10">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold">Conference Events</h1>
-              <AddFileModal />
+        <div className="space-y-8">
+          {/* Latest Conference Section */}
+          {selectedConference && conferenceDetails && (
+            <div className="space-y-4">
+              {/* <h2 className="text-2xl font-bold text-gray-900">Current Conference</h2> */}
+              <ConferenceDetailsView
+                conference={selectedConference}
+                conferenceDetails={conferenceDetails}
+                loading={detailsLoading}
+                onBack={handleBackToList}
+                onViewResources={handleViewResources}
+              />
             </div>
-          </div>
+          )}
 
-          <div className="mb-6 flex gap-2 overflow-x-auto py-2">
-            {Object.keys(conferencesByYear).map((year) => (
-              <button
-                key={year}
-                onClick={() =>
-                  setSelectedYear(year === selectedYear ? null : year)
-                }
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors
-                  ${
-                    selectedYear === year
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-              >
-                {year} ({conferencesByYear[year].length})
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {(selectedYear ? conferencesByYear[selectedYear] : conferences).map(
-              (conference) => (
-                <ConferenceCard
-                  key={conference.id}
-                  conference={conference}
-                  onViewResources={handleViewResources}
-                  onViewDetails={handleViewDetails}
-                  onDeleteConference={handleDeleteConference}
-                  onEditConference={() => {
-                    /* Add edit functionality */
-                  }}
-                />
-              )
-            )}
-          </div>
-        </>
+          {/* Past Conferences Section */}
+          {conferences.length > 1 && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-gray-900">Past Conferences</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {conferences.slice(1).map((conference) => (
+                  <ConferenceCard
+                    key={conference.id}
+                    conference={conference}
+                    onViewResources={handleViewResources}
+                    onViewDetails={handleViewDetails}
+                    onEditConference={() => {}}
+                    onDeleteConference={() => {}}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

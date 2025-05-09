@@ -228,6 +228,16 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
   );
 };
 
+//  const handleDelete = async () => {
+//     try {
+//       await onDeleteConference(conference.id);
+//       showToast.success("Conference deleted successfully");
+//     } catch (error) {
+//       showToast.error("Failed to delete conference");
+//     }
+//   };
+
+
 interface AddResourceModalProps {
   conferenceId: number;
   onSuccess: () => void;
@@ -481,7 +491,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Venue</p>
-                <p className="font-medium">{conference.venue}</p>
+                <p className="font-medium text-gray-500">{conference.venue}</p>
               </div>
             </div>
           </div>
@@ -825,6 +835,41 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         >
           View Resources
         </button>
+          {/* <AlertDialog.Root>
+                  <AlertDialog.Trigger asChild>
+                    <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
+                  </AlertDialog.Trigger>
+                  <AlertDialog.Portal>
+                    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                      <AlertDialog.Title className="text-lg font-semibold">
+                        Delete Conference
+                      </AlertDialog.Title>
+                      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                        Are you sure you want to delete this conference? This action
+                        cannot be undone.
+                      </AlertDialog.Description>
+                      <div className="flex justify-end gap-4">
+                        <AlertDialog.Cancel asChild>
+                          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                            Cancel
+                          </button>
+                        </AlertDialog.Cancel>
+                        <AlertDialog.Action asChild>
+                          <button
+                            onClick={handleDelete}
+                            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </AlertDialog.Action>
+                      </div>
+                    </AlertDialog.Content>
+                  </AlertDialog.Portal>
+                </AlertDialog.Root> */}
       </div>
     </div>
   );

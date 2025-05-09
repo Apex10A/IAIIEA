@@ -98,15 +98,15 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({ conference, o
     date: conference.date,
     start_date: conference.start_date,
     start_time: conference.start_time,
-    sub_theme: [...conference.sub_theme],
-    work_shop: [...conference.work_shop],
-    important_date: [...conference.important_date],
+    sub_theme: [...(conference.sub_theme || [])], // Fallback to empty array
+    work_shop: [...(conference.work_shop || [])], // Fallback to empty array
+    important_date: [...(conference.important_date || [])], // Fallback to empty array
     flyer: conference.flyer,
-    gallery: [...conference.gallery],
-    sponsors: [...conference.sponsors],
-    videos: [...conference.videos],
+    gallery: [...(conference.gallery || [])], // Fallback to empty array
+    sponsors: [...(conference.sponsors || [])], // Fallback to empty array
+    videos: [...(conference.videos || [])], // Fallback to empty array
     payments: { ...conference.payments },
-    speakers: [...conference.speakers],
+    speakers: [...(conference.speakers || [])], // Fallback to empty array
   });
 
   useEffect(() => {

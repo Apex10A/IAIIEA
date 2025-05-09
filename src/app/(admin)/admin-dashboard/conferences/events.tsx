@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import EditConferenceModal from './EditEvents';
 import { useSession } from "next-auth/react";
 import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -19,18 +20,61 @@ interface Resource {
 
 interface Conference {
   id: number;
+  is_registered?: boolean;
   title: string;
   theme: string;
   venue: string;
   date: string;
-  description: string;
-  status: string;
-  meals: string[];
-  gallery: string[];
+  start_date: string;
+  start_time: string;
+  sub_theme: string[];
+  work_shop: string[];
+  important_date: string[];
   flyer: string;
+  gallery: string[];
   sponsors: string[];
   videos: string[];
-  resources: Resource[];
+  payments: {
+    basic?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+      package?: string[];
+    };
+    standard?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+      package?: string[];
+    };
+    premium?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+      package?: string[];
+    };
+    early_bird_registration?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+    };
+    normal_registration?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+    };
+    late_registration?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+    };
+  };
+  speakers: Array<{
+    speaker_id: number;
+    name: string;
+    title: string;
+    portfolio: string;
+    picture: string;
+    occupation?: string;
+  }>;
+  resources?: any[];
+  schedule?: any[];
+  meals?: any[];
+  status?: string;
 }
 interface ConferenceDetails {
   id: number;
@@ -161,6 +205,26 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
   onDeleteConference,
   onEditConference,
 }) => {
+  const fullConference: Conference = {
+    id: conference.id,
+    title: conference.title,
+    theme: conference.theme,
+    venue: conference.venue,
+    date: conference.date,
+    start_date: conference.start_date || '',
+    start_time: conference.start_time || '',
+    sub_theme: conference.sub_theme || [],
+    work_shop: conference.work_shop || [],
+    important_date: conference.important_date || [],
+    flyer: conference.flyer || '',
+    gallery: conference.gallery || [],
+    sponsors: conference.sponsors || [],
+    videos: conference.videos || [],
+    payments: conference.payments || {},
+    speakers: conference.speakers || [],
+    status: conference.status || 'Upcoming'
+  };
+
   const resourceCount = conference.resources?.length || 0;
 
   const handleDelete = async () => {
@@ -220,6 +284,11 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         >
           View Details
         </button>
+        <EditConferenceModal 
+          conference={fullConference} 
+          onSuccess={onEditConference} 
+        />
+        
         <AlertDialog.Root>
           <AlertDialog.Trigger asChild>
             <button className="text-red-600 hover:text-red-800 font-semibold text-sm sm:text-base flex items-center gap-2">

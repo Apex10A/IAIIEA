@@ -194,7 +194,7 @@ const DashboardConferences = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
+      <div className="bg-white rounded-xl shadow-md p-6 border ">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6 text-[#0E1A3D]" />

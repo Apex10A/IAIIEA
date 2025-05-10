@@ -805,7 +805,6 @@ const ConferenceResources: React.FC = () => {
           {(!selectedConference.resources ||
             selectedConference.resources.length === 0) && (
             <div className="text-center py-12 text-gray-600">
-              No resources available for this conference.
             </div>
           )}
         </div>

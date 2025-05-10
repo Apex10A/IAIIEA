@@ -24,7 +24,6 @@ const Page = () => {
       const formattedResources: Resource[] = response.data.data.map((item: any) => ({
         resource_id: item.resource_id.toString(),
         resource_type: item.resource_type,
-        resource: item.file,
         caption: item.caption,
         created_at: item.date
       }));

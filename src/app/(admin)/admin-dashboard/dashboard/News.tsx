@@ -279,7 +279,7 @@ const NewsPage = () => {
         <h1 className="text-xl md:text-2xl font-bold text-gray-600">News Management</h1>
         
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="w-full sm:w-64">
+          {/* <div className="w-full sm:w-64">
             <Select 
               value={selectedConferenceId?.toString() || ""} 
               onValueChange={handleFilterConferenceChange}
@@ -295,10 +295,10 @@ const NewsPage = () => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
           
-          <Button 
-            className="bg-blue-600 hover:bg-blue-700"
+          <Button  
+            className="bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => {
               resetForm();
               setIsDialogOpen(true);

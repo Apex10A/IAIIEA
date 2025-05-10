@@ -441,7 +441,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to conferences
+        Back to seminars
       </button>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -586,39 +586,6 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <p className="text-gray-500 text-center py-8">No gallery images available</p>
             )}
           </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Conference Schedules</h2>
-            {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {conferenceDetails.schedule.map((item, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{item.activity}</h3>
-                      {item.facilitator && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          Facilitator: {item.facilitator}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">
-                        {item.day}, {item.start} - {item.end}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {item.venue}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-8">No schedules available</p>
-            )}
-          </div>
-
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
@@ -952,7 +919,7 @@ const ConferenceResources: React.FC = () => {
               className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to conferences
+              Back to seminars
             </button>
             <AddResourceModal
               conferenceId={selectedConference.id}
@@ -1031,7 +998,7 @@ const ConferenceResources: React.FC = () => {
           {/* Past Conferences Section */}
           {conferences.length > 1 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Past Conferences</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Past Semminars</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {conferences.slice(1).map((conference) => (
                   <ConferenceCard

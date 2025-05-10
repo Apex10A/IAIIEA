@@ -300,12 +300,12 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({ conference, o
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="text-[#203a87]">
-          Edit Conference
+          Edit Seminar
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Conference</DialogTitle>
+          <DialogTitle>Edit Seminar</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -316,7 +316,7 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({ conference, o
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Conference Title</Label>
+                <Label htmlFor="title">Seminar Title</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -370,107 +370,7 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({ conference, o
             </CardContent>
           </Card>
 
-          {/* Subthemes */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Subthemes</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.sub_theme.map((subtheme, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <Input
-                    value={subtheme}
-                    onChange={(e) => handleArrayChange('sub_theme', index, e.target.value)}
-                    required
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    onClick={() => removeArrayItem('sub_theme', index)}
-                  >
-                    <TrashIcon className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => addArrayItem('sub_theme')}
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Add Subtheme
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Workshops */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Workshops</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.work_shop.map((workshop, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <Input
-                    value={workshop}
-                    onChange={(e) => handleArrayChange('work_shop', index, e.target.value)}
-                    required
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    onClick={() => removeArrayItem('work_shop', index)}
-                  >
-                    <TrashIcon className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => addArrayItem('work_shop')}
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Add Workshop
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Important Dates */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Important Dates</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.important_date.map((date, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <Input
-                    value={date}
-                    onChange={(e) => handleArrayChange('important_date', index, e.target.value)}
-                    required
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    type="button"
-                    onClick={() => removeArrayItem('important_date', index)}
-                  >
-                    <TrashIcon className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => addArrayItem('important_date')}
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Add Important Date
-              </Button>
-            </CardContent>
-          </Card>
+         
 
           {/* Payment Plans */}
           <Card>

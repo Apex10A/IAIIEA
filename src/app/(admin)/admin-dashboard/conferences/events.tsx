@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
@@ -434,6 +435,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
   return (
     <div className="space-y-6">
+      <AddFileModal/>
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"

@@ -369,7 +369,7 @@ const AnnouncementsPage = () => {
                       <SelectValue placeholder={isLoadingConferences ? "Loading conferences..." : "Select a conference"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {conferences.map((conference) => (
                         <SelectItem key={conference.id} value={conference.id.toString()}>
                           {conference.title} (ID: {conference.id})
@@ -653,7 +653,7 @@ const AnnouncementsPage = () => {
                     <SelectValue placeholder={isLoadingConferences ? "Loading conferences..." : "Select a conference"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {conferences.map((conference) => (
                       <SelectItem key={conference.id} value={conference.id.toString()}>
                         {conference.title} (ID: {conference.id})

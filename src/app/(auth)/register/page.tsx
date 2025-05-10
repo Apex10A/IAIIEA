@@ -405,7 +405,7 @@ export default function RegisterPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#b0abab] text-sm">
-                    qualifications<span className="text-brand-primary">*</span>
+                    Qualifications<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -427,7 +427,7 @@ export default function RegisterPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    area_of_specialization<span className="text-brand-primary">*</span>
+                    Area_Of_Specialization<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -449,7 +449,7 @@ export default function RegisterPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    institution_name_addr<span className="text-brand-primary">*</span>
+                    Institution_Name_Addr<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input

@@ -774,7 +774,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
           <AlertDialog.Root>
                   <AlertDialog.Trigger asChild>
                       <Button variant="outline" className="text-[#203a87]">
-                              Delete Conference
+                              Delete Seminar
                             </Button>
                   </AlertDialog.Trigger>
                   <AlertDialog.Portal>
@@ -782,11 +782,11 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
                     <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
                       <AlertDialog.Title className="">
                      
-                              <span className="text-lg font-semibold text-gray-900">Delete Conference</span>
+                              <span className="text-lg font-semibold text-gray-900"> Delete Seminar</span>
                           
                       </AlertDialog.Title>
                       <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                        Are you sure you want to delete this conference? This action
+                        Are you sure you want to delete this seminar? This action
                         cannot be undone.
                       </AlertDialog.Description>
                       <div className="flex justify-end gap-4">
@@ -797,7 +797,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
                         </AlertDialog.Cancel>
                         <AlertDialog.Action asChild>
                            <Button variant="outline" className="text-[#203a87]">
-                                   Delete Conference
+                           Delete Seminar
                                  </Button>
                         </AlertDialog.Action>
                       </div>
@@ -998,7 +998,7 @@ const ConferenceResources: React.FC = () => {
           {/* Past Conferences Section */}
           {conferences.length > 1 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Past Semminars</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Past Seminars</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {conferences.slice(1).map((conference) => (
                   <ConferenceCard

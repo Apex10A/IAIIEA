@@ -5,9 +5,16 @@ import "@/app/index.css"
 
 // Import your icons
 import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
+import CalendarIcon from '@/assets/sidebarIcons/CalendarIcon';
+import ConferenceScheduleIcon from '@/assets/sidebarIcons/ScheduleIcon';
+import ConferencePortalIcon from '@/assets/sidebarIcons/ConferencePortalIcon';
 import PaymentIcon from '@/assets/sidebarIcons/PaymentIcon';
+import MealsIcon from '@/assets/sidebarIcons/MealsIcon';
+import NewsIcon from '@/assets/sidebarIcons/NewsIcon';
 import AnnouncementIcon from '@/assets/sidebarIcons/AnnouncementIcon';
+import SpeakersIcon from '@/assets/sidebarIcons/SpeakersIcon';
 import GalleryIcon from '@/assets/sidebarIcons/GalleryIcon';
+import BroadcastIcon from '@/assets/sidebarIcons/BroadcastIcon';
 import ResourcesIcon from '@/assets/sidebarIcons/ResourcesIcon';
 import ForumIcon from '@/assets/sidebarIcons/ForumIcon';
 import MembersIcon from '@/assets/sidebarIcons/MembersDirectoryIcon';
@@ -43,20 +50,26 @@ const portalItems: NavItem[] = [
     subItems: []
   },
   {
+    name: 'Announcement', 
+    icon: AnnouncementIcon,
+    requiredPortal: 'seminar',
+    subItems: []
+  },
+  {
     name: 'Annual calendar', 
-    icon: MembersIcon,
+    icon: CalendarIcon,
     requiredPortal: 'seminar',
     subItems: []
   },
   {
     name: 'Conference Schedule', 
-    icon: MembersIcon,
+    icon: ConferenceScheduleIcon ,
     requiredPortal: 'seminar',
     subItems: []
   },
   {
     name: 'Daily Meals', 
-    icon: MembersIcon,
+    icon: MealsIcon,
     requiredPortal: 'seminar',
     subItems: []
   },
@@ -69,23 +82,24 @@ const portalItems: NavItem[] = [
   
   {
     name: 'News', 
-    icon: MembersIcon,
+    icon: NewsIcon,
     requiredPortal: 'seminar',
     subItems: []
   },
   {
     name: 'Broadcast Message', 
-    icon: MembersIcon,
+    icon: BroadcastIcon,
     requiredPortal: 'seminar',
     subItems: []
   },
 
   {
     name: 'Speakers List', 
-    icon: MembersIcon,
+    icon: SpeakersIcon,
     requiredPortal: 'seminar',
     subItems: []
   },
+
   { 
     name: 'Membership Portal', 
     icon: MembersIcon,
@@ -93,13 +107,12 @@ const portalItems: NavItem[] = [
     subItems: [
       { name: 'Directory', requiredPortal: 'membership', icon: MembersIcon },
       { name: 'Members Resources', requiredPortal: 'membership', icon: ResourcesIcon },
-      { name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon },
       // { name: 'Events', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]
   },
   { 
     name: 'Conference Portal', 
-    icon: MembersIcon,
+    icon: ConferencePortalIcon,
     requiredPortal: 'conference',
     subItems: [
       { name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },

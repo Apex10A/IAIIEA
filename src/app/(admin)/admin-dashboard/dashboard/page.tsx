@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
@@ -13,18 +13,121 @@ import Speakers from '@/app/(admin)/admin-dashboard/dashboard/speakers';
 import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
 import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
 import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
-import { FiCalendar, FiClock, FiBook, FiSettings,  FiUsers, FiMic, FiBookOpen } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiBook, FiSettings, FiUsers, FiMic, FiBookOpen } from 'react-icons/fi';
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
-  
-  // Stats data
-  const stats = [
-    { id: 1, name: 'Total Members', value: '49', icon: FiUsers, change: '+4.5%', changeType: 'positive' },
-    { id: 2, name: 'Total Speakers', value: '19', icon: FiMic, change: '+2.1%', changeType: 'positive' },
-    { id: 3, name: 'Total Conferences', value: '11', icon: FiCalendar, change: '+1.2%', changeType: 'positive' },
-    { id: 4, name: 'Total Seminars', value: '7', icon: FiBookOpen, change: '+0.8%', changeType: 'positive' },
-  ];
+  const [stats, setStats] = useState([
+    { id: 1, name: 'Total Members', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+    { id: 2, name: 'Total Speakers', value: '0', icon: FiMic, change: '+0%', changeType: 'positive' },
+    { id: 3, name: 'Total Conferences', value: '0', icon: FiCalendar, change: '+0%', changeType: 'positive' },
+    { id: 4, name: 'Total Seminars', value: '0', icon: FiBookOpen, change: '+0%', changeType: 'positive' },
+    { id: 5, name: 'Conference Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+    { id: 6, name: 'Seminar Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all data in parallel
+        const [speakersRes, membersRes, conferencesRes, seminarsRes, confParticipantsRes, seminarParticipantsRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/speaker`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/member`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/seminar_member`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          })
+        ]);
+
+        const [speakersData, membersData, conferencesData, seminarsData, confParticipantsData, seminarParticipantsData] = await Promise.all([
+          speakersRes.json(),
+          membersRes.json(),
+          conferencesRes.json(),
+          seminarsRes.json(),
+          confParticipantsRes.json(),
+          seminarParticipantsRes.json()
+        ]);
+
+        // Update stats with actual counts
+        setStats([
+          { 
+            id: 1, 
+            name: 'Total Members', 
+            value: membersData.data?.length.toString() || '0', 
+            icon: FiUsers, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 2, 
+            name: 'Total Speakers', 
+            value: speakersData.data?.length.toString() || '0', 
+            icon: FiMic, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 3, 
+            name: 'Total Conferences', 
+            value: conferencesData.data?.length.toString() || '0', 
+            icon: FiCalendar, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 4, 
+            name: 'Total Seminars', 
+            value: seminarsData.data?.length.toString() || '0', 
+            icon: FiBookOpen, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 5, 
+            name: 'Conference Participants', 
+            value: confParticipantsData.data?.length.toString() || '0', 
+            icon: FiUsers, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 6, 
+            name: 'Seminar Participants', 
+            value: seminarParticipantsData.data?.length.toString() || '0', 
+            icon: FiUsers, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+        ]);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    if (session?.user?.token) {
+      fetchData();
+    }
+  }, [session]);
 
   return (
     <div className="min-h-screen bg-gray-50 px-2 sm:px-6 lg:px-8 py-6">
@@ -54,7 +157,7 @@ export default function AdminDashboardPage() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 -mt-4 sm:-mt-12 relative z-20"
       >
-        {stats.map((stat) => (
+        {stats.slice(0, 4).map((stat) => (
           <motion.div
             key={stat.id}
             whileHover={{ y: -5 }}
@@ -63,7 +166,52 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {loading ? (
+                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    stat.value
+                  )}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
+                <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className={`text-xs font-medium ${
+                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {stat.change} from last month
+              </p>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Additional Stats Cards for Participants */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8 relative z-20"
+      >
+        {stats.slice(4, 6).map((stat) => (
+          <motion.div
+            key={stat.id}
+            whileHover={{ y: -5 }}
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {loading ? (
+                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    stat.value
+                  )}
+                </p>
               </div>
               <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
                 <stat.icon className="h-6 w-6 text-[#0E1A3D]" />

@@ -298,7 +298,7 @@ const Calendar = () => {
     <div className="space-y-4 px-3 py-3 rounded-lg">
       {/* Calendar Header */}
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+        <div className="sm:flex items-center gap-4">
           <h2 className="text-xl font-semibold text-gray-800">Event Calendar</h2>
           <div className="flex items-center gap-2">
             <Button 
@@ -310,7 +310,7 @@ const Calendar = () => {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-md font-medium text-gray-700 min-w-[120px] text-center">
-              {currentMonth.title} {currentYear}
+              {currentMonth.title} 
             </span>
             <Button 
               variant="outline" 
@@ -347,7 +347,7 @@ const Calendar = () => {
           </div>
           
           {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr min-w-[1200px]">
             {renderCalendarDays()}
           </div>
         </CardContent>

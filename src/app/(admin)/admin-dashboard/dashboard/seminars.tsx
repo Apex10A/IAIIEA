@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 
 // Avatar Group Component
 const AvatarGroup = ({ members, totalMembers }: { members: any[], totalMembers: number }) => {
-  // Limit displayed avatars to 5
   const displayedMembers = members.slice(0, 5);
   const remainingMembers = Math.max(0, totalMembers - displayedMembers.length);
 
@@ -56,35 +55,35 @@ const AvatarGroup = ({ members, totalMembers }: { members: any[], totalMembers: 
   );
 };
 
-interface Conference {
+interface Seminar {
   id: string;
   title: string;
   date: string;
   location?: string;
   venue?: string;
-  status: 'Incoming' | 'ongoing' | 'completed' | 'Completed';
+  status: 'Incoming' | 'Completed'; // Updated to match API response
   members?: any[];
   total_members?: number;
   theme?: string;
 }
 
-interface ConferenceMembersData {
-  [conferenceId: string]: {
+interface SeminarMembersData {
+  [seminarId: string]: {
     members: any[];
     total: number;
   }
 }
 
-const DashboardConferences = () => {
-  const [conferences, setConferences] = useState<Conference[]>([]);
-  const [conferenceMembersData, setConferenceMembersData] = useState<ConferenceMembersData>({});
+const DashboardSeminars = () => {
+  const [seminars, setSeminars] = useState<Seminar[]>([]);
+  const [seminarMembersData, setSeminarMembersData] = useState<SeminarMembersData>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   useEffect(() => {
-    const fetchConferences = async () => {
+    const fetchSeminars = async () => {
       try {
         setLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`, {
@@ -96,28 +95,30 @@ const DashboardConferences = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch conferences');
+          throw new Error('Failed to fetch seminars');
         }
 
         const data = await response.json();
         
         if (data.status === 'success') {
-          // Map the API response to our interface
-          const mappedConferences: Conference[] = data.data.map((conf: any) => ({
-            id: conf.id.toString(),
-            title: conf.title,
-            date: conf.date,
-            location: conf.venue,
-            status: conf.status,
-            theme: conf.theme
-          }));
+          // Filter out completed seminars and map the remaining
+          const mappedSeminars: Seminar[] = data.data
+            .filter((seminar: any) => seminar.status !== 'Completed')
+            .map((seminar: any) => ({
+              id: seminar.id.toString(),
+              title: seminar.title,
+              date: seminar.date,
+              location: seminar.venue,
+              status: seminar.status as 'Incoming' | 'Completed',
+              theme: seminar.theme
+            }));
           
-          setConferences(mappedConferences);
+          setSeminars(mappedSeminars);
           
-          // Fetch members data for each conference
-          await fetchMembersForConferences(mappedConferences);
+          // Fetch members data for each seminar
+          await fetchMembersForSeminars(mappedSeminars);
         } else {
-          throw new Error(data.message || 'Failed to fetch conferences');
+          throw new Error(data.message || 'Failed to fetch seminars');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -130,18 +131,18 @@ const DashboardConferences = () => {
       }
     };
 
-    const fetchMembersForConferences = async (confs: Conference[]) => {
-      const membersData: ConferenceMembersData = {};
+    const fetchMembersForSeminars = async (seminars: Seminar[]) => {
+      const membersData: SeminarMembersData = {};
       
-      // Only fetch for the first 3 conferences to display (optimization)
-      const conferencesToFetch = confs.slice(0, 3);
+      // Only fetch for the first 3 seminars to display (optimization)
+      const seminarsToFetch = seminars.slice(0, 3);
       
       try {
         // Use Promise.all to fetch all member data concurrently
-        await Promise.all(conferencesToFetch.map(async (conf) => {
+        await Promise.all(seminarsToFetch.map(async (seminar) => {
           try {
             const response = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member/${conf.id}`,
+              `${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/seminar_member/${seminar.id}`,
               {
                 method: 'GET',
                 headers: {
@@ -152,66 +153,46 @@ const DashboardConferences = () => {
             );
             
             if (!response.ok) {
-              throw new Error(`Failed to fetch members for conference ${conf.id}`);
+              throw new Error(`Failed to fetch members for seminar ${seminar.id}`);
             }
             
             const data = await response.json();
             
             if (data.status === 'success') {
-              membersData[conf.id] = {
+              membersData[seminar.id] = {
                 members: data.data || [],
                 total: data.data?.length || 0
               };
             }
           } catch (error) {
-            console.error(`Error fetching members for conference ${conf.id}:`, error);
+            console.error(`Error fetching members for seminar ${seminar.id}:`, error);
             // Initialize with empty data if fetching fails
-            membersData[conf.id] = {
+            membersData[seminar.id] = {
               members: [],
               total: 0
             };
           }
         }));
         
-        setConferenceMembersData(membersData);
+        setSeminarMembersData(membersData);
       } catch (error) {
-        console.error('Error fetching conference members:', error);
+        console.error('Error fetching seminar members:', error);
       }
     };
 
     if (bearerToken) {
-      fetchConferences();
+      fetchSeminars();
     }
   }, [bearerToken]);
 
-  // Format date helper
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Date not specified';
-    
-    // Handle date ranges like "May 05 To July 05, 2025"
-    if (dateString.toLowerCase().includes('to')) {
-      return dateString;
-    }
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (e) {
-      return dateString;
-    }
-  };
-
-  // Show only first 3 conferences on dashboard
-  const displayConferences = conferences.slice(0, 3);
+  // Show only first 3 seminars on dashboard
+  const displaySeminars = seminars.slice(0, 3);
 
   if (loading) {
     return (
       <div className="rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Conferences</h2>
+          <h2 className="text-xl font-semibold">Upcoming Seminars</h2>
         </div>
         <div className="animate-pulse space-y-4">
           {[...Array(3)].map((_, index) => (
@@ -231,7 +212,7 @@ const DashboardConferences = () => {
   if (error) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Conferences</h2>
+        <h2 className="text-xl font-semibold mb-4">Upcoming Seminars</h2>
         <div className="p-4 text-red-500 bg-red-50 rounded">
           Error: {error}
         </div>
@@ -241,43 +222,44 @@ const DashboardConferences = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
-      <div className="flex justify-between items-center mb-4">
+      {/* <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 mb-1" />
           <h2 className="text-xl font-semibold">Seminars</h2>
         </div>
-        <Link href="/conferences" className="flex items-center bg-gray-200 px-3 py-1 text-sm rounded-lg">
+        <Link href="/seminars" className="flex items-center bg-gray-200 px-3 py-1 text-sm rounded-lg">
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
       </div>
-      <hr className='mb-4'/>
+      <hr className='mb-4'/> */}
 
-      {displayConferences.length === 0 ? (
+      {displaySeminars.length === 0 ? (
         <div className="text-gray-500 p-4 bg-gray-50 rounded text-center">
-          No seminars available
+          No upcoming seminars available
         </div>
       ) : (
         <div className="space-y-4">
-          {displayConferences.map((conference) => {
-            const memberData = conferenceMembersData[conference.id] || { members: [], total: 0 };
+          {displaySeminars.map((seminar) => {
+            const memberData = seminarMembersData[seminar.id] || { members: [], total: 0 };
             
             return (
               <div 
-                key={conference.id} 
+                key={seminar.id} 
                 className="flex items-center border-b pb-3 last:border-0"
               >
                 <div className="mr-4 flex flex-col items-center">
-                  {/* <span className="text-xs font-medium text-gray-500">
-                    {formatDate(conference.date)}
-                  </span> */}
+                  {/* Optional: Add date display here if needed */}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-sm">{conference.title}</h3>
-                  {conference.location && (
-                    <div className="flex items-center text-xs text-gray-500">
+                  <h3 className="font-medium text-sm">{seminar.title}</h3>
+                  {seminar.theme && (
+                    <p className="text-xs text-gray-500 mt-1">{seminar.theme}</p>
+                  )}
+                  {seminar.location && (
+                    <div className="flex items-center text-xs text-gray-500 mt-1">
                       <MapPin className="h-3 w-3 mr-1" />
-                      {conference.location}
+                      {seminar.location}
                     </div>
                   )}
                   {/* Members Avatar Group */}
@@ -296,16 +278,12 @@ const DashboardConferences = () => {
                 </div>
                 <span 
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    conference.status === 'Incoming' 
-                      ? 'bg-green-100 text-green-800'
-                      : conference.status === 'ongoing'
-                      ? 'bg-blue-100 text-blue-800'
-                      : conference.status === 'completed' || conference.status === 'Completed'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-red-100 text-red-800'
+                    seminar.status === 'Incoming' 
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-green-100 text-green-800'
                   }`}
                 >
-                  {conference.status || 'Unknown'}
+                  {seminar.status === 'Incoming' ? 'Upcoming' : seminar.status}
                 </span>
               </div>
             );
@@ -316,4 +294,4 @@ const DashboardConferences = () => {
   );
 };
 
-export default DashboardConferences;
+export default DashboardSeminars;

@@ -115,13 +115,13 @@ const DashboardSpeakers = () => {
           <Mic className="h-6 w-6 text-[#0E1A3D]" />
           <h2 className="text-xl font-semibold text-gray-800">Speakers</h2>
         </div>
-        <Link 
+        {/* <Link 
           href="/admin/speakers" 
           className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 px-3 py-2 text-sm rounded-lg transition-colors"
         >
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
-        </Link>
+        </Link> */}
       </div>
 
       {displaySpeakers.length === 0 ? (

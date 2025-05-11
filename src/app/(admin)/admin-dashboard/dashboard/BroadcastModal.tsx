@@ -61,7 +61,7 @@ const BroadcastMail = () => {
     <div className="flex items-center justify-between">
       <Dialog.Root>
         <Dialog.Trigger asChild>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-md">
+          <button className="bg-[#0E1A3D] hover:bg-blue-700 text-white px-5 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-md">
             <EnvelopeClosedIcon className="w-5 h-5" />
             Send Broadcast Mail
           </button>

@@ -340,7 +340,7 @@ const NewsPage = () => {
         
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <Button  
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-[#0E1A3D] text-white"
             onClick={() => {
               resetForm();
               setIsDialogOpen(true);

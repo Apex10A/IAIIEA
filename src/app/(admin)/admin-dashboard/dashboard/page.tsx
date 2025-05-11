@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Seminars</h2>
@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.4 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px] ">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Speakers</h2>
@@ -153,7 +153,7 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.5 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
@@ -165,7 +165,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">News Management</h2>

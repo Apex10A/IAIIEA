@@ -9,6 +9,16 @@ import { showToast } from '@/utils/toast';
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash2, Edit2, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import dynamic from 'next/dynamic';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+
+// Dynamically import ReactQuill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => <textarea className="w-full h-32 px-3 py-2 border rounded-md" />
+});
+
+import 'react-quill/dist/quill.snow.css';
 
 interface NewsItem {
   id: string | number;
@@ -65,9 +75,30 @@ const NewsPage = () => {
   const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
   const [isLoadingConferences, setIsLoadingConferences] = useState<boolean>(true);
   const [isLoadingNews, setIsLoadingNews] = useState<boolean>(false);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [newsToDelete, setNewsToDelete] = useState<string | number | null>(null);
   
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  // Quill modules configuration
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link'
+  ];
 
   // Fetch conferences
   const fetchConferences = async () => {
@@ -158,6 +189,10 @@ const NewsPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDescriptionChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, description: value }));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFormData((prev) => ({ ...prev, image: e.target.files![0] }));
@@ -175,16 +210,33 @@ const NewsPage = () => {
   };
 
   const handleSubmit = async (): Promise<void> => {
-    if (!formData.title || !formData.description || !formData.conference_id) {
-      showToast.error("Please fill in all required fields and select a conference.");
+    // Check if description is empty (including just HTML tags)
+    const isDescriptionEmpty = !formData.description || 
+                            formData.description.replace(/<[^>]*>/g, '').trim() === '';
+  
+    if (!formData.title || isDescriptionEmpty) {
+      showToast.error("Please fill in all required fields (Title and Description)");
       return;
     }
-
+  
     const body = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value !== null) body.append(key, value.toString());
-    });
-
+    
+    // Append all fields
+    body.append('title', formData.title);
+    body.append('description', formData.description);
+    
+    // Append conference_id if it exists (no longer required)
+    if (formData.conference_id) {
+      body.append('conference_id', formData.conference_id.toString());
+    }
+    
+    // Append optional fields if they exist
+    if (formData.date) body.append('date', formData.date);
+    if (formData.time) body.append('time', formData.time);
+    if (formData.social_media) body.append('social_media', formData.social_media);
+    if (formData.social_media_link) body.append('social_media_link', formData.social_media_link);
+    if (formData.image) body.append('image', formData.image);
+  
     try {
       setLoading(true);
       const endpoint = editingNewsId 
@@ -192,7 +244,7 @@ const NewsPage = () => {
         : `${process.env.NEXT_PUBLIC_API_URL}/admin/add_news`;
       
       if (editingNewsId) body.append("news_id", editingNewsId.toString());
-
+  
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -200,10 +252,10 @@ const NewsPage = () => {
         },
         body,
       });
-
+  
       const result = await response.json();
       if (response.ok) {
-        showToast.success(editingNewsId ? "News updated successfully!" : "News added successfully!");
+        setShowSuccessModal(true);
         fetchNews(selectedConferenceId || undefined);
         setFormData(initialFormData);
         setEditingNewsId(null);
@@ -220,7 +272,12 @@ const NewsPage = () => {
   };
 
   const handleDelete = async (newsId: string | number): Promise<void> => {
-    if (!confirm("Are you sure you want to delete this news item?")) return;
+    setNewsToDelete(newsId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!newsToDelete) return;
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_news`, {
@@ -229,7 +286,7 @@ const NewsPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${bearerToken}`,
         },
-        body: JSON.stringify({ news_id: newsId }),
+        body: JSON.stringify({ news_id: newsToDelete }),
       });
 
       const result = await response.json();
@@ -242,6 +299,9 @@ const NewsPage = () => {
     } catch (error) {
       console.error("Error deleting news:", error);
       showToast.error("An error occurred while deleting news.");
+    } finally {
+      setDeleteDialogOpen(false);
+      setNewsToDelete(null);
     }
   };
 
@@ -279,24 +339,6 @@ const NewsPage = () => {
         <h1 className="text-xl md:text-2xl font-bold text-gray-600">News Management</h1>
         
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          {/* <div className="w-full sm:w-64">
-            <Select 
-              value={selectedConferenceId?.toString() || ""} 
-              onValueChange={handleFilterConferenceChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Conference" />
-              </SelectTrigger>
-              <SelectContent>
-                {conferences.map((conference) => (
-                  <SelectItem key={conference.id} value={conference.id.toString()}>
-                    {conference.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
-          
           <Button  
             className="bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => {
@@ -401,13 +443,14 @@ const NewsPage = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">Description</label>
-                <textarea
-                  name="description"
+                <ReactQuill
                   value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="News description"
-                  rows={4}
-                  className="w-full px-3 py-2 border rounded-md"
+                  onChange={handleDescriptionChange}
+                  modules={quillModules}
+                  formats={quillFormats}
+                  placeholder="Write your news content here..."
+                  className="border rounded-md"
+                  theme="snow"
                 />
               </div>
 
@@ -446,6 +489,68 @@ const NewsPage = () => {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
+
+      {/* Success Modal */}
+      <Dialog.Root open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+          <Dialog.Content className="fixed top-[50%] left-[50%] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg z-50">
+            <div className="flex flex-col items-center">
+              <div className="bg-green-100 p-3 rounded-full">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <Dialog.Title className="text-center text-[#203a87] text-2xl mt-4 font-semibold">
+                Success!
+              </Dialog.Title>
+              <Dialog.Description className="text-center text-gray-600 mt-2">
+                {editingNewsId ? "News updated successfully!" : "News added successfully!"}
+              </Dialog.Description>
+              <div className="mt-6">
+                <Button 
+                  onClick={() => setShowSuccessModal(false)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Delete Confirmation Dialog */}
+  
+        <AlertDialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <AlertDialog.Portal>
+                <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                  <AlertDialog.Title className="text-lg font-semibold">
+                    Delete News
+                  </AlertDialog.Title>
+                  <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                    Are you sure you want to delete this News? This action cannot be undone.
+                  </AlertDialog.Description>
+                  <div className="flex justify-end gap-4">
+                    <AlertDialog.Cancel asChild>
+                      <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Cancel
+                      </button>
+                    </AlertDialog.Cancel>
+                    <AlertDialog.Action asChild>
+                      <button 
+                       onClick={confirmDelete}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+                    </AlertDialog.Action>
+                  </div>
+                </AlertDialog.Content>
+              </AlertDialog.Portal>
+            </AlertDialog.Root>
+
 
       {/* News listing */}
       <div className="mt-8">
@@ -501,7 +606,10 @@ const NewsPage = () => {
                   )}
                   
                   {/* Description with truncation */}
-                  <p className="text-gray-600 mt-2 line-clamp-3">{newsItem.description}</p>
+                  <div 
+                    className="text-gray-600 mt-2 line-clamp-3" 
+                    dangerouslySetInnerHTML={{ __html: newsItem.description }} 
+                  />
                   
                   <div className="flex justify-end mt-4 gap-2">
                     <Button 

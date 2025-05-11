@@ -38,7 +38,7 @@ const ConferenceSchedule = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/14`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',

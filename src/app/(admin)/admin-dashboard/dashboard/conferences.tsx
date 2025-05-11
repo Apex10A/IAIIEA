@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, Calendar, MapPin, Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChevronRight, Calendar, MapPin, Users, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useSession } from "next-auth/react";
 import { motion } from 'framer-motion';
 
@@ -9,11 +9,8 @@ interface Conference {
   id: string;
   title: string;
   date: string;
-  location?: string;
   venue?: string;
-  status: 'upcoming' | 'ongoing' | 'completed';
-  members?: any[];
-  total_members?: number;
+  status: 'Incoming' | 'Completed';
   theme?: string;
 }
 
@@ -25,17 +22,12 @@ interface ConferenceMembersData {
 }
 
 const statusConfig = {
-  upcoming: {
+  Incoming: {
     color: 'bg-amber-100 text-amber-800',
     icon: <Clock className="h-4 w-4" />,
     label: 'Upcoming'
   },
-  ongoing: {
-    color: 'bg-blue-100 text-blue-800',
-    icon: <AlertCircle className="h-4 w-4" />,
-    label: 'Ongoing'
-  },
-  completed: {
+  Completed: {
     color: 'bg-green-100 text-green-800',
     icon: <CheckCircle className="h-4 w-4" />,
     label: 'Completed'
@@ -111,14 +103,16 @@ const DashboardConferences = () => {
         const data = await response.json();
         
         if (data.status === 'success') {
-          const mappedConferences: Conference[] = data.data.map((conf: any) => ({
-            id: conf.id.toString(),
-            title: conf.title,
-            date: conf.date,
-            location: conf.venue,
-            status: conf.status.toLowerCase() as 'upcoming' | 'ongoing' | 'completed',
-            theme: conf.theme
-          }));
+          const mappedConferences: Conference[] = data.data
+            .filter((conf: any) => conf.status !== 'Completed')
+            .map((conf: any) => ({
+              id: conf.id.toString(),
+              title: conf.title,
+              date: conf.date,
+              venue: conf.venue,
+              status: conf.status as 'Incoming' | 'Completed',
+              theme: conf.theme
+            }));
           
           setConferences(mappedConferences);
           await fetchMembersForConferences(mappedConferences);
@@ -173,28 +167,9 @@ const DashboardConferences = () => {
     if (bearerToken) fetchConferences();
   }, [bearerToken]);
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Date not specified';
-    
-    if (dateString.toLowerCase().includes('to')) {
-      return dateString;
-    }
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    } catch (e) {
-      return dateString;
-    }
-  };
-
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border ">
+      <div className="bg-white rounded-xl shadow-md p-6 border">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6 text-[#0E1A3D]" />
@@ -242,7 +217,8 @@ const DashboardConferences = () => {
     );
   }
 
-  const displayConferences = conferences.slice(0, 2);
+  const activeConferences = conferences.filter(conf => conf.status !== 'Completed');
+  const displayConferences = activeConferences.slice(0, 2);
 
   return (
     <motion.div 
@@ -250,7 +226,7 @@ const DashboardConferences = () => {
       animate={{ opacity: 1 }}
       className="bg-white rounded-xl min-h-[400px]"
     >
-      {/* <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 p-6">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 text-[#0E1A3D]" />
           <h2 className="text-xl font-semibold text-gray-800">Conferences</h2>
@@ -262,19 +238,19 @@ const DashboardConferences = () => {
           View All
           <ChevronRight className="ml-1 h-4 w-4" />
         </Link>
-      </div> */}
+      </div>
 
       {displayConferences.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500 p-6">
           <Calendar className="h-12 w-12 mb-4 text-gray-300" />
-          <p className="text-lg">No conferences scheduled</p>
+          <p className="text-lg">No upcoming conferences</p>
           <p className="text-sm mt-1">Check back later for upcoming events</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 px-6 pb-6">
           {displayConferences.map((conference) => {
             const memberData = conferenceMembersData[conference.id] || { members: [], total: 0 };
-            const status = statusConfig[conference.status] || statusConfig.upcoming;
+            const status = statusConfig[conference.status] || statusConfig.Incoming;
             
             return (
               <motion.div
@@ -292,15 +268,15 @@ const DashboardConferences = () => {
                     )}
                     
                     <div className="md:flex items-center mt-3 text-sm text-gray-500">
-                      {/* <Calendar className="h-4 w-4 mr-1.5" /> */}
-                      {/* <span className='flex pb-3 md:pb-0'>{formatDate(conference.date)}</span>
-                      {conference.location && (
+                      <Calendar className="h-4 w-4 mr-1.5" />
+                      <span className='flex pb-3 md:pb-0'>{conference.date}</span>
+                      {conference.venue && (
                         <>
                           <span className="mx-2 hidden md:flex">•</span>
                           <MapPin className="h-4 w-4 mr-1.5" />
-                          <span>{conference.location}</span>
+                          <span>{conference.venue}</span>
                         </>
-                      )} */}
+                      )}
                     </div>
                     
                     <div className="flex items-center mt-3">

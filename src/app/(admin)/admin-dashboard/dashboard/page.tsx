@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.4 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px] ">
+          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px] ">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
@@ -278,6 +278,17 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
               <Calendar />
+            </div>
+          </div> */}
+           <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiClock className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <ConferenceSchedule />
             </div>
           </div>
 
@@ -301,7 +312,7 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.5 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
@@ -311,7 +322,7 @@ export default function AdminDashboardPage() {
               </div>
               <ConferenceSchedule />
             </div>
-          </div>
+          </div> */}
 
           <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">

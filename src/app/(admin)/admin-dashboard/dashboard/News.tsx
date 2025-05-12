@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
+import { Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { showToast } from '@/utils/toast';
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash2, Edit2, Plus } from 'lucide-react';
@@ -29,8 +29,6 @@ interface NewsItem {
   social_media_link: string;
   description: string;
   image?: string;
-  conference_id?: number;
-  conference_title?: string;
 }
 
 interface Conference {
@@ -51,7 +49,6 @@ interface FormData {
   social_media_link: string;
   description: string;
   image: File | null;
-  conference_id: number | null;
 }
 
 const initialFormData: FormData = {
@@ -62,7 +59,6 @@ const initialFormData: FormData = {
   social_media_link: "",
   description: "",
   image: null,
-  conference_id: null,
 };
 
 const NewsPage = () => {
@@ -78,6 +74,8 @@ const NewsPage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [newsToDelete, setNewsToDelete] = useState<string | number | null>(null);
+  const [viewingNews, setViewingNews] = useState<NewsItem | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState<boolean>(false);
   
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -141,7 +139,6 @@ const NewsPage = () => {
   const fetchNews = async (conferenceId?: number): Promise<void> => {
     setIsLoadingNews(true);
     try {
-      // If specific conference is selected, fetch news for that conference
       let endpoint = `${process.env.NEXT_PUBLIC_API_URL}/admin/list_news`;
       if (conferenceId) {
         endpoint += `?conference_id=${conferenceId}`;
@@ -199,18 +196,7 @@ const NewsPage = () => {
     }
   };
 
-  const handleConferenceChange = (id: string) => {
-    const conferenceId = parseInt(id, 10);
-    setFormData(prev => ({ ...prev, conference_id: conferenceId }));
-  };
-
-  const handleFilterConferenceChange = (id: string) => {
-    const conferenceId = parseInt(id, 10);
-    setSelectedConferenceId(conferenceId);
-  };
-
   const handleSubmit = async (): Promise<void> => {
-    // Check if description is empty (including just HTML tags)
     const isDescriptionEmpty = !formData.description || 
                             formData.description.replace(/<[^>]*>/g, '').trim() === '';
   
@@ -220,17 +206,9 @@ const NewsPage = () => {
     }
   
     const body = new FormData();
-    
-    // Append all fields
     body.append('title', formData.title);
     body.append('description', formData.description);
     
-    // Append conference_id if it exists (no longer required)
-    if (formData.conference_id) {
-      body.append('conference_id', formData.conference_id.toString());
-    }
-    
-    // Append optional fields if they exist
     if (formData.date) body.append('date', formData.date);
     if (formData.time) body.append('time', formData.time);
     if (formData.social_media) body.append('social_media', formData.social_media);
@@ -313,11 +291,15 @@ const NewsPage = () => {
       social_media: newsItem.social_media || "",
       social_media_link: newsItem.social_media_link || "",
       description: newsItem.description,
-      image: null, // Image can't be prefilled
-      conference_id: newsItem.conference_id || null,
+      image: newsItem.image ? new File([], newsItem.image) : null,
     });
     setEditingNewsId(newsItem.id);
     setIsDialogOpen(true);
+  };
+
+  const handleView = (newsItem: NewsItem): void => {
+    setViewingNews(newsItem);
+    setViewModalOpen(true);
   };
 
   const resetForm = () => {
@@ -363,25 +345,6 @@ const NewsPage = () => {
               {editingNewsId ? "Edit News" : "Add News"}
             </h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-600">Select Conference</label>
-                <Select 
-                  value={formData.conference_id?.toString() || ""} 
-                  onValueChange={handleConferenceChange}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Conference" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {conferences.map((conference) => (
-                      <SelectItem key={conference.id} value={conference.id.toString()}>
-                        {conference.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">Title</label>
                 <input
@@ -490,6 +453,87 @@ const NewsPage = () => {
         </Dialog.Portal>
       </Dialog.Root>
 
+      {/* View News Modal */}
+      <Dialog.Root open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+          <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[90vh] w-[90vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg z-50 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              
+              <Dialog.Close asChild>
+                <button
+                  className="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition-colors"
+                  aria-label="Close"
+                >
+                  <Cross2Icon className="w-5 h-5" />
+                </button>
+              </Dialog.Close>
+            </div>
+
+            {viewingNews && (
+              <div className="space-y-6">
+                
+                {viewingNews.image && (
+                  <div className="w-full h-64 rounded-lg overflow-hidden">
+                    <img
+                      src={viewingNews.image}
+                      alt={viewingNews.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-news.jpg';
+                        target.alt = 'News image not available';
+                      }}
+                    />
+                  </div>
+                )}
+                <Dialog.Title className="text-2xl font-bold text-gray-800">
+                {viewingNews?.title}
+              </Dialog.Title>
+
+                {(viewingNews.date || viewingNews.time) && (
+                  <div className="flex items-center text-sm text-gray-500">
+                    {viewingNews.date && (
+                      <span>{new Date(viewingNews.date).toLocaleDateString()}</span>
+                    )}
+                    {viewingNews.date && viewingNews.time && (
+                      <span className="mx-2">•</span>
+                    )}
+                    {viewingNews.time && (
+                      <span>{viewingNews.time}</span>
+                    )}
+                  </div>
+                )}
+
+                {viewingNews.social_media && (
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">Posted on:</span>
+                    <span className="text-sm text-blue-600">
+                      {viewingNews.social_media}
+                      {viewingNews.social_media_link && (
+                        <a 
+                          href={viewingNews.social_media_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="ml-2 text-blue-500 hover:underline"
+                        >
+                          (View Post)
+                        </a>
+                      )}
+                    </span>
+                  </div>
+                )}
+
+                <div 
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: viewingNews.description }} 
+                />
+              </div>
+            )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
       {/* Success Modal */}
       <Dialog.Root open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <Dialog.Portal>
@@ -521,36 +565,34 @@ const NewsPage = () => {
       </Dialog.Root>
 
       {/* Delete Confirmation Dialog */}
-  
-        <AlertDialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <AlertDialog.Portal>
-                <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
-                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
-                  <AlertDialog.Title className="text-lg font-semibold">
-                    Delete News
-                  </AlertDialog.Title>
-                  <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                    Are you sure you want to delete this News? This action cannot be undone.
-                  </AlertDialog.Description>
-                  <div className="flex justify-end gap-4">
-                    <AlertDialog.Cancel asChild>
-                      <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        Cancel
-                      </button>
-                    </AlertDialog.Cancel>
-                    <AlertDialog.Action asChild>
-                      <button 
-                       onClick={confirmDelete}
-                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-                    </AlertDialog.Action>
-                  </div>
-                </AlertDialog.Content>
-              </AlertDialog.Portal>
-            </AlertDialog.Root>
-
+      <AlertDialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+            <AlertDialog.Title className="text-lg font-semibold">
+              Delete News
+            </AlertDialog.Title>
+            <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+              Are you sure you want to delete this News? This action cannot be undone.
+            </AlertDialog.Description>
+            <div className="flex justify-end gap-4">
+              <AlertDialog.Cancel asChild>
+                <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                  Cancel
+                </button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action asChild>
+                <button 
+                  onClick={confirmDelete}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </AlertDialog.Action>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
 
       {/* News listing */}
       <div className="mt-8">
@@ -561,7 +603,7 @@ const NewsPage = () => {
         ) : news.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
-              <p className="text-gray-500">No news items available for this conference. Click "Add News" to create one.</p>
+              <p className="text-gray-500">No news items available. Click "Add News" to create one.</p>
             </CardContent>
           </Card>
         ) : (
@@ -589,14 +631,6 @@ const NewsPage = () => {
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-lg mb-2">{newsItem.title}</h3>
                   
-                  {/* Conference name if available */}
-                  {newsItem.conference_title && (
-                    <p className="text-sm text-gray-500 mb-2">
-                      Conference: {newsItem.conference_title}
-                    </p>
-                  )}
-                  
-                  {/* Date and time if available */}
                   {(newsItem.date || newsItem.time) && (
                     <p className="text-sm text-gray-500 mb-2">
                       {newsItem.date && new Date(newsItem.date).toLocaleDateString()}
@@ -605,13 +639,20 @@ const NewsPage = () => {
                     </p>
                   )}
                   
-                  {/* Description with truncation */}
                   <div 
                     className="text-gray-600 mt-2 line-clamp-3" 
                     dangerouslySetInnerHTML={{ __html: newsItem.description }} 
                   />
                   
                   <div className="flex justify-end mt-4 gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleView(newsItem)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
                     <Button 
                       variant="outline" 
                       size="sm" 

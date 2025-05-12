@@ -38,7 +38,7 @@ const ConferenceSchedule = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/19`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const ConferenceSchedule = () => {
     } catch (err) {
       console.error('Error fetching schedules:', err);
       setError('Failed to load schedules. Please try again later.');
-      showToast.error('Failed to load schedules. Please try again later.');
+      // showToast.error('Failed to load schedules. Please try again later.');
     } finally {
       setIsLoading(false);
     }

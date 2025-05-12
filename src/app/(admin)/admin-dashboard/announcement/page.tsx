@@ -16,7 +16,7 @@ const Page = () => {
             <AnnouncementsPage />
           </div>
         );
-      case 'job opportunity':
+      case 'Job Opportunity':
         return (
           <div>
             <JobOpportunitiesPage />
@@ -34,7 +34,7 @@ const Page = () => {
       </div>
       <div>
         <ButtonProp
-          options={['Announcement', 'job opportunity']}
+          options={['Announcement', 'Job Opportunity']}
           selectedSection={selectedSection}
           setSelectedSection={setSelectedSection}
         />

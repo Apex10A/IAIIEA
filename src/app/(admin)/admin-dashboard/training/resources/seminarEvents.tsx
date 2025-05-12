@@ -587,36 +587,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">This are the list of food currently available for the day. Select any food of your choice</p>
-            {conferenceDetails?.meals && conferenceDetails.meals.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {conferenceDetails.meals.map((item, index) => (
-                  <div
-                    key={index}
-                    className="h-60 relative rounded-lg overflow-hidden bg-gray-100"
-                  >
-                    <Image
-                      src={item.image}
-                      alt={`Gallery image ${index + 1}`}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform"
-                    />
-                  <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-2 rounded-t-lg">
-                  <h2 className="text-lg font-bold text-gray-900 mb-4">{item.name}</h2>
-                    <div>
-                      <button   className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">select meal</button>
-                    </div>
-                  </div>
-                  </div>
-                  
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-8">No Meals available</p>
-            )}
-          </div>
+        
 
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Videos</h2>

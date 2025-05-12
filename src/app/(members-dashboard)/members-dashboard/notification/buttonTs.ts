@@ -8,7 +8,7 @@ export type SectionType =
   | 'Event speakers' 
   | 'Conference participants' 
   | 'Volunteers' 
-  | 'job opportunity'
+  | 'Job Opportunity'
   | 'Announcement'
   | 'Members resources'
   | 'Payment History'

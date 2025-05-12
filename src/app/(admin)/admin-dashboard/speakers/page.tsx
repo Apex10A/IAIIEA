@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Image from 'next/image';
 import { Phone, Mail, Edit, Trash, Plus, X } from 'lucide-react';
 import { countries } from '@/utils/countries'; 
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 // TypeScript interfaces
 interface Speaker {
@@ -14,10 +15,6 @@ interface Speaker {
   email?: string;
   phone?: string;
   country?: string;
-  f_name?: string;
-  m_name?: string;
-  l_name?: string;
-  title?: string;
 }
 
 interface ApiResponse {
@@ -34,6 +31,7 @@ export default function SpeakersManagement() {
   const [editingSpeaker, setEditingSpeaker] = useState<Speaker | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [speakerToDelete, setSpeakerToDelete] = useState<string | null>(null);
   
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -43,10 +41,8 @@ export default function SpeakersManagement() {
   
   // Form state
   const [formData, setFormData] = useState({
-    title: '',
-    f_name: '',
-    m_name: '',
-    l_name: '',
+    speaker_name: '',
+    speaker_institution: '',
     phone: '',
     email: '',
     country: '',
@@ -121,10 +117,8 @@ export default function SpeakersManagement() {
   const openAddModal = () => {
     setEditingSpeaker(null);
     setFormData({
-      title: '',
-      f_name: '',
-      m_name: '',
-      l_name: '',
+      speaker_name: '',
+      speaker_institution: '',
       phone: '',
       email: '',
       country: '',
@@ -138,10 +132,8 @@ export default function SpeakersManagement() {
   const openEditModal = (speaker: Speaker) => {
     setEditingSpeaker(speaker);
     setFormData({
-      title: speaker.title || '',
-      f_name: speaker.f_name || '',
-      m_name: speaker.m_name || '',
-      l_name: speaker.l_name || '',
+      speaker_name: speaker.speaker_name,
+      speaker_institution: speaker.speaker_institution,
       phone: speaker.phone || '',
       email: speaker.email || '',
       country: speaker.country || '',
@@ -165,10 +157,8 @@ export default function SpeakersManagement() {
     
     try {
       const form = new FormData();
-      form.append('title', formData.title);
-      form.append('f_name', formData.f_name);
-      form.append('m_name', formData.m_name);
-      form.append('l_name', formData.l_name);
+      form.append('speaker_name', formData.speaker_name);
+      form.append('speaker_institution', formData.speaker_institution);
       form.append('phone', formData.phone);
       form.append('email', formData.email);
       form.append('country', formData.country);
@@ -217,14 +207,17 @@ export default function SpeakersManagement() {
     }
   };
 
+  // Handle speaker deletion confirmation
+  const confirmDelete = (speakerId: string) => {
+    setSpeakerToDelete(speakerId);
+  };
+
   // Handle speaker deletion
-  const handleDeleteSpeaker = async (speakerId: string) => {
-    if (!window.confirm('Are you sure you want to delete this speaker?')) {
-      return;
-    }
+  const handleDeleteSpeaker = async () => {
+    if (!speakerToDelete) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_speaker/${speakerId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_speaker/${speakerToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
@@ -240,8 +233,9 @@ export default function SpeakersManagement() {
       
       if (data.status === 'success') {
         // Remove the deleted speaker from the state
-        setSpeakers(speakers.filter(speaker => speaker.speaker_id !== speakerId));
+        setSpeakers(speakers.filter(speaker => speaker.speaker_id !== speakerToDelete));
         setSuccessMessage('Speaker deleted successfully');
+        setSpeakerToDelete(null);
         
         // Clear success message after 3 seconds
         setTimeout(() => {
@@ -326,13 +320,18 @@ export default function SpeakersManagement() {
                     >
                       <Edit size={16} className="text-gray-700" />
                     </button>
-                    <button 
-                      onClick={() => handleDeleteSpeaker(speaker.speaker_id)}
-                      className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-colors"
-                      aria-label="Delete speaker"
-                    >
-                      <Trash size={16} className="text-red-600" />
-                    </button>
+                    
+                    <AlertDialog.Root>
+                      <AlertDialog.Trigger asChild>
+                        <button 
+                          className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-colors"
+                          aria-label="Delete speaker"
+                          onClick={() => confirmDelete(speaker.speaker_id)}
+                        >
+                          <Trash size={16} className="text-red-600" />
+                        </button>
+                      </AlertDialog.Trigger>
+                    </AlertDialog.Root>
                   </div>
                 </div>
                 <div className="p-6">
@@ -389,61 +388,33 @@ export default function SpeakersManagement() {
             <form ref={formRef} onSubmit={handleSubmit} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
-                    Title/Position
+                  <label className="block text-gray-700 font-medium mb-2" htmlFor="speaker_name">
+                    Speaker Name
                   </label>
                   <input
                     type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
+                    id="speaker_name"
+                    name="speaker_name"
+                    value={formData.speaker_name}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g. Professor of Educational Evaluation"
+                    placeholder="e.g. Dr. John Doe"
                     required
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="f_name">
-                    First Name
+                <div className="md:col-span-2">
+                  <label className="block text-gray-700 font-medium mb-2" htmlFor="speaker_institution">
+                    Institution/Position
                   </label>
                   <input
                     type="text"
-                    id="f_name"
-                    name="f_name"
-                    value={formData.f_name}
+                    id="speaker_institution"
+                    name="speaker_institution"
+                    value={formData.speaker_institution}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="m_name">
-                    Middle Name
-                  </label>
-                  <input
-                    type="text"
-                    id="m_name"
-                    name="m_name"
-                    value={formData.m_name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="l_name">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="l_name"
-                    name="l_name"
-                    value={formData.l_name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g. Professor at University of Example"
                     required
                   />
                 </div>
@@ -569,6 +540,39 @@ export default function SpeakersManagement() {
           </div>
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog.Root open={!!speakerToDelete}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+            <AlertDialog.Title className="text-lg font-semibold">
+              Delete Speaker
+            </AlertDialog.Title>
+            <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+              Are you sure you want to delete this speaker? This action cannot be undone.
+            </AlertDialog.Description>
+            <div className="flex justify-end gap-4">
+              <AlertDialog.Cancel asChild>
+                <button 
+                  className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  onClick={() => setSpeakerToDelete(null)}
+                >
+                  Cancel
+                </button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action asChild>
+                <button 
+                  onClick={handleDeleteSpeaker}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </AlertDialog.Action>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
     </div>
   );
 }

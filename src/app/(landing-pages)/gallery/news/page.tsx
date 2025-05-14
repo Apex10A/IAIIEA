@@ -234,18 +234,18 @@ const NewsPage = () => {
   );
 
   return (
-    <div className='flex flex-col lg:flex-row gap-6 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'>
+    <div className='flex flex-col lg:flex-row gap-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24 ]'>
       {/* Main content */}
       <div className='lg:w-[70%] w-full bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6'>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-10">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">News & Updates</h1>
-          <Button 
+          {/* <Button 
             onClick={() => setShowAddModal(true)}
             className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add News
-          </Button>
+          </Button> */}
         </div>
 
         {loading ? (
@@ -416,8 +416,12 @@ const NewsPage = () => {
       
       {/* Sidebar content */}
       <div className='lg:w-[30%] w-full space-y-6'>
+        <div className='max-h-[150px] overflow-y-scroll'>
         <Upcoming/>
+        </div>
+        <div className='max-h-[150px] overflow-y-scroll'>
         <ActiveConferences/>
+        </div>
       </div>
 
       {/* Add News Modal */}

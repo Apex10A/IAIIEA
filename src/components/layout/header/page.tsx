@@ -323,7 +323,7 @@ const Header = () => {
               ))}
 
               <Link
-                href="/blog"
+                href="/about"
                 className={`px-4 py-3 rounded-lg ${pathname === "/blog" ? "bg-[#1a2a5a] text-[#D5B93C]" : "text-gray-300 hover:bg-[#1a2a5a]"}`}
                 onClick={toggleMobileMenu}
               >
@@ -433,7 +433,7 @@ const Header = () => {
             ))}
 
             <Link
-              href="/blog"
+              href="/about"
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 pathname === "/blog" 
                   ? "text-[#D5B93C] border-b-2 border-[#D5B93C]" 

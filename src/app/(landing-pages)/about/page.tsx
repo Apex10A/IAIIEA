@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import "@/app/index.css"
 import { motion } from 'framer-motion'
 import { FaArrowLeft } from 'react-icons/fa'
 import Link from 'next/link'
@@ -11,16 +12,17 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-white py-5">
       {/* Back Button */}
+    
+
+      {/* History Content */}
+      <section className="py-12 px-4 md:px-8 lg:px-14 bg-white">
       <div className="container mx-auto px-4 md:px-8 lg:px-14 pt-8">
         <Link href="/" className="inline-flex items-center text-[#0B142F] hover:text-[#D5B93C] transition-colors">
           <FaArrowLeft className="mr-2" /> Back to Home
         </Link>
       </div>
-
-      {/* History Content */}
-      <section className="py-12 px-4 md:px-8 lg:px-14 bg-white">
         <div className="container mx-auto max-w-4xl">
           <motion.h1 
             className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-8 text-center"

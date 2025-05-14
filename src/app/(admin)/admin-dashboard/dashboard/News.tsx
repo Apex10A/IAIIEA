@@ -76,6 +76,8 @@ const NewsPage = () => {
   const [newsToDelete, setNewsToDelete] = useState<string | number | null>(null);
   const [viewingNews, setViewingNews] = useState<NewsItem | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState<boolean>(false);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -192,7 +194,15 @@ const NewsPage = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFormData((prev) => ({ ...prev, image: e.target.files![0] }));
+      const file = e.target.files[0];
+      setFormData((prev) => ({ ...prev, image: file }));
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -213,7 +223,16 @@ const NewsPage = () => {
     if (formData.time) body.append('time', formData.time);
     if (formData.social_media) body.append('social_media', formData.social_media);
     if (formData.social_media_link) body.append('social_media_link', formData.social_media_link);
-    if (formData.image) body.append('image', formData.image);
+  
+    // Only append image if a new one was selected
+    if (formData.image) {
+      body.append('image', formData.image);
+    } else if (editingNewsId && !existingImageUrl) {
+      // If editing and no existing image, you might want to remove the image
+      body.append('remove_image', 'true');
+    }
+
+    if (editingNewsId) body.append("news_id", editingNewsId.toString());
   
     try {
       setLoading(true);
@@ -221,8 +240,6 @@ const NewsPage = () => {
         ? `${process.env.NEXT_PUBLIC_API_URL}/admin/edit_news` 
         : `${process.env.NEXT_PUBLIC_API_URL}/admin/add_news`;
       
-      if (editingNewsId) body.append("news_id", editingNewsId.toString());
-  
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -235,8 +252,7 @@ const NewsPage = () => {
       if (response.ok) {
         setShowSuccessModal(true);
         fetchNews(selectedConferenceId || undefined);
-        setFormData(initialFormData);
-        setEditingNewsId(null);
+        resetForm();
         setIsDialogOpen(false);
       } else {
         showToast.error(result.message || "Failed to submit news.");
@@ -291,9 +307,11 @@ const NewsPage = () => {
       social_media: newsItem.social_media || "",
       social_media_link: newsItem.social_media_link || "",
       description: newsItem.description,
-      image: newsItem.image ? new File([], newsItem.image) : null,
+      image: null, // Initialize as null, we'll track the existing image separately
     });
     setEditingNewsId(newsItem.id);
+    setExistingImageUrl(newsItem.image || null);
+    setImagePreview(null);
     setIsDialogOpen(true);
   };
 
@@ -305,6 +323,8 @@ const NewsPage = () => {
   const resetForm = () => {
     setFormData(initialFormData);
     setEditingNewsId(null);
+    setExistingImageUrl(null);
+    setImagePreview(null);
   };
 
   if (isLoadingConferences) {
@@ -419,12 +439,43 @@ const NewsPage = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-600">Image</label>
+                {existingImageUrl && editingNewsId && (
+                  <div className="mb-2">
+                    <p className="text-sm text-gray-500 mb-1">Current Image:</p>
+                    <img 
+                      src={existingImageUrl} 
+                      alt="Current news" 
+                      className="h-32 object-contain border rounded"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-news.jpg';
+                      }}
+                    />
+                  </div>
+                )}
+                {imagePreview && (
+                  <div className="mb-2">
+                    <p className="text-sm text-gray-500 mb-1">New Image Preview:</p>
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="h-32 object-contain border rounded"
+                    />
+                  </div>
+                )}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
                   className="w-full px-3 py-2 border rounded-md text-gray-600"
                 />
+                {editingNewsId && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.image 
+                      ? "New image selected (will replace current image)"
+                      : "Leave blank to keep current image"}
+                  </p>
+                )}
               </div>
             </div>
             <div className="mt-6 flex justify-end space-x-4">
@@ -436,9 +487,19 @@ const NewsPage = () => {
               <Button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {loading ? "Submitting..." : "Submit"}
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {editingNewsId ? "Updating..." : "Submitting..."}
+                  </>
+                ) : (
+                  editingNewsId ? "Update" : "Submit"
+                )}
               </Button>
             </div>
             <Dialog.Close asChild>

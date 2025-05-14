@@ -485,11 +485,15 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {conference.title}
           </h1>
+          <Pencil className="w-4 h-4 mr-2" />
           <p className="text-gray-800 ">171 people have registered for this conference</p>
           </div>
-          <p className="text-2xl text-gray-800 uppercase font-bold mb-4">
+          <div className="flex items-center gap-2 mb-4">
+          <p className="text-2xl text-gray-800 uppercase font-bold">
             {conference.theme}
           </p>
+          <Pencil className="w-4 h-4 mr-2" />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-5">
             <div className="flex items-start gap-3">
@@ -499,6 +503,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 <p className="font-medium text-gray-500">
                   {conference.date}
                 </p>
+                <Pencil className="w-4 h-4 mr-2" />
               </div>
             </div>
             <div className="flex items-start gap-3">

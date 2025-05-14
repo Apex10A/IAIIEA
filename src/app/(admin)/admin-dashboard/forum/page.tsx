@@ -4,7 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon, TrashIcon, Pencil1Icon } from '@radix-ui/react-icons';
 import { useSession } from "next-auth/react";
 import { showToast } from '@/utils/toast';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns'; // Import format for exact time display
 
 interface Comment {
   name: string;
@@ -79,6 +79,11 @@ const ForumPage: React.FC = () => {
     title: '',
     description: ''
   });
+
+  // Add new state variables for submission status
+  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState<boolean>(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   const [newQuestion, setNewQuestion] = useState<NewQuestion>({
     title: "",
@@ -188,6 +193,44 @@ const ForumPage: React.FC = () => {
     }));
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const utcDate = new Date(dateString);
+  
+      // Shift to WAT manually (UTC+1, 60 mins ahead)
+      const watOffsetMs = 60 * 60 * 1000;
+      const watDate = new Date(utcDate.getTime() + watOffsetMs);
+  
+      const now = new Date();
+      const nowWat = new Date(now.getTime() + watOffsetMs);
+  
+      const diffMs = nowWat.getTime() - watDate.getTime();
+      const diffMins = Math.floor(diffMs / (60 * 1000));
+  
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  
+      const isSameDay = watDate.getDate() === nowWat.getDate() &&
+                        watDate.getMonth() === nowWat.getMonth() &&
+                        watDate.getFullYear() === nowWat.getFullYear();
+  
+      if (isSameDay) return `Today at ${format(watDate, "h:mm a")}`;
+  
+      const yesterday = new Date(nowWat);
+      yesterday.setDate(nowWat.getDate() - 1);
+      const isYesterday = watDate.getDate() === yesterday.getDate() &&
+                          watDate.getMonth() === yesterday.getMonth() &&
+                          watDate.getFullYear() === yesterday.getFullYear();
+  
+      if (isYesterday) return `Yesterday at ${format(watDate, "h:mm a")}`;
+  
+      return format(watDate, "MMM d, yyyy 'at' h:mm a");
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Invalid date";
+    }
+  };
+  
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -197,6 +240,8 @@ const ForumPage: React.FC = () => {
     }
 
     try {
+      setIsSubmittingQuestion(true); // Set loading state when submission starts
+      
       const formData = new FormData();
       formData.append('title', newQuestion.title);
       formData.append('description', newQuestion.description);
@@ -225,6 +270,8 @@ const ForumPage: React.FC = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to post question";
       showToast.error(errorMessage);
+    } finally {
+      setIsSubmittingQuestion(false); // Reset loading state when done
     }
   };
 
@@ -240,6 +287,8 @@ const ForumPage: React.FC = () => {
     }
 
     try {
+      setIsSubmittingComment(true); // Set loading state
+      
       const response = await fetch(`${API_URL}/forum/post_comment`, {
         method: 'POST',
         headers: {
@@ -264,6 +313,8 @@ const ForumPage: React.FC = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to post comment";
       showToast.error(errorMessage);
+    } finally {
+      setIsSubmittingComment(false); // Reset loading state
     }
   };
 
@@ -316,6 +367,8 @@ const ForumPage: React.FC = () => {
     }
 
     try {
+      setIsUpdating(true); // Set loading state
+      
       const response = await fetch(`${API_URL}/forum/update`, {
         method: 'POST',
         headers: {
@@ -342,6 +395,8 @@ const ForumPage: React.FC = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to update post";
       showToast.error(errorMessage);
+    } finally {
+      setIsUpdating(false); // Reset loading state
     }
   };
 
@@ -414,12 +469,28 @@ const ForumPage: React.FC = () => {
                     </div>
                     <div className="flex justify-end space-x-3 pt-2">
                       <Dialog.Close asChild>
-                        <button type="button" className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        <button 
+                          type="button" 
+                          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                          disabled={isSubmittingQuestion}
+                        >
                           Cancel
                         </button>
                       </Dialog.Close>
-                      <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
-                        Post Question
+                      <button 
+                        type="submit" 
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center justify-center min-w-[100px]"
+                        disabled={isSubmittingQuestion}
+                      >
+                        {isSubmittingQuestion ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                          </>
+                        ) : "Post Question"}
                       </button>
                     </div>
                   </form>
@@ -464,8 +535,8 @@ const ForumPage: React.FC = () => {
                       />
                       <div>
                         <p className="font-semibold text-gray-800">{question.poster_name}</p>
-                        <p className="text-sm text-gray-500">
-                          {formatDistanceToNow(new Date(question.posted_date), { addSuffix: true })}
+                        <p className="text-sm text-gray-500" title={format(new Date(question.posted_date), "PPpp")}>
+                          {formatDate(question.posted_date)}
                         </p>
                       </div>
                     </div>
@@ -481,6 +552,7 @@ const ForumPage: React.FC = () => {
                           }}
                           className="text-gray-500 hover:text-blue-600 p-1"
                           title="Edit"
+                          disabled={isDeleting === question.forum_id}
                         >
                           <Pencil1Icon className="w-4 h-4" />
                         </button>
@@ -491,7 +563,10 @@ const ForumPage: React.FC = () => {
                           disabled={isDeleting === question.forum_id}
                         >
                           {isDeleting === question.forum_id ? (
-                            <span className="animate-spin">...</span>
+                            <svg className="animate-spin h-4 w-4 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
                           ) : (
                             <TrashIcon className="w-4 h-4" />
                           )}
@@ -519,14 +594,21 @@ const ForumPage: React.FC = () => {
                         <button
                           onClick={() => setIsEditing(null)}
                           className="px-3 py-1 text-sm border rounded-md"
+                          disabled={isUpdating}
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => handleUpdatePost(question.forum_id)}
-                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md"
+                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md min-w-[60px] flex items-center justify-center"
+                          disabled={isUpdating}
                         >
-                          Save
+                          {isUpdating ? (
+                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : "Save"}
                         </button>
                       </div>
                     </div>
@@ -560,8 +642,8 @@ const ForumPage: React.FC = () => {
                                 />
                                 <div>
                                   <p className="font-medium text-gray-800">{comment.name}</p>
-                                  <p className="text-xs text-gray-500">
-                                    {formatDistanceToNow(new Date(comment.date), { addSuffix: true })}
+                                  <p className="text-xs text-gray-500" title={format(new Date(comment.date), "PPpp")}>
+                                    {formatDate(comment.date)}
                                   </p>
                                 </div>
                               </div>
@@ -581,16 +663,23 @@ const ForumPage: React.FC = () => {
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Write a comment..."
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === 'Enter' && !isSubmittingComment) {
                               handlePostComment(question.forum_id);
                             }
                           }}
+                          disabled={isSubmittingComment}
                         />
                         <button
                           onClick={() => handlePostComment(question.forum_id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md min-w-[80px] flex items-center justify-center"
+                          disabled={isSubmittingComment}
                         >
-                          Post
+                          {isSubmittingComment ? (
+                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : "Post"}
                         </button>
                       </div>
                     </div>

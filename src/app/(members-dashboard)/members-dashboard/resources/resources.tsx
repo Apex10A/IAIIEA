@@ -55,12 +55,15 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
           {isMediaResource ? (
             resource.resource_type === 'Video' ? (
               <video 
-                controls 
-                className="w-full rounded-lg"
-                src={typeof resource.resource === 'string' ? resource.resource : undefined}
-              >
-                Your browser does not support the video tag.
-              </video>
+              controls 
+              controlsList="nodownload"
+              onContextMenu={(e) => e.preventDefault()}
+              className="w-full rounded-lg"
+              src={typeof resource.resource === 'string' ? resource.resource : undefined}
+            >
+              Your browser does not support the video tag.
+            </video>
+            
             ) : (
               <audio 
                 controls 
@@ -96,19 +99,26 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
         <div className='flex items-center justify-between w-full'>
           <div className="flex gap-2">
-            <button className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2">
-              <Download className="w-5 h-5" />
-              <span className='text-sm'>Download {resource.resource_type.toLowerCase()}</span>
-            </button>
+          {['PDF', 'PPT', 'DOCX'].includes(resource.resource_type) && typeof resource.resource === 'string' && (
+  <a 
+    href={resource.resource}
+    download
+    className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2"
+  >
+    <Download className="w-5 h-5" />
+    <span className='text-sm'>Download {resource.resource_type.toLowerCase()}</span>
+  </a>
+)}
+
           </div>
           
-          {onDelete && resource.resource_id && (
+          {/* {onDelete && resource.resource_id && (
             <AlertDialog.Root>
               <AlertDialog.Trigger asChild>
-                {/* <button className="text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
+                <button className="text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
                   <Trash2 className="w-4 h-4" />
                   <span className='text-sm'>Delete</span>
-                </button> */}
+                </button>
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
                 <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
@@ -137,7 +147,7 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
                 </AlertDialog.Content>
               </AlertDialog.Portal>
             </AlertDialog.Root>
-          )}
+          )} */}
         </div>
       </CardHeader>
     </Card>
@@ -179,14 +189,14 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-700">Members Resources</h1>
-        {/* <ResourceUploadModal onUpload={onUpload} /> */}
+        <h1 className="text-2xl font-bold text-[#000]">Members Resources</h1>
+        <ResourceUploadModal onUpload={onUpload} />
       </div>
 
       <Tabs defaultValue="media" className="w-full">
         <TabsList>
-          <TabsTrigger value="media">Media Resources</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="media" className="text-[#000]">Media Resources</TabsTrigger>
+          <TabsTrigger value="documents" className="text-[#000]">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="media">
@@ -279,10 +289,10 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        {/* <Button variant="outline" className="flex items-center gap-2">
           <Upload className="w-4 h-4" />
           Upload Resources
-        </Button>
+        </Button> */}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

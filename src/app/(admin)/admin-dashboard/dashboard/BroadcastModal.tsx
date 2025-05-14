@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { showToast } from '@/utils/toast';
 import dynamic from 'next/dynamic';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from '@/components/ui/multi-select';
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { 
@@ -16,24 +18,30 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 
 import 'react-quill/dist/quill.snow.css';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  country: string | null;
+  institution: string;
+  role: string;
+  type: string;
+}
+
 const BroadcastMail = () => {
   const [organizationEmail, setOrganizationEmail] = useState("");
-  const [recipients, setRecipients] = useState("");
   const [subject, setSubject] = useState("");
   const [messageToSend, setMessageToSend] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Recipient group options
-  const recipientGroups = [
-    { id: 'conference_participants', label: 'Conference Participants' },
-    { id: 'speakers', label: 'Speakers' },
-    { id: 'paid_members', label: 'Paid Members' },
-    { id: 'all_members', label: 'All Members' }
-  ];
+  // User type and selection state
+  const [selectedUserType, setSelectedUserType] = useState<string>('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Quill modules configuration
   const quillModules = {
@@ -53,17 +61,45 @@ const BroadcastMail = () => {
     'link'
   ];
 
-  const handleGroupToggle = (groupId: string) => {
-    setSelectedGroups(prev => 
-      prev.includes(groupId) 
-        ? prev.filter(id => id !== groupId) 
-        : [...prev, groupId]
-    );
+  // Fetch users based on selected type
+  const fetchUsers = async (type: string) => {
+    if (!type) return;
+    
+    setIsLoadingUsers(true);
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/${type}`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
+        }
+      });
+      
+      if (response.data.status === "success" && response.data.data) {
+        setUsers(response.data.data);
+      } else {
+        setUsers([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch users', error);
+      setUsers([]);
+      showToast.error("Failed to fetch users");
+    } finally {
+      setIsLoadingUsers(false);
+    }
   };
 
+  // Handle user type selection change
+  useEffect(() => {
+    if (selectedUserType) {
+      fetchUsers(selectedUserType);
+      setSelectedEmails([]); // Reset selected emails when user type changes
+    } else {
+      setUsers([]);
+    }
+  }, [selectedUserType]);
+
   const handleSubmit = async () => {
-    if (!organizationEmail || (!recipients && selectedGroups.length === 0) || !subject || !messageToSend) {
-      showToast.error("Please fill in all required fields.");
+    if (!organizationEmail || !selectedUserType || selectedEmails.length === 0 || !subject || !messageToSend) {
+      showToast.error("Please fill in all required fields and select at least one recipient.");
       return;
     }
 
@@ -74,10 +110,10 @@ const BroadcastMail = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/admin/send_broadcast_mail`,
         {
           organization_email: organizationEmail,
-          recipients,
-          recipient_groups: selectedGroups,
+          recipients: selectedEmails.join(','),
           subject,
           message_to_send: messageToSend,
+          recipient_type: selectedUserType
         },
         {
           headers: {
@@ -89,8 +125,8 @@ const BroadcastMail = () => {
       showToast.success("Broadcast mail sent successfully!");
       // Reset form
       setOrganizationEmail("");
-      setRecipients("");
-      setSelectedGroups([]);
+      setSelectedUserType("");
+      setSelectedEmails([]);
       setSubject("");
       setMessageToSend("");
     } catch (error) {
@@ -152,39 +188,47 @@ const BroadcastMail = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Recipient Groups
+                  Select Recipient Type *
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {recipientGroups.map(group => (
-                    <div key={group.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={group.id}
-                        checked={selectedGroups.includes(group.id)}
-                        onChange={() => handleGroupToggle(group.id)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor={group.id} className="ml-2 text-sm text-gray-700">
-                        {group.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                <Select 
+                  value={selectedUserType}
+                  onValueChange={setSelectedUserType}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select recipient type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="conference_member">Conference Participants</SelectItem>
+                    <SelectItem value="member">Members</SelectItem>
+                    <SelectItem value="seminar_member">Seminar Participants</SelectItem>
+                    <SelectItem value="speaker">Speakers</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label htmlFor="recipients" className="block text-sm font-medium text-gray-700 mb-1">
-                  Additional Recipients
-                  <span className="text-xs text-gray-500 ml-1">(comma-separated emails)</span>
-                </label>
-                <input
-                  id="recipients"
-                  value={recipients}
-                  onChange={(e) => setRecipients(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., user1@example.com, user2@example.com"
-                />
-              </div>
+              {selectedUserType && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Recipients *
+                  </label>
+                  {isLoadingUsers ? (
+                    <div className="p-4 text-center text-gray-500">Loading users...</div>
+                  ) : users.length > 0 ? (
+                    <MultiSelect
+                      options={users.map(user => ({
+                        value: user.email,
+                        label: `${user.name} (${user.email})`
+                      }))}
+                      selected={selectedEmails}
+                      onChange={setSelectedEmails}
+                      placeholder="Select recipients..."
+                      className="w-full"
+                    />
+                  ) : (
+                    <div className="p-4 text-center text-gray-500">No users found for this type</div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
@@ -226,7 +270,7 @@ const BroadcastMail = () => {
               </Dialog.Close>
               <button
                 onClick={handleSubmit}
-                disabled={loading}
+                disabled={loading || !selectedUserType || selectedEmails.length === 0}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-2 disabled:opacity-70"
               >
                 {loading ? (

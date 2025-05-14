@@ -193,7 +193,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
   }
 
   return (
-    <div className="p-6 bg-[#F9FAFF]">
+    <div className="md:p-6 bg-[#F9FAFF]">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#203a87] to-indigo-700 text-white rounded-lg px-5 py-4 mb-6 shadow-sm">
         <h1 className="text-lg md:text-xl font-medium">Dashboard Overview</h1>

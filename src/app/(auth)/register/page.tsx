@@ -129,7 +129,9 @@ export default function RegisterPage() {
       <div className="md:w-[900px] bg-[#fff] md:px-32 sm:px-20 rounded-md flex flex-col items-center justify-center min-h-[70%] w-full  shadow-none py-5">
         <CardHeader className="w-full">
           <div className="flex flex-col gap-8 items-center w-full">
-          <Image src='/logo.png' alt="logo" width={130} height={50} />
+            <Link href="/" className="cursor-pointer">
+            <Image src='/logo.png' alt="logo" width={130} height={50} />
+            </Link>
             <div className="flex flex-col text-center gap-[8px]">
               <h1 className="text-[#203A87] font-bold text-2xl md:text-4xl">
                 Become a member of IAIIEA
@@ -140,7 +142,7 @@ export default function RegisterPage() {
             </div>
           </div>
         </CardHeader>
-
+       
         <CardContent className="gap-5 grid w-full">
           {error && (
             <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
@@ -427,7 +429,7 @@ export default function RegisterPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    Area_Of_Specialization<span className="text-brand-primary">*</span>
+                    Area Of Specialization<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -449,7 +451,7 @@ export default function RegisterPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    Institution_Name_Addr<span className="text-brand-primary">*</span>
+                    Institution Name Addr<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -493,13 +495,13 @@ export default function RegisterPage() {
             </form>
           </Form>
 
-          <Link 
+          {/* <Link 
             href="/"
             className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#203A87]"
           >
             <ChevronLeft className="w-4 h-4" />
             Back to Home
-          </Link>
+          </Link> */}
         </CardContent>
       </div>
     </div>

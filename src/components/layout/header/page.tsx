@@ -15,11 +15,24 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { data: session } = useSession();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+    
+    // Set initial width
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = async () => {
     setIsMobileMenuOpen(false);
@@ -148,20 +161,29 @@ const Header = () => {
   );
 
   const renderDropdownMenu = (type: keyof typeof dropdownContent) => {
+    const isMobile = viewportWidth < 768;
+    
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
         transition={{ duration: 0.2 }}
-        className="absolute left-1/2 transform -translate-x-1/2 mt-3 w-[600px] bg-white shadow-xl rounded-xl overflow-hidden z-50 border border-gray-100"
+        className={`absolute mt-3 bg-white shadow-xl rounded-xl overflow-hidden z-50 border border-gray-100 ${
+          isMobile ? 'left-4 right-4' : 'left-1/2 -translate-x-1/2'
+        }`}
+        style={{
+          width: isMobile ? 'calc(100vw - 2rem)' : '600px',
+          maxWidth: 'calc(100vw - 2rem)'
+        }}
       >
-        <div className="grid grid-cols-2 divide-x divide-gray-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-gray-100">
           {dropdownContent[type].map((item, index) => (
             <Link 
               key={index} 
               href={item.link}
               className="group p-6 hover:bg-gray-50 transition-colors"
+              onClick={() => setActiveDropdown(null)}
             >
               <div className="flex items-start mb-4">
                 <div className="flex-shrink-0">
@@ -303,6 +325,9 @@ const Header = () => {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden pl-6"
+                        style={{
+                          maxWidth: 'calc(100vw - 3rem)'
+                        }}
                       >
                         <div className="py-2 space-y-1">
                           {items.map((item, index) => (

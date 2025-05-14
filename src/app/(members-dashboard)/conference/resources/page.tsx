@@ -562,7 +562,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 </div>
               )}
 
-              {conferenceDetails?.payments && (
+              {/* {conferenceDetails?.payments && (
               <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="border-b border-gray-200 pb-4">
                   <button
@@ -605,7 +605,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   )}
                 </div>
               </div>
-              )}
+              )} */}
             </div>
           )}
 

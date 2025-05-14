@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import AddFileModal from "./AddFileModal";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross2Icon } from "@radix-ui/react-icons";
+import { Cross2Icon, Pencil1Icon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import EditConferenceModal from './EditEvents';
 import Link from "next/link";
@@ -23,6 +23,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Pencil,
   Loader2,
   Plus,
   FileUp
@@ -393,6 +394,8 @@ interface ConferenceDetailsProps {
   conferenceDetails: ConferenceDetails | null;
   loading: boolean;
   onBack: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
   onViewResources: (conference: Conference) => void;
 }
 
@@ -401,6 +404,8 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   conferenceDetails,
   loading,
   onBack,
+  onEdit,
+  onDelete,
   onViewResources,
 }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -433,6 +438,8 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
     );
   }
 
+ 
+
   return (
     <div className="space-y-6">
       <AddFileModal/>
@@ -443,6 +450,16 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <ArrowLeft className="w-4 h-4" />
         Back to conferences
       </button>
+      <div className="flex gap-2">
+      <Button variant="outline" onClick={onEdit}>
+        <Pencil className="w-4 h-4 mr-2" />
+        Edit Conference
+      </Button>
+      <Button variant="destructive" onClick={onDelete}>
+        <Trash2 className="w-4 h-4 mr-2" />
+        Delete Conference
+      </Button>
+    </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         {/* <div className="relative h-[400px] bg-gray-100">
@@ -741,6 +758,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
     }
   };
 
+
   return (
     <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
       <div className="relative group">
@@ -805,38 +823,38 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
                   onSuccess={onEditConference} 
                 />
           <AlertDialog.Root>
-                  <AlertDialog.Trigger asChild>
-                      <Button variant="outline" className="text-[#203a87]">
-                              Delete Conference
-                            </Button>
-                  </AlertDialog.Trigger>
-                  <AlertDialog.Portal>
-                    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
-                    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
-                      <AlertDialog.Title className="">
-                     
-                              <span className="text-lg font-semibold text-gray-900">Delete Conference</span>
-                          
-                      </AlertDialog.Title>
-                      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                        Are you sure you want to delete this conference? This action
-                        cannot be undone.
-                      </AlertDialog.Description>
-                      <div className="flex justify-end gap-4">
-                        <AlertDialog.Cancel asChild>
-                          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                            Cancel
-                          </button>
-                        </AlertDialog.Cancel>
-                        <AlertDialog.Action asChild>
-                           <Button variant="outline" className="text-[#203a87]">
-                                   Delete Conference
-                                 </Button>
-                        </AlertDialog.Action>
-                      </div>
-                    </AlertDialog.Content>
-                  </AlertDialog.Portal>
-                </AlertDialog.Root>
+  <AlertDialog.Trigger asChild>
+    <button className="px-3 py-2 rounded-md text-red-600 border border-red-200 hover:bg-red-50 text-sm font-medium transition-colors">
+      Delete Conference
+    </button>
+  </AlertDialog.Trigger>
+  <AlertDialog.Portal>
+    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+      <AlertDialog.Title className="text-lg font-semibold text-gray-900">
+        Delete Conference
+      </AlertDialog.Title>
+      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+        Are you sure you want to delete this conference? This action cannot be undone.
+      </AlertDialog.Description>
+      <div className="flex justify-end gap-4">
+        <AlertDialog.Cancel asChild>
+          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Cancel
+          </button>
+        </AlertDialog.Cancel>
+        <AlertDialog.Action asChild>
+          <button 
+            onClick={() => onDeleteConference(conference.id)}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+          >
+            Delete Conference
+          </button>
+        </AlertDialog.Action>
+      </div>
+    </AlertDialog.Content>
+  </AlertDialog.Portal>
+</AlertDialog.Root>
       </div>
     </div>
   );
@@ -884,6 +902,31 @@ const ConferenceResources: React.FC = () => {
     }
   };
 
+
+  const handleDeleteConference = async (conferenceId: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference/${conferenceId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete conference");
+      }
+  
+      // Refresh the conferences list
+      await fetchConferences();
+      showToast.success("Conference deleted successfully");
+    } catch (error) {
+      console.error("Error deleting conference:", error);
+      showToast.error("Failed to delete conference");
+    }
+  };
   const fetchConferenceDetails = async (id: number) => {
     try {
       setDetailsLoading(true);
@@ -1039,8 +1082,8 @@ const ConferenceResources: React.FC = () => {
                     conference={conference}
                     onViewResources={handleViewResources}
                     onViewDetails={handleViewDetails}
-                    onEditConference={() => {}}
-                    onDeleteConference={() => {}}
+                    onEditConference={fetchConferences} // Refresh list after edit
+                    onDeleteConference={handleDeleteConference} // Pass the delete function
                   />
                 ))}
               </div>

@@ -96,10 +96,17 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
         <div className='flex items-center justify-between w-full'>
           <div className="flex gap-2">
-            <button className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2">
-              <Download className="w-5 h-5" />
-              <span className='text-sm'>Download {resource.resource_type.toLowerCase()}</span>
-            </button>
+          {['PDF', 'PPT', 'DOCX'].includes(resource.resource_type) && typeof resource.resource === 'string' && (
+  <a 
+    href={resource.resource}
+    download
+    className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2"
+  >
+    <Download className="w-5 h-5" />
+    <span className='text-sm'>Download {resource.resource_type.toLowerCase()}</span>
+  </a>
+)}
+
           </div>
           
           {onDelete && resource.resource_id && (

@@ -376,7 +376,7 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({
               <button
                 type="submit"
                 disabled={loading || !file || !caption}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#203a87] rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {loading ? "Uploading..." : "Upload Resource"}
@@ -610,7 +610,10 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Conference Schedules</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 ">Conference Schedules</h2>
+             <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Download Conference Preceeding</button>
+            </div>
             {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {conferenceDetails.schedule.map((item, index) => (
@@ -661,7 +664,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-2 rounded-t-lg">
                   <h2 className="text-lg font-bold text-gray-900 mb-4">{item.name}</h2>
                     <div>
-                      <button   className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">select meal</button>
+                      <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">select meal</button>
                     </div>
                   </div>
                   </div>
@@ -702,7 +705,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <h2 className="text-xl font-bold text-gray-900 mb-4">Join event for virtual attendees</h2>
             <div className="flex items-center gap-3">
             <p className="text-gray-600 text-sm line-clamp-2">You can access the live event from here</p>
-            <button className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Join the live call</button>
+            <button className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Join the live call</button>
             </div>
             </div>
           
@@ -813,7 +816,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
       <div className="px-4 pb-4 grid grid-cols-2 gap-2">
         <button
           onClick={() => onViewDetails(conference)}
-          className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
+          className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
         >
           View Details
         </button>

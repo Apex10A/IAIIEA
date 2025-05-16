@@ -67,12 +67,12 @@ const portalItems: NavItem[] = [
   //   requiredPortal: 'seminar',
   //   subItems: []
   // },
-  {
-    name: 'Daily Meals', 
-    icon: MealsIcon,
-    requiredPortal: 'seminar',
-    subItems: []
-  },
+  // {
+  //   name: 'Daily Meals', 
+  //   icon: MealsIcon,
+  //   requiredPortal: 'seminar',
+  //   subItems: []
+  // },
   {
     name: 'Forum', 
     icon: ForumIcon,
@@ -119,7 +119,8 @@ const portalItems: NavItem[] = [
       { name: 'Conferences', requiredPortal: 'conference', icon: ResourcesIcon },
       { name: 'Messages', requiredPortal: 'conference', icon: ResourcesIcon },
       { name: 'Gallery', requiredPortal: 'conference', icon: ResourcesIcon },
-       { name: 'Conference Schedule', requiredPortal: 'conference', icon: ConferenceScheduleIcon  },
+      {name: 'Daily Meals', requiredPortal: 'conference', icon: MealsIcon}, 
+      { name: 'Conference Schedule', requiredPortal: 'conference', icon: ConferenceScheduleIcon  },
     ]
   },
   { 

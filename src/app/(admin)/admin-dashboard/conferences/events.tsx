@@ -442,27 +442,22 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
   return (
     <div className="space-y-6">
-      <AddFileModal/>
-      <button
+     <div className='flex items-center justify-between'>
+       <Button
         onClick={onBack}
-        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+         variant="outline"
+        className="flex items-center gap-2 text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to conferences
-      </button>
-      <div className="flex gap-2">
-      <Button variant="outline" onClick={onEdit}>
-        <Pencil className="w-4 h-4 mr-2" />
-        Edit Conference
       </Button>
-      <Button variant="destructive" onClick={onDelete}>
-        <Trash2 className="w-4 h-4 mr-2" />
-        Delete Conference
-      </Button>
-    </div>
+       <AddFileModal/>
+     
+     </div>
+     
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        {/* <div className="relative h-[400px] bg-gray-100">
+        <div className="relative h-[400px] bg-gray-100">
           {conferenceDetails?.flyer ? (
             <Image
               src={conferenceDetails.flyer}
@@ -478,41 +473,50 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
             {conference.status}
           </div>
-        </div> */}
+        </div>
 
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {conference.title}
           </h1>
-          <Pencil className="w-4 h-4 mr-2" />
+       
           <p className="text-gray-800 ">171 people have registered for this conference</p>
           </div>
           <div className="flex items-center gap-2 mb-4">
           <p className="text-2xl text-gray-800 uppercase font-bold">
             {conference.theme}
           </p>
-          <Pencil className="w-4 h-4 mr-2" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-5">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-500 mt-0.5" />
-              <div>
-                <p className="text-sm text-gray-500">Date</p>
+              <Calendar className="w-5 h-5 text-gray-500 " />
+              <div className="flex">
+                {/* <p className="text-sm text-gray-500">Date</p> */}
                 <p className="font-medium text-gray-500">
                   {conference.date}
                 </p>
-                <Pencil className="w-4 h-4 mr-2" />
+              
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
+              <MapPin className="w-5 h-5 text-gray-500 " />
               <div>
-                <p className="text-sm text-gray-500">Venue</p>
+                {/* <p className="text-sm text-gray-500">Venue</p> */}
                 <p className="font-medium text-gray-500">{conference.venue}</p>
               </div>
             </div>
+             <div className="flex gap-2 mt-5">
+      <Button variant="outline" onClick={onEdit}>
+        <Pencil className="w-4 h-4 mr-2" />
+        Edit Conference
+      </Button>
+      <Button variant="destructive" className="bg-red-500 text-white" onClick={onDelete}>
+        <Trash2 className="w-4 h-4 mr-2" />
+        Delete Conference
+      </Button>
+    </div>
           </div>
 
           {!conferenceDetails.is_registered && (
@@ -536,53 +540,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         </div>
       </div>
 
-      {conferenceDetails.is_registered && (
-            <div className="space-y-4 mt-10">
-              {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
-                <div className="border-b border-gray-200 pb-4">
-                  <button
-                    onClick={() => toggleSection("schedule")}
-                    className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                  >
-                    {/* <span>Schedules</span> */}
-                    {/* {expandedSection === "schedule" ? (
-                      <ChevronUp className="w-5 h-5" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5" />
-                    )} */}
-                  </button>
-                 
-                    <div className="mt-4 space-y-4">
-                      {/* {conferenceDetails.schedule.map((item, index) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-medium">{item.activity}</h3>
-                              {item.facilitator && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  Facilitator: {item.facilitator}
-                                </p>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-medium">
-                                {item.day}, {item.start} - {item.end}
-                              </p>
-                              <p className="text-sm text-gray-600 mt-1">
-                                {item.venue}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))} */}
-
-                    </div>
-              
-                </div>
-              )}
-
-            </div>
-          )}
+    
 
       {conferenceDetails.is_registered && (
         <>
@@ -599,7 +557,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                       src={imageUrl}
                       alt={`Gallery image ${index + 1}`}
                       fill
-                      className="object-cover hover:scale-105 transition-transform"
+                      className="object-cover hover:scale-105 transition-transform cursor-pointer"
                     />
                   </div>
                 ))}
@@ -613,8 +571,8 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 ">Conference Schedules</h2>
                <div className='flex gap-2'>
-                <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Create Conference Schedule</button>
-             <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Download Conference Preceeding</button>
+                <button   className="bg-[#203a87] hover:bg-blue-800 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Create Conference Schedule</button>
+             <button   className="bg-[#203a87] hover:bg-blue-800 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Download Conference Preceeding</button>
                </div>
             </div>
             {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
@@ -644,6 +602,8 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">No schedules available</p>
+              
+
             )}
           </div>
 
@@ -651,7 +611,7 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
-            <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Create Meals Ticketing</button>
+            <button   className="bg-[#203a87] hover:bg-blue-800 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Add Meals</button>
           </div>
 
             <p className="text-gray-600 text-sm mb-3 line-clamp-2">This are the list of food currently available for the day. Select any food of your choice</p>

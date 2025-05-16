@@ -265,7 +265,7 @@ const DuesSettings: React.FC = () => {
         <CardFooter className="flex justify-end">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#203a87] ">
+              <Button className="bg-[#203a87] text-white">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Dues
               </Button>
@@ -376,7 +376,7 @@ const DuesSettings: React.FC = () => {
                   Cancel
                 </Button>
                 <Button 
-                  className="bg-[#203a87]" 
+                  className="bg-[#203a87] text-white" 
                   onClick={handleUpdateDues}
                   disabled={isUpdating}
                 >

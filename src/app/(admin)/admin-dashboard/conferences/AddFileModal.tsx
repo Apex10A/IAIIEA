@@ -277,7 +277,7 @@ const AddConferenceModal = () => {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Button className="bg-[#203a87] hover:bg-[#1a2f6d]">
+        <Button className="bg-[#203a87] hover:bg-[#1a2f6d] text-white">
           Add New Conference
         </Button>
       </Dialog.Trigger>

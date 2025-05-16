@@ -10,7 +10,7 @@ import "@/app/index.css";
 import Link from "next/link";
 import { showToast } from "@/utils/toast";
 import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -35,125 +35,131 @@ export default function AdminLoginPage() {
       if (result?.error) {
         setError(result.error);
         setIsLoading(false);
+        showToast.error(result.error);
         return;
       }
-      showToast.success('Login successful!')
-
-
-      // Successful login
+      
+      showToast.success('Login successful!');
       router.push("/admin-dashboard");
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred");
-      showToast.error('An unexpected error occured');
+      showToast.error('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen background pt-28 mx-auto flex flex-col items-center">
-      <Card className="md:w-[700px] md:px-32 sm:px-20 py-5 flex flex-col items-center justify-center min-h-max w-full rounded-none shadow-none">
-        <CardHeader className="w-full">
-          <div className="flex flex-col gap-8 items-center w-full">
-            <Image src={Logo} alt="logo" width={200} height={70} />
-            <div className="flex flex-col text-center gap-[8px]">
-              <h1 className="text-black font-bold text-2xl md:text-4xl">
-                Admin Login
-              </h1>
-              <p className="text-[#393938] leading-[24px] max-w-[611px]">
-                Welcome back, please enter your details
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen background flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <Card className="w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl rounded-xl shadow-lg">
+        <div className="flex justify-center pt-8">
+          <Image 
+            src={Logo} 
+            alt="logo" 
+            width={180} 
+            height={60} 
+            priority
+            className="h-auto"
+          />
+        </div>
+
+        <CardHeader className="text-center space-y-2 pt-6 pb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Admin Login
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">
+            Welcome back, please enter your details
+          </p>
         </CardHeader>
 
-        <CardContent className="gap-5 grid w-full">
+        <CardContent className="space-y-4 px-6 pb-8">
           {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+            <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md border border-red-100">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            <div className="grid gap-2">
-              <div className="space-y-2">
-                <label className="font-medium text-[#1A1A1A] text-sm">
-                  Email Address
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
                 </label>
+                <Link
+                  href="/reset-password"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+              <div className="relative">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  className="w-full p-2 border rounded-md"
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-10"
                   required
                   disabled={isLoading}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
-
-              <div className="space-y-2">
-                <label className="font-medium text-[#1A1A1A] text-sm">
-                  Password
-                </label>
-                <div className="relative w-full">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full p-2 border rounded-md"
-                    required
-                    disabled={isLoading}
-                  />
-                  <span
-                    className="absolute right-2 top-[50%] -translate-y-1/2 cursor-pointer"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff color="#000" size={20} />
-                    ) : (
-                      <Eye color="#000" size={20} />
-                    )}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <Link
-                    href="/reset-password"
-                    className="text-xs text-brand-primary font-bold"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full h-12 mt-4 rounded-md bg-[#203A87] text-white"
-                disabled={!email || !password || isLoading}
-              >
-                {isLoading ? "LOGGING IN..." : "LOGIN"}
-              </Button>
             </div>
+
+            <Button
+              type="submit"
+              className="w-full h-12 mt-2 rounded-lg bg-[#203A87] hover:bg-blue-800 text-white font-bold tracking-widest transition-colors "
+              disabled={!email || !password || isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>LOGGING IN...</span>
+                </div>
+              ) : (
+                "LOGIN"
+              )}
+            </Button>
           </form>
 
-          <div className="mt-2 text-center text-xs text-[#646261]">
-            Don&apos;t have an account?{" "}
+          <div className="flex justify-center mt-4">
             <Link
-              href="/register"
-              className="text-brand-primary text-xs font-semibold"
+              href="/"
+              className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 font-medium"
             >
-              Sign up
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back to Home
             </Link>
           </div>
-
-          <Link
-            href="/"
-            className="mt-2 text-center text-sm text-[#667085] flex flex-row items-center justify-center gap-2 font-medium"
-          >
-            <ChevronLeft size={15} />
-            <span>Back to Home</span>
-          </Link>
         </CardContent>
       </Card>
     </div>

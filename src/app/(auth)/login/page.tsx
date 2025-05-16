@@ -7,10 +7,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import "@/app/index.css";
-import { LoadingSpinner } from '@/components/loading-spinner'
 import Link from "next/link";
 import { showToast } from "@/utils/toast";
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FiLock, FiMail } from "react-icons/fi";
 
@@ -69,6 +68,7 @@ export default function LoginPage() {
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
+               <Link  href="/" className='cursor-pointer' >
                 <Image 
                   src="/logo.png" 
                   alt="logo" 
@@ -76,6 +76,7 @@ export default function LoginPage() {
                   height={60} 
                   className="object-contain"
                 />
+               </Link>
               </motion.div>
               
               <div className="text-center space-y-2">
@@ -100,29 +101,6 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent className="pt-4">
-            {/* {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-lg flex items-center"
-              >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                {error}
-              </motion.div>
-            )} */}
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -179,6 +157,7 @@ export default function LoginPage() {
                         defaultInpType === "text" ? "password" : "text"
                       )
                     }
+                    disabled={isLoading}
                   >
                     {defaultInpType === "text" ? (
                       <Eye className="text-gray-500 hover:text-gray-700" size={20} />
@@ -209,7 +188,7 @@ export default function LoginPage() {
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2">
-                      <LoadingSpinner className="size-5 animate-spin-fast" />
+                      <Loader2 className="h-5 w-5 animate-spin" />
                       <span>Signing in...</span>
                     </div>
                   ) : (
@@ -234,20 +213,7 @@ export default function LoginPage() {
               </Link>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-              className="mt-4 text-center"
-            >
-              <Link 
-                href="/" 
-                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                <ChevronLeft size={16} className="mr-1" />
-                Back to Home
-              </Link>
-            </motion.div>
+         
           </CardContent>
         </Card>
       </motion.div>

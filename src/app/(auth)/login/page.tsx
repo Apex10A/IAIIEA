@@ -120,7 +120,7 @@ export default function LoginPage() {
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder="Enter your email or ID"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#203A87] focus:border-[#203A87] outline-none transition-all"
+                    className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#203A87] focus:border-[#203A87] outline-none transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -145,7 +145,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#203A87] focus:border-[#203A87] outline-none transition-all"
+                    className="block w-full pl-10 pr-10 py-2 border text-sm  border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#203A87] focus:border-[#203A87] outline-none transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -183,7 +183,7 @@ export default function LoginPage() {
               >
                 <Button
                   type="submit"
-                  className="w-full h-12 mt-2 rounded-lg bg-[#203A87] hover:bg-[#152a61] text-white font-medium transition-colors shadow-md"
+                  className="w-full h-12 mt-2 rounded-lg bg-[#203A87] hover:bg-[#152a61] text-white font-bold uppercase transition-colors shadow-md tracking-widest "
                   disabled={!identifier || !password || isLoading}
                 >
                   {isLoading ? (

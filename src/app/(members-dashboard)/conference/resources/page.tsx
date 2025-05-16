@@ -635,7 +635,11 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Conference Schedules</h2>
+             <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 ">Conference Schedules</h2>
+               
+             <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Download Conference Preceeding</button>
+            </div>
             {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {conferenceDetails.schedule.map((item, index) => (

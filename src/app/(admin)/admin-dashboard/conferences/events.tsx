@@ -612,7 +612,10 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 ">Conference Schedules</h2>
+               <div className='flex gap-2'>
+                <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Create Conference Schedule</button>
              <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Download Conference Preceeding</button>
+               </div>
             </div>
             {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -646,7 +649,11 @@ const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
+          <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Meals Ticketing</h2>
+            <button   className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">Create Meals Ticketing</button>
+          </div>
+
             <p className="text-gray-600 text-sm mb-3 line-clamp-2">This are the list of food currently available for the day. Select any food of your choice</p>
             {conferenceDetails?.meals && conferenceDetails.meals.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

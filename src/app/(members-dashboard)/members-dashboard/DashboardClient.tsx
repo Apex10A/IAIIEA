@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
+import { ThemeProvider } from '@/components/theme-provider';
 import { redirect } from 'next/navigation';
 import "@/app/index.css"
 import { motion, AnimatePresence } from 'framer-motion';
@@ -121,6 +122,7 @@ export default function DashboardClient() {
   }
 
   return (
+    <ThemeProvider>
     <div className="h-screen flex flex-col bg-[#F9FAFF] overflow-hidden">
       {/* Header */}
       <DashboardHeader 
@@ -169,5 +171,6 @@ export default function DashboardClient() {
         </main>
       </div>
     </div>
+    </ThemeProvider>
   );
 }

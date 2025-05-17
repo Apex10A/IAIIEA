@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
+
 import { ChevronRight, Calendar, MapPin, Users } from 'lucide-react';
 import { useSession } from "next-auth/react";
 
@@ -221,7 +223,7 @@ const DashboardSeminars = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
+    <div className="bg-white rounded-xl min-h-[300px]">
       {/* <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6 mb-1" />
@@ -244,49 +246,59 @@ const DashboardSeminars = () => {
             const memberData = seminarMembersData[seminar.id] || { members: [], total: 0 };
             
             return (
-              <div 
-                key={seminar.id} 
-                className="flex items-center border-b pb-3 last:border-0"
-              >
-                <div className="mr-4 flex flex-col items-center">
-                  {/* Optional: Add date display here if needed */}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm">{seminar.title}</h3>
-                  {seminar.theme && (
-                    <p className="text-xs text-gray-500 mt-1">{seminar.theme}</p>
-                  )}
-                  {seminar.location && (
-                    <div className="flex items-center text-xs text-gray-500 mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {seminar.location}
-                    </div>
-                  )}
-                  {/* Members Avatar Group */}
-                  <div className="flex items-center mt-2 space-x-2">
-                    <Users className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs text-gray-600">
-                      {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
-                    </span>
-                    {memberData.members.length > 0 && (
-                      <AvatarGroup 
-                        members={memberData.members} 
-                        totalMembers={memberData.total} 
-                      />
-                    )}
-                  </div>
-                </div>
-                <span 
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    seminar.status === 'Incoming' 
-                      ? 'bg-amber-100 text-amber-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}
-                >
-                  {seminar.status === 'Incoming' ? 'Upcoming' : seminar.status}
-                </span>
-              </div>
-            );
+                        <motion.div
+                          key={seminar.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-800">{seminar.title}</h3>
+                              {seminar.theme && (
+                                <p className="text-sm text-gray-800 mt-1">{seminar.theme}</p>
+                              )}
+                              
+                              <div className="md:flex items-center mt-3 text-sm text-gray-500">
+                              <div className='flex items-center'>
+                                  <Calendar className="h-4 w-4 mr-1.5" />
+                                <span className='flex'>{seminar.date}</span>
+                              </div>
+                                {seminar.venue && (
+                                  <>
+                                  <div className='flex items-center pt-2'>
+                                      <span className="mx-2 hidden md:flex">•</span>
+                                    <MapPin className="h-4 w-4 mr-1.5" />
+                                    <span>{seminar.venue}</span>
+                                  </div>
+                                  </>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center mt-3">
+                                <div className="flex items-center mr-4">
+                                  <Users className="h-4 w-4 mr-1.5 text-gray-500" />
+                                  <span className="text-sm text-gray-600 flex">
+                                    {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
+                                  </span>
+                                </div>
+                                {memberData.members.length > 0 && (
+                                  <AvatarGroup 
+                                    members={memberData.members} 
+                                    totalMembers={memberData.total} 
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                              {status.icon}
+                              <span className="ml-1.5">{status.label}</span>
+                            </div> */}
+                          </div>
+                        </motion.div>
+                      );
           })}
         </div>
       )}

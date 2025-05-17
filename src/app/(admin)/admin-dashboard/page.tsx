@@ -349,7 +349,7 @@ export default function AdminDashboardPage() {
                   <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiBookOpen className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">Seminars</h2>
+                <h2 className="text-lg font-bold text-gray-800">Seminars</h2>
                 </div>
                   <Link
                   href="/admin-dashboard/seminars"
@@ -372,14 +372,14 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.4 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll  ">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                <div className="flex items-center gap-2">
                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
+                <h2 className="text-lg font-bold text-gray-800">Calendar</h2>
                 
                </div>
                   <Link
@@ -414,7 +414,7 @@ export default function AdminDashboardPage() {
                 <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiMic className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
-                 <h2 className="text-xl font-bold text-gray-800">Speakers</h2>
+                 <h2 className="text-lg font-bold text-gray-800">Speakers</h2>
                </div>
                  <Link
                   href="/admin-dashboard/calendar"
@@ -473,10 +473,10 @@ export default function AdminDashboardPage() {
           <div className="p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-lg font-bold text-gray-800">
                   Broadcast Message
                 </h2>
-                <p className="text-gray-500 mt-1">
+                <p className="text-gray-500 mt-1 text-sm">
                   Send a message to all users, members, and speakers
                 </p>
               </div>

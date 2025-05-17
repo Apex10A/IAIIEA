@@ -309,7 +309,7 @@ const Calendar = () => {
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-md font-medium text-gray-700 min-w-[120px] text-center">
+            <span className="text-md font-medium text-gray-700  text-center">
               {currentMonth.title} 
             </span>
             <Button 

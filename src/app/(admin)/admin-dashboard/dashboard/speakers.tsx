@@ -108,7 +108,7 @@ const DashboardSpeakers = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]"
+      className="bg-white rounded-xl min-h-[400px]"
     >
       <div className="flex justify-between items-center mb-6">
        
@@ -154,7 +154,7 @@ const DashboardSpeakers = () => {
                 )}
                 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-800 truncate">{speaker.name}</h3>
+                  <h3 className="font-semibold text-sm text-gray-800 truncate">{speaker.name}</h3>
                   
                   <div className="flex items-center mt-1 text-sm text-gray-600">
                     {speaker.institution && (

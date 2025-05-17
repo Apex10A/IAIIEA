@@ -55,7 +55,7 @@ const DashboardSpeakers = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border min-h-[400px]">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Mic className="h-6 w-6 text-[#0E1A3D]" />
@@ -83,7 +83,7 @@ const DashboardSpeakers = () => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border min-h-[400px]">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <Mic className="h-6 w-6 text-[#0E1A3D]" />
@@ -108,7 +108,7 @@ const DashboardSpeakers = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-xl min-h-[400px]"
+      className="bg-white dark:bg-gray-800 rounded-xl min-h-[400px]"
     >
       <div className="flex justify-between items-center mb-6">
        
@@ -135,7 +135,7 @@ const DashboardSpeakers = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+              className="p-4 border dark:border-white rounded-lg hover:shadow-md transition-shadow"
             >
               <div className="flex items-center space-x-4">
                 {speaker.profile_picture ? (
@@ -154,7 +154,7 @@ const DashboardSpeakers = () => {
                 )}
                 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-gray-800 truncate">{speaker.name}</h3>
+                  <h3 className="font-semibold text-sm dark:text-white text-gray-800 truncate">{speaker.name}</h3>
                   
                   <div className="flex items-center mt-1 text-sm text-gray-600">
                     {speaker.institution && (

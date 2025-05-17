@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '@/components/theme-toggle'
 import Logo from '@/assets/auth/images/IAIIEA Logo I.png';
 import { Menu, Search, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/modules/ui/avatar';
@@ -86,8 +87,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       {/* Header */}
       <header className={`
         fixed w-full z-50 transition-all duration-300
-        ${isScrolled ? 'bg-[#0E1A3D]/95 backdrop-blur-sm py-2 shadow-lg' : 'bg-[#0E1A3D] py-3'}
+        ${isScrolled ? 'bg-[#0E1A3D]/95 dark:bg-gray-900/95 backdrop-blur-sm py-2 shadow-lg' : 'bg-[#0E1A3D] dark:bg-gray-900 py-3'}
       `}>
+
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left section - Menu button and Logo */}
@@ -122,6 +124,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
             {/* Right section - Profile dropdown */}
             <div className="relative ml-4 flex items-center">
+              <ThemeToggle />
               <div 
                 onClick={toggleDropdown}
                 className={`

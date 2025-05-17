@@ -1,213 +1,364 @@
 "use client";
 
-import { useState } from "react";
-// import AdminDashboardGrid from "@/app/(admin)/admin-dashboard/dashboard/";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import Events from '@/app/(admin)/admin-dashboard/events/page';
+import { motion } from "framer-motion";
+import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
 import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
 import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
-import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
 import Calendar from '@/app/(admin)/admin-dashboard/dashboard/calendar';
 import DailyMeals from '@/app/(admin)/admin-dashboard/dashboard/DailyMeals';
 import News from '@/app/(admin)/admin-dashboard/dashboard/News';
-import Speakers from '@/app/(admin)/admin-dashboard/dashboard/speakers'
+import Speakers from '@/app/(admin)/admin-dashboard/dashboard/speakers';
 import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
 import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
 import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
-
-// Define the type for dashboard items
-interface DashboardItem {
-  title: string;
-  icon: "Calendar" | "Clock" | "Plus" | "Utensils" | "Newspaper" | "Settings" | "Upload" | "Megaphone";
-  description: string;
-  content: () => JSX.Element;
-}
+import { FiCalendar, FiClock, FiBook, FiSettings, FiUsers, FiMic, FiBookOpen } from 'react-icons/fi';
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
-  const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
+  const [stats, setStats] = useState([
+    { id: 1, name: 'Total Members', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+    { id: 2, name: 'Total Speakers', value: '0', icon: FiMic, change: '+0%', changeType: 'positive' },
+    { id: 3, name: 'Total Conferences', value: '0', icon: FiCalendar, change: '+0%', changeType: 'positive' },
+    { id: 4, name: 'Total Seminars', value: '0', icon: FiBookOpen, change: '+0%', changeType: 'positive' },
+    { id: 5, name: 'Conference Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+    { id: 6, name: 'Seminar Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+  ]);
+  const [loading, setLoading] = useState(true);
 
-  const dashboardItems: DashboardItem[] = [
-    {
-      title: "Annual Calendar",
-      icon: "Calendar",
-      description: "Manage and upload annual calendar",
-      content: () => (
-        <div>
-          <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Annual Calendar</h2>
-          <Calendar />
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all data in parallel
+        const [speakersRes, membersRes, conferencesRes, seminarsRes, confParticipantsRes, seminarParticipantsRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/speaker`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/member`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/seminar_member`, {
+            headers: {
+              'Authorization': `Bearer ${session?.user?.token}`
+            }
+          })
+        ]);
+
+        const [speakersData, membersData, conferencesData, seminarsData, confParticipantsData, seminarParticipantsData] = await Promise.all([
+          speakersRes.json(),
+          membersRes.json(),
+          conferencesRes.json(),
+          seminarsRes.json(),
+          confParticipantsRes.json(),
+          seminarParticipantsRes.json()
+        ]);
+
+        // Update stats with actual counts
+        setStats([
+          { 
+            id: 1, 
+            name: 'Total Members', 
+            value: membersData.data?.length.toString() || '0', 
+            icon: FiUsers, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 2, 
+            name: 'Total Speakers', 
+            value: speakersData.data?.length.toString() || '0', 
+            icon: FiMic, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 3, 
+            name: 'Total Conferences', 
+            value: conferencesData.data?.length.toString() || '0', 
+            icon: FiCalendar, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 4, 
+            name: 'Total Seminars', 
+            value: seminarsData.data?.length.toString() || '0', 
+            icon: FiBookOpen, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 5, 
+            name: 'Conference Participants', 
+            value: confParticipantsData.data?.length.toString() || '0', 
+            icon: FiUsers, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+          { 
+            id: 6, 
+            name: 'Seminar Participants', 
+            value: seminarParticipantsData.data?.length.toString() || '0', 
+            icon: FiUsers, 
+            change: '+0%', 
+            changeType: 'positive' 
+          },
+        ]);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    if (session?.user?.token) {
+      fetchData();
+    }
+  }, [session]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 px-2 sm:px-6 lg:px-8 py-6">
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-[#0E1A3D] rounded-xl shadow-lg p-6 mb-8 relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] opacity-90"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-4">
+            <DashboardIcon />
+            <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
+          </div>
+          <p className="text-gray-300 mt-2">
+            Welcome back, {session?.user?.userData?.name || 'Admin'} 👋
+          </p>
         </div>
-      )
-    },
-    {
-      title: "Daily Conference Schedule",
-      icon: "Clock",
-      description: "Create and edit conference schedules",
-      content: () => (
-        <div className="flex items-center justify-between w-full ">
-          <ConferenceSchedule/>
-        </div>
-      )
-    },
-    // {
-    //   title: "Create Events",
-    //   icon: "Plus",
-    //   description: "Add new events to the platform",
-    //   content: () => (
-    //     <div>
-    //       <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Create Events</h2>
-    //       <Events/>
-    //     </div>
-    //   )
-    // },
-    {
-      title: "Daily Meals",
-      icon: "Utensils",
-      description: "Upload and update daily meal information",
-      content: () => (
-        <div>
-          <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Daily Meals</h2>
-          <DailyMeals/>
-        </div>
-      )
-    },
-    {
-      title: "News Management",
-      icon: "Newspaper",
-      description: "Post and manage news on main website",
-      content: () => (
-        <div>
-          <News/>
-        </div>
-      )
-    },
-    {
-      title: "Page Settings",
-      icon: "Settings",
-      description: "Modify website page configurations",
-      content: () => (
-        <div>
-          <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Page Settings</h2>
-        </div>
-      )
-    },
-    {
-      title: "Broadcast message",
-      icon: "Megaphone",
-      description: "Broadcast a message to all users on the platform",
-      content: () => (
-        <div>
-          <div>
-            <h2 className="text-xl lg:text-2xl font-bold mb-4 text-gray-600">Broadcast message</h2>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 -mt-4 sm:-mt-12 relative z-20"
+      >
+        {stats.slice(0, 4).map((stat) => (
+          <motion.div
+            key={stat.id}
+            whileHover={{ y: -5 }}
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="max-w-[60%] opacity-[0.6]">
-                  Broadcast a message to all users, members, conference particpants and speakers on the platform
+                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {loading ? (
+                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    stat.value
+                  )}
                 </p>
               </div>
+              <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
+                <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className={`text-xs font-medium ${
+                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {stat.change} from last month
+              </p>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Additional Stats Cards for Participants */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8 relative z-20"
+      >
+        {stats.slice(4, 6).map((stat) => (
+          <motion.div
+            key={stat.id}
+            whileHover={{ y: -5 }}
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
+          >
+            <div className="flex items-center justify-between">
               <div>
-                <BroadcastModal/>
+                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {loading ? (
+                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    stat.value
+                  )}
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
+                <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className={`text-xs font-medium ${
+                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {stat.change} from last month
+              </p>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Main Content Grid */}
+      <div className="space-y-8">
+        {/* Conferences and Seminars */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll py-5 max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Conferences</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <Conferences />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Seminars</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiBookOpen className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <Seminars />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Calendar and Speakers */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
+          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px] ">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <Calendar />
+            </div>
+          </div> */}
+           <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiClock className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <ConferenceSchedule />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Speakers</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiMic className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <Speakers />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Additional Sections */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
+          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiClock className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <ConferenceSchedule />
+            </div>
+          </div> */}
+
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">News Management</h2>
+                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                  <FiBook className="h-5 w-5 text-[#0E1A3D]" />
+                </div>
+              </div>
+              <News />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Broadcast Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="bg-white rounded-xl shadow-md overflow-hidden"
+        >
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Broadcast Message</h2>
+                <p className="text-gray-500 mt-1">
+                  Send a message to all users, members, and speakers
+                </p>
+              </div>
+              <div className="mt-4 sm:mt-0">
+                <BroadcastModal />
               </div>
             </div>
           </div>
-        </div>
-      )
-    }
-  ];
-
-  return (
-    <div className="px-6 py-10 ">
-     <div className="relative ">
-     <div className="pb-10 bg-[#0E1A3D] w-full p-6 mb-10 ">
-       <div className="flex items-center gap-4 pb-10">
-       <DashboardIcon/>
-       <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
-       </div>
-        {/* <h1 className="text-xl text-white">Hi, {session?.user?.userData?.name || 'Faith'} 👋</h1> */}
+        </motion.div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pb-10 px-6 absolute top-20 w-full">
-        <div   className="bg-white shadow-md rounded-lg p-6
-            hover:shadow-xl transition-all duration-300
-            flex flex-col items-start space-y-4 cursor-pointer">
-          <h1 className="text-4xl font-bold">49</h1>
-          <p className="">Total members</p>
-        </div>
-        <div   className="bg-white shadow-md rounded-lg p-6
-            hover:shadow-xl transition-all duration-300
-            flex flex-col items-start space-y-4 cursor-pointer">
-          <h1 className="text-4xl font-bold">19</h1>
-          <p>Total Speakers</p>
-        </div>
-        <div   className="bg-white shadow-md rounded-lg p-6
-            hover:shadow-xl transition-all duration-300
-            flex flex-col items-start space-y-4 cursor-pointer">
-          <h1 className="text-4xl font-bold">11</h1>
-          <p>Total Confereces</p>
-        </div>
-        <div   className="bg-white shadow-md rounded-lg p-6
-            hover:shadow-xl transition-all duration-300
-            flex flex-col items-start space-y-4 cursor-pointer">
-          <h1 className="text-4xl font-bold">7</h1>
-          <p>Total Seminars</p>
-        </div>
-      </div>
-     </div>
-    
-
-      {/* {selectedItem ? (
-        <div>
-         <button 
-  onClick={() => setSelectedItem(null)}
-  className="group flex items-center gap-2 px-4 py-2 mb-6 bg-zinc-100 text-gray-700 hover:text-blue-700 transition-all duration-200 ease-in-out"
->
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="20" 
-    height="20" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-    className="transform group-hover:-translate-x-1 transition-transform duration-200"
-  >
-    <path d="m15 18-6-6 6-6"/>
-  </svg>
-  <span className="font-medium">Back to Dashboard</span>
-</button>
-          {selectedItem.content()}
-        </div>
-      ) : (
-        <AdminDashboardGrid
-          items={dashboardItems.map(item => ({
-            title: item.title,
-            icon: item.icon,
-            description: item.description,
-            onClick: () => setSelectedItem(item)
-          }))}
-        />
-      )} */}
- <div className="grid grid-cols-2 items-center px-6 mt-20 gap-4 w-full">
-     <div className="">
-        <Conferences/>
-      </div>
-      <div className="">
-        <Seminars/>
-      </div>
-     </div>
-    <div className="grid grid-cols-2 items-center gap-4 px-6 pt-5">
-      <div>
-        <Calendar/>
-      </div>
-    <div>
-      <Speakers/>
-     </div>
-    </div>
-  
     </div>
   );
 }

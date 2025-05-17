@@ -5,7 +5,7 @@ const LoadingDashboard = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="relative">
         {/* Main spinner */}
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500" />
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#203A87]" />
         
         {/* Subtle secondary spinner */}
         <div 
@@ -22,13 +22,13 @@ const LoadingDashboard = () => {
           Preparing Dashboard
         </h2>
         <div className="flex items-center justify-center space-x-1">
-          <div className="h-2 w-2 bg-blue-500 rounded-full animate-bounce" />
+          <div className="h-2 w-2 bg-[#203A87] rounded-full animate-bounce" />
           <div 
-            className="h-2 w-2 bg-blue-500 rounded-full animate-bounce"
+            className="h-2 w-2 bg-[#203A87] rounded-full animate-bounce"
             style={{ animationDelay: '150ms' }}
           />
           <div 
-            className="h-2 w-2 bg-blue-500 rounded-full animate-bounce"
+            className="h-2 w-2 bg-[#203A87] rounded-full animate-bounce"
             style={{ animationDelay: '300ms' }}
           />
         </div>
@@ -40,7 +40,7 @@ const LoadingDashboard = () => {
       {/* Progress bar */}
       <div className="mt-8 w-64 h-1 bg-gray-200 rounded-full overflow-hidden">
         <div 
-          className="h-full bg-blue-500 rounded-full"
+          className="h-full bg-[#203A87] rounded-full"
           style={{
             animation: 'progress 2s ease-in-out infinite',
             width: '100%'

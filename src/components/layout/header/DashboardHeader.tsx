@@ -13,11 +13,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/modules/ui/avatar';
 type DashboardHeaderProps = {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  showMobileMenuButton?: boolean; // New prop to control mobile menu button visibility
 };
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
   isSidebarOpen, 
-  toggleSidebar 
+  toggleSidebar,
+  showMobileMenuButton = true // Default to true for backward compatibility
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -90,19 +92,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="flex items-center justify-between h-16">
             {/* Left section - Menu button and Logo */}
             <div className="flex items-center">
-              {/* Mobile Menu Button */}
-              <button 
-                className="p-2 text-white rounded-md md:hidden hover:bg-[#1A2C5B]/50 transition-colors"
-                onClick={toggleSidebar}
-                aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-              >
-                <Menu size={24} />
-              </button>
+              {/* Mobile Menu Button - Only shown when showMobileMenuButton is true */}
+              {showMobileMenuButton && (
+                <button 
+                  className="p-2 text-white rounded-md md:hidden hover:bg-[#1A2C5B]/50 transition-colors"
+                  onClick={toggleSidebar}
+                  aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                >
+                  <Menu size={24} />
+                </button>
+              )}
 
               {/* Logo */}
               <Link 
                 href="/" 
-                className="ml-2 md:ml-0 flex-shrink-0"
+                className={`${showMobileMenuButton ? 'ml-2' : 'ml-0'} md:ml-0 flex-shrink-0`}
                 onClick={closeDropdown}
               >
                 <Image 

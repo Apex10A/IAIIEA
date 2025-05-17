@@ -277,7 +277,7 @@ const DashboardConferences = () => {
                     <div className="flex items-center mt-3">
                       <div className="flex items-center mr-4">
                         <Users className="h-4 w-4 mr-1.5 text-gray-500" />
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 flex">
                           {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
                         </span>
                       </div>

@@ -347,7 +347,7 @@ const Calendar = () => {
           </div>
           
           {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr min-w-[1200px]">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr min-w-[800px] md:min-w-full">
             {renderCalendarDays()}
           </div>
         </CardContent>

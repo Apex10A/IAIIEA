@@ -299,7 +299,7 @@ const Calendar = () => {
       {/* Calendar Header */}
       <div className="flex justify-between items-center">
         <div className="sm:flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-gray-800">Event Calendar</h2>
+        
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
@@ -322,13 +322,13 @@ const Calendar = () => {
             </Button>
           </div>
         </div>
-        <Button 
+        {/* <Button 
           onClick={() => setIsModalOpen(true)}
           className="bg-[#0E1A3D] hover:bg-[#152a61] text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Event
-        </Button>
+        </Button> */}
       </div>
 
       {/* Calendar Grid */}

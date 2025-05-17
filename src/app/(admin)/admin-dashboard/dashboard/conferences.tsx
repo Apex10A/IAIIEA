@@ -224,7 +224,7 @@ const DashboardConferences = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-xl min-h-[400px]"
+      className="bg-white rounded-xl min-h-[300px] cursor-pointer"
     >
       <div className="flex justify-between items-center mb-6 ">
         

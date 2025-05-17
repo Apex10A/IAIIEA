@@ -51,7 +51,7 @@ const DashboardSpeakers = () => {
   }, [bearerToken]);
 
   // Display first 6 speakers
-  const displaySpeakers = speakers.slice(0, 6);
+  const displaySpeakers = speakers.slice(0, 3);
 
   if (loading) {
     return (
@@ -111,10 +111,7 @@ const DashboardSpeakers = () => {
       className="bg-white rounded-xl shadow-md p-6 border min-h-[400px]"
     >
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3">
-          <Mic className="h-6 w-6 text-[#0E1A3D]" />
-          <h2 className="text-xl font-semibold text-gray-800">Speakers</h2>
-        </div>
+       
         {/* <Link 
           href="/admin/speakers" 
           className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 px-3 py-2 text-sm rounded-lg transition-colors"

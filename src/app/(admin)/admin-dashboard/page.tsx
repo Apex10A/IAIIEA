@@ -332,7 +332,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <Link
                   href="/admin-dashboard/conferences"
-                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 px-3 py-2 text-sm rounded-lg transition-colors"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -353,7 +353,7 @@ export default function AdminDashboardPage() {
                 </div>
                   <Link
                   href="/admin-dashboard/seminars"
-                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 px-3 py-2 text-sm rounded-lg transition-colors"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -375,10 +375,20 @@ export default function AdminDashboardPage() {
           <div className="bg-white rounded-xl shadow-md overflow-y-scroll  ">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
-                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+               <div className="flex items-center gap-2">
+                 <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
+                <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
+                
+               </div>
+                  <Link
+                  href="/admin-dashboard/calendar"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
+                >
+                  View All
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
               </div>
               <Calendar />
             </div>
@@ -400,11 +410,19 @@ export default function AdminDashboardPage() {
           <div className="bg-white rounded-xl shadow-md overflow-y-scroll">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Speakers</h2>
-
+               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiMic className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
+                 <h2 className="text-xl font-bold text-gray-800">Speakers</h2>
+               </div>
+                 <Link
+                  href="/admin-dashboard/calendar"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
+                >
+                  View All
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
               </div>
               <Speakers />
             </div>

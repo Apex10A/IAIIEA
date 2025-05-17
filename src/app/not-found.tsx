@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Home, ArrowLeft } from "lucide-react";
@@ -27,7 +28,7 @@ export default function NotFound() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
-            className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-6 px-8 text-lg"
+            className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-6 px-8 text-lg transition-colors"
             onClick={() => router.push("/")}
           >
             <Home className="w-5 h-5 mr-2" />
@@ -35,7 +36,7 @@ export default function NotFound() {
           </Button>
           <Button
             variant="outline"
-            className="border-[#D5B93C] text-[#D5B93C] hover:bg-[#D5B93C]/10 font-bold py-6 px-8 text-lg"
+            className="border-[#D5B93C] text-[#D5B93C] hover:bg-[#D5B93C]/10 font-bold py-6 px-8 text-lg transition-colors"
             onClick={() => router.back()}
           >
             <ArrowLeft className="w-5 h-5 mr-2" />

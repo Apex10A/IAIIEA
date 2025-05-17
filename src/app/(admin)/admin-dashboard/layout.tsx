@@ -7,6 +7,7 @@ import "@/app/index.css"
 import Sidebar from '@/app/(admin)/admin-dashboard/sidebarTwo/sidebar'
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
 import LoadingDashboard from './LoadingDashboard';
+import { ThemeProvider } from '@/components/theme-provider';
 
 export default function DashboardLayout({
   children,
@@ -43,6 +44,7 @@ export default function DashboardLayout({
   }
 
   return (
+<ThemeProvider>
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
@@ -97,10 +99,11 @@ export default function DashboardLayout({
         )}
 
         {/* Page Content */}
-        <div className="flex-grow pt-20 md:pt-24 w-full overflow-y-auto bg-[#feffff] lg:px-6 px-3">
+        <div className="flex-grow pt-20 md:pt-24 w-full overflow-y-auto bg-[#feffff] dark:bg-gray-800 lg:px-6 px-3">
           <div className="mx-auto">{children}</div>
         </div>
       </div>
     </div>
+    </ThemeProvider>
   );
 }

@@ -23,12 +23,12 @@ interface ConferenceMembersData {
 
 const statusConfig = {
   Incoming: {
-    color: 'bg-amber-100 text-amber-800',
+    color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200',
     icon: <Clock className="h-4 w-4" />,
     label: 'Upcoming'
   },
   Completed: {
-    color: 'bg-green-100 text-green-800',
+    color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
     icon: <CheckCircle className="h-4 w-4" />,
     label: 'Completed'
   }
@@ -46,7 +46,7 @@ const AvatarGroup = ({ members, totalMembers }: { members: any[], totalMembers: 
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="relative w-8 h-8 border-2 border-white rounded-full overflow-hidden shadow-sm"
+          className="relative w-8 h-8 border-2 border-white dark:border-gray-800 rounded-full overflow-hidden shadow-sm"
           style={{ zIndex: 5 - index }}
         >
           {member.profile_picture ? (
@@ -57,7 +57,7 @@ const AvatarGroup = ({ members, totalMembers }: { members: any[], totalMembers: 
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-[#0E1A3D] flex items-center justify-center text-white text-xs">
+            <div className="w-full h-full bg-[#0E1A3D] dark:bg-gray-600 flex items-center justify-center text-white text-xs">
               {(member.name || 'M')
                 .split(' ')
                 .map((n: string) => n[0])
@@ -70,7 +70,7 @@ const AvatarGroup = ({ members, totalMembers }: { members: any[], totalMembers: 
       ))}
       
       {remainingMembers > 0 && (
-        <div className="relative w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium text-gray-700 border-2 border-white shadow-sm">
+        <div className="relative w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300 border-2 border-white dark:border-gray-800 shadow-sm">
           +{remainingMembers}
         </div>
       )}
@@ -169,24 +169,24 @@ const DashboardConferences = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border dark:border-gray-700">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <Calendar className="h-6 w-6 text-[#0E1A3D]" />
-            <h2 className="text-xl font-semibold text-gray-800">Conferences</h2>
+            <Calendar className="h-6 w-6 text-[#0E1A3D] dark:text-gray-300" />
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Conferences</h2>
           </div>
-          <div className="h-8 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
+          <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
         </div>
         
         <div className="space-y-4">
           {[...Array(3)].map((_, index) => (
-            <div key={index} className="flex items-center p-4 border rounded-lg animate-pulse">
+            <div key={index} className="flex items-center p-4 border dark:border-gray-700 rounded-lg animate-pulse">
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-6 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
               </div>
-              <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+              <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
             </div>
           ))}
         </div>
@@ -196,14 +196,14 @@ const DashboardConferences = () => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-md p-6 border min-h-[300px]">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border dark:border-gray-700 min-h-[300px]">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <Calendar className="h-6 w-6 text-[#0E1A3D]" />
-            <h2 className="text-xl font-semibold text-gray-800">Conferences</h2>
+            <Calendar className="h-6 w-6 text-[#0E1A3D] dark:text-gray-300" />
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Conferences</h2>
           </div>
         </div>
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-200 p-4 rounded-lg">
           <p className="font-medium">Error loading conferences</p>
           <p className="text-sm mt-1">{error}</p>
           <button 
@@ -224,21 +224,24 @@ const DashboardConferences = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-xl min-h-[300px] cursor-pointer"
+      className="bg-white dark:bg-gray-800 rounded-xl min-h-[300px] cursor-pointer dark:border-gray-700"
     >
-      <div className="flex justify-between items-center mb-6 ">
-        
-        
+      <div className="flex justify-between items-center mb-6">
+        {activeConferences.length > 2 && (
+          <Link href="/conferences" className="text-sm font-medium text-[#0E1A3D] dark:text-gray-300 hover:underline flex items-center">
+            View all <ChevronRight className="h-4 w-4 ml-1" />
+          </Link>
+        )}
       </div>
 
       {displayConferences.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-gray-500 p-6">
-          <Calendar className="h-12 w-12 mb-4 text-gray-300" />
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400 p-6">
+          <Calendar className="h-12 w-12 mb-4 text-gray-300 dark:text-gray-600" />
           <p className="text-lg">No upcoming conferences</p>
           <p className="text-sm mt-1">Check back later for upcoming events</p>
         </div>
       ) : (
-        <div className="space-y-4 pb-6">
+        <div className="space-y-4 pb-6 ">
           {displayConferences.map((conference) => {
             const memberData = conferenceMembersData[conference.id] || { members: [], total: 0 };
             const status = statusConfig[conference.status] || statusConfig.Incoming;
@@ -249,35 +252,35 @@ const DashboardConferences = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                className="p-4 border dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:shadow-gray-700/30 transition-shadow"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800">{conference.title}</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-white">{conference.title}</h3>
                     {conference.theme && (
-                      <p className="text-sm text-gray-600 mt-1">{conference.theme}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{conference.theme}</p>
                     )}
                     
-                    <div className="md:flex items-center mt-3 text-sm text-gray-500">
-                    <div className='flex items-center'>
+                    <div className="md:flex items-center mt-3 text-sm text-gray-500 dark:text-gray-400">
+                      <div className='flex items-center'>
                         <Calendar className="h-4 w-4 mr-1.5" />
-                      <span className='flex'>{conference.date}</span>
-                    </div>
+                        <span className='flex'>{conference.date}</span>
+                      </div>
                       {conference.venue && (
                         <>
-                        <div className='flex items-center pt-2'>
+                          <div className='flex items-center pt-2 md:pt-0'>
                             <span className="mx-2 hidden md:flex">•</span>
-                          <MapPin className="h-4 w-4 mr-1.5" />
-                          <span>{conference.venue}</span>
-                        </div>
+                            <MapPin className="h-4 w-4 mr-1.5" />
+                            <span>{conference.venue}</span>
+                          </div>
                         </>
                       )}
                     </div>
                     
                     <div className="flex items-center mt-3">
                       <div className="flex items-center mr-4">
-                        <Users className="h-4 w-4 mr-1.5 text-gray-500" />
-                        <span className="text-sm text-gray-600 flex">
+                        <Users className="h-4 w-4 mr-1.5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400 flex">
                           {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
                         </span>
                       </div>

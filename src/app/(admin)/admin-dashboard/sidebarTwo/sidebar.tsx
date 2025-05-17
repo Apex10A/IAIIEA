@@ -181,13 +181,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
     return (
       <div className="w-full">
         <div
-          className={`
-            w-full flex items-center justify-between p-3 rounded-lg
-            transition-colors duration-200
-            ${isActive ? 'bg-white text-[#203A87]' : 'text-gray-300 hover:bg-blue-600/20'}
-            ${level > 0 ? 'ml-4' : ''}
-            cursor-pointer
-          `}
+         className={`
+          w-full flex items-center justify-between p-3 rounded-lg
+          transition-colors duration-200
+          ${isActive ? 'bg-white dark:bg-gray-700 text-[#203A87] dark:text-white' : 
+            'text-gray-300 dark:text-gray-400 hover:bg-blue-600/20 dark:hover:bg-gray-700/50'}
+          ${level > 0 ? 'ml-4' : ''}
+          cursor-pointer
+        `}
           onClick={() => {
             if (hasSubItems) {
               toggleItem(item.name);
@@ -239,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
   };
 
   return (
-    <div className="h-full mt-16 w-64 bg-[#0e1a3d] shadow-xl flex flex-col overflow-y-auto">
+    <div className="h-full mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto">
       <div className="flex flex-col gap-1 p-4 pt-5">
         {portalItems.map((item) => (
           <NavItemComponent key={item.path} item={item} />

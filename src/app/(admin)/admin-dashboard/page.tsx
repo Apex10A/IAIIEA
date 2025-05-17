@@ -3,18 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import DashboardIcon from "@/assets/sidebarIcons/DashboardIcon";
-import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
-import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
-import Calendar from "@/app/(admin)/admin-dashboard/dashboard/calendar";
-import DailyMeals from "@/app/(admin)/admin-dashboard/dashboard/DailyMeals";
-import { ChevronRight } from "lucide-react";
-import News from "@/app/(admin)/admin-dashboard/dashboard/News";
+import { ChevronRight, Sun, Moon } from "lucide-react";
 import Link from "next/link";
-import Speakers from "@/app/(admin)/admin-dashboard/dashboard/speakers";
-import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
-import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
-import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
 import {
   FiCalendar,
   FiClock,
@@ -24,8 +14,20 @@ import {
   FiMic,
   FiBookOpen,
 } from "react-icons/fi";
+import { useTheme } from "@/components/theme-provider";
+import DashboardIcon from "@/assets/sidebarIcons/DashboardIcon";
+import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
+import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
+import Calendar from "@/app/(admin)/admin-dashboard/dashboard/calendar";
+import DailyMeals from "@/app/(admin)/admin-dashboard/dashboard/DailyMeals";
+import News from "@/app/(admin)/admin-dashboard/dashboard/News";
+import Speakers from "@/app/(admin)/admin-dashboard/dashboard/speakers";
+import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
+import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
+import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
 
 export default function AdminDashboardPage() {
+  const { theme, setTheme } = useTheme();
   const { data: session } = useSession();
   const [stats, setStats] = useState([
     {
@@ -82,7 +84,6 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all data in parallel
         const [
           speakersRes,
           membersRes,
@@ -137,7 +138,6 @@ export default function AdminDashboardPage() {
           seminarParticipantsRes.json(),
         ]);
 
-        // Update stats with actual counts
         setStats([
           {
             id: 1,
@@ -201,27 +201,42 @@ export default function AdminDashboardPage() {
     }
   }, [session]);
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 px-2 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen px-2 sm:px-6 lg:px-8 py-6 bg-gray-50 dark:bg-gray-900">
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-[#0E1A3D] rounded-xl shadow-lg p-6 mb-8 relative overflow-hidden"
+        className="bg-[#0E1A3D] dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 relative overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] opacity-90"></div>
-        <div className="relative z-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] dark:from-gray-800 dark:to-gray-700 opacity-90"></div>
+        <div className="relative z-10 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <DashboardIcon />
+            <DashboardIcon className="text-white" />
             <h1 className="text-2xl md:text-3xl font-bold text-white">
               Admin Dashboard
             </h1>
           </div>
-          <p className="text-gray-300 mt-2">
-            Welcome back, {session?.user?.userData?.name || "Admin"} 👋
-          </p>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? (
+              <Moon className="h-5 w-5 text-white" />
+            ) : (
+              <Sun className="h-5 w-5 text-white" />
+            )}
+          </button>
         </div>
+        <p className="relative z-10 text-gray-300 mt-2">
+          Welcome back, {session?.user?.userData?.name || "Admin"} 👋
+        </p>
       </motion.div>
 
       {/* Stats Cards */}
@@ -235,29 +250,31 @@ export default function AdminDashboardPage() {
           <motion.div
             key={stat.id}
             whileHover={{ y: -5 }}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {stat.name}
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                   {loading ? (
-                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-8 w-12 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
                   ) : (
                     stat.value
                   )}
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
-                <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
+              <div className="p-3 rounded-lg bg-[#0E1A3D]/10 dark:bg-gray-700">
+                <stat.icon className="h-6 w-6 text-[#0E1A3D] dark:text-white" />
               </div>
             </div>
             <div className="mt-4">
               <p
                 className={`text-xs font-medium ${
                   stat.changeType === "positive"
-                    ? "text-green-600"
-                    : "text-red-600"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
                 }`}
               >
                 {stat.change} from last month
@@ -278,29 +295,31 @@ export default function AdminDashboardPage() {
           <motion.div
             key={stat.id}
             whileHover={{ y: -5 }}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 flex flex-col"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {stat.name}
+                </p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                   {loading ? (
-                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-8 w-12 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
                   ) : (
                     stat.value
                   )}
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
-                <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
+              <div className="p-3 rounded-lg bg-[#0E1A3D]/10 dark:bg-gray-700">
+                <stat.icon className="h-6 w-6 text-[#0E1A3D] dark:text-white" />
               </div>
             </div>
             <div className="mt-4">
               <p
                 className={`text-xs font-medium ${
                   stat.changeType === "positive"
-                    ? "text-green-600"
-                    : "text-red-600"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
                 }`}
               >
                 {stat.change} from last month
@@ -319,20 +338,20 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.3 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll py-5 ">
-            <div className=" p-3 md:p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-y-scroll py-5">
+            <div className="p-3 md:p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 ">
-                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                    <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10 dark:bg-gray-700">
+                    <FiCalendar className="h-5 w-5 text-[#0E1A3D] dark:text-white" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-800">
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                     Conferences
                   </h2>
                 </div>
                 <Link
                   href="/admin-dashboard/conferences"
-                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 dark:bg-gray-700 dark:hover:bg-gray-600 text-[#0E1A3D] dark:text-white px-3 py-2 text-sm rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -342,23 +361,24 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-y-scroll">
             <div className="p-3 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiBookOpen className="h-5 w-5 text-[#0E1A3D]" />
+                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10 dark:bg-gray-700">
+                    <FiBookOpen className="h-5 w-5 text-[#0E1A3D] dark:text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                    Seminars
+                  </h2>
                 </div>
-                <h2 className="text-lg font-bold text-gray-800">Seminars</h2>
-                </div>
-                  <Link
+                <Link
                   href="/admin-dashboard/seminars"
-                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 dark:bg-gray-700 dark:hover:bg-gray-600 text-[#0E1A3D] dark:text-white px-3 py-2 text-sm rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
-                
               </div>
               <Seminars />
             </div>
@@ -372,19 +392,20 @@ export default function AdminDashboardPage() {
           transition={{ delay: 0.4 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-y-scroll">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-               <div className="flex items-center gap-2">
-                 <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10 dark:bg-gray-700">
+                    <FiCalendar className="h-5 w-5 text-[#0E1A3D] dark:text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                    Calendar
+                  </h2>
                 </div>
-                <h2 className="text-lg font-bold text-gray-800">Calendar</h2>
-                
-               </div>
-                  <Link
+                <Link
                   href="/admin-dashboard/calendar"
-                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 dark:bg-gray-700 dark:hover:bg-gray-600 text-[#0E1A3D] dark:text-white px-3 py-2 text-sm rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -393,32 +414,21 @@ export default function AdminDashboardPage() {
               <Calendar />
             </div>
           </div>
-          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll ">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">
-                  Daily Schedule
-                </h2>
-                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiClock className="h-5 w-5 text-[#0E1A3D]" />
-                </div>
-              </div>
-              <ConferenceSchedule />
-            </div>
-          </div> */}
 
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-y-scroll">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiMic className="h-5 w-5 text-[#0E1A3D]" />
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10 dark:bg-gray-700">
+                    <FiMic className="h-5 w-5 text-[#0E1A3D] dark:text-white" />
+                  </div>
+                  <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                    Speakers
+                  </h2>
                 </div>
-                 <h2 className="text-lg font-bold text-gray-800">Speakers</h2>
-               </div>
-                 <Link
+                <Link
                   href="/admin-dashboard/calendar"
-                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 text-[#0E1A3D] px-3 py-2 text-sm rounded-lg transition-colors"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 dark:bg-gray-700 dark:hover:bg-gray-600 text-[#0E1A3D] dark:text-white px-3 py-2 text-sm rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="ml-1 h-4 w-4" />
@@ -429,54 +439,20 @@ export default function AdminDashboardPage() {
           </div>
         </motion.div>
 
-        {/* Additional Sections */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-        >
-          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
-                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiClock className="h-5 w-5 text-[#0E1A3D]" />
-                </div>
-              </div>
-              <ConferenceSchedule />
-            </div>
-          </div> */}
-
-          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">
-                  News Management
-                </h2>
-                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiBook className="h-5 w-5 text-[#0E1A3D]" />
-                </div>
-              </div>
-              <News />
-            </div>
-          </div> */}
-        </motion.div>
-
         {/* Broadcast Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="bg-white rounded-xl shadow-md overflow-hidden"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden"
         >
           <div className="p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">
                   Broadcast Message
                 </h2>
-                <p className="text-gray-500 mt-1 text-sm">
+                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
                   Send a message to all users, members, and speakers
                 </p>
               </div>

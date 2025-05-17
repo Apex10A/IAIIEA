@@ -3,27 +3,79 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
+import DashboardIcon from "@/assets/sidebarIcons/DashboardIcon";
 import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
 import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
-import Calendar from '@/app/(admin)/admin-dashboard/dashboard/calendar';
-import DailyMeals from '@/app/(admin)/admin-dashboard/dashboard/DailyMeals';
-import News from '@/app/(admin)/admin-dashboard/dashboard/News';
-import Speakers from '@/app/(admin)/admin-dashboard/dashboard/speakers';
+import Calendar from "@/app/(admin)/admin-dashboard/dashboard/calendar";
+import DailyMeals from "@/app/(admin)/admin-dashboard/dashboard/DailyMeals";
+import { ChevronRight } from "lucide-react";
+import News from "@/app/(admin)/admin-dashboard/dashboard/News";
+import Link from "next/link";
+import Speakers from "@/app/(admin)/admin-dashboard/dashboard/speakers";
 import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
 import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
 import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
-import { FiCalendar, FiClock, FiBook, FiSettings, FiUsers, FiMic, FiBookOpen } from 'react-icons/fi';
+import {
+  FiCalendar,
+  FiClock,
+  FiBook,
+  FiSettings,
+  FiUsers,
+  FiMic,
+  FiBookOpen,
+} from "react-icons/fi";
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
   const [stats, setStats] = useState([
-    { id: 1, name: 'Total Members', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
-    { id: 2, name: 'Total Speakers', value: '0', icon: FiMic, change: '+0%', changeType: 'positive' },
-    { id: 3, name: 'Total Conferences', value: '0', icon: FiCalendar, change: '+0%', changeType: 'positive' },
-    { id: 4, name: 'Total Seminars', value: '0', icon: FiBookOpen, change: '+0%', changeType: 'positive' },
-    { id: 5, name: 'Conference Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
-    { id: 6, name: 'Seminar Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+    {
+      id: 1,
+      name: "Total Members",
+      value: "0",
+      icon: FiUsers,
+      change: "+0%",
+      changeType: "positive",
+    },
+    {
+      id: 2,
+      name: "Total Speakers",
+      value: "0",
+      icon: FiMic,
+      change: "+0%",
+      changeType: "positive",
+    },
+    {
+      id: 3,
+      name: "Total Conferences",
+      value: "0",
+      icon: FiCalendar,
+      change: "+0%",
+      changeType: "positive",
+    },
+    {
+      id: 4,
+      name: "Total Seminars",
+      value: "0",
+      icon: FiBookOpen,
+      change: "+0%",
+      changeType: "positive",
+    },
+    {
+      id: 5,
+      name: "Conference Participants",
+      value: "0",
+      icon: FiUsers,
+      change: "+0%",
+      changeType: "positive",
+    },
+    {
+      id: 6,
+      name: "Seminar Participants",
+      value: "0",
+      icon: FiUsers,
+      change: "+0%",
+      changeType: "positive",
+    },
   ]);
   const [loading, setLoading] = useState(true);
 
@@ -31,95 +83,115 @@ export default function AdminDashboardPage() {
     const fetchData = async () => {
       try {
         // Fetch all data in parallel
-        const [speakersRes, membersRes, conferencesRes, seminarsRes, confParticipantsRes, seminarParticipantsRes] = await Promise.all([
+        const [
+          speakersRes,
+          membersRes,
+          conferencesRes,
+          seminarsRes,
+          confParticipantsRes,
+          seminarParticipantsRes,
+        ] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/speaker`, {
             headers: {
-              'Authorization': `Bearer ${session?.user?.token}`
-            }
+              Authorization: `Bearer ${session?.user?.token}`,
+            },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/member`, {
             headers: {
-              'Authorization': `Bearer ${session?.user?.token}`
-            }
+              Authorization: `Bearer ${session?.user?.token}`,
+            },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`),
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member`, {
-            headers: {
-              'Authorization': `Bearer ${session?.user?.token}`
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member`,
+            {
+              headers: {
+                Authorization: `Bearer ${session?.user?.token}`,
+              },
             }
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/seminar_member`, {
-            headers: {
-              'Authorization': `Bearer ${session?.user?.token}`
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/seminar_member`,
+            {
+              headers: {
+                Authorization: `Bearer ${session?.user?.token}`,
+              },
             }
-          })
+          ),
         ]);
 
-        const [speakersData, membersData, conferencesData, seminarsData, confParticipantsData, seminarParticipantsData] = await Promise.all([
+        const [
+          speakersData,
+          membersData,
+          conferencesData,
+          seminarsData,
+          confParticipantsData,
+          seminarParticipantsData,
+        ] = await Promise.all([
           speakersRes.json(),
           membersRes.json(),
           conferencesRes.json(),
           seminarsRes.json(),
           confParticipantsRes.json(),
-          seminarParticipantsRes.json()
+          seminarParticipantsRes.json(),
         ]);
 
         // Update stats with actual counts
         setStats([
-          { 
-            id: 1, 
-            name: 'Total Members', 
-            value: membersData.data?.length.toString() || '0', 
-            icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
+          {
+            id: 1,
+            name: "Total Members",
+            value: membersData.data?.length.toString() || "0",
+            icon: FiUsers,
+            change: "+0%",
+            changeType: "positive",
           },
-          { 
-            id: 2, 
-            name: 'Total Speakers', 
-            value: speakersData.data?.length.toString() || '0', 
-            icon: FiMic, 
-            change: '+0%', 
-            changeType: 'positive' 
+          {
+            id: 2,
+            name: "Total Speakers",
+            value: speakersData.data?.length.toString() || "0",
+            icon: FiMic,
+            change: "+0%",
+            changeType: "positive",
           },
-          { 
-            id: 3, 
-            name: 'Total Conferences', 
-            value: conferencesData.data?.length.toString() || '0', 
-            icon: FiCalendar, 
-            change: '+0%', 
-            changeType: 'positive' 
+          {
+            id: 3,
+            name: "Total Conferences",
+            value: conferencesData.data?.length.toString() || "0",
+            icon: FiCalendar,
+            change: "+0%",
+            changeType: "positive",
           },
-          { 
-            id: 4, 
-            name: 'Total Seminars', 
-            value: seminarsData.data?.length.toString() || '0', 
-            icon: FiBookOpen, 
-            change: '+0%', 
-            changeType: 'positive' 
+          {
+            id: 4,
+            name: "Total Seminars",
+            value: seminarsData.data?.length.toString() || "0",
+            icon: FiBookOpen,
+            change: "+0%",
+            changeType: "positive",
           },
-          { 
-            id: 5, 
-            name: 'Conference Participants', 
-            value: confParticipantsData.data?.length.toString() || '0', 
-            icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
+          {
+            id: 5,
+            name: "Conference Participants",
+            value: confParticipantsData.data?.length.toString() || "0",
+            icon: FiUsers,
+            change: "+0%",
+            changeType: "positive",
           },
-          { 
-            id: 6, 
-            name: 'Seminar Participants', 
-            value: seminarParticipantsData.data?.length.toString() || '0', 
-            icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
+          {
+            id: 6,
+            name: "Seminar Participants",
+            value: seminarParticipantsData.data?.length.toString() || "0",
+            icon: FiUsers,
+            change: "+0%",
+            changeType: "positive",
           },
         ]);
 
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
@@ -132,7 +204,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 px-2 sm:px-6 lg:px-8 py-6">
       {/* Header Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -142,16 +214,18 @@ export default function AdminDashboardPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-4">
             <DashboardIcon />
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
+              Admin Dashboard
+            </h1>
           </div>
           <p className="text-gray-300 mt-2">
-            Welcome back, {session?.user?.userData?.name || 'Admin'} 👋
+            Welcome back, {session?.user?.userData?.name || "Admin"} 👋
           </p>
         </div>
       </motion.div>
 
       {/* Stats Cards */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -179,9 +253,13 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className={`text-xs font-medium ${
-                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <p
+                className={`text-xs font-medium ${
+                  stat.changeType === "positive"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
                 {stat.change} from last month
               </p>
             </div>
@@ -190,7 +268,7 @@ export default function AdminDashboardPage() {
       </motion.div>
 
       {/* Additional Stats Cards for Participants */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -218,9 +296,13 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="mt-4">
-              <p className={`text-xs font-medium ${
-                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <p
+                className={`text-xs font-medium ${
+                  stat.changeType === "positive"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
                 {stat.change} from last month
               </p>
             </div>
@@ -231,19 +313,30 @@ export default function AdminDashboardPage() {
       {/* Main Content Grid */}
       <div className="space-y-8">
         {/* Conferences and Seminars */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          <div className="bg-white rounded-xl shadow-md overflow-y-scroll py-5 max-h-[250px]">
-            <div className="p-6">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll py-5 ">
+            <div className=" p-3 md:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Conferences</h2>
-                <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
-                  <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
+                <div className="flex items-center gap-2 ">
+                  <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
+                    <FiCalendar className="h-5 w-5 text-[#0E1A3D]" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">
+                    Conferences
+                  </h2>
                 </div>
+                <Link
+                  href="/admin-dashboard/conferences"
+                  className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 px-3 py-2 text-sm rounded-lg transition-colors"
+                >
+                  View All
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
               </div>
               <Conferences />
             </div>
@@ -263,13 +356,13 @@ export default function AdminDashboardPage() {
         </motion.div>
 
         {/* Calendar and Speakers */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
-          {/* <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px] ">
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px] ">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
@@ -279,11 +372,13 @@ export default function AdminDashboardPage() {
               </div>
               <Calendar />
             </div>
-          </div> */}
-           <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
+          </div>
+          <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Daily Schedule</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Daily Schedule
+                </h2>
                 <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiClock className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
@@ -306,7 +401,7 @@ export default function AdminDashboardPage() {
         </motion.div>
 
         {/* Additional Sections */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -327,7 +422,9 @@ export default function AdminDashboardPage() {
           <div className="bg-white rounded-xl shadow-md overflow-y-scroll max-h-[250px]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">News Management</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  News Management
+                </h2>
                 <div className="p-2 rounded-lg bg-[#0E1A3D]/10">
                   <FiBook className="h-5 w-5 text-[#0E1A3D]" />
                 </div>
@@ -338,7 +435,7 @@ export default function AdminDashboardPage() {
         </motion.div>
 
         {/* Broadcast Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
@@ -347,7 +444,9 @@ export default function AdminDashboardPage() {
           <div className="p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">Broadcast Message</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Broadcast Message
+                </h2>
                 <p className="text-gray-500 mt-1">
                   Send a message to all users, members, and speakers
                 </p>

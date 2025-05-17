@@ -226,18 +226,9 @@ const DashboardConferences = () => {
       animate={{ opacity: 1 }}
       className="bg-white rounded-xl min-h-[400px]"
     >
-      <div className="flex justify-between items-center mb-6 p-6">
-        <div className="flex items-center gap-3">
-          <Calendar className="h-6 w-6 text-[#0E1A3D]" />
-          <h2 className="text-xl font-semibold text-gray-800">Conferences</h2>
-        </div>
-        <Link 
-          href="/admin-dashboard/conferences" 
-          className="flex items-center bg-[#0E1A3D]/10 hover:bg-[#0E1A3D]/20 px-3 py-2 text-sm rounded-lg transition-colors"
-        >
-          View All
-          <ChevronRight className="ml-1 h-4 w-4" />
-        </Link>
+      <div className="flex justify-between items-center mb-6 ">
+        
+        
       </div>
 
       {displayConferences.length === 0 ? (
@@ -247,7 +238,7 @@ const DashboardConferences = () => {
           <p className="text-sm mt-1">Check back later for upcoming events</p>
         </div>
       ) : (
-        <div className="space-y-4 px-6 pb-6">
+        <div className="space-y-4 pb-6">
           {displayConferences.map((conference) => {
             const memberData = conferenceMembersData[conference.id] || { members: [], total: 0 };
             const status = statusConfig[conference.status] || statusConfig.Incoming;
@@ -268,13 +259,17 @@ const DashboardConferences = () => {
                     )}
                     
                     <div className="md:flex items-center mt-3 text-sm text-gray-500">
-                      <Calendar className="h-4 w-4 mr-1.5" />
-                      <span className='flex pb-3 md:pb-0'>{conference.date}</span>
+                    <div className='flex items-center'>
+                        <Calendar className="h-4 w-4 mr-1.5" />
+                      <span className='flex'>{conference.date}</span>
+                    </div>
                       {conference.venue && (
                         <>
-                          <span className="mx-2 hidden md:flex">•</span>
+                        <div className='flex items-center pt-2'>
+                            <span className="mx-2 hidden md:flex">•</span>
                           <MapPin className="h-4 w-4 mr-1.5" />
                           <span>{conference.venue}</span>
+                        </div>
                         </>
                       )}
                     </div>

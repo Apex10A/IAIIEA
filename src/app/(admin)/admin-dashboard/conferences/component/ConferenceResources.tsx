@@ -41,6 +41,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   onViewResources,
 }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -57,7 +58,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -65,18 +66,18 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   if (!conferenceDetails) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p>Failed to load conference details</p>
+        <p className="text-foreground">Failed to load conference details</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
         <Button
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 text-sm font-medium"
+          className="flex items-center gap-2 text-sm font-medium dark:text-white"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to conferences
@@ -84,79 +85,113 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <AddFileModal/>
       </div>
      
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="relative h-[400px] bg-gray-100">
+      <div className="bg-card rounded-lg shadow-md overflow-hidden border">
+        <div className="relative h-64 sm:h-[400px] bg-muted">
           {conferenceDetails?.flyer ? (
             <Image
               src={conferenceDetails.flyer}
               alt={conference.title}
               fill
               className="object-cover"
+              priority
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex items-center justify-center h-full text-muted-foreground">
               <FileText className="w-16 h-16" />
             </div>
           )}
-          <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
+          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium">
             {conference.status}
           </div>
         </div>
       
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               {conference.title}
             </h1>
-            <p className="text-gray-800 ">171 people have registered for this conference</p>
+            <p className="text-muted-foreground">
+              {conferenceDetails.registered_count || 0} people have registered for this conference
+            </p>
           </div>
-          <div className="flex items-center gap-2 mb-4">
-            <p className="text-2xl text-gray-800 uppercase font-bold">
+          
+          <div className="mb-4">
+            <p className="text-lg sm:text-2xl text-muted-foreground uppercase font-bold">
               {conference.theme}
             </p>
           </div>
       
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-500 " />
-              <div className="flex">
-                <p className="font-medium text-gray-500">
+              <Calendar className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium text-muted-foreground">
                   {conference.date}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-gray-500 " />
+              <MapPin className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="font-medium text-gray-500">{conference.venue}</p>
+                <p className="font-medium text-muted-foreground">{conference.venue}</p>
               </div>
             </div>
           </div>
 
-          {/* Edit and Delete Buttons - Only visible in details view */}
-          <div className="flex gap-2 mt-5">
+          {/* Edit and Delete Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 mt-5">
             <EditConferenceModal 
               conference={conference} 
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Conference
                 </Button>
               }
             />
-            <Button 
-              variant="destructive" 
-              className="bg-red-500 text-white" 
-              onClick={onDelete}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Conference
-            </Button>
+            
+            <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <AlertDialog.Trigger asChild>
+                <Button variant="destructive" className="w-full sm:w-auto">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Conference
+                </Button>
+              </AlertDialog.Trigger>
+              <AlertDialog.Portal>
+                <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
+                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[500px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-background p-6 rounded-lg shadow-lg">
+                  <AlertDialog.Title className="text-lg font-semibold">
+                    Delete Conference
+                  </AlertDialog.Title>
+                  <AlertDialog.Description className="mt-4 mb-6 text-muted-foreground">
+                    Are you sure you want to delete this conference? This action cannot be undone.
+                  </AlertDialog.Description>
+                  <div className="flex justify-end gap-4">
+                    <AlertDialog.Cancel asChild>
+                      <Button variant="outline">
+                        Cancel
+                      </Button>
+                    </AlertDialog.Cancel>
+                    <AlertDialog.Action asChild>
+                      <Button 
+                        variant="destructive"
+                        onClick={() => {
+                          onDelete();
+                          setShowDeleteDialog(false);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialog.Action>
+                  </div>
+                </AlertDialog.Content>
+              </AlertDialog.Portal>
+            </AlertDialog.Root>
           </div>
       
           {!conferenceDetails.is_registered && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6 rounded">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -164,7 +199,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-yellow-700">
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
                     You need to register for this conference to view all details.
                   </p>
                 </div>
@@ -172,17 +207,17 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             </div>
           )}
       
-          {/* Rest of the conference details... */}
           {conferenceDetails.is_registered && (
             <>
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Gallery</h2>
-                {conferenceDetails?.gallery && conferenceDetails.gallery.length > 0 ? (
+              {/* Gallery Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-4">Gallery</h2>
+                {conferenceDetails?.gallery?.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {conferenceDetails.gallery.map((imageUrl, index) => (
                       <div
                         key={index}
-                        className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
+                        className="relative aspect-square rounded-lg overflow-hidden bg-muted"
                       >
                         <Image
                           src={imageUrl}
@@ -194,161 +229,179 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No gallery images available</p>
+                  <p className="text-muted-foreground text-center py-8">No gallery images available</p>
                 )}
               </div>
       
               {/* Conference Schedules */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-xl font-bold text-gray-900">Conference Schedules</h2>
-    <div className='flex gap-2'>
-      <button className="bg-[#203a87] hover:bg-blue-800 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">
-        Create Conference Schedule
-      </button>
-      <button className="bg-[#203a87] hover:bg-blue-800 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">
-        Download Conference Proceedings
-      </button>
-    </div>
-  </div>
-  {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 ? (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {conferenceDetails.schedule.map((item, index) => (
-        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-medium">{item.activity}</h3>
-              {item.facilitator && (
-                <p className="text-sm text-gray-600 mt-1">
-                  Facilitator: {item.facilitator}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <h2 className="text-xl font-bold text-foreground">Conference Schedules</h2>
+                  <div className='flex flex-col sm:flex-row gap-2'>
+                    <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
+                      Create Conference Schedule
+                    </button>
+                    <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
+                      Download Conference Proceedings
+                    </button>
+                  </div>
+                </div>
+                {conferenceDetails?.schedule?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {conferenceDetails.schedule.map((item, index) => (
+                      <div key={index} className="bg-muted/50 p-4 rounded-lg border">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
+                          <div>
+                            <h3 className="font-medium">{item.activity}</h3>
+                            {item.facilitator && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Facilitator: {item.facilitator}
+                              </p>
+                            )}
+                          </div>
+                          <div className="sm:text-right">
+                            <p className="text-sm font-medium">
+                              {item.day}, {item.start} - {item.end}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {item.venue}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No schedules available</p>
+                )}
+              </div>
+
+              {/* Meals Ticketing */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <h2 className="text-xl font-bold text-foreground">Meals Ticketing</h2>
+                  <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
+                    Add Meals
+                  </button>
+                </div>
+                <p className="text-muted-foreground text-sm mb-3">
+                  These are the list of food currently available for the day. Select any food of your choice
                 </p>
-              )}
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-medium">
-                {item.day}, {item.start} - {item.end}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                {item.venue}
-              </p>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-gray-500 text-center py-8">No schedules available</p>
-  )}
-</div>
+                {conferenceDetails?.meals?.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {conferenceDetails.meals.map((item, index) => (
+                      <div
+                        key={index}
+                        className="h-60 relative rounded-lg overflow-hidden bg-muted"
+                      >
+                        <Image
+                          src={item.image}
+                          alt={`Meal ${index + 1}`}
+                          fill
+                          className="object-cover hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 rounded-t-lg">
+                          <h2 className="text-lg font-bold text-foreground mb-2">{item.name}</h2>
+                          <div>
+                            <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
+                              Select meal
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">No Meals available</p>
+                )}
+              </div>
 
-{/* Meals Ticketing */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-xl font-bold text-gray-900">Meals Ticketing</h2>
-    <button className="bg-[#203a87] hover:bg-blue-800 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">
-      Add Meals
-    </button>
-  </div>
-  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-    These are the list of food currently available for the day. Select any food of your choice
-  </p>
-  {conferenceDetails?.meals && conferenceDetails.meals.length > 0 ? (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {conferenceDetails.meals.map((item, index) => (
-        <div
-          key={index}
-          className="h-60 relative rounded-lg overflow-hidden bg-gray-100"
-        >
-          <Image
-            src={item.image}
-            alt={`Meal ${index + 1}`}
-            fill
-            className="object-cover hover:scale-105 transition-transform"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-white/90 p-2 rounded-t-lg">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">{item.name}</h2>
-            <div>
-              <button className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">
-                Select meal
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-gray-500 text-center py-8">No Meals available</p>
-  )}
-</div>
+              {/* Videos Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-4">Videos</h2>
+                {conferenceDetails?.videos?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {conferenceDetails.videos.map((video, index) => (
+                      <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                        {video.type === 'video' ? (
+                          <>
+                            <video
+                              src={video.url}
+                              className="w-full h-full object-cover"
+                              controls
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Play className="w-10 h-10 text-white bg-black/50 rounded-full p-2" />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                            <FileText className="w-12 h-12 text-muted-foreground" />
+                            <p className="text-muted-foreground">Video not available</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="aspect-video flex flex-col items-center justify-center gap-2 bg-muted rounded-lg">
+                    <FileText className="w-12 h-12 text-muted-foreground" />
+                    <p className="text-muted-foreground">No videos available</p>
+                  </div>
+                )}
+              </div>
 
-{/* Videos Section */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  <h2 className="text-xl font-bold text-gray-900 mb-4">Videos</h2>
-  {conferenceDetails?.videos && conferenceDetails.videos.length > 0 ? (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {conferenceDetails.videos.map((video, index) => (
-        <div key={index} className="relative h-40 rounded-lg overflow-hidden bg-gray-100">
-          <Image
-            src={video.url}
-            alt={`Video ${index + 1}`}
-            fill
-            className="object-cover hover:scale-105 transition-transform"
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Play className="w-10 h-10 text-white bg-black/50 rounded-full p-2" />
-          </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-gray-500 text-center py-8">No videos available</p>
-  )}
-</div>
+              {/* Certification Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-4">Certification</h2>
+                <p className="text-muted-foreground text-sm">
+                  You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold text-primary">here</Link>
+                </p>
+              </div>
 
-{/* Certification Section */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  <h2 className="text-xl font-bold text-gray-900 mb-4">Certification</h2>
-  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-    You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold">here</Link>
-  </p>
-</div>
+              {/* Virtual Event Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-4">Join event for virtual attendees</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <p className="text-muted-foreground text-sm">You can access the live event from here</p>
+                  <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors w-full sm:w-auto">
+                    Join the live call
+                  </button>
+                </div>
+              </div>
 
-{/* Virtual Event Section */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  <h2 className="text-xl font-bold text-gray-900 mb-4">Join event for virtual attendees</h2>
-  <div className="flex items-center gap-3">
-    <p className="text-gray-600 text-sm line-clamp-2">You can access the live event from here</p>
-    <button className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors">
-      Join the live call
-    </button>
-  </div>
-</div>
-
-{/* Resources Section */}
-<div className="bg-white rounded-lg shadow-md p-6">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-xl font-bold text-gray-900">Resources</h2>
-    <button
-      onClick={() => onViewResources(conference)}
-      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-    >
-      View all resources <ExternalLink className="w-4 h-4" />
-    </button>
-  </div>
-  {conferenceDetails?.resources && conferenceDetails.resources.length > 0 ? (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {conferenceDetails.resources.slice(0, 4).map((resource) => (
-        <ResourceCard
-          key={resource.resource_id}
-          resource={resource}
-          onDelete={() => {}}
-        />
-      ))}
-    </div>
-  ) : (
-    <p className="text-gray-500 text-center py-8">No resources available</p>
-  )}
-</div>
+              {/* Resources Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <h2 className="text-xl font-bold text-foreground">Resources</h2>
+                  <button
+                    onClick={() => onViewResources(conference)}
+                    className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                  >
+                    View all resources <ExternalLink className="w-4 h-4" />
+                  </button>
+                </div>
+                {conferenceDetails?.resources?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {conferenceDetails.resources.slice(0, 4).map((resource) => (
+                      <ResourceCard
+                        key={resource.resource_id}
+                        resource={resource}
+                        onDelete={() => {}}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                      <FileText className="w-10 h-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-1">
+                      No resources available
+                    </h3>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -365,20 +418,20 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
   const resourceCount = conference.resources?.length || 0;
 
   return (
-    <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
+    <div className="rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-card">
       <div className="relative group">
         <div className="absolute z-20 bottom-5 left-5">
           <span
             className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
               conference?.status === "Completed"
-                ? "bg-amber-100 text-amber-800"
-                : "bg-blue-100 text-blue-800"
+                ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
             }`}
           >
             {conference?.status}
           </span>
         </div>
-        <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
+        <div className="h-48 w-full bg-muted relative overflow-hidden">
           {conference.flyer ? (
             <Image
               src={conference.flyer}
@@ -387,7 +440,7 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="flex items-center justify-center h-full text-muted-foreground">
               <FileText className="w-12 h-12" />
             </div>
           )}
@@ -395,31 +448,31 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <h2 className="text-gray-900 text-lg font-semibold line-clamp-2">
+          <h2 className="text-foreground text-lg font-semibold line-clamp-2">
             {conference.title}
           </h2>
-          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
+          <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
             {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
           </span>
         </div>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
           {conference.theme}
         </p>
-        <div className="flex items-center text-gray-500 text-xs mb-4">
+        <div className="flex items-center text-muted-foreground text-xs mb-4">
           <Calendar className="w-3 h-3 mr-1" />
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{conference.date}</p>
+          <p className="text-muted-foreground text-sm line-clamp-2">{conference.date}</p>
         </div>
       </div>
       <div className="px-4 pb-4 grid grid-cols-2 gap-2">
         <button
           onClick={() => onViewDetails(conference)}
-          className="bg-[#203a87] hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
+          className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors"
         >
           View Details
         </button>
         <button
           onClick={() => onViewResources(conference)}
-          className="bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-md text-gray-700 text-sm font-medium transition-colors"
+          className="bg-muted hover:bg-muted/80 px-3 py-2 rounded-md text-muted-foreground text-sm font-medium transition-colors"
         >
           View Resources
         </button>
@@ -550,7 +603,7 @@ const ConferenceResources: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -559,10 +612,10 @@ const ConferenceResources: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <button
               onClick={handleBackToList}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+              className="flex items-center gap-2 text-primary  hover:text-primary/80 text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to conferences
@@ -573,15 +626,15 @@ const ConferenceResources: React.FC = () => {
             />
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-foreground">
                   {selectedConference.title}
                 </h1>
-                <p className="text-gray-600">{selectedConference.theme}</p>
+                <p className="text-muted-foreground dark:text-white">{selectedConference.theme}</p>
               </div>
-              <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
+              <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-sm">
                 {selectedConference.resources?.length || 0} resources
               </span>
             </div>
@@ -598,13 +651,13 @@ const ConferenceResources: React.FC = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-10 h-10 text-gray-400" />
+                <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-10 h-10 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                <h3 className="text-lg font-medium text-foreground mb-1">
                   No resources yet
                 </h3>
-                <p className="text-gray-500">
+                <p className="text-muted-foreground">
                   Add resources to make them available to attendees
                 </p>
               </div>
@@ -645,7 +698,7 @@ const ConferenceResources: React.FC = () => {
 
           {conferences.length > 1 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900">Past Conferences</h2>
+              <h2 className="text-2xl font-bold text-foreground">Past Conferences</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {conferences.slice(1).map((conference) => (
                   <ConferenceCard

@@ -1,12 +1,9 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Cross2Icon, CalendarIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import { format } from "date-fns";
-import { DayPicker } from "react-day-picker";
+import { Cross2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { showToast } from '@/utils/toast';
-import ImageUpload from './ImageUpload'
 import { useSession } from "next-auth/react";
 import {
   Select,
@@ -17,11 +14,20 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+
+interface FileWithPreview {
+  file: File;
+  preview: string;
+  name: string;
+  size: number;
+  type: string;
+}
 
 interface FormData {
-  // Step 1 data
   title: string;
   theme: string;
   venue: string;
@@ -30,12 +36,10 @@ interface FormData {
   subthemes_input: string[];
   workshops_input: string[];
   important_date: string[];
-  flyer: File | null;
-  
-  // Step 2 data
-  gallery: File[];
-  sponsors: File[];
-  videos: File[];
+  flyer: FileWithPreview | null;
+  gallery: FileWithPreview[];
+  sponsors: FileWithPreview[];
+  videos: FileWithPreview[];
   basic_naira: string;
   basic_usd: string;
   basic_package: string[];
@@ -100,6 +104,17 @@ const AddConferenceModal = () => {
 
   useEffect(() => {
     fetchSpeakers();
+    return () => {
+      // Clean up object URLs when component unmounts
+      ['flyer', 'gallery', 'sponsors', 'videos'].forEach(field => {
+        const files = formData[field as keyof FormData];
+        if (Array.isArray(files)) {
+          files.forEach(file => URL.revokeObjectURL(file.preview));
+        } else if (files) {
+          URL.revokeObjectURL((files as FileWithPreview).preview);
+        }
+      });
+    };
   }, []);
 
   const fetchSpeakers = async () => {
@@ -162,6 +177,7 @@ const AddConferenceModal = () => {
       return { ...prev, [`${packageType}_package`]: newPackage };
     });
   };
+
   const addPackageItem = (packageType: 'basic' | 'premium' | 'standard') => {
     setFormData(prev => ({
       ...prev,
@@ -180,11 +196,47 @@ const AddConferenceModal = () => {
     const files = event.target.files;
     if (!files) return;
 
+    const newFiles = Array.from(files).map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+      size: file.size,
+      type: file.type.split('/')[0] // 'image' or 'video'
+    }));
+
     if (field === 'flyer') {
-      setFormData(prev => ({ ...prev, [field]: files[0] }));
+      // Revoke previous flyer URL if exists
+      if (formData.flyer) {
+        URL.revokeObjectURL(formData.flyer.preview);
+      }
+      setFormData(prev => ({ 
+        ...prev, 
+        [field]: newFiles[0] 
+      }));
     } else {
-      setFormData(prev => ({ ...prev, [field]: [...Array.from(files)] }));
+      setFormData(prev => ({ 
+        ...prev, 
+        [field]: [...prev[field], ...newFiles] 
+      }));
     }
+  };
+
+  const removeFile = (field: 'gallery' | 'sponsors' | 'videos', index: number) => {
+    setFormData(prev => {
+      const updatedFiles = [...prev[field]];
+      // Revoke the object URL to avoid memory leaks
+      URL.revokeObjectURL(updatedFiles[index].preview);
+      updatedFiles.splice(index, 1);
+      return { ...prev, [field]: updatedFiles };
+    });
+  };
+
+  const clearAllFiles = (field: 'gallery' | 'sponsors' | 'videos') => {
+    setFormData(prev => {
+      // Revoke all object URLs
+      prev[field].forEach(file => URL.revokeObjectURL(file.preview));
+      return { ...prev, [field]: [] };
+    });
   };
 
   const handleStepOneSubmit = async () => {
@@ -200,7 +252,7 @@ const AddConferenceModal = () => {
     formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
     formDataToSend.append('workshops_input', JSON.stringify(formData.workshops_input));
     formDataToSend.append('important_date', JSON.stringify(formData.important_date));
-    if (formData.flyer) formDataToSend.append('flyer', formData.flyer);
+    if (formData.flyer) formDataToSend.append('flyer', formData.flyer.file);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_conference/1`, {
@@ -232,11 +284,11 @@ const AddConferenceModal = () => {
     formDataToSend.append('token', token);
     
     // Append media files
-    formData.gallery.forEach(file => formDataToSend.append('gallery[]', file));
-    formData.sponsors.forEach(file => formDataToSend.append('sponsors[]', file));
-    formData.videos.forEach(file => formDataToSend.append('videos[]', file));
+    formData.gallery.forEach(file => formDataToSend.append('gallery[]', file.file));
+    formData.sponsors.forEach(file => formDataToSend.append('sponsors[]', file.file));
+    formData.videos.forEach(file => formDataToSend.append('videos[]', file.file));
     
-    // Append payment data in the flat structure the backend expects
+    // Append payment data
     formDataToSend.append('basic_naira', formData.basic_naira);
     formDataToSend.append('basic_usd', formData.basic_usd);
     formDataToSend.append('basic_package', JSON.stringify(formData.basic_package));
@@ -262,7 +314,32 @@ const AddConferenceModal = () => {
       const data = await response.json();
       if (data.status === "success") {
         showToast.success('Conference created successfully');
-        // Close modal or reset form here
+        // Reset form and close modal
+        setFormData({
+          title: '',
+          theme: '',
+          venue: '',
+          start: '',
+          end: '',
+          subthemes_input: [''],
+          workshops_input: [''],
+          important_date: [''],
+          flyer: null,
+          gallery: [],
+          sponsors: [],
+          videos: [],
+          basic_naira: '',
+          basic_usd: '',
+          basic_package: [],
+          premium_naira: '',
+          premium_usd: '',
+          premium_package: [],
+          standard_naira: '',
+          standard_usd: '',
+          standard_package: [],
+          selectedSpeakers: []
+        });
+        setCurrentStep(1);
       } else {
         showToast.error(data.message || 'Failed to create conference');
       }
@@ -472,25 +549,29 @@ const AddConferenceModal = () => {
                   <CardTitle>Event Flyer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ImageUpload 
-                    onFileChange={(files: File[]) => {
-                      const syntheticEvent = {
-                        target: {
-                          files: (() => {
-                            const dataTransfer = new DataTransfer();
-                            files.forEach(file => dataTransfer.items.add(file));
-                            return dataTransfer.files;
-                          })()
-                        }
-                      } as React.ChangeEvent<HTMLInputElement>;
-                      handleFileChange(syntheticEvent, 'flyer');
-                    }} 
-                  />
-                  {formData.flyer && (
-                    <p className="mt-2 text-sm text-gray-600">
-                      Selected file: {formData.flyer.name}
-                    </p>
-                  )}
+                  <div className="space-y-2">
+                    <Label>Upload Flyer Image</Label>
+                    <Input
+                      type="file"
+                      onChange={(e) => handleFileChange(e, 'flyer')}
+                      accept="image/*"
+                    />
+                    {formData.flyer && (
+                      <div className="mt-4 relative group">
+                        <div className="aspect-[3/4] w-48 rounded-md overflow-hidden border">
+                          <Image
+                            src={formData.flyer.preview}
+                            alt="Flyer preview"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="mt-1 text-sm text-gray-600">
+                          {formData.flyer.name} ({Math.round(formData.flyer.size / 1024)} KB)
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -517,9 +598,22 @@ const AddConferenceModal = () => {
                 <CardHeader>
                   <CardTitle>Media Upload</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Gallery Images</Label>
+                <CardContent className="space-y-6">
+                  {/* Gallery Images Section */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label>Gallery Images</Label>
+                      {formData.gallery.length > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => clearAllFiles('gallery')}
+                          className="text-red-500"
+                        >
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
                     <Input
                       type="file"
                       multiple
@@ -527,14 +621,51 @@ const AddConferenceModal = () => {
                       accept="image/*"
                     />
                     {formData.gallery.length > 0 && (
-                      <p className="text-sm text-gray-600">
-                        {formData.gallery.length} file(s) selected
-                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                        {formData.gallery.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <div className="aspect-square rounded-md overflow-hidden border">
+                              <Image
+                                src={file.preview}
+                                alt={`Gallery image ${index + 1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-white hover:bg-red-500/80"
+                                onClick={() => removeFile('gallery', index)}
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="mt-1 text-xs text-gray-500 truncate">
+                              {file.name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Sponsors Images</Label>
+
+                  {/* Sponsors Images Section */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label>Sponsors Images</Label>
+                      {formData.sponsors.length > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => clearAllFiles('sponsors')}
+                          className="text-red-500"
+                        >
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
                     <Input
                       type="file"
                       multiple
@@ -542,14 +673,51 @@ const AddConferenceModal = () => {
                       accept="image/*"
                     />
                     {formData.sponsors.length > 0 && (
-                      <p className="text-sm text-gray-600">
-                        {formData.sponsors.length} file(s) selected
-                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                        {formData.sponsors.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <div className="aspect-square rounded-md overflow-hidden border">
+                              <Image
+                                src={file.preview}
+                                alt={`Sponsor image ${index + 1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-white hover:bg-red-500/80"
+                                onClick={() => removeFile('sponsors', index)}
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="mt-1 text-xs text-gray-500 truncate">
+                              {file.name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Videos</Label>
+
+                  {/* Videos Section */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label>Videos</Label>
+                      {formData.videos.length > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => clearAllFiles('videos')}
+                          className="text-red-500"
+                        >
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
                     <Input
                       type="file"
                       multiple
@@ -557,9 +725,39 @@ const AddConferenceModal = () => {
                       accept="video/*"
                     />
                     {formData.videos.length > 0 && (
-                      <p className="text-sm text-gray-600">
-                        {formData.videos.length} file(s) selected
-                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        {formData.videos.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <div className="aspect-video rounded-md overflow-hidden border bg-black">
+                              {file.type === 'video' ? (
+                                <video 
+                                  src={file.preview}
+                                  className="w-full h-full object-contain"
+                                  controls={false}
+                                  muted
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <FileText className="w-12 h-12 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-white hover:bg-red-500/80"
+                                onClick={() => removeFile('videos', index)}
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="mt-1 text-xs text-gray-500 truncate">
+                              {file.name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </CardContent>
@@ -573,211 +771,87 @@ const AddConferenceModal = () => {
                 <CardContent className="space-y-6">
                   {/* Basic Package */}
                   <div className="border rounded-lg p-4">
-  <h4 className="font-medium mb-4">Basic Package</h4>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <div className="space-y-2">
-      <Label>Price (Naira)</Label>
-      <Input
-        type="number"
-        value={formData.basic_naira}
-        onChange={(e) => handlePaymentChange('basic_naira', e.target.value)}
-        placeholder="Enter Naira price"
-        required
-      />
-    </div>
-    <div className="space-y-2">
-      <Label>Price (USD)</Label>
-      <Input
-        type="number"
-        value={formData.basic_usd}
-        onChange={(e) => handlePaymentChange('basic_usd', e.target.value)}
-        placeholder="Enter USD price"
-        required
-      />
-    </div>
-  </div>
-  
-  <div className="space-y-2">
-    <Label>Package Inclusions</Label>
-    {formData.basic_package.map((item, index) => (
-      <div key={index} className="flex gap-2 items-center">
-        <Input
-          value={item}
-          onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
-          placeholder="Enter package item"
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => removePackageItem('basic', index)}
-        >
-          <TrashIcon className="w-4 h-4 text-red-500" />
-        </Button>
-      </div>
-    ))}
-    <Button
-      variant="outline"
-      onClick={() => addPackageItem('basic')}
-    >
-      <PlusIcon className="w-4 h-4 mr-2" />
-      Add Package Item
-    </Button>
-  </div>
-</div>
-
-<div className="border rounded-lg p-4">
-  <h4 className="font-medium mb-4">Standard Package</h4>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <div className="space-y-2">
-      <Label>Price (Naira)</Label>
-      <Input
-        type="number"
-        value={formData.standard_naira}
-        onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
-        placeholder="Enter Naira price"
-        required
-      />
-    </div>
-    <div className="space-y-2">
-      <Label>Price (USD)</Label>
-      <Input
-        type="number"
-        value={formData.standard_usd}
-        onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
-        placeholder="Enter USD price"
-        required
-      />
-    </div>
-  </div>
-  
-  <div className="space-y-2">
-    <Label>Package Inclusions</Label>
-    {formData.standard_package.map((item, index) => (
-      <div key={index} className="flex gap-2 items-center">
-        <Input
-          value={item}
-          onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
-          placeholder="Enter package item"
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => removePackageItem('standard', index)}
-        >
-          <TrashIcon className="w-4 h-4 text-red-500" />
-        </Button>
-      </div>
-    ))}
-    <Button
-      variant="outline"
-      onClick={() => addPackageItem('standard')}
-    >
-      <PlusIcon className="w-4 h-4 mr-2" />
-      Add Package Item
-    </Button>
-  </div>
-</div>
-
-
-<div className="border rounded-lg p-4">
-  <h4 className="font-medium mb-4">Premium Package</h4>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <div className="space-y-2">
-      <Label>Price (Naira)</Label>
-      <Input
-        type="number"
-        value={formData.premium_naira}
-        onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
-        placeholder="Enter Naira price"
-        required
-      />
-    </div>
-    <div className="space-y-2">
-      <Label>Price (USD)</Label>
-      <Input
-        type="number"
-        value={formData.premium_usd}
-        onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
-        placeholder="Enter USD price"
-        required
-      />
-    </div>
-  </div>
-  
-  <div className="space-y-2">
-    <Label>Package Inclusions</Label>
-    {formData.premium_package.map((item, index) => (
-      <div key={index} className="flex gap-2 items-center">
-        <Input
-          value={item}
-          onChange={(e) => handlePackageItemChange('premium', index, e.target.value)}
-          placeholder="Enter package item"
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => removePackageItem('premium', index)}
-        >
-          <TrashIcon className="w-4 h-4 text-red-500" />
-        </Button>
-      </div>
-    ))}
-    <Button
-      variant="outline"
-      onClick={() => addPackageItem('premium')}
-    >
-      <PlusIcon className="w-4 h-4 mr-2" />
-      Add Package Item
-    </Button>
-  </div>
-</div>
-
-
-                  {/* Standard Package */}
-                  {/* <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Standard Package</h4>
+                    <h4 className="font-medium mb-4">Basic Package</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="space-y-2">
-                        <Label>Virtual Attendance (USD)</Label>
+                        <Label>Price (Naira)</Label>
                         <Input
                           type="number"
-                          value={formData.standard_usd}
-                          onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
-                          placeholder="Enter USD price"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Virtual Attendance (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_naira}
-                          onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
+                          value={formData.basic_naira}
+                          onChange={(e) => handlePaymentChange('basic_naira', e.target.value)}
                           placeholder="Enter Naira price"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Physical Attendance (USD)</Label>
+                        <Label>Price (USD)</Label>
                         <Input
                           type="number"
-                          value={formData.payments.standard.physical.usd}
-                          onChange={(e) => handlePaymentChange('standard', 'physical', 'usd', e.target.value)}
+                          value={formData.basic_usd}
+                          onChange={(e) => handlePaymentChange('basic_usd', e.target.value)}
                           placeholder="Enter USD price"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Physical Attendance (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.payments.standard.physical.naira}
-                          onChange={(e) => handlePaymentChange('standard', 'physical', 'naira', e.target.value)}
-                          placeholder="Enter Naira price"
+                          required
                         />
                       </div>
                     </div>
                     
                     <div className="space-y-2">
                       <Label>Package Inclusions</Label>
-                      {formData.payments.standard.package.map((item, index) => (
+                      {formData.basic_package.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={item}
+                            onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
+                            placeholder="Enter package item"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePackageItem('basic', index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => addPackageItem('basic')}
+                      >
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        Add Package Item
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Standard Package */}
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Standard Package</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Price (Naira)</Label>
+                        <Input
+                          type="number"
+                          value={formData.standard_naira}
+                          onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Price (USD)</Label>
+                        <Input
+                          type="number"
+                          value={formData.standard_usd}
+                          onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
+                          placeholder="Enter USD price"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Package Inclusions</Label>
+                      {formData.standard_package.map((item, index) => (
                         <div key={index} className="flex gap-2 items-center">
                           <Input
                             value={item}
@@ -801,53 +875,37 @@ const AddConferenceModal = () => {
                         Add Package Item
                       </Button>
                     </div>
-                  </div> */}
+                  </div>
 
                   {/* Premium Package */}
-                  {/* <div className="border rounded-lg p-4">
+                  <div className="border rounded-lg p-4">
                     <h4 className="font-medium mb-4">Premium Package</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="space-y-2">
-                        <Label>Virtual Attendance (USD)</Label>
+                        <Label>Price (Naira)</Label>
                         <Input
                           type="number"
-                          value={formData.payments.premium.virtual.usd}
-                          onChange={(e) => handlePaymentChange('premium', 'virtual', 'usd', e.target.value)}
-                          placeholder="Enter USD price"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Virtual Attendance (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.payments.premium.virtual.naira}
-                          onChange={(e) => handlePaymentChange('premium', 'virtual', 'naira', e.target.value)}
+                          value={formData.premium_naira}
+                          onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
                           placeholder="Enter Naira price"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Physical Attendance (USD)</Label>
+                        <Label>Price (USD)</Label>
                         <Input
                           type="number"
-                          value={formData.payments.premium.physical.usd}
-                          onChange={(e) => handlePaymentChange('premium', 'physical', 'usd', e.target.value)}
+                          value={formData.premium_usd}
+                          onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
                           placeholder="Enter USD price"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Physical Attendance (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.payments.premium.physical.naira}
-                          onChange={(e) => handlePaymentChange('premium', 'physical', 'naira', e.target.value)}
-                          placeholder="Enter Naira price"
+                          required
                         />
                       </div>
                     </div>
                     
                     <div className="space-y-2">
                       <Label>Package Inclusions</Label>
-                      {formData.payments.premium.package.map((item, index) => (
+                      {formData.premium_package.map((item, index) => (
                         <div key={index} className="flex gap-2 items-center">
                           <Input
                             value={item}
@@ -871,7 +929,7 @@ const AddConferenceModal = () => {
                         Add Package Item
                       </Button>
                     </div>
-                  </div> */}
+                  </div>
                 </CardContent>
               </Card>
 

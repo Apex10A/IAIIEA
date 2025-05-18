@@ -1,8 +1,9 @@
 "use client"
 import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
-import Events from '@/app/(admin)/admin-dashboard/conferences/events'
-import Resources from '@/app/(admin)/admin-dashboard/conferences/ResourcesPage'
+import Events from '@/app/(admin)/admin-dashboard/conferences/component/events'
+import ConferenceResources from './component/ConferenceResources';
+import Resources from '@/app/(admin)/admin-dashboard/conferences/component/ResourcesPage'
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 
 const Page = () => {
@@ -13,7 +14,7 @@ const Page = () => {
       case 'Create Conference Events':
         return (
           <div>
-            <Events/>
+            <ConferenceResources/>
           </div>
         );
       case 'Create Conference Resources':

@@ -97,17 +97,17 @@ const portalItems: NavItem[] = [
     subItems: [
       { 
         name: 'Participants', 
-        path: '/admin-dashboard/conference/participants',
+        path: '/admin-dashboard/conferences/participants',
         icon: MembersIcon 
       },
       { 
         name: 'Conferences', 
-        path: '/admin-dashboard/conference',
+        path: '/admin-dashboard/conferences',
         icon: ResourcesIcon 
       },
       { 
         name: 'Messages', 
-        path: '/admin-dashboard/conference/messages',
+        path: '/admin-dashboard/conferences/messages',
         icon: MembersIcon 
       },
         {

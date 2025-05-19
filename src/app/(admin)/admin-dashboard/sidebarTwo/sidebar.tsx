@@ -240,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
   };
 
   return (
-    <div className="h-full mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto">
+    <div className="h-full mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-hidden">
       <div className="flex flex-col gap-1 p-4 pt-5">
         {portalItems.map((item) => (
           <NavItemComponent key={item.path} item={item} />

@@ -77,7 +77,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <Button
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 text-sm font-medium dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="flex items-center gap-2 text-sm font-medium dark:text-gray-100 dark:border-gray-700  dark:hover:bg-gray-800"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to conferences
@@ -110,7 +110,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <h1 className="text-xl sm:text-2xl font-bold text-foreground dark:text-gray-100">
               {conference.title}
             </h1>
-            <p className="text-muted-foreground dark:text-gray-300">
+            <p className="text-muted-foreground text-sm dark:text-gray-300">
               {conferenceDetails.registered_count || 0} people have registered for this conference
             </p>
           </div>
@@ -125,7 +125,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex items-start gap-3">
               <Calendar className="w-5 h-5 text-muted-foreground dark:text-gray-400" />
               <div>
-                <p className="font-medium text-muted-foreground dark:text-gray-300">
+                <p className="font-medium text-muted-foreground dark:text-gray-300 text-sm">
                   {conference.date}
                 </p>
               </div>
@@ -133,7 +133,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-muted-foreground dark:text-gray-400" />
               <div>
-                <p className="font-medium text-muted-foreground dark:text-gray-300">{conference.venue}</p>
+                <p className="font-medium text-muted-foreground dark:text-gray-300 text-sm">{conference.venue}</p>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               conference={conference} 
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                <Button variant="outline" className="w-full sm:w-auto  text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Conference
                 </Button>
@@ -153,7 +153,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             
             <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
               <AlertDialog.Trigger asChild>
-                <Button variant="destructive" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete Conference
                 </Button>
@@ -188,6 +188,10 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 </AlertDialog.Content>
               </AlertDialog.Portal>
             </AlertDialog.Root>
+
+             <Button variant="outline" className="w-full sm:w-auto  text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                  View Resources
+                </Button>
           </div>
       
           {!conferenceDetails.is_registered && (
@@ -210,8 +214,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           {conferenceDetails.is_registered && (
             <>
               {/* Gallery Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
-                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Gallery</h2>
+              <div className="bg-card rounded-lg md:mt-10 mt-3 shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100 mb-4">Gallery</h2>
                 {conferenceDetails?.gallery?.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {conferenceDetails.gallery.map((imageUrl, index) => (
@@ -236,14 +240,14 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               {/* Conference Schedules */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-xl font-bold text-foreground dark:text-gray-100">Conference Schedules</h2>
+                  <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100">Conference Schedules</h2>
                   <div className='flex flex-col sm:flex-row gap-2'>
-                    <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
+                    <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                       Create Conference Schedule
-                    </button>
-                    <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
-                      Download Conference Proceedings
-                    </button>
+                    </Button>
+                    <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                      Upload Conference Proceedings
+                    </Button>
                   </div>
                 </div>
                 {conferenceDetails?.schedule?.length > 0 ? (
@@ -252,7 +256,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                       <div key={index} className="bg-muted/50 p-4 rounded-lg border dark:border-gray-700">
                         <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                           <div>
-                            <h3 className="font-medium dark:text-gray-100">{item.activity}</h3>
+                            <h3 className="font-medium dark:text-gray-100 text-sm md:text-md">{item.activity}</h3>
                             {item.facilitator && (
                               <p className="text-sm text-muted-foreground mt-1 dark:text-gray-400">
                                 Facilitator: {item.facilitator}

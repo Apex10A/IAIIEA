@@ -11,7 +11,13 @@ export interface Conference {
   title: string;
   theme: string;
   venue: string;
-  date: string;
+  start_date?: string;
+  start_time?: string;
+  end_date?: string;
+  end_time?: string;
+   sub_theme?: string[];
+  work_shop?: string[];
+  important_date?: string[];
   description: string;
   status: string;
   meals: string[];

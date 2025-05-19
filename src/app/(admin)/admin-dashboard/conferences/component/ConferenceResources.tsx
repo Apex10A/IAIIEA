@@ -300,13 +300,11 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           {conferenceDetails.is_registered && (
             <>
               {/* Conference Schedules */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6 mt-3 md:mt-10">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                   <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100">Conference Schedules</h2>
                   <div className='flex flex-col sm:flex-row gap-2'>
-                    <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
-                      Create Conference Schedule
-                    </Button>
+                    
                     <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                       Upload Conference Proceedings
                     </Button>
@@ -345,10 +343,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               {/* Meals Ticketing */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-xl font-bold text-foreground dark:text-gray-100">Meals Ticketing</h2>
-                  <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
-                    Add Meals
-                  </button>
+                  <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100">Meals Ticketing</h2>
+                  
                 </div>
                 <p className="text-muted-foreground dark:text-gray-400 text-sm mb-3">
                   These are the list of food currently available for the day. Select any food of your choice
@@ -366,12 +362,12 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                           fill
                           className="object-cover hover:scale-105 transition-transform"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 rounded-t-lg dark:bg-gray-800/90">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gray-100/60 p-2 rounded-t-lg dark:bg-gray-800/90">
                           <h2 className="text-lg font-bold text-foreground dark:text-gray-100 mb-2">{item.name}</h2>
                           <div>
-                            <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
+                            <Button variant="outline" className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                               Select meal
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -384,7 +380,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
               {/* Certification Section */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
-                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Certification</h2>
+                <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100 mb-4">Certification</h2>
                 <p className="text-muted-foreground dark:text-gray-400 text-sm">
                   You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold text-primary dark:text-primary-400">here</Link>
                 </p>
@@ -392,12 +388,12 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
               {/* Virtual Event Section */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
-                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Join event for virtual attendees</h2>
+                <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100 mb-4">Join event for virtual attendees</h2>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <p className="text-muted-foreground dark:text-gray-400 text-sm">You can access the live event from here</p>
-                  <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors w-full sm:w-auto">
+                  <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors w-full sm:w-auto text-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 ">
                     Join the live call
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>

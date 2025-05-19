@@ -6,6 +6,7 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import "@/app/index.css"
 
+// Import your icons...
 import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
 import CalendarIcon from '@/assets/sidebarIcons/CalendarIcon';
 import ConferenceScheduleIcon from '@/assets/sidebarIcons/ScheduleIcon';
@@ -180,15 +181,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
 
     return (
       <div className="w-full">
-        <div
-         className={`
-          w-full flex items-center justify-between p-3 rounded-lg
-          transition-colors duration-200
-          ${isActive ? 'bg-white dark:bg-gray-700 text-[#203A87] dark:text-white' : 
-            'text-gray-300 dark:text-gray-400 hover:bg-blue-600/20 dark:hover:bg-gray-700/50'}
-          ${level > 0 ? 'ml-4' : ''}
-          cursor-pointer
-        `}
+        <motion.div
+          className={`
+            w-full flex items-center justify-between p-3 rounded-lg
+            transition-all duration-200 ease-in-out
+            ${isActive ? 'bg-white/10 dark:bg-gray-700 text-white' : 
+              'text-gray-300 dark:text-gray-400 hover:bg-white/5 dark:hover:bg-gray-700/50'}
+            ${level > 0 ? 'ml-4' : ''}
+            cursor-pointer
+            border-l-4 ${isActive ? 'border-blue-500' : 'border-transparent'}
+          `}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => {
             if (hasSubItems) {
               toggleItem(item.name);
@@ -200,7 +204,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
           <div className="flex items-center gap-3">
             <div className={`
               w-6 h-6 flex items-center justify-center
-              ${isActive ? 'text-white' : 'text-gray-400'}
+              ${isActive ? 'text-blue-400' : 'text-gray-400'}
             `}>
               <IconComponent isActive={!!isActive} />
             </div>
@@ -209,20 +213,33 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
           {hasSubItems && (
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
               <ChevronRight className="w-4 h-4" />
             </motion.div>
           )}
-        </div>
+        </motion.div>
 
         <AnimatePresence>
           {isExpanded && hasSubItems && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              animate={{ 
+                height: 'auto',
+                opacity: 1,
+                transition: {
+                  height: { duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] },
+                  opacity: { duration: 0.1 }
+                }
+              }}
+              exit={{ 
+                height: 0,
+                opacity: 0,
+                transition: {
+                  height: { duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] },
+                  opacity: { duration: 0.1 }
+                }
+              }}
               className="overflow-hidden pl-2"
             >
               {item.subItems?.map((subItem) => (
@@ -240,13 +257,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
   };
 
   return (
-    <div className="h-full mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-hidden">
+    <motion.div 
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="h-full fixed mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto custom-scrollbar"
+    >
       <div className="flex flex-col gap-1 p-4 pt-5">
         {portalItems.map((item) => (
           <NavItemComponent key={item.path} item={item} />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -19,7 +19,9 @@ import {
   FileText,
   Loader2,
   Plus,
-  Pencil
+  Pencil,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
@@ -31,6 +33,99 @@ import {
 } from "./interfaces";
 import { ResourceCard, AddResourceModal } from "./components";
 
+// Carousel component for galleries, sponsors, and videos
+const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'sponsors' | 'videos' }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const itemsPerPage = type === 'videos' ? 1 : 3;
+
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex + itemsPerPage >= items.length ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex - 1 < 0 ? Math.max(0, items.length - itemsPerPage) : prevIndex - 1
+    );
+  };
+
+  const visibleItems = items.slice(currentIndex, currentIndex + itemsPerPage);
+
+  return (
+    <div className="relative">
+      <div className="flex overflow-hidden">
+        {type === 'gallery' && (
+          <div className="flex gap-4 transition-transform duration-300">
+            {visibleItems.map((imageUrl, index) => (
+              <div key={index} className="relative aspect-square w-full min-w-[300px] rounded-lg overflow-hidden bg-muted">
+                <Image
+                  src={imageUrl}
+                  alt={`Gallery image ${index + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {type === 'sponsors' && (
+          <div className="flex gap-4 transition-transform duration-300">
+            {visibleItems.map((sponsor, index) => (
+              <div key={index} className="relative aspect-square w-full min-w-[300px] rounded-lg overflow-hidden bg-muted">
+                <Image
+                  src={sponsor.logo}
+                  alt={sponsor.name}
+                  fill
+                  className="object-contain p-4"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center dark:bg-gray-800/90">
+                  <p className="font-medium dark:text-gray-100">{sponsor.name}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {type === 'videos' && visibleItems[0] && (
+          <div className="w-full aspect-video rounded-lg overflow-hidden bg-muted">
+            {visibleItems[0].type === 'video' ? (
+              <video
+                src={visibleItems[0].url}
+                className="w-full h-full object-cover"
+                controls
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                <FileText className="w-12 h-12 text-muted-foreground dark:text-gray-400" />
+                <p className="text-muted-foreground dark:text-gray-400">Video not available</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {items.length > itemsPerPage && (
+        <>
+          <button 
+            onClick={prevSlide}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 p-2 rounded-full shadow hover:bg-background dark:bg-gray-800/80 dark:hover:bg-gray-700"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={nextSlide}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 p-2 rounded-full shadow hover:bg-background dark:bg-gray-800/80 dark:hover:bg-gray-700"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   conference,
   conferenceDetails,
@@ -40,20 +135,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   onDelete,
   onViewResources,
 }) => {
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   if (loading) {
     return (
@@ -77,7 +159,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <Button
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 text-sm font-medium dark:text-gray-100 dark:border-gray-700  dark:hover:bg-gray-800"
+          className="flex items-center gap-2 text-sm font-medium dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to conferences
@@ -144,7 +226,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               conference={conference} 
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto  text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                <Button variant="outline" className="w-full sm:w-auto text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Conference
                 </Button>
@@ -189,9 +271,13 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               </AlertDialog.Portal>
             </AlertDialog.Root>
 
-             <Button variant="outline" className="w-full sm:w-auto  text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
-                  View Resources
-                </Button>
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+              onClick={() => onViewResources(conference)}
+            >
+              View Resources
+            </Button>
           </div>
       
           {!conferenceDetails.is_registered && (
@@ -213,30 +299,6 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
       
           {conferenceDetails.is_registered && (
             <>
-              {/* Gallery Section */}
-              <div className="bg-card rounded-lg md:mt-10 mt-3 shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
-                <h2 className="text-md md:text-xl font-bold text-foreground dark:text-gray-100 mb-4">Gallery</h2>
-                {conferenceDetails?.gallery?.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {conferenceDetails.gallery.map((imageUrl, index) => (
-                      <div
-                        key={index}
-                        className="relative aspect-square rounded-lg overflow-hidden bg-muted"
-                      >
-                        <Image
-                          src={imageUrl}
-                          alt={`Gallery image ${index + 1}`}
-                          fill
-                          className="object-cover hover:scale-105 transition-transform cursor-pointer"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No gallery images available</p>
-                )}
-              </div>
-      
               {/* Conference Schedules */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -320,41 +382,6 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 )}
               </div>
 
-              {/* Videos Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
-                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Videos</h2>
-                {conferenceDetails?.videos?.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {conferenceDetails.videos.map((video, index) => (
-                      <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                        {video.type === 'video' ? (
-                          <>
-                            <video
-                              src={video.url}
-                              className="w-full h-full object-cover"
-                              controls
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <Play className="w-10 h-10 text-white bg-black/50 rounded-full p-2" />
-                            </div>
-                          </>
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                            <FileText className="w-12 h-12 text-muted-foreground dark:text-gray-400" />
-                            <p className="text-muted-foreground dark:text-gray-400">Video not available</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="aspect-video flex flex-col items-center justify-center gap-2 bg-muted rounded-lg">
-                    <FileText className="w-12 h-12 text-muted-foreground dark:text-gray-400" />
-                    <p className="text-muted-foreground dark:text-gray-400">No videos available</p>
-                  </div>
-                )}
-              </div>
-
               {/* Certification Section */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Certification</h2>
@@ -373,39 +400,6 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   </button>
                 </div>
               </div>
-
-              {/* Resources Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-xl font-bold text-foreground dark:text-gray-100">Resources</h2>
-                  <button
-                    onClick={() => onViewResources(conference)}
-                    className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 dark:text-primary-400 dark:hover:text-primary-300"
-                  >
-                    View all resources <ExternalLink className="w-4 h-4" />
-                  </button>
-                </div>
-                {conferenceDetails?.resources?.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {conferenceDetails.resources.slice(0, 4).map((resource) => (
-                      <ResourceCard
-                        key={resource.resource_id}
-                        resource={resource}
-                        onDelete={() => {}}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                      <FileText className="w-10 h-10 text-muted-foreground dark:text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-medium text-foreground dark:text-gray-100 mb-1">
-                      No resources available
-                    </h3>
-                  </div>
-                )}
-              </div>
             </>
           )}
         </div>
@@ -416,11 +410,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
 export const ConferenceCard: React.FC<ConferenceCardProps> = ({
   conference,
-  onViewResources,
   onViewDetails,
 }) => {
-  const resourceCount = conference.resources?.length || 0;
-
   return (
     <div className="rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-card dark:border-gray-700 dark:hover:shadow-gray-700/30">
       <div className="relative group">
@@ -455,9 +446,6 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
           <h2 className="text-foreground dark:text-gray-100 text-lg font-semibold line-clamp-2">
             {conference.title}
           </h2>
-          <span className="bg-muted text-muted-foreground dark:text-gray-400 text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
-            {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
-          </span>
         </div>
         <p className="text-muted-foreground dark:text-gray-400 text-sm mb-3 line-clamp-2">
           {conference.theme}
@@ -467,18 +455,12 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
           <p className="text-muted-foreground dark:text-gray-400 text-sm line-clamp-2">{conference.date}</p>
         </div>
       </div>
-      <div className="px-4 pb-4 grid grid-cols-2 gap-2">
+      <div className="px-4 pb-4">
         <button
           onClick={() => onViewDetails(conference)}
-          className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors"
+          className="w-full bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors"
         >
           View Details
-        </button>
-        <button
-          onClick={() => onViewResources(conference)}
-          className="bg-muted hover:bg-muted/80 px-3 py-2 rounded-md text-muted-foreground dark:text-gray-300 text-sm font-medium transition-colors dark:hover:bg-gray-700"
-        >
-          View Resources
         </button>
       </div>
     </div>
@@ -612,7 +594,7 @@ const ConferenceResources: React.FC = () => {
     );
   }
 
-  if (viewMode === "resources" && selectedConference) {
+  if (viewMode === "resources" && selectedConference && conferenceDetails) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
@@ -638,34 +620,71 @@ const ConferenceResources: React.FC = () => {
                 </h1>
                 <p className="text-muted-foreground dark:text-gray-400">{selectedConference.theme}</p>
               </div>
-              <span className="bg-muted text-muted-foreground dark:text-gray-400 px-3 py-1 rounded-full text-sm">
-                {selectedConference.resources?.length || 0} resources
-              </span>
             </div>
 
-            {selectedConference.resources?.length ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {selectedConference.resources.map((resource) => (
-                  <ResourceCard
-                    key={resource.resource_id}
-                    resource={resource}
-                    onDelete={() => {}}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-10 h-10 text-muted-foreground dark:text-gray-400" />
+            {/* Gallery Section */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Gallery</h2>
+              {conferenceDetails.gallery?.length > 0 ? (
+                <MediaCarousel items={conferenceDetails.gallery} type="gallery" />
+              ) : (
+                <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No gallery images available</p>
+              )}
+            </div>
+
+            {/* Sponsors Section */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Sponsors</h2>
+              {conferenceDetails.sponsors?.length > 0 ? (
+                <MediaCarousel 
+                  items={conferenceDetails.sponsors.map(sponsor => ({
+                    logo: sponsor.logo,
+                    name: sponsor.name
+                  }))} 
+                  type="sponsors" 
+                />
+              ) : (
+                <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No sponsors available</p>
+              )}
+            </div>
+
+            {/* Videos Section */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Videos</h2>
+              {conferenceDetails.videos?.length > 0 ? (
+                <MediaCarousel items={conferenceDetails.videos} type="videos" />
+              ) : (
+                <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No videos available</p>
+              )}
+            </div>
+
+            {/* Resources Section */}
+            <div>
+              <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Documents</h2>
+              {conferenceDetails.resources?.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {conferenceDetails.resources.map((resource) => (
+                    <ResourceCard
+                      key={resource.resource_id}
+                      resource={resource}
+                      onDelete={() => {}}
+                    />
+                  ))}
                 </div>
-                <h3 className="text-lg font-medium text-foreground dark:text-gray-100 mb-1">
-                  No resources yet
-                </h3>
-                <p className="text-muted-foreground dark:text-gray-400">
-                  Add resources to make them available to attendees
-                </p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <FileText className="w-10 h-10 text-muted-foreground dark:text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground dark:text-gray-100 mb-1">
+                    No resources yet
+                  </h3>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Add resources to make them available to attendees
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -708,7 +727,6 @@ const ConferenceResources: React.FC = () => {
                   <ConferenceCard
                     key={conference.id}
                     conference={conference}
-                    onViewResources={handleViewResources}
                     onViewDetails={handleViewDetails}
                   />
                 ))}

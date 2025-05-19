@@ -66,7 +66,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   if (!conferenceDetails) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-foreground">Failed to load conference details</p>
+        <p className="text-foreground dark:text-gray-100">Failed to load conference details</p>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <Button
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 text-sm font-medium dark:text-white"
+          className="flex items-center gap-2 text-sm font-medium dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to conferences
@@ -85,7 +85,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <AddFileModal/>
       </div>
      
-      <div className="bg-card rounded-lg shadow-md overflow-hidden border">
+      <div className="bg-card rounded-lg shadow-md overflow-hidden border dark:border-gray-700">
         <div className="relative h-64 sm:h-[400px] bg-muted">
           {conferenceDetails?.flyer ? (
             <Image
@@ -96,27 +96,27 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               priority
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex items-center justify-center h-full text-muted-foreground dark:text-gray-400">
               <FileText className="w-16 h-16" />
             </div>
           )}
-          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium dark:text-gray-200">
+          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium dark:bg-gray-800 dark:text-gray-200">
             {conference.status}
           </div>
         </div>
       
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground dark:text-gray-200">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground dark:text-gray-100">
               {conference.title}
             </h1>
-            <p className="text-muted-foreground dark:text-gray-400">
+            <p className="text-muted-foreground dark:text-gray-300">
               {conferenceDetails.registered_count || 0} people have registered for this conference
             </p>
           </div>
           
           <div className="mb-4">
-            <p className="text-lg sm:text-2xl text-muted-foreground uppercase font-bold dark:text-gray-200">
+            <p className="text-lg sm:text-2xl text-muted-foreground uppercase font-bold dark:text-gray-300">
               {conference.theme}
             </p>
           </div>
@@ -125,7 +125,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex items-start gap-3">
               <Calendar className="w-5 h-5 text-muted-foreground dark:text-gray-400" />
               <div>
-                <p className="font-medium text-muted-foreground dark:text-gray-400">
+                <p className="font-medium text-muted-foreground dark:text-gray-300">
                   {conference.date}
                 </p>
               </div>
@@ -133,7 +133,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-muted-foreground dark:text-gray-400" />
               <div>
-                <p className="font-medium text-muted-foreground dark:text-gray-400">{conference.venue}</p>
+                <p className="font-medium text-muted-foreground dark:text-gray-300">{conference.venue}</p>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               conference={conference} 
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto dark:text-gray-300 ">
+                <Button variant="outline" className="w-full sm:w-auto dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Conference
                 </Button>
@@ -160,16 +160,16 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
                 <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
-                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[500px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-background p-6 rounded-lg shadow-lg">
-                  <AlertDialog.Title className="text-lg font-semibold">
+                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[500px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-background p-6 rounded-lg shadow-lg dark:border dark:border-gray-700">
+                  <AlertDialog.Title className="text-lg font-semibold dark:text-gray-100">
                     Delete Conference
                   </AlertDialog.Title>
-                  <AlertDialog.Description className="mt-4 mb-6 text-muted-foreground">
+                  <AlertDialog.Description className="mt-4 mb-6 text-muted-foreground dark:text-gray-300">
                     Are you sure you want to delete this conference? This action cannot be undone.
                   </AlertDialog.Description>
                   <div className="flex justify-end gap-4">
                     <AlertDialog.Cancel asChild>
-                      <Button variant="outline">
+                      <Button variant="outline" className="dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
                         Cancel
                       </Button>
                     </AlertDialog.Cancel>
@@ -210,8 +210,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           {conferenceDetails.is_registered && (
             <>
               {/* Gallery Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
-                <h2 className="text-xl font-bold text-foreground mb-4">Gallery</h2>
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Gallery</h2>
                 {conferenceDetails?.gallery?.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {conferenceDetails.gallery.map((imageUrl, index) => (
@@ -229,14 +229,14 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">No gallery images available</p>
+                  <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No gallery images available</p>
                 )}
               </div>
       
               {/* Conference Schedules */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-xl font-bold text-foreground">Conference Schedules</h2>
+                  <h2 className="text-xl font-bold text-foreground dark:text-gray-100">Conference Schedules</h2>
                   <div className='flex flex-col sm:flex-row gap-2'>
                     <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
                       Create Conference Schedule
@@ -249,21 +249,21 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 {conferenceDetails?.schedule?.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {conferenceDetails.schedule.map((item, index) => (
-                      <div key={index} className="bg-muted/50 p-4 rounded-lg border">
+                      <div key={index} className="bg-muted/50 p-4 rounded-lg border dark:border-gray-700">
                         <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                           <div>
-                            <h3 className="font-medium">{item.activity}</h3>
+                            <h3 className="font-medium dark:text-gray-100">{item.activity}</h3>
                             {item.facilitator && (
-                              <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-sm text-muted-foreground mt-1 dark:text-gray-400">
                                 Facilitator: {item.facilitator}
                               </p>
                             )}
                           </div>
                           <div className="sm:text-right">
-                            <p className="text-sm font-medium">
+                            <p className="text-sm font-medium dark:text-gray-200">
                               {item.day}, {item.start} - {item.end}
                             </p>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1 dark:text-gray-400">
                               {item.venue}
                             </p>
                           </div>
@@ -272,19 +272,19 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">No schedules available</p>
+                  <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No schedules available</p>
                 )}
               </div>
 
               {/* Meals Ticketing */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-xl font-bold text-foreground">Meals Ticketing</h2>
+                  <h2 className="text-xl font-bold text-foreground dark:text-gray-100">Meals Ticketing</h2>
                   <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
                     Add Meals
                   </button>
                 </div>
-                <p className="text-muted-foreground text-sm mb-3">
+                <p className="text-muted-foreground dark:text-gray-400 text-sm mb-3">
                   These are the list of food currently available for the day. Select any food of your choice
                 </p>
                 {conferenceDetails?.meals?.length > 0 ? (
@@ -300,8 +300,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                           fill
                           className="object-cover hover:scale-105 transition-transform"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 rounded-t-lg">
-                          <h2 className="text-lg font-bold text-foreground mb-2">{item.name}</h2>
+                        <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 rounded-t-lg dark:bg-gray-800/90">
+                          <h2 className="text-lg font-bold text-foreground dark:text-gray-100 mb-2">{item.name}</h2>
                           <div>
                             <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors">
                               Select meal
@@ -312,13 +312,13 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-center py-8">No Meals available</p>
+                  <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No Meals available</p>
                 )}
               </div>
 
               {/* Videos Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
-                <h2 className="text-xl font-bold text-foreground mb-4">Videos</h2>
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Videos</h2>
                 {conferenceDetails?.videos?.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {conferenceDetails.videos.map((video, index) => (
@@ -336,8 +336,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                           </>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                            <FileText className="w-12 h-12 text-muted-foreground" />
-                            <p className="text-muted-foreground">Video not available</p>
+                            <FileText className="w-12 h-12 text-muted-foreground dark:text-gray-400" />
+                            <p className="text-muted-foreground dark:text-gray-400">Video not available</p>
                           </div>
                         )}
                       </div>
@@ -345,25 +345,25 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   </div>
                 ) : (
                   <div className="aspect-video flex flex-col items-center justify-center gap-2 bg-muted rounded-lg">
-                    <FileText className="w-12 h-12 text-muted-foreground" />
-                    <p className="text-muted-foreground">No videos available</p>
+                    <FileText className="w-12 h-12 text-muted-foreground dark:text-gray-400" />
+                    <p className="text-muted-foreground dark:text-gray-400">No videos available</p>
                   </div>
                 )}
               </div>
 
               {/* Certification Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
-                <h2 className="text-xl font-bold text-foreground mb-4">Certification</h2>
-                <p className="text-muted-foreground text-sm">
-                  You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold text-primary">here</Link>
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Certification</h2>
+                <p className="text-muted-foreground dark:text-gray-400 text-sm">
+                  You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold text-primary dark:text-primary-400">here</Link>
                 </p>
               </div>
 
               {/* Virtual Event Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
-                <h2 className="text-xl font-bold text-foreground mb-4">Join event for virtual attendees</h2>
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-xl font-bold text-foreground dark:text-gray-100 mb-4">Join event for virtual attendees</h2>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <p className="text-muted-foreground text-sm">You can access the live event from here</p>
+                  <p className="text-muted-foreground dark:text-gray-400 text-sm">You can access the live event from here</p>
                   <button className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors w-full sm:w-auto">
                     Join the live call
                   </button>
@@ -371,12 +371,12 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               </div>
 
               {/* Resources Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border">
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-xl font-bold text-foreground">Resources</h2>
+                  <h2 className="text-xl font-bold text-foreground dark:text-gray-100">Resources</h2>
                   <button
                     onClick={() => onViewResources(conference)}
-                    className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                    className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 dark:text-primary-400 dark:hover:text-primary-300"
                   >
                     View all resources <ExternalLink className="w-4 h-4" />
                   </button>
@@ -394,9 +394,9 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 ) : (
                   <div className="text-center py-8">
                     <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                      <FileText className="w-10 h-10 text-muted-foreground" />
+                      <FileText className="w-10 h-10 text-muted-foreground dark:text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-foreground mb-1">
+                    <h3 className="text-lg font-medium text-foreground dark:text-gray-100 mb-1">
                       No resources available
                     </h3>
                   </div>
@@ -418,7 +418,7 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
   const resourceCount = conference.resources?.length || 0;
 
   return (
-    <div className="rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-card">
+    <div className="rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-card dark:border-gray-700 dark:hover:shadow-gray-700/30">
       <div className="relative group">
         <div className="absolute z-20 bottom-5 left-5">
           <span
@@ -440,7 +440,7 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex items-center justify-center h-full text-muted-foreground dark:text-gray-400">
               <FileText className="w-12 h-12" />
             </div>
           )}
@@ -448,19 +448,19 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <h2 className="text-foreground text-lg font-semibold line-clamp-2">
+          <h2 className="text-foreground dark:text-gray-100 text-lg font-semibold line-clamp-2">
             {conference.title}
           </h2>
-          <span className="bg-muted text-muted-foreground text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
+          <span className="bg-muted text-muted-foreground dark:text-gray-400 text-xs px-2 py-1 rounded ml-2 whitespace-nowrap">
             {resourceCount} {resourceCount === 1 ? "resource" : "resources"}
           </span>
         </div>
-        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+        <p className="text-muted-foreground dark:text-gray-400 text-sm mb-3 line-clamp-2">
           {conference.theme}
         </p>
         <div className="flex items-center text-muted-foreground text-xs mb-4">
-          <Calendar className="w-3 h-3 mr-1" />
-          <p className="text-muted-foreground text-sm line-clamp-2">{conference.date}</p>
+          <Calendar className="w-3 h-3 mr-1 text-muted-foreground dark:text-gray-400" />
+          <p className="text-muted-foreground dark:text-gray-400 text-sm line-clamp-2">{conference.date}</p>
         </div>
       </div>
       <div className="px-4 pb-4 grid grid-cols-2 gap-2">
@@ -472,7 +472,7 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
         </button>
         <button
           onClick={() => onViewResources(conference)}
-          className="bg-muted hover:bg-muted/80 px-3 py-2 rounded-md text-muted-foreground text-sm font-medium transition-colors"
+          className="bg-muted hover:bg-muted/80 px-3 py-2 rounded-md text-muted-foreground dark:text-gray-300 text-sm font-medium transition-colors dark:hover:bg-gray-700"
         >
           View Resources
         </button>
@@ -615,7 +615,7 @@ const ConferenceResources: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <button
               onClick={handleBackToList}
-              className="flex items-center gap-2 text-primary  hover:text-primary/80 text-sm font-medium"
+              className="flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium dark:text-primary-400 dark:hover:text-primary-300"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to conferences
@@ -626,15 +626,15 @@ const ConferenceResources: React.FC = () => {
             />
           </div>
 
-          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border">
+          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-xl font-bold text-foreground">
+                <h1 className="text-xl font-bold text-foreground dark:text-gray-100">
                   {selectedConference.title}
                 </h1>
-                <p className="text-muted-foreground dark:text-white">{selectedConference.theme}</p>
+                <p className="text-muted-foreground dark:text-gray-400">{selectedConference.theme}</p>
               </div>
-              <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-sm">
+              <span className="bg-muted text-muted-foreground dark:text-gray-400 px-3 py-1 rounded-full text-sm">
                 {selectedConference.resources?.length || 0} resources
               </span>
             </div>
@@ -652,12 +652,12 @@ const ConferenceResources: React.FC = () => {
             ) : (
               <div className="text-center py-12">
                 <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <FileText className="w-10 h-10 text-muted-foreground" />
+                  <FileText className="w-10 h-10 text-muted-foreground dark:text-gray-400" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground mb-1">
+                <h3 className="text-lg font-medium text-foreground dark:text-gray-100 mb-1">
                   No resources yet
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground dark:text-gray-400">
                   Add resources to make them available to attendees
                 </p>
               </div>
@@ -669,7 +669,7 @@ const ConferenceResources: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto py-8">
       {viewMode === "details" && selectedConference ? (
         <ConferenceDetailsView
           conference={selectedConference}
@@ -698,7 +698,7 @@ const ConferenceResources: React.FC = () => {
 
           {conferences.length > 1 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">Past Conferences</h2>
+              <h2 className="text-2xl font-bold text-foreground dark:text-gray-100">Past Conferences</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {conferences.slice(1).map((conference) => (
                   <ConferenceCard

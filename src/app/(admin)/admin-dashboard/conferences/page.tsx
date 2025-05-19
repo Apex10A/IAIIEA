@@ -30,8 +30,8 @@ const Page = () => {
 
   return (
     <div className=''>
-      <div className='bg-gray-200 px-5 py-3 mb-6 '>
-        <h1 className='text-xl md:text-2xl text-gray-700'>Conferences</h1>
+      <div className=' px-5 py-3 mb-6 '>
+        <h1 className='text-xl md:text-2xl text-gray-700 dark:text-gray-300'>Conferences</h1>
       </div>
       {/* <div>
         <ButtonProp
@@ -41,7 +41,7 @@ const Page = () => {
         />
       </div> */}
 
-      <div className='py-10'>
+      <div className=''>
         {/* Render the content based on the selected section */}
         {renderContent()}
       </div>

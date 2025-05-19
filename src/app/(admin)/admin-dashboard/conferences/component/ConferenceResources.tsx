@@ -100,40 +100,40 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <FileText className="w-16 h-16" />
             </div>
           )}
-          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium">
+          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium dark:text-gray-200">
             {conference.status}
           </div>
         </div>
       
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground dark:text-gray-200">
               {conference.title}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground dark:text-gray-400">
               {conferenceDetails.registered_count || 0} people have registered for this conference
             </p>
           </div>
           
           <div className="mb-4">
-            <p className="text-lg sm:text-2xl text-muted-foreground uppercase font-bold">
+            <p className="text-lg sm:text-2xl text-muted-foreground uppercase font-bold dark:text-gray-200">
               {conference.theme}
             </p>
           </div>
       
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-muted-foreground" />
+              <Calendar className="w-5 h-5 text-muted-foreground dark:text-gray-400" />
               <div>
-                <p className="font-medium text-muted-foreground">
+                <p className="font-medium text-muted-foreground dark:text-gray-400">
                   {conference.date}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-muted-foreground" />
+              <MapPin className="w-5 h-5 text-muted-foreground dark:text-gray-400" />
               <div>
-                <p className="font-medium text-muted-foreground">{conference.venue}</p>
+                <p className="font-medium text-muted-foreground dark:text-gray-400">{conference.venue}</p>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               conference={conference} 
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto dark:text-gray-300 ">
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Conference
                 </Button>

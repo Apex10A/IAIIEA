@@ -29,7 +29,7 @@ const Page = () => {
   };
 
   return (
-    <div className='p-6'>
+    <div className=''>
       <div className='bg-gray-200 px-5 py-3 mb-6 '>
         <h1 className='text-xl md:text-2xl text-gray-700'>Conferences</h1>
       </div>

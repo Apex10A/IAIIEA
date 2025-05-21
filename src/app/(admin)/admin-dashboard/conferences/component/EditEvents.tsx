@@ -74,7 +74,7 @@ interface Conference {
   end_time?: string;
   sub_theme?: string[];
   work_shop?: string[];
-  important_date?: string[];
+  important_date: string[];
   flyer?: string;
   gallery?: string[];
   sponsors?: string[];
@@ -129,135 +129,132 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [isLoading, setIsLoading] = useState(false);
 
-  const [formData, setFormData] = useState<FormData>({
-    title: conference.title,
-    theme: conference.theme,
-    venue: conference.venue,
-    start: conference.start_date ? `${conference.start_date}T${conference.start_time || '00:00'}` : '',
-    end: conference.end_date ? `${conference.end_date}T${conference.end_time || '00:00'}` : '',
-    subthemes_input: conference.sub_theme || [],
-    workshops_input: conference.work_shop || [],
-    important_date: conference.important_date || [],
+ const [formData, setFormData] = useState<FormData>({
+    title: '',
+    theme: '',
+    venue: '',
+    start: '',
+    end: '',
+    subthemes_input: [],
+    workshops_input: [],
+    important_date: [],
     flyer: null,
     gallery: [],
     sponsors: [],
     videos: [],
-    basic_naira: conference.payments?.basic?.physical?.naira || '',
-    basic_usd: conference.payments?.basic?.physical?.usd || '',
-    basic_package: conference.payments?.basic?.package || [],
-    premium_naira: conference.payments?.premium?.physical?.naira || '',
-    premium_usd: conference.payments?.premium?.physical?.usd || '',
-    premium_package: conference.payments?.premium?.package || [],
-    standard_naira: conference.payments?.standard?.physical?.naira || '',
-    standard_usd: conference.payments?.standard?.physical?.usd || '',
-    standard_package: conference.payments?.standard?.package || [],
-    selectedSpeakers: conference.speakers?.map(speaker => ({
-      speaker_id: speaker.speaker_id || 0,
-      occupation: speaker.portfolio || ''
-    })) || []
+    basic_naira: '',
+    basic_usd: '',
+    basic_package: [],
+    premium_naira: '',
+    premium_usd: '',
+    premium_package: [],
+    standard_naira: '',
+    standard_usd: '',
+    standard_package: [],
+    selectedSpeakers: []
   });
 
   useEffect(() => {
     fetchSpeakers();
-    
-    setFormData(prev => ({
-      ...prev,
-      title: conference.title,
-      theme: conference.theme,
-      venue: conference.venue,
-      start: conference.start_date ? `${conference.start_date}T${conference.start_time || '00:00'}` : '',
-      end: conference.end_date ? `${conference.end_date}T${conference.end_time || '00:00'}` : '',
-      subthemes_input: conference.sub_theme || [],
-      workshops_input: conference.work_shop || [],
-      important_date: conference.important_date || [],
-      basic_naira: conference.payments?.basic?.physical?.naira || '',
-      basic_usd: conference.payments?.basic?.physical?.usd || '',
-      basic_package: conference.payments?.basic?.package || [],
-      premium_naira: conference.payments?.premium?.physical?.naira || '',
-      premium_usd: conference.payments?.premium?.physical?.usd || '',
-      premium_package: conference.payments?.premium?.package || [],
-      standard_naira: conference.payments?.standard?.physical?.naira || '',
-      standard_usd: conference.payments?.standard?.physical?.usd || '',
-      standard_package: conference.payments?.standard?.package || [],
-      selectedSpeakers: conference.speakers?.map(speaker => ({
-        speaker_id: speaker.speaker_id || 0,
-        occupation: speaker.portfolio || ''
-      })) || []
-    }));
 
-    if (conference.flyer) {
-      setFormData(prev => ({
-        ...prev,
-        flyer: {
+    // Only initialize when conference data is available
+    if (conference) {
+      console.log('Initializing with conference data:', conference);
+      
+      const newFormData: Partial<FormData> = {
+        title: conference.title,
+        theme: conference.theme,
+        venue: conference.venue,
+        start: conference.start_date ? `${conference.start_date}T${conference.start_time || '00:00'}` : '',
+        end: conference.end_date ? `${conference.end_date}T${conference.end_time || '00:00'}` : '',
+        subthemes_input: Array.isArray(conference.sub_theme) ? conference.sub_theme : [],
+        workshops_input: conference.work_shop || [],
+        important_date: conference.important_date || [],
+        basic_naira: conference.payments?.basic?.physical?.naira || '',
+        basic_usd: conference.payments?.basic?.physical?.usd || '',
+        basic_package: conference.payments?.basic?.package || [],
+        premium_naira: conference.payments?.premium?.physical?.naira || '',
+        premium_usd: conference.payments?.premium?.physical?.usd || '',
+        premium_package: conference.payments?.premium?.package || [],
+        standard_naira: conference.payments?.standard?.physical?.naira || '',
+        standard_usd: conference.payments?.standard?.physical?.usd || '',
+        standard_package: conference.payments?.standard?.package || [],
+        selectedSpeakers: conference.speakers?.map(speaker => ({
+          speaker_id: speaker.speaker_id || 0,
+          occupation: speaker.portfolio || ''
+        })) || []
+      };
+
+      // Handle file fields
+      if (conference.flyer) {
+        newFormData.flyer = {
           file: new File([], conference.flyer.split('/').pop() || 'flyer.jpg'),
           preview: conference.flyer,
           name: conference.flyer.split('/').pop() || 'flyer.jpg',
           size: 0,
           type: 'image'
-        }
-      }));
-    }
-    
-    if (conference.gallery && conference.gallery.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        gallery: conference.gallery.map(url => ({
+        };
+      }
+
+      if (conference.gallery?.length) {
+        newFormData.gallery = conference.gallery.map(url => ({
           file: new File([], url.split('/').pop() || 'gallery.jpg'),
           preview: url,
           name: url.split('/').pop() || 'gallery.jpg',
           size: 0,
           type: 'image'
-        }))
-      }));
-    }
+        }));
+      }
 
-    if (conference.sponsors && conference.sponsors.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        sponsors: conference.sponsors.map(url => ({
+      if (conference.sponsors?.length) {
+        newFormData.sponsors = conference.sponsors.map(url => ({
           file: new File([], url.split('/').pop() || 'sponsor.jpg'),
           preview: url,
           name: url.split('/').pop() || 'sponsor.jpg',
           size: 0,
           type: 'image'
-        }))
-      }));
-    }
+        }));
+      }
 
-    if (conference.videos && conference.videos.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        videos: conference.videos.map(url => ({
+      if (conference.videos?.length) {
+        newFormData.videos = conference.videos.map(url => ({
           file: new File([], url.split('/').pop() || 'video.mp4'),
           preview: url,
           name: url.split('/').pop() || 'video.mp4',
           size: 0,
           type: 'video'
-        }))
+        }));
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        ...newFormData
       }));
     }
-
-    return () => {
-      ['flyer', 'gallery', 'sponsors', 'videos'].forEach(field => {
-        const files = formData[field as keyof FormData];
-        if (Array.isArray(files)) {
-          files.forEach(file => URL.revokeObjectURL(file.preview));
-        } else if (files) {
-          URL.revokeObjectURL((files as FileWithPreview).preview);
-        }
-      });
-    };
   }, [conference]);
 
+  // Cleanup function
+  useEffect(() => {
+    return () => {
+      const { flyer, gallery, sponsors, videos } = formData;
+      if (flyer) URL.revokeObjectURL(flyer.preview);
+      gallery.forEach(file => URL.revokeObjectURL(file.preview));
+      sponsors.forEach(file => URL.revokeObjectURL(file.preview));
+      videos.forEach(file => URL.revokeObjectURL(file.preview));
+    };
+  }, [formData.flyer, formData.gallery, formData.sponsors, formData.videos]);
+
 useEffect(() => {
-  if (conference && Array.isArray(conference.sub_theme)) {
-    console.log("Conference sub_theme:", conference.sub_theme);
-  } else {
-    console.log("Conference not ready yet or sub_theme is missing");
+  console.log('Current formData:', formData);
+}, [formData]);
+useEffect(() => {
+  console.log('Conference prop changed:', conference);
+  if (conference) {
+    console.log('Subthemes from API:', conference.sub_theme);
+    console.log('Workshops from API:', conference.work_shop);
+    console.log('Important dates from API:', conference.important_date);
   }
 }, [conference]);
-
-
 
   const fetchSpeakers = async () => {
     try {

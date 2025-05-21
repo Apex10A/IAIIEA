@@ -6,58 +6,52 @@ export interface Resource {
   file: string;
 }
 
+// Basic conference from /landing/events
 export interface Conference {
   id: number;
   title: string;
   theme: string;
   venue: string;
-  start_date?: string;
-  start_time?: string;
-  end_date?: string;
-  end_time?: string;
-   sub_theme?: string[];
-  work_shop?: string[];
-  important_date?: string[];
-  description: string;
+  date: string;
   status: string;
-  meals: string[];
-  gallery: string[];
   flyer: string;
+}
+
+// Detailed conference from /landing/event_details/{id}
+export interface ConferenceDetails extends Conference {
+  is_registered: boolean;
+  start_date: string;
+  start_time: string;
+  sub_theme: string[];
+  work_shop: string[];
+  important_date: string[];
+  gallery: string[];
   sponsors: string[];
   videos: string[];
   resources: Resource[];
-}
-
-export interface ConferenceDetails {
-  id: number;
-  is_registered: boolean;
-  title: string;
-  theme: string;
-  venue: string;
-  date: string;
-  start_date: string;
-  start_time: string;
-  sub_theme?: string[];
-  work_shop: string[];
-  important_date: string[];
-  flyer: string;
-  gallery: string[];
-  resources: {
-    resource_id: number;
-    resource_type: string | null;
-    caption: string;
-    date: string;
-    file: string;
-  }[];
-  videos: {
-    title?: string;
-    description?: string;
-    url: string;
-  }[];
-  meals: {
-    meal_id: number;
+  payments: {
+    basic: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+      package: string[];
+    };
+    premium: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+      package: string[];
+    };
+    standard: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+      package: string[];
+    };
+  };
+  speakers: {
+    speaker_id?: number;
     name: string;
-    image: string;
+    title?: string;
+    portfolio?: string;
+    picture?: string;
   }[];
   schedule: {
     schedule_id: number;
@@ -69,80 +63,12 @@ export interface ConferenceDetails {
     venue: string;
     posted: string;
   }[];
-  payments: {
-    early_bird_registration: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    normal_registration: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    late_registration: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    tour: {
-      virtual: {
-        usd: number | string;
-        naira: number | string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    annual_dues: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    vetting_fee: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    publication_fee: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-  };
+  meals: {
+    meal_id: number;
+    name: string;
+    image: string;
+  }[];
 }
-
 export interface ResourceCardProps {
   resource: Resource;
   onDelete: (resourceId: number) => void;

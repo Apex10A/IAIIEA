@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
-import IAIIEAmembers from './IAIIEAmembers/page'
+// import IAIIEAmembers from './IAIIEAmembers/page'
 import EventSpeakers from './EventSpeakers/page'
 // import Volunteers from './Volunteers/page'
 // import ConferenceParticipants from './ConferenceParticipants/page'
@@ -14,12 +14,12 @@ const Page = () => {
 
   const renderContent = () => {
     switch (selectedSection) {
-      case 'IAIIEA members':
-        return (
-          <div>
-            <IAIIEAmembers/>
-          </div>
-        );
+      // case 'IAIIEA members':
+      //   return (
+      //     <div>
+      //       <IAIIEAmembers/>
+      //     </div>
+      //   );
       // case 'Event speakers':
       //   return (
       //     <div>

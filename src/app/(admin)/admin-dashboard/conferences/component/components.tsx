@@ -103,7 +103,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
       formData.append("conference_id", conferenceId.toString());
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/add_resource`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/upload_conference_resource`,
         {
           method: "POST",
           headers: {

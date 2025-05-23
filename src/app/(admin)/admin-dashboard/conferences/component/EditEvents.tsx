@@ -158,6 +158,7 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [isLoading, setIsLoading] = useState(false);
   const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
+  const [stepOneToken, setStepOneToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     title: '',
@@ -430,28 +431,27 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
     
-    // Format dates properly
+    // Format dates
     const startDateTime = new Date(formData.start);
-    const startDate = startDateTime.toISOString().split('T')[0];
-    const startTime = startDateTime.toTimeString().split(' ')[0];
-    
-    formDataToSend.append('start_date', startDate);
-    formDataToSend.append('start_time', startTime);
+    const formattedStart = `${startDateTime.getFullYear()}-${String(startDateTime.getMonth() + 1).padStart(2, '0')}-${String(startDateTime.getDate()).padStart(2, '0')} ${String(startDateTime.getHours()).padStart(2, '0')}:${String(startDateTime.getMinutes()).padStart(2, '0')}:00`;
+    formDataToSend.append('start', formattedStart);
+    formDataToSend.append('end', formattedStart);
     
     // Append arrays as JSON strings
-    formDataToSend.append('sub_theme', JSON.stringify(formData.subthemes_input));
-    formDataToSend.append('work_shop', JSON.stringify(formData.workshops_input));
-    
-    // Format important dates as an array
+    formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
+    formDataToSend.append('workshops_input', JSON.stringify(formData.workshops_input));
     formDataToSend.append('important_date', JSON.stringify(formData.important_date));
     
-    // Only append flyer if it's a new file
+    // Add conference_id
+    formDataToSend.append('conference_id', conference.id.toString());
+    
+    // Handle flyer
     if (formData.flyer && formData.flyer.file.size > 0) {
       formDataToSend.append('flyer', formData.flyer.file);
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_conference/${conference.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_conference/1`, {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${bearerToken}`
@@ -459,17 +459,36 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
         body: formDataToSend
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update conference');
-      }
+      const responseText = await response.text();
+      console.log('Step 1 Response:', responseText);
       
-      const data = await response.json();
-      if (data.status === "success") {
-        setCurrentStep(2);
-        showToast.success('Basic details updated successfully');
-      } else {
-        showToast.error(data.message || 'Failed to update conference details');
+      try {
+        const data = JSON.parse(responseText);
+        console.log('Parsed response data:', data); // Debug log
+        
+        if (data.status === "success") {
+          // Get token from the data object
+          const token = data.data?.token || data.token;
+          console.log('Extracted token:', token); // Debug log
+          
+          if (!token) {
+            throw new Error('No token received in response');
+          }
+          
+          // Store the token in state
+          setStepOneToken(token);
+          
+          // Store token in localStorage as backup
+          localStorage.setItem('editConferenceToken', token);
+          
+          setCurrentStep(2);
+          showToast.success('Basic details updated successfully');
+        } else {
+          showToast.error(data.message || 'Failed to update conference details');
+        }
+      } catch (e) {
+        console.error('Error parsing response:', e);
+        showToast.error('Invalid response format');
       }
     } catch (error) {
       console.error('Error submitting step 1:', error);
@@ -480,25 +499,41 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
   };
 
   const handleStepTwoSubmit = async () => {
+    // Try to get token from state or localStorage
+    const token = stepOneToken || localStorage.getItem('editConferenceToken');
+    
+    if (!token) {
+      showToast.error('Token from step 1 is required. Please try again.');
+      setCurrentStep(1);
+      return;
+    }
+
     setIsLoading(true);
     const formDataToSend = new FormData();
     
+    // Add the token
+    formDataToSend.append('token', token);
+    
+    // Add media files
     formData.gallery.forEach(file => {
       if (file.file.size > 0) {
         formDataToSend.append('gallery[]', file.file);
       }
     });
+    
     formData.sponsors.forEach(file => {
       if (file.file.size > 0) {
         formDataToSend.append('sponsors[]', file.file);
       }
     });
+    
     formData.videos.forEach(file => {
       if (file.file.size > 0) {
         formDataToSend.append('videos[]', file.file);
       }
     });
     
+    // Add payment details
     formDataToSend.append('basic_naira', formData.basic_naira);
     formDataToSend.append('basic_usd', formData.basic_usd);
     formDataToSend.append('basic_package', JSON.stringify(formData.basic_package));
@@ -509,10 +544,11 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     formDataToSend.append('standard_usd', formData.standard_usd);
     formDataToSend.append('standard_package', JSON.stringify(formData.standard_package));
     
+    // Add speakers
     formDataToSend.append('speakers', JSON.stringify(selectedSpeakers));
-  
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_conference/${conference.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_conference/2`, {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${bearerToken}`
@@ -520,8 +556,15 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
         body: formDataToSend
       });
       
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log('Step 2 Response:', responseText);
+      
+      const data = JSON.parse(responseText);
       if (data.status === "success") {
+        // Clear stored token after successful submission
+        localStorage.removeItem('editConferenceToken');
+        setStepOneToken(null);
+        
         showToast.success('Conference updated successfully');
         onSuccess();
       } else {
@@ -529,7 +572,7 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
       }
     } catch (error) {
       console.error('Error submitting step 2:', error);
-      showToast.error('Failed to update conference details');
+      showToast.error(error instanceof Error ? error.message : 'Failed to update conference details');
     } finally {
       setIsLoading(false);
     }

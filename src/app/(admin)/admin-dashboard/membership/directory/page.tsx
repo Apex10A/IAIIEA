@@ -232,6 +232,76 @@ const Page = () => {
     }
     setIsAllSelected(!isAllSelected);
   };
+  const EditMemberModal = () => {
+    if (!currentMember) return null;
+  
+    const fields = [
+      { key: 'f_name', label: 'First Name' },
+      { key: 'm_name', label: 'Middle Name' },
+      { key: 'l_name', label: 'Last Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'phone', label: 'Phone Number' },
+      { key: 'country', label: 'Country' },
+      { key: 'institution', label: 'Institution' },
+      { key: 'whatsapp_no', label: 'WhatsApp Number' },
+      { key: 'area_of_specialization', label: 'Area of Specialization' },
+      { key: 'profession', label: 'Profession' },
+      { key: 'postal_addr', label: 'Postal Address' },
+      { key: 'residential_addr', label: 'Residential Address' },
+      { key: 'type', label: 'Member Type' }
+    ];
+  
+    return (
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[90%] max-w-3xl max-h-[90vh] overflow-y-auto">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Edit Member</h2>
+          <form onSubmit={handleEditMember} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {fields.map(({ key, label }) => (
+                <div key={key}>
+                  <label className="block text-sm font-medium mb-1 dark:text-gray-300">
+                    {label}
+                  </label>
+                  {key === 'type' ? (
+                    <select
+                      value={editFormData[key as keyof Member] || currentMember[key as keyof Member]}
+                      onChange={(e) => setEditFormData({...editFormData, [key]: e.target.value})}
+                      className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    >
+                      <option value="member">Member</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={key === 'email' ? 'email' : 'text'}
+                      value={editFormData[key as keyof Member] || currentMember[key as keyof Member]}
+                      onChange={(e) => setEditFormData({...editFormData, [key]: e.target.value})}
+                      className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
 
   // Loading state
   if (isLoading) {
@@ -256,7 +326,7 @@ const Page = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -279,8 +349,8 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <Table className="w-full">
+          <div className="overflow-x-auto bg-gray-50 dark:bg-gray-700">
+            <Table className="w-full ">
               <TableHeader>
                 <TableRow className="bg-gray-50 dark:bg-gray-700">
                   <TableHead className="w-[50px]">
@@ -291,20 +361,20 @@ const Page = () => {
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
                     />
                   </TableHead>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Country</TableHead>
-                  <TableHead>Institution</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Action</TableHead>
+                  <TableHead className='text-sm md:text-md'>ID</TableHead>
+                  <TableHead className='text-sm md:text-md'>Name</TableHead>
+                  <TableHead className='text-sm md:text-md'>Email</TableHead>
+                  <TableHead className='text-sm md:text-md'>Country</TableHead>
+                  <TableHead className='text-sm md:text-md'>Institution</TableHead>
+                  <TableHead className='text-sm md:text-md'>Type</TableHead>
+                  <TableHead className='text-sm md:text-md'>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentMembers.map((member) => (
                   <TableRow 
                     key={member.user_id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors "
                     onClick={() => router.push(`/admin-dashboard/membership/${member.user_id}`)}
                   >
                     <TableCell className="w-[50px]" onClick={(e) => e.stopPropagation()}>
@@ -312,25 +382,25 @@ const Page = () => {
                         type="checkbox" 
                         checked={selectedMembers.includes(member.user_id)}
                         onChange={() => handleMemberSelect(member.user_id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 "
                       />
                     </TableCell>
-                    <TableCell>{truncateText(member.user_id, 10)}</TableCell>
+                    <TableCell className='text-sm md:text-md'>{truncateText(member.user_id, 15)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <img 
                           src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${member.name}`} 
                           alt={`${member.name}'s avatar`} 
-                          className="w-8 h-8 rounded-full"
+                          className="w-8 h-8 rounded-full text-sm md:text-md"
                         />
-                        <span>{truncateText(member.name, 15)}</span>
+                        <span className='text-sm md:text-md'>{truncateText(member.name, 15)}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{truncateText(member.email, 20)}</TableCell>
-                    <TableCell>{member.country || 'Nigeria'}</TableCell>
-                    <TableCell>{truncateText(member.institution, 15)}</TableCell>
+                    <TableCell className='text-sm md:text-md'>{truncateText(member.email, 20)}</TableCell>
+                    <TableCell className='text-sm md:text-md'>{member.country || 'Nigeria'}</TableCell>
+                    <TableCell className='text-sm md:text-md'>{truncateText(member.institution, 15)}</TableCell>
                     <TableCell>
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                      <span className="px-2 py-1 text-sm md:text-md font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                         {member.type}
                       </span>
                     </TableCell>
@@ -344,7 +414,7 @@ const Page = () => {
                           }}
                           className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                         >
-                          <PencilIcon className="w-4 h-4" />
+                          <PencilIcon className="w-4 h-4 text-sm md:text-md" />
                         </button>
                         <AlertDialog.Root>
                           <AlertDialog.Trigger asChild>
@@ -352,7 +422,7 @@ const Page = () => {
                               onClick={(e) => e.stopPropagation()}
                               className="p-1 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
                             >
-                              <TrashIcon className="w-4 h-4" />
+                              <TrashIcon className="w-4 h-4 text-sm md:text-md" />
                             </button>
                           </AlertDialog.Trigger>
                           <AlertDialog.Portal>

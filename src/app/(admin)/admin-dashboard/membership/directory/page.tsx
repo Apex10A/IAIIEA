@@ -78,9 +78,6 @@ const Page = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentMember, setCurrentMember] = useState<Member | null>(null);
-  const [editFormData, setEditFormData] = useState<Partial<Member>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -149,49 +146,7 @@ const Page = () => {
     }
   };
 
-  // Edit member
-  const handleEditMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!bearerToken) {
-      setError('No authentication token found');
-      return;
-    }
 
-    try {
-      const response = await fetch(`${API_URL}/admin/edit_user_info/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${bearerToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: currentMember?.user_id,
-          ...editFormData
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to update member');
-      
-      showToast.success('Member updated successfully!');
-      
-      const updatedMembers = members.map(member => 
-        member.user_id === currentMember?.user_id 
-          ? { ...member, ...editFormData } 
-          : member
-      );
-
-      setMembers(updatedMembers);
-      setFilteredMembers(updatedMembers);
-      setIsEditModalOpen(false);
-      setCurrentMember(null);
-      setEditFormData({});
-    } catch (err) {
-      console.error('Error updating member:', err);
-      showToast.error('Failed to update member');
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    }
-  };
 
   // Effects
   useEffect(() => {
@@ -232,76 +187,7 @@ const Page = () => {
     }
     setIsAllSelected(!isAllSelected);
   };
-  const EditMemberModal = () => {
-    if (!currentMember) return null;
-  
-    const fields = [
-      { key: 'f_name', label: 'First Name' },
-      { key: 'm_name', label: 'Middle Name' },
-      { key: 'l_name', label: 'Last Name' },
-      { key: 'email', label: 'Email' },
-      { key: 'phone', label: 'Phone Number' },
-      { key: 'country', label: 'Country' },
-      { key: 'institution', label: 'Institution' },
-      { key: 'whatsapp_no', label: 'WhatsApp Number' },
-      { key: 'area_of_specialization', label: 'Area of Specialization' },
-      { key: 'profession', label: 'Profession' },
-      { key: 'postal_addr', label: 'Postal Address' },
-      { key: 'residential_addr', label: 'Residential Address' },
-      { key: 'type', label: 'Member Type' }
-    ];
-  
-    return (
-      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[90%] max-w-3xl max-h-[90vh] overflow-y-auto">
-          <h2 className="text-xl font-bold mb-4 dark:text-white">Edit Member</h2>
-          <form onSubmit={handleEditMember} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {fields.map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium mb-1 dark:text-gray-300">
-                    {label}
-                  </label>
-                  {key === 'type' ? (
-                    <select
-                      value={editFormData[key as keyof Member] || currentMember[key as keyof Member]}
-                      onChange={(e) => setEditFormData({...editFormData, [key]: e.target.value})}
-                      className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    >
-                      <option value="member">Member</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  ) : (
-                    <input
-                      type={key === 'email' ? 'email' : 'text'}
-                      value={editFormData[key as keyof Member] || currentMember[key as keyof Member]}
-                      onChange={(e) => setEditFormData({...editFormData, [key]: e.target.value})}
-                      className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  };
+
 
   // Loading state
   if (isLoading) {
@@ -406,16 +292,7 @@ const Page = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCurrentMember(member);
-                            setIsEditModalOpen(true);
-                          }}
-                          className="p-1 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                        >
-                          <PencilIcon className="w-4 h-4 text-sm md:text-md" />
-                        </button>
+                        
                         <AlertDialog.Root>
                           <AlertDialog.Trigger asChild>
                             <button
@@ -495,8 +372,7 @@ const Page = () => {
         </div>
       </div>
 
-      {/* Edit Modal */}
-      {isEditModalOpen && <EditMemberModal />}
+    
     </div>
   );
 };

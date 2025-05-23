@@ -1,12 +1,30 @@
-import NextAuth, { NextAuthOptions, User } from "next-auth";
+import NextAuth, { NextAuthOptions, User, Session, DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
 
 // Environment variables for API URLs
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Extend the built-in User type
+// Extend the built-in Session type
 declare module "next-auth" {
+  interface Session {
+    user: {
+      userType?: string;
+      token?: string;
+      userData?: UserData;
+    } & DefaultSession["user"]
+  }
+
   interface User {
+    userType?: string;
+    token?: string;
+    userData?: UserData;
+  }
+}
+
+// Extend JWT type
+declare module "next-auth/jwt" {
+  interface JWT {
     userType?: string;
     token?: string;
     userData?: UserData;
@@ -32,6 +50,7 @@ interface MemberLoginResponse {
   };
   error?: string;
   message?: string;
+  status?: string;
 }
 
 interface AdminLoginResponse {
@@ -40,10 +59,10 @@ interface AdminLoginResponse {
     token: string;
     name: string;
     email: string;
-    // Add other admin-specific fields here
   };
   error?: string;
   message?: string;
+  status?: string;
 }
 
 const authOptions: NextAuthOptions = {
@@ -58,7 +77,7 @@ const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.uid || !credentials?.password) {
-          return null;
+          throw new Error("Missing credentials");
         }
 
         try {
@@ -74,10 +93,14 @@ const authOptions: NextAuthOptions = {
             }),
           });
 
-          const data = await response.json() as MemberLoginResponse;
+          const data: MemberLoginResponse = await response.json();
 
-          if (!response.ok) {
-            throw new Error(data.error || data.message || "Member Login failed");
+          if (!response.ok || data.status === 'error') {
+            throw new Error(data.error || data.message || "Authentication failed");
+          }
+
+          if (!data.data?.token || !data.data?.user_data) {
+            throw new Error("Invalid response data");
           }
 
           return {
@@ -90,7 +113,7 @@ const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error("Member Authentication error:", error);
-          return null;
+          throw error;
         }
       }
     }),
@@ -105,7 +128,7 @@ const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Missing credentials");
         }
 
         try {
@@ -121,55 +144,75 @@ const authOptions: NextAuthOptions = {
             }),
           });
 
-          const data = await response.json() as AdminLoginResponse;
+          const data: AdminLoginResponse = await response.json();
 
-          if (!response.ok) {
-            throw new Error(data.error || data.message || "Admin Login failed");
+          if (!response.ok || data.status === 'error') {
+            throw new Error(data.error || data.message || "Authentication failed");
           }
 
-          // For admin login, we don't have the same UserData structure
+          if (!data.data?.token) {
+            throw new Error("Invalid response data");
+          }
+
           return {
             id: data.data.id,
             name: data.data.name,
             email: data.data.email,
             userType: 'ADMIN',
-            token: data.data.token,
-            // Don't include userData for admin
+            token: data.data.token
           };
         } catch (error) {
           console.error("Admin Authentication error:", error);
-          return null;
+          throw error;
         }
       }
     })
   ],
   
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.userType = user.userType;
-        token.token = user.token;
-        token.userData = user.userData;
+    async jwt({ token, user, account }) {
+      if (user && account) {
+        return {
+          ...token,
+          userType: user.userType,
+          token: user.token,
+          userData: user.userData
+        };
       }
       return token;
     },
     
-    async session({ session, token }) {
-      session.user.userType = token.userType;
-      session.user.token = token.token;
-      session.user.userData = token.userData;
-      return session;
+    async session({ session, token, user }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          userType: token.userType,
+          token: token.token,
+          userData: token.userData
+        }
+      };
     }
   },
   
   pages: {
     signIn: '/login',
-    // adminSignIn: '/admin/login'
+    error: '/auth/error',
+    signOut: '/auth/signout'
   },
   
   session: {
     strategy: 'jwt',
-  }
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+
+  debug: process.env.NODE_ENV === 'development',
+
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

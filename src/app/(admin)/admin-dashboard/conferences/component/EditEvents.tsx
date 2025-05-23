@@ -63,50 +63,79 @@ interface Speaker {
   picture?: string;
 }
 
-interface Conference {
+interface ConferenceDetails {
   id: number;
+  is_registered: boolean;
+  registered_plan: string;
   title: string;
   theme: string;
   venue: string;
-  start_date?: string;
-  start_time?: string;
-  end_date?: string;
-  end_time?: string;
-  sub_theme?: string[];
-  work_shop?: string[];
+  date: string;
+  start_date: string;
+  start_time: string;
+  sub_theme: string[];
+  work_shop: string[];
   important_date: string[];
-  flyer?: string;
-  gallery?: string[];
-  sponsors?: string[];
-  videos?: string[];
-  payments?: {
+  flyer: string;
+  gallery: string[];
+  sponsors: string[];
+  videos: string[];
+  status: string;
+  payments: {
+    early_bird_registration?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+    };
+    normal_registration?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+    };
+    late_registration?: {
+      virtual: { usd: string; naira: string };
+      physical: { usd: string; naira: string };
+    };
     basic?: {
-      physical?: {
-        naira?: string;
-        usd?: string;
-      };
+      virtual?: { usd: string; naira: string };
+      physical?: { usd: string; naira: string };
       package?: string[];
     };
     premium?: {
-      physical?: {
-        naira?: string;
-        usd?: string;
-      };
+      virtual?: { usd: string; naira: string };
+      physical?: { usd: string; naira: string };
       package?: string[];
     };
     standard?: {
-      physical?: {
-        naira?: string;
-        usd?: string;
-      };
+      virtual?: { usd: string; naira: string };
+      physical?: { usd: string; naira: string };
       package?: string[];
     };
   };
-  speakers?: Speaker[];
+  speakers: Array<{
+    name: string;
+    title: string;
+    portfolio: string;
+    picture: string;
+  }>;
+  resources: any[];
+  schedule: Array<{
+    schedule_id: number;
+    day: string;
+    activity: string;
+    facilitator: string;
+    start: string;
+    end: string;
+    venue: string;
+    posted: string;
+  }>;
+  meals: Array<{
+    meal_id: number;
+    name: string;
+    image: string;
+  }>;
 }
 
 interface EditConferenceModalProps {
-  conference: Conference;
+  conference: ConferenceDetails;
   onSuccess: () => void;
   trigger?: React.ReactNode;
 }
@@ -128,8 +157,9 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [isLoading, setIsLoading] = useState(false);
+  const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
 
- const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     theme: '',
     venue: '',
@@ -154,86 +184,101 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     selectedSpeakers: []
   });
 
+  // Fetch conference details
+  const fetchConferenceDetails = async (id: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch conference details');
+      
+      const data = await response.json();
+      if (data.status === "success") {
+        setConferenceDetails(data.data);
+        initializeFormData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching conference details:', error);
+      showToast.error('Failed to load conference details');
+    }
+  };
+
+  // Initialize form data from conference details
+  const initializeFormData = (details: ConferenceDetails) => {
+    const newFormData: FormData = {
+      title: details.title,
+      theme: details.theme,
+      venue: details.venue,
+      start: `${details.start_date}T${details.start_time}`,
+      end: `${details.start_date}T${details.start_time}`,
+      subthemes_input: details.sub_theme || [],
+      workshops_input: details.work_shop || [],
+      important_date: details.important_date || [],
+      flyer: details.flyer ? {
+        file: new File([], details.flyer.split('/').pop() || ''),
+        preview: details.flyer,
+        name: details.flyer.split('/').pop() || '',
+        size: 0,
+        type: 'image'
+      } : null,
+      gallery: (details.gallery || []).map(url => ({
+        file: new File([], url.split('/').pop() || 'gallery.jpg'),
+        preview: url,
+        name: url.split('/').pop() || 'gallery.jpg',
+        size: 0,
+        type: 'image'
+      })),
+      sponsors: (details.sponsors || []).map(url => ({
+        file: new File([], url.split('/').pop() || 'sponsor.jpg'),
+        preview: url,
+        name: url.split('/').pop() || 'sponsor.jpg',
+        size: 0,
+        type: 'image'
+      })),
+      videos: (details.videos || []).map(url => ({
+        file: new File([], url.split('/').pop() || 'video.mp4'),
+        preview: url,
+        name: url.split('/').pop() || 'video.mp4',
+        size: 0,
+        type: 'video'
+      })),
+      // Handle both payment structures
+      basic_naira: details.payments?.basic?.physical?.naira || 
+                  details.payments?.early_bird_registration?.physical?.naira || '',
+      basic_usd: details.payments?.basic?.physical?.usd || 
+                details.payments?.early_bird_registration?.physical?.usd || '',
+      basic_package: details.payments?.basic?.package || [],
+      premium_naira: details.payments?.premium?.physical?.naira || 
+                    details.payments?.normal_registration?.physical?.naira || '',
+      premium_usd: details.payments?.premium?.physical?.usd || 
+                  details.payments?.normal_registration?.physical?.usd || '',
+      premium_package: details.payments?.premium?.package || [],
+      standard_naira: details.payments?.standard?.physical?.naira || 
+                     details.payments?.late_registration?.physical?.naira || '',
+      standard_usd: details.payments?.standard?.physical?.usd || 
+                   details.payments?.late_registration?.physical?.usd || '',
+      standard_package: details.payments?.standard?.package || [],
+      selectedSpeakers: details.speakers.map(speaker => ({
+        speaker_id: availableSpeakers.find(s => s.name === speaker.name)?.speaker_id || 0,
+        occupation: speaker.portfolio
+      }))
+    };
+
+    console.log('Initialized flyer:', newFormData.flyer);
+    setFormData(newFormData);
+  };
+
+  // Fetch speakers and conference details when component mounts
   useEffect(() => {
     fetchSpeakers();
-
-    // Only initialize when conference data is available
-    if (conference) {
-      console.log('Initializing with conference data:', conference);
-      
-      const newFormData: Partial<FormData> = {
-        title: conference.title,
-        theme: conference.theme,
-        venue: conference.venue,
-        start: conference.start_date ? `${conference.start_date}T${conference.start_time || '00:00'}` : '',
-        end: conference.end_date ? `${conference.end_date}T${conference.end_time || '00:00'}` : '',
-        subthemes_input: Array.isArray(conference.sub_theme) ? conference.sub_theme : [],
-        workshops_input: conference.work_shop || [],
-        important_date: conference.important_date || [],
-        basic_naira: conference.payments?.basic?.physical?.naira || '',
-        basic_usd: conference.payments?.basic?.physical?.usd || '',
-        basic_package: conference.payments?.basic?.package || [],
-        premium_naira: conference.payments?.premium?.physical?.naira || '',
-        premium_usd: conference.payments?.premium?.physical?.usd || '',
-        premium_package: conference.payments?.premium?.package || [],
-        standard_naira: conference.payments?.standard?.physical?.naira || '',
-        standard_usd: conference.payments?.standard?.physical?.usd || '',
-        standard_package: conference.payments?.standard?.package || [],
-        selectedSpeakers: conference.speakers?.map(speaker => ({
-          speaker_id: speaker.speaker_id || 0,
-          occupation: speaker.portfolio || ''
-        })) || []
-      };
-
-      // Handle file fields
-      if (conference.flyer) {
-        newFormData.flyer = {
-          file: new File([], conference.flyer.split('/').pop() || 'flyer.jpg'),
-          preview: conference.flyer,
-          name: conference.flyer.split('/').pop() || 'flyer.jpg',
-          size: 0,
-          type: 'image'
-        };
-      }
-
-      if (conference.gallery?.length) {
-        newFormData.gallery = conference.gallery.map(url => ({
-          file: new File([], url.split('/').pop() || 'gallery.jpg'),
-          preview: url,
-          name: url.split('/').pop() || 'gallery.jpg',
-          size: 0,
-          type: 'image'
-        }));
-      }
-
-      if (conference.sponsors?.length) {
-        newFormData.sponsors = conference.sponsors.map(url => ({
-          file: new File([], url.split('/').pop() || 'sponsor.jpg'),
-          preview: url,
-          name: url.split('/').pop() || 'sponsor.jpg',
-          size: 0,
-          type: 'image'
-        }));
-      }
-
-      if (conference.videos?.length) {
-        newFormData.videos = conference.videos.map(url => ({
-          file: new File([], url.split('/').pop() || 'video.mp4'),
-          preview: url,
-          name: url.split('/').pop() || 'video.mp4',
-          size: 0,
-          type: 'video'
-        }));
-      }
-
-      setFormData(prev => ({
-        ...prev,
-        ...newFormData
-      }));
+    if (conference?.id) {
+      fetchConferenceDetails(conference.id);
     }
-  }, [conference]);
+  }, [conference?.id]);
 
-  // Cleanup function
   useEffect(() => {
     return () => {
       const { flyer, gallery, sponsors, videos } = formData;
@@ -244,17 +289,18 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     };
   }, [formData.flyer, formData.gallery, formData.sponsors, formData.videos]);
 
-useEffect(() => {
-  console.log('Current formData:', formData);
-}, [formData]);
-useEffect(() => {
-  console.log('Conference prop changed:', conference);
-  if (conference) {
-    console.log('Subthemes from API:', conference.sub_theme);
-    console.log('Workshops from API:', conference.work_shop);
-    console.log('Important dates from API:', conference.important_date);
-  }
-}, [conference]);
+  useEffect(() => {
+    console.log('Current formData:', formData);
+  }, [formData]);
+
+  useEffect(() => {
+    console.log('Conference prop changed:', conference);
+    if (conference) {
+      console.log('Subthemes from API:', conference.sub_theme);
+      console.log('Workshops from API:', conference.work_shop);
+      console.log('Important dates from API:', conference.important_date);
+    }
+  }, [conference]);
 
   const fetchSpeakers = async () => {
     try {
@@ -379,23 +425,27 @@ useEffect(() => {
     setIsLoading(true);
     const formDataToSend = new FormData();
     
+    // Basic fields
     formDataToSend.append('title', formData.title);
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
-    formDataToSend.append('start', formData.start);
-    formDataToSend.append('end', formData.end);
-    formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
-    formDataToSend.append('workshops_input', JSON.stringify(formData.workshops_input));
-    formDataToSend.append('important_date', JSON.stringify(
-      formData.important_date.reduce((acc, curr) => {
-        const [key, value] = curr.split(': ');
-        if (key && value) {
-          acc[key.trim()] = value.trim();
-        }
-        return acc;
-      }, {} as Record<string, string>)
-    ));
     
+    // Format dates properly
+    const startDateTime = new Date(formData.start);
+    const startDate = startDateTime.toISOString().split('T')[0];
+    const startTime = startDateTime.toTimeString().split(' ')[0];
+    
+    formDataToSend.append('start_date', startDate);
+    formDataToSend.append('start_time', startTime);
+    
+    // Append arrays as JSON strings
+    formDataToSend.append('sub_theme', JSON.stringify(formData.subthemes_input));
+    formDataToSend.append('work_shop', JSON.stringify(formData.workshops_input));
+    
+    // Format important dates as an array
+    formDataToSend.append('important_date', JSON.stringify(formData.important_date));
+    
+    // Only append flyer if it's a new file
     if (formData.flyer && formData.flyer.file.size > 0) {
       formDataToSend.append('flyer', formData.flyer.file);
     }
@@ -409,15 +459,21 @@ useEffect(() => {
         body: formDataToSend
       });
       
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update conference');
+      }
+      
       const data = await response.json();
       if (data.status === "success") {
         setCurrentStep(2);
+        showToast.success('Basic details updated successfully');
       } else {
         showToast.error(data.message || 'Failed to update conference details');
       }
     } catch (error) {
       console.error('Error submitting step 1:', error);
-      showToast.error('Failed to update conference details');
+      showToast.error(error instanceof Error ? error.message : 'Failed to update conference details');
     } finally {
       setIsLoading(false);
     }
@@ -693,14 +749,16 @@ useEffect(() => {
                           <Image
                             src={formData.flyer.preview}
                             alt="Flyer preview"
-                            fill
+                            width={192}
+                            height={256}
                             className="object-cover"
+                            unoptimized
                           />
                         </div>
                         <div className="mt-1 text-sm text-gray-600">
                           {formData.flyer.name} ({formData.flyer.size > 0 ? 
                             `${Math.round(formData.flyer.size / 1024)} KB` : 
-                            'Existing file'}
+                            'Existing file'})
                         </div>
                       </div>
                     )}
@@ -718,7 +776,7 @@ useEffect(() => {
                 <Button
                   onClick={handleStepOneSubmit}
                   disabled={isLoading}
-                  className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                  className="bg-[#203a87] hover:bg-[#1a2f6d] text-white"
                 >
                   {isLoading ? 'Processing...' : 'Next Step'}
                 </Button>
@@ -1038,114 +1096,6 @@ useEffect(() => {
                     
                     <div className="space-y-2">
                       <Label>Package Inclusions</Label>
-                      {formData.basic_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('basic', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('basic')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Standard Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Standard Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_naira}
-                          onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_usd}
-                          onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.standard_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('standard', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('standard')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Premium Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Premium Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.premium_naira}
-                          onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.premium_usd}
-                          onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
                       {formData.premium_package.map((item, index) => (
                         <div key={index} className="flex gap-2 items-center">
                           <Input
@@ -1234,7 +1184,7 @@ useEffect(() => {
                         </div>
                       );
                     })}
-                                      </div>
+                  </div>
                 </CardContent>
               </Card>
 

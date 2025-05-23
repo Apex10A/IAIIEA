@@ -13,7 +13,7 @@ import {
 } from '@/modules/ui/table';
 import { PencilIcon, TrashIcon, Search, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AddMemberModal from "./AddMemberModal"
+import AddMemberModal from "./components/AddMemberModal"
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useTheme } from 'next-themes';

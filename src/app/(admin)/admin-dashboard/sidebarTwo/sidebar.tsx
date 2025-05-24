@@ -113,7 +113,7 @@ const portalItems: NavItem[] = [
       },
         {
     name: 'Conference Schedule', 
-    path: '/admin-dashboard/conference/conference-schedule',
+    path: '/admin-dashboard/conferences/conference-schedule',
     icon: ConferenceScheduleIcon,
   },
       { 
@@ -183,16 +183,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
       <div className="w-full">
         <motion.div
           className={`
-            w-full flex items-center justify-between p-3 rounded-lg
-            transition-all duration-200 ease-in-out
+            w-full flex items-center justify-between px-3 py-2 rounded-lg
+            transition-all duration-150 ease-in-out
             ${isActive ? 'bg-white/10 dark:bg-gray-700 text-white' : 
               'text-gray-300 dark:text-gray-400 hover:bg-white/5 dark:hover:bg-gray-700/50'}
-            ${level > 0 ? 'ml-4' : ''}
+            ${level > 0 ? 'ml-3' : ''}
             cursor-pointer
-            border-l-4 ${isActive ? 'border-blue-500' : 'border-transparent'}
+            border-l-2 ${isActive ? 'border-blue-500' : 'border-transparent'}
           `}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           onClick={() => {
             if (hasSubItems) {
               toggleItem(item.name);
@@ -201,21 +201,21 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
             }
           }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className={`
-              w-6 h-6 flex items-center justify-center
+              w-5 h-5 flex items-center justify-center
               ${isActive ? 'text-blue-400' : 'text-gray-400'}
             `}>
               <IconComponent isActive={!!isActive} />
             </div>
-            <span className="text-sm font-medium">{item.name}</span>
+            <span className="text-xs font-medium">{item.name}</span>
           </div>
           {hasSubItems && (
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </motion.div>
           )}
         </motion.div>
@@ -228,7 +228,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
                 height: 'auto',
                 opacity: 1,
                 transition: {
-                  height: { duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] },
+                  height: { duration: 0.15, ease: 'easeOut' },
                   opacity: { duration: 0.1 }
                 }
               }}
@@ -236,8 +236,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
                 height: 0,
                 opacity: 0,
                 transition: {
-                  height: { duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] },
-                  opacity: { duration: 0.1 }
+                  height: { duration: 0.1, ease: 'easeIn' },
+                  opacity: { duration: 0.05 }
                 }
               }}
               className="overflow-hidden pl-2"
@@ -261,12 +261,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="h-full fixed mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-y-auto custom-scrollbar"
+      className="h-screen fixed mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-hidden"
     >
-      <div className="flex flex-col gap-1 p-4 pt-5">
-        {portalItems.map((item) => (
-          <NavItemComponent key={item.path} item={item} />
-        ))}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="flex flex-col gap-0.5 p-3">
+          {portalItems.map((item) => (
+            <NavItemComponent key={item.path} item={item} />
+          ))}
+        </div>
       </div>
     </motion.div>
   );

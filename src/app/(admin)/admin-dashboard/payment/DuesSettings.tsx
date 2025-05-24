@@ -131,8 +131,8 @@ const DuesSettings: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        <p className="text-muted-foreground ml-3">Loading dues information...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary text-black dark:text-white"></div>
+        <p className="text-muted-foreground ml-3 text-black dark:text-white">Loading dues information...</p>
       </div>
     );
   }
@@ -158,7 +158,7 @@ const DuesSettings: React.FC = () => {
       <Card className="bg-card text-card-foreground">
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <CardTitle className="text-xl font-semibold text-foreground">
+            <CardTitle className="text-xl font-semibold text-foreground dark:text-white text-gray-900">
               Membership & Dues Information
             </CardTitle>
             <div className="flex space-x-2">
@@ -266,7 +266,7 @@ const DuesSettings: React.FC = () => {
             <DialogContent className="sm:max-w-md bg-background">
               <DialogHeader>
                 <DialogTitle className="text-foreground">Update Dues Information</DialogTitle>
-                <DialogDescription className="text-muted-foreground">
+                <DialogDescription className="text-muted-foreground text-black dark:text-white">
                   Update the membership and dues information for both USD and NGN.
                 </DialogDescription>
               </DialogHeader>

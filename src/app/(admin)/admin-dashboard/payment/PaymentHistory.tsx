@@ -311,7 +311,7 @@ const PaymentHistory: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        <p className="text-gray-500">Loading payment history...</p>
+        <p className="text-muted-foreground">Loading payment history...</p>
       </div>
     );
   }
@@ -344,18 +344,18 @@ const PaymentHistory: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Payment History</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-black dark:text-white">Payment History</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">
             {filteredPayments.length} {filteredPayments.length === 1 ? 'payment' : 'payments'} found
           </p>
         </div>
         
         {/* Search */}
         <div className="relative w-full md:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
           <Input
             placeholder="Search payments..."
-            className="pl-10"
+            className="pl-10 bg-white dark:bg-gray-900 text-black dark:text-white border-border"
             value={filters.searchQuery}
             onChange={(e) => {
               setFilters(prev => ({...prev, searchQuery: e.target.value}));
@@ -364,7 +364,7 @@ const PaymentHistory: React.FC = () => {
           />
           {filters.searchQuery && (
             <X 
-              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
               onClick={() => {
                 setFilters(prev => ({...prev, searchQuery: ''}));
                 applyFilters();
@@ -374,68 +374,79 @@ const PaymentHistory: React.FC = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="rounded-lg border p-4 space-y-4">
-        <h2 className="text-lg font-medium">Filters</h2>
+      {/* Filters Card */}
+      <div className="rounded-lg border border-border dark:border-gray-600 bg-white dark:bg-gray-800 p-6">
+        <h2 className="text-lg font-medium text-black dark:text-white mb-4">Filters</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Date Range</label>
+            <label className="text-sm font-medium text-black dark:text-white">Date Range</label>
             <div className="grid grid-cols-2 gap-2">
               <Input 
                 type="date" 
                 value={filters.dateFrom}
                 onChange={(e) => setFilters(prev => ({...prev, dateFrom: e.target.value}))}
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
               />
               <Input 
                 type="date" 
                 value={filters.dateTo}
                 onChange={(e) => setFilters(prev => ({...prev, dateTo: e.target.value}))}
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
               />
             </div>
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium">Amount Range</label>
+            <label className="text-sm font-medium text-black dark:text-white">Amount Range</label>
             <div className="grid grid-cols-2 gap-2">
               <Input 
                 type="number" 
                 value={filters.minAmount}
                 onChange={(e) => setFilters(prev => ({...prev, minAmount: e.target.value}))}
                 placeholder="Min"
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
               />
               <Input 
                 type="number" 
                 value={filters.maxAmount}
                 onChange={(e) => setFilters(prev => ({...prev, maxAmount: e.target.value}))}
                 placeholder="Max"
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
               />
             </div>
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium">Payment Type</label>
+            <label className="text-sm font-medium text-black dark:text-white">Payment Type</label>
             <Select 
               value={filters.paymentType}
               onValueChange={(value) => setFilters(prev => ({...prev, paymentType: value}))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-white dark:bg-gray-900 text-black dark:text-white border-border">
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
+              <SelectContent className="bg-white dark:bg-gray-900">
+                <SelectItem value="all" className="text-black dark:text-white">All types</SelectItem>
                 {paymentTypes.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                  <SelectItem key={type} value={type} className="text-black dark:text-white">{type}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
         
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={resetFilters}>
+        <div className="flex justify-end gap-2 pt-4">
+          <Button 
+            variant="outline" 
+            onClick={resetFilters}
+            className="text-black dark:text-white border-border dark:border-gray-600"
+          >
             Reset
           </Button>
-          <Button onClick={applyFilters}>
+          <Button 
+            onClick={applyFilters}
+            className="bg-primary hover:bg-primary/90 text-black dark:text-white"
+          >
             Apply Filters
           </Button>
         </div>
@@ -443,19 +454,19 @@ const PaymentHistory: React.FC = () => {
 
       {/* Payment History Table */}
       {filteredPayments.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <Info className="mx-auto h-8 w-8 text-muted-foreground" />
-          <h3 className="mt-2 text-lg font-medium">No payments found</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border p-8 text-center bg-white dark:bg-gray-900">
+          <Info className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
+          <h3 className="mt-2 text-lg font-medium text-black dark:text-white">No payments found</h3>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
             Try adjusting your filters or search query
           </p>
         </div>
       ) : (
-        <div className="rounded-lg border overflow-hidden">
+        <div className="rounded-lg border border-border overflow-hidden bg-white dark:bg-gray-900 dark:border-gray-700">
           <div className="relative overflow-x-auto">
             <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
+              <TableHeader>
+                <TableRow className="bg-gray-50 dark:bg-gray-800">
                   <TableHead className="w-[40px]">
                     <input 
                       type="checkbox" 
@@ -464,18 +475,18 @@ const PaymentHistory: React.FC = () => {
                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                     />
                   </TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Payment ID</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Date</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-black dark:text-white">Name</TableHead>
+                  <TableHead className="text-black dark:text-white">Email</TableHead>
+                  <TableHead className="text-black dark:text-white">Type</TableHead>
+                  <TableHead className="text-black dark:text-white">Payment ID</TableHead>
+                  <TableHead className="text-right text-black dark:text-white">Amount</TableHead>
+                  <TableHead className="text-right text-black dark:text-white">Date</TableHead>
+                  <TableHead className="text-black dark:text-white">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedPayments.map((payment) => (
-                  <TableRow key={payment.payment_id} className="hover:bg-muted/50">
+                  <TableRow key={payment.payment_id} className="hover:bg-gray-50 dark:hover:bg-gray-800 border-t border-border">
                     <TableCell>
                       <input 
                         type="checkbox" 
@@ -484,24 +495,24 @@ const PaymentHistory: React.FC = () => {
                         className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-black dark:text-white">
                       {payment.name}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-gray-600 dark:text-gray-300">
                       {payment.email}
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+                      <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-800 px-2 py-1 text-xs font-medium text-black dark:text-white">
                         {payment.payment_type}
                       </span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground font-mono text-sm">
+                    <TableCell className="text-gray-600 dark:text-gray-300 font-mono text-sm">
                       {payment.payment_id}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
+                    <TableCell className="text-right font-medium text-black dark:text-white">
                       {formatCurrency(payment.amount, payment.currency)}
                     </TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">
+                    <TableCell className="text-right text-sm text-gray-600 dark:text-gray-300">
                       {formatDate(payment.date)}
                     </TableCell>
                     <TableCell>
@@ -509,6 +520,7 @@ const PaymentHistory: React.FC = () => {
                         size="sm" 
                         variant="ghost" 
                         onClick={() => openPaymentDetails(payment)}
+                        className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                       >
                         View
                       </Button>
@@ -520,12 +532,12 @@ const PaymentHistory: React.FC = () => {
           </div>
           
           {/* Pagination */}
-          <div className="border-t px-4 py-3">
+          <div className="border-t border-border px-4 py-3 bg-white dark:bg-gray-900">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-sm text-muted-foreground">
-                Showing <span className="font-medium">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
-                <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredPayments.length)}</span> of{' '}
-                <span className="font-medium">{filteredPayments.length}</span> payments
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Showing <span className="font-medium text-black dark:text-white">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
+                <span className="font-medium text-black dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredPayments.length)}</span> of{' '}
+                <span className="font-medium text-black dark:text-white">{filteredPayments.length}</span> payments
               </div>
               
               <div className="flex items-center space-x-2">
@@ -534,6 +546,7 @@ const PaymentHistory: React.FC = () => {
                   size="sm"
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
+                  className="text-black dark:text-white border-border"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -547,6 +560,7 @@ const PaymentHistory: React.FC = () => {
                   size="sm"
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
+                  className="text-black dark:text-white border-border"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -559,7 +573,7 @@ const PaymentHistory: React.FC = () => {
       {/* Payment Details Dialog */}
       <AnimatePresence>
         <Dialog open={!!selectedPaymentDetail} onOpenChange={closePaymentDetails}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border border-border">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -571,44 +585,44 @@ const PaymentHistory: React.FC = () => {
               }}
             >
               <DialogHeader>
-                <DialogTitle>Payment Details</DialogTitle>
+                <DialogTitle className="text-black dark:text-white">Payment Details</DialogTitle>
               </DialogHeader>
               
               {selectedPaymentDetail && (
                 <div className="space-y-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-medium">{selectedPaymentDetail.name}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Name</p>
+                      <p className="font-medium text-black dark:text-white">{selectedPaymentDetail.name}</p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium">{selectedPaymentDetail.email}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Email</p>
+                      <p className="font-medium text-black dark:text-white">{selectedPaymentDetail.email}</p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-muted-foreground">Payment Type</p>
-                      <p className="font-medium">{selectedPaymentDetail.payment_type}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Payment Type</p>
+                      <p className="font-medium text-black dark:text-white">{selectedPaymentDetail.payment_type}</p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-muted-foreground">Amount</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Amount</p>
+                      <p className="font-medium text-black dark:text-white">
                         {formatCurrency(selectedPaymentDetail.amount, selectedPaymentDetail.currency)}
                       </p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-muted-foreground">Payment ID</p>
-                      <p className="font-medium font-mono text-sm">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Payment ID</p>
+                      <p className="font-medium font-mono text-sm text-black dark:text-white">
                         {selectedPaymentDetail.payment_id}
                       </p>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-muted-foreground">Date</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Date</p>
+                      <p className="font-medium text-black dark:text-white">
                         {formatDate(selectedPaymentDetail.date)}
                       </p>
                     </div>

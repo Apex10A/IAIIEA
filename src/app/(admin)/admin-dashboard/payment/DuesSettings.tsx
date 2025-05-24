@@ -31,24 +31,23 @@ interface DuesData {
   institution_membership_fee_naira: number;
 }
 
-const DuesSettings: React.FC = () => {
-  // Session hook for authorization
-  const { data: session, status } = useSession();
+interface UserData {
+  token?: string;
+  userData?: {
+    token?: string;
+  };
+}
 
-  // State for managing dues data
+const DuesSettings: React.FC = () => {
+  const { data: session, status } = useSession();
   const [duesData, setDuesData] = useState<DuesData | null>(null);
   const [editData, setEditData] = useState<DuesData | null>(null);
-  
-  // State for managing loading and error states
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-
-  // State for selected currency
   const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD');
 
-  // Utility function to format currency
   const formatCurrency = (amount: number, currencyCode: 'USD' | 'NGN') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -57,11 +56,9 @@ const DuesSettings: React.FC = () => {
   };
   
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const bearerToken = (session?.user as UserData)?.token || (session?.user as UserData)?.userData?.token;
 
-  // Fetch dues data
   const fetchDuesData = async () => {
-    // Check if session and token are available
     if (status !== 'authenticated' || !session?.user) {
       setError('Not authenticated');
       setIsLoading(false);
@@ -95,7 +92,6 @@ const DuesSettings: React.FC = () => {
     fetchDuesData();
   }, [session, status]);
 
-  // Handle input change for edit form
   const handleInputChange = (field: keyof DuesData, value: string) => {
     if (!editData) return;
     
@@ -106,7 +102,6 @@ const DuesSettings: React.FC = () => {
     });
   };
 
-  // Handle form submission for updating dues
   const handleUpdateDues = async () => {
     if (!editData || !bearerToken) return;
     
@@ -133,147 +128,145 @@ const DuesSettings: React.FC = () => {
     }
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-gray-500">Loading dues information...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground ml-3">Loading dues information...</p>
       </div>
     );
   }
 
-  // Render authentication error
   if (status === 'unauthenticated' || error === 'Not authenticated') {
     return (
-      <div className="bg-red-50 p-4 rounded-md">
-        <p className="text-red-600">Please log in to view dues information.</p>
+      <div className="rounded-lg bg-destructive/10 p-6 text-center">
+        <p className="text-destructive">Please log in to view dues information.</p>
       </div>
     );
   }
 
-  // Render other error states
   if (error || !duesData) {
     return (
-      <div className="bg-red-50 p-4 rounded-md">
-        <p className="text-red-600">Error: {error || 'Unable to load dues information'}</p>
+      <div className="rounded-lg bg-destructive/10 p-6 text-center">
+        <p className="text-destructive">Error: {error || 'Unable to load dues information'}</p>
       </div>
     );
   }
 
   return (
-    <div>
-      <Card>
+    <div className="space-y-6">
+      <Card className="bg-card text-card-foreground">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Membership & Dues Information</CardTitle>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <CardTitle className="text-xl font-semibold text-foreground">
+              Membership & Dues Information
+            </CardTitle>
             <div className="flex space-x-2">
-              <button 
-                className={`px-4 py-2 rounded ${
-                  currency === 'USD' 
-                    ? 'bg-[#203a87] text-white' 
-                    : 'bg-gray-200 text-gray-700'
-                }`}
+              <Button 
+                variant={currency === 'USD' ? 'default' : 'outline'}
                 onClick={() => setCurrency('USD')}
+                size="sm"
               >
                 USD
-              </button>
-              <button 
-                className={`px-4 py-2 rounded ${
-                  currency === 'NGN' 
-                    ? 'bg-[#203a87] text-white' 
-                    : 'bg-gray-200 text-gray-700'
-                }`}
+              </Button>
+              <Button 
+                variant={currency === 'NGN' ? 'default' : 'outline'}
                 onClick={() => setCurrency('NGN')}
+                size="sm"
               >
                 NGN
-              </button>
+              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="membership">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="membership">Membership Fees</TabsTrigger>
-              <TabsTrigger value="additional">Additional Fees</TabsTrigger>
+          <Tabs defaultValue="membership" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="membership" className="text-sm">Membership Fees</TabsTrigger>
+              <TabsTrigger value="additional" className="text-sm">Additional Fees</TabsTrigger>
             </TabsList>
             <TabsContent value="membership">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Fee</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Individual Membership</TableCell>
-                    <TableCell className="text-right">
-                      {currency === 'USD'
-                        ? formatCurrency(duesData.individual_membership_fee_usd, 'USD')
-                        : formatCurrency(duesData.individual_membership_fee_naira, 'NGN')}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Institutional Membership</TableCell>
-                    <TableCell className="text-right">
-                      {currency === 'USD'
-                        ? formatCurrency(duesData.institution_membership_fee_usd, 'USD')
-                        : formatCurrency(duesData.institution_membership_fee_naira, 'NGN')}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <div className="rounded-md border bg-card">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-muted/50">
+                      <TableHead className="w-[50%] text-foreground">Type</TableHead>
+                      <TableHead className="text-right text-foreground">Fee</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="text-foreground">Individual Membership</TableCell>
+                      <TableCell className="text-right text-foreground">
+                        {currency === 'USD'
+                          ? formatCurrency(duesData.individual_membership_fee_usd, 'USD')
+                          : formatCurrency(duesData.individual_membership_fee_naira, 'NGN')}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-foreground">Institutional Membership</TableCell>
+                      <TableCell className="text-right text-foreground">
+                        {currency === 'USD'
+                          ? formatCurrency(duesData.institution_membership_fee_usd, 'USD')
+                          : formatCurrency(duesData.institution_membership_fee_naira, 'NGN')}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
             </TabsContent>
             <TabsContent value="additional">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Fee</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Annual Dues</TableCell>
-                    <TableCell className="text-right">
-                      {currency === 'USD'
-                        ? formatCurrency(duesData.annual_dues_usd, 'USD')
-                        : formatCurrency(duesData.annual_dues_naira, 'NGN')}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Vetting Fee</TableCell>
-                    <TableCell className="text-right">
-                      {currency === 'USD'
-                        ? formatCurrency(duesData.vetting_fee_usd, 'USD')
-                        : formatCurrency(duesData.vetting_fee_naira, 'NGN')}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Publication Fee</TableCell>
-                    <TableCell className="text-right">
-                      {currency === 'USD'
-                        ? formatCurrency(duesData.publication_fee_usd, 'USD')
-                        : formatCurrency(duesData.publication_fee_naira, 'NGN')}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <div className="rounded-md border bg-card">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-muted/50">
+                      <TableHead className="w-[50%] text-foreground">Type</TableHead>
+                      <TableHead className="text-right text-foreground">Fee</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="text-foreground">Annual Dues</TableCell>
+                      <TableCell className="text-right text-foreground">
+                        {currency === 'USD'
+                          ? formatCurrency(duesData.annual_dues_usd, 'USD')
+                          : formatCurrency(duesData.annual_dues_naira, 'NGN')}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-foreground">Vetting Fee</TableCell>
+                      <TableCell className="text-right text-foreground">
+                        {currency === 'USD'
+                          ? formatCurrency(duesData.vetting_fee_usd, 'USD')
+                          : formatCurrency(duesData.vetting_fee_naira, 'NGN')}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="text-foreground">Publication Fee</TableCell>
+                      <TableCell className="text-right text-foreground">
+                        {currency === 'USD'
+                          ? formatCurrency(duesData.publication_fee_usd, 'USD')
+                          : formatCurrency(duesData.publication_fee_naira, 'NGN')}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-end pt-6">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#203a87] text-white">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Dues
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-background">
               <DialogHeader>
-                <DialogTitle>Update Dues Information</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-foreground">Update Dues Information</DialogTitle>
+                <DialogDescription className="text-muted-foreground">
                   Update the membership and dues information for both USD and NGN.
                 </DialogDescription>
               </DialogHeader>
@@ -376,7 +369,7 @@ const DuesSettings: React.FC = () => {
                   Cancel
                 </Button>
                 <Button 
-                  className="bg-[#203a87] text-white" 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground" 
                   onClick={handleUpdateDues}
                   disabled={isUpdating}
                 >

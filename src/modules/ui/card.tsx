@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50',
+      'rounded-lg border border-border dark:border-gray-700 bg-white dark:bg-gray-900 text-black dark:text-white shadow-sm',
       className
     )}
     {...props}
@@ -23,7 +23,10 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-1.5 p-6', className)}
+    className={cn(
+      'flex flex-col space-y-1.5 p-6 border-b border-border dark:border-gray-700',
+      className
+    )}
     {...props}
   />
 ))
@@ -35,7 +38,10 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('font-semibold leading-none tracking-tight', className)}
+    className={cn(
+      'text-lg font-semibold leading-none tracking-tight text-black dark:text-white',
+      className
+    )}
     {...props}
   />
 ))
@@ -47,7 +53,10 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-neutral-500 dark:text-neutral-400', className)}
+    className={cn(
+      'text-sm text-gray-600 dark:text-gray-300',
+      className
+    )}
     {...props}
   />
 ))
@@ -57,7 +66,14 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  <div 
+    ref={ref} 
+    className={cn(
+      'p-6 pt-0 text-black dark:text-white',
+      className
+    )} 
+    {...props} 
+  />
 ))
 CardContent.displayName = 'CardContent'
 
@@ -67,7 +83,10 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center p-6 pt-0', className)}
+    className={cn(
+      'flex items-center p-6 pt-0 border-t border-border dark:border-gray-700 mt-6',
+      className
+    )}
     {...props}
   />
 ))

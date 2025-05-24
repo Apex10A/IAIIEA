@@ -1,10 +1,9 @@
-
 "use client"
 import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import PaymentHistory from './PaymentHistory'
 import DuesSettings from './DuesSettings';
-import   PortalAccessWrapper   from '@/components/ProtectedRoute';
+import PortalAccessWrapper from '@/components/ProtectedRoute';
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 
 const Page = () => {
@@ -13,29 +12,23 @@ const Page = () => {
   const renderContent = () => {
     switch (selectedSection) {
       case 'Payment History':
-        return (
-          <div>
-            <PaymentHistory />
-          </div>
-        );
+        return <PaymentHistory />;
       case 'Dues Settings':
-        return (
-          <div>
-            <DuesSettings />
-          </div>
-        );
+        return <DuesSettings />;
       default:
         return null;
     }
   };
 
   return (
-   
-    <div className='p-6'>
-       <div className='bg-gray-200 px-5 py-3 mb-6 mt-10'>
-        <h1 className='text-xl md:text-2xl text-gray-700'>Payment History</h1>
+    <div className='p-4 md:p-6 lg:p-8 min-h-screen bg-background'>
+      <div className='px-4 py-3 mb-6 mt-6 md:mt-10 shadow-sm'>
+        <h1 className='text-xl md:text-2xl font-semibold text-black dark:text-white'>
+          {selectedSection}
+        </h1>
       </div>
-      <div>
+      
+      <div className="mb-6">
         <ButtonProp
           options={['Payment History', 'Dues Settings']}
           selectedSection={selectedSection}
@@ -43,8 +36,7 @@ const Page = () => {
         />
       </div>
 
-      <div className='py-10'>
-        {/* Render the content based on the selected section */}
+      <div className='py-6 md:py-10'>
         {renderContent()}
       </div>
     </div>

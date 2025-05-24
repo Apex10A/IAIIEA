@@ -28,11 +28,15 @@ const Page = () => {
   };
 
   return (
-    <div className='p-6'>
-      <div className='bg-gray-200 px-5 py-3 mb-6 '>
-        <h1 className='text-xl md:text-2xl text-gray-700'>OPPORTUNITIES</h1>
+    <div className='p-6 dark:bg-gray-900 min-h-screen'>
+      <div className='bg-gray-100 dark:bg-gray-800 px-5 py-4 mb-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
+        <h1 className='text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100'>OPPORTUNITIES</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Manage announcements and job opportunities
+        </p>
       </div>
-      <div>
+      
+      <div className="mb-6">
         <ButtonProp
           options={['Announcement', 'Job Opportunity']}
           selectedSection={selectedSection}
@@ -40,8 +44,7 @@ const Page = () => {
         />
       </div>
 
-      <div className='py-10'>
-        {/* Render the content based on the selected section */}
+      <div className='py-6'>
         {renderContent()}
       </div>
     </div>

@@ -4,6 +4,7 @@ import { SkeletonLoader } from './SkeletonLoader';
 import { UserDataType } from '@/app/(members-dashboard)/members-dashboard/dash/types';
 import { CheckCircle, AlertCircle, Loader2, Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
 import Calendar from "./calendar";
+import { useSession } from "next-auth/react";
 
 interface Event {
   id: number;
@@ -15,6 +16,9 @@ interface Event {
   is_registered?: boolean;
   start_date?: string;
   start_time?: string;
+  registered_plan?: {
+    [key: string]: number;
+  };
 }
 
 interface CalendarEvent {
@@ -37,6 +41,7 @@ interface DashboardContentProps {
 }
 
 export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error }) => {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
   const [conferences, setConferences] = useState<Event[]>([]);
@@ -49,43 +54,154 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
       try {
         setIsLoading(true);
         
+        // Get the bearer token from session
+        const token = session?.user?.token;
+        
+        if (!token) {
+          console.log('Session data:', session); // Debug log
+          throw new Error("No authentication token found. Please log in again.");
+        }
+
+        const headers = {
+          'Authorization': `Bearer ${token}`
+        };
+
         // Fetch conferences
-        const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
-        const confData = await confResponse.json();
-        if (confData.status === 'success') {
-          const incomingConfs = confData.data.filter((event: Event) => event.status === 'Incoming');
-          setConferences(incomingConfs);
-          // Fetch registration status for each conference
-          await checkRegistrationStatus(incomingConfs, 'conference');
-        }
-
-        // Fetch seminars
-        const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
-        const semData = await semResponse.json();
-        if (semData.status === 'success') {
-          const incomingSems = semData.data.filter((event: Event) => event.status === 'Incoming');
-          setSeminars(incomingSems);
-          // Fetch registration status for each seminar
-          await checkRegistrationStatus(incomingSems, 'seminar');
-        }
-
-        // Fetch calendar events
-        const year = new Date().getFullYear();
-        const calResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/anual_calendar/${year}`);
-        const calData = await calResponse.json();
-        if (calData.status === 'success') {
-          const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-          const monthData = calData.data.find((month: any) => month.title.includes(currentMonth));
-          if (monthData) {
-            setCalendarEvents(monthData.days);
+        try {
+          const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`, {
+            headers
+          });
+          
+          if (!confResponse.ok) {
+            throw new Error(`HTTP error! status: ${confResponse.status}`);
           }
+          
+          const confData = await confResponse.json();
+          console.log('Initial conferences data:', confData);
+          
+          if (confData.status === 'success') {
+            const incomingConfs = confData.data.filter((event: Event) => event.status === 'Incoming');
+            console.log('Filtered incoming conferences:', incomingConfs);
+            
+            // First set the basic conference data
+            setConferences(incomingConfs);
+            
+            // Then fetch detailed data for each conference
+            for (const conf of incomingConfs) {
+              try {
+                const detailsResponse = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conf.id}`,
+                  { headers }
+                );
+                
+                if (!detailsResponse.ok) {
+                  console.error(`Failed to fetch details for conference ${conf.id}:`, detailsResponse.status);
+                  continue;
+                }
+                
+                const detailsData = await detailsResponse.json();
+                console.log(`Detailed data for conference ${conf.id}:`, detailsData);
+
+                if (detailsData.status === 'success') {
+                  setConferences(prev => prev.map(existingConf => 
+                    existingConf.id === conf.id ? {
+                      ...existingConf,
+                      is_registered: detailsData.data.is_registered,
+                      registered_plan: detailsData.data.registered_plan,
+                      theme: detailsData.data.theme,
+                      start_date: detailsData.data.start_date,
+                      start_time: detailsData.data.start_time
+                    } : existingConf
+                  ));
+                }
+              } catch (error) {
+                console.error(`Error fetching details for conference ${conf.id}:`, error);
+              }
+            }
+          }
+        } catch (confError) {
+          console.error("Error fetching conferences:", confError);
+          setLocalError(confError instanceof Error ? 
+            `Failed to load conferences: ${confError.message}` : 
+            "Failed to load conferences: Network error"
+          );
+        }
+
+        // Fetch seminars with error handling
+        try {
+          const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`, {
+            headers
+          });
+          
+          if (!semResponse.ok) {
+            throw new Error(`HTTP error! status: ${semResponse.status}`);
+          }
+          
+          const semData = await semResponse.json();
+          if (semData.status === 'success') {
+            const incomingSems = semData.data.filter((event: Event) => event.status === 'Incoming');
+            setSeminars(incomingSems);
+            
+            // Fetch details for each seminar
+            for (const sem of incomingSems) {
+              try {
+                const detailsResponse = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${sem.id}`,
+                  { headers }
+                );
+                
+                if (!detailsResponse.ok) {
+                  console.error(`Failed to fetch details for seminar ${sem.id}:`, detailsResponse.status);
+                  continue;
+                }
+                
+                const detailsData = await detailsResponse.json();
+                if (detailsData.status === 'success') {
+                  setSeminars(prev => prev.map(existingSem => 
+                    existingSem.id === sem.id ? {
+                      ...existingSem,
+                      is_registered: detailsData.data.is_registered,
+                      registered_plan: detailsData.data.registered_plan
+                    } : existingSem
+                  ));
+                }
+              } catch (error) {
+                console.error(`Error fetching details for seminar ${sem.id}:`, error);
+              }
+            }
+          }
+        } catch (semError) {
+          console.error("Error fetching seminars:", semError);
+        }
+
+        // Fetch calendar events with error handling
+        try {
+          const year = new Date().getFullYear();
+          const calResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/anual_calendar/${year}`, {
+            headers
+          });
+          
+          if (!calResponse.ok) {
+            throw new Error(`HTTP error! status: ${calResponse.status}`);
+          }
+          
+          const calData = await calResponse.json();
+          if (calData.status === 'success') {
+            const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+            const monthData = calData.data.find((month: any) => month.title.includes(currentMonth));
+            if (monthData) {
+              setCalendarEvents(monthData.days);
+            }
+          }
+        } catch (calError) {
+          console.error("Error fetching calendar events:", calError);
         }
 
         setIsLoading(false);
       } catch (err) {
-        setLocalError("Failed to load dashboard data");
+        console.error("Main error in fetchData:", err);
+        setLocalError(err instanceof Error ? err.message : "Failed to load dashboard data");
         setIsLoading(false);
-        console.error("Error fetching dashboard data:", err);
       }
     };
 
@@ -97,16 +213,44 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
             ? `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${event.id}`
             : `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${event.id}`;
           
-          const response = await fetch(endpoint);
+          // Add cache-busting query parameter
+          const cacheBuster = new Date().getTime();
+          const response = await fetch(`${endpoint}?_=${cacheBuster}`, {
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          });
+          
           const data = await response.json();
+          console.log(`Registration status for ${type} ${event.id}:`, data);
           
           if (data.status === 'success') {
-            setConferences(prev => prev.map(conf => 
-              conf.id === event.id ? { ...conf, is_registered: data.data.is_registered } : conf
-            ));
-            setSeminars(prev => prev.map(sem => 
-              sem.id === event.id ? { ...sem, is_registered: data.data.is_registered } : sem
-            ));
+            if (type === 'conference') {
+              setConferences(prev => {
+                const updated = prev.map(conf => 
+                  conf.id === event.id ? { 
+                    ...conf, 
+                    is_registered: data.data.is_registered,
+                    registered_plan: data.data.registered_plan
+                  } : conf
+                );
+                console.log('Updated conferences:', updated);
+                return updated;
+              });
+            } else {
+              setSeminars(prev => {
+                const updated = prev.map(sem => 
+                  sem.id === event.id ? { 
+                    ...sem, 
+                    is_registered: data.data.is_registered,
+                    registered_plan: data.data.registered_plan
+                  } : sem
+                );
+                console.log('Updated seminars:', updated);
+                return updated;
+              });
+            }
           }
         } catch (err) {
           console.error(`Error checking registration for ${type} ${event.id}:`, err);
@@ -117,7 +261,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
     };
 
     fetchData();
-  }, []);
+  }, [session]);
 
   const getStatusIcon = (status: string) => {
     return status.toLowerCase() === 'complete' ? (
@@ -256,9 +400,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                       {loadingStatus[conf.id] ? (
                         <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                       ) : (
-                        <span className={`text-xs px-2 py-1 rounded-full ${conf.is_registered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                          {conf.is_registered ? 'Registered' : 'Not Registered'}
-                        </span>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${conf.is_registered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {conf.is_registered ? 'Registered' : 'Not Registered'}
+                          </span>
+                          {conf.is_registered && conf.registered_plan && (
+                            <span className="text-xs text-gray-600">
+                              {Object.keys(conf.registered_plan)[0]}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                     <p className="text-sm text-gray-600 mt-2 line-clamp-2">{conf.theme}</p>

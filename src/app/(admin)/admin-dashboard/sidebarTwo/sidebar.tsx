@@ -131,12 +131,12 @@ const portalItems: NavItem[] = [
     subItems: [
       { 
         name: 'Seminar Participants', 
-        path: '/admin-dashboard/training/seminar-participants',
+        path: '/admin-dashboard/training/participants',
         icon: MembersIcon 
       },
       { 
         name: 'Seminars', 
-        path: '/admin-dashboard/training/seminars',
+        path: '/admin-dashboard/training',
         icon: ResourcesIcon 
       },
       { 

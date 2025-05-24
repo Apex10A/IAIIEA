@@ -99,7 +99,7 @@ export default function DashboardLayout({
         )}
 
         {/* Page Content */}
-        <div className="flex-grow pt-20 md:pt-24 w-full overflow-y-auto bg-[#feffff] dark:bg-gray-800 lg:px-6 px-3">
+        <div className="flex-grow pt-20 md:pt-24 w-full overflow-y-auto bg-[#feffff] dark:bg-gray-800 lg:px-10 px-3">
           <div className="mx-auto">{children}</div>
         </div>
       </div>

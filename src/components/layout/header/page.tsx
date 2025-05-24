@@ -7,8 +7,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { FiChevronDown, FiChevronUp, FiX, FiUser, FiLogOut, FiSettings } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu } from 'lucide-react';
+import { Menu, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useIncomingConference } from '@/hooks/useIncomingConference';
 import "../../../app/globals.css";
 
 const Header = () => {
@@ -21,6 +22,7 @@ const Header = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const pathname = usePathname();
+  const { incomingConference, loading } = useIncomingConference();
 
   useEffect(() => {
     const handleResize = () => {
@@ -92,12 +94,20 @@ const Header = () => {
     programmes: [
       { 
         title: "Conference", 
-        description: "Meet industry experts in live interactive sessions", 
-        link: "/conference?id=17", 
+        description: loading 
+          ? "Loading conference details..." 
+          : incomingConference 
+            ? `Join us at ${incomingConference.title}`
+            : "Meet industry experts in live interactive sessions",
+        link: incomingConference ? `/conference?id=${incomingConference.id}` : "/conference",
         image: "/Head.png",
-        icon: <svg className="w-5 h-5 text-[#D5B93C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
+        icon: loading ? (
+          <Loader2 className="w-5 h-5 text-[#D5B93C] mr-2 animate-spin" />
+        ) : (
+          <svg className="w-5 h-5 text-[#D5B93C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        )
       },
       { 
         title: "Seminar/Training", 
@@ -488,4 +498,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Header; 

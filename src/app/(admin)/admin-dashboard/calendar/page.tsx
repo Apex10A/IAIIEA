@@ -289,7 +289,7 @@ const Calendar = () => {
       days.push(
         <div 
           key={`empty-${i}`} 
-          className="p-2 border border-gray-200 bg-gray-50 min-h-[100px]"
+          className="p-2 border border-gray-200  dark:border-gray-700 dark:bg-gray-800 min-h-[100px] "
         />
       );
     }
@@ -318,8 +318,8 @@ const Calendar = () => {
           key={dayData.day}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className={`p-2 border border-gray-200 min-h-[100px] hover:bg-gray-50 cursor-pointer transition-colors ${
-            isCurrentDay ? 'bg-blue-50 border-blue-200' : ''
+          className={`p-2 border border-gray-200 dark:border-gray-700 min-h-[100px] hover:bg-gray-50 cursor-pointer transition-colors ${
+            isCurrentDay ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : ''
           }`}
         >
           <div className="flex flex-col h-full">
@@ -421,30 +421,30 @@ const Calendar = () => {
   }
 
   return (
-    <div className="space-y-4 px-3 py-3 rounded-lg">
+    <div className="space-y-4 px-3 py-3 rounded-lg dark:bg-gray-900">
       {/* Calendar Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-gray-800">Event Calendar</h2>
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Event Calendar</h2>
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={goToPreviousMonth}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 text-black dark:text-white" />
             </Button>
-            <span className="text-md font-medium text-gray-700 min-w-[120px] text-center">
+            <span className="text-md font-medium text-gray-700 dark:text-gray-300 min-w-[120px] text-center">
               {currentMonth.title} {currentYear}
             </span>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={goToNextMonth}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 text-black dark:text-white" />
             </Button>
           </div>
         </div>
@@ -462,7 +462,7 @@ const Calendar = () => {
             });
             setIsModalOpen(true);
           }}
-          className="bg-[#0E1A3D] hover:bg-[#152a61] text-white"
+          className="bg-primary hover:bg-primary/90 text-white dark:bg-primary dark:hover:bg-primary/90"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Event
@@ -470,14 +470,14 @@ const Calendar = () => {
       </div>
 
       {/* Calendar Grid */}
-      <Card className="w-full mx-auto">
+      <Card className="w-full mx-auto border-gray-200 dark:border-gray-700 dark:bg-gray-800">
         <CardContent className="p-4">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
               <div
                 key={day}
-                className="text-center font-semibold text-gray-600 text-xs sm:text-sm border border-gray-200 p-2 bg-gray-50 rounded"
+                className="text-center font-semibold text-gray-600 dark:text-gray-300 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-800/50 rounded"
               >
                 {day}
               </div>
@@ -496,16 +496,16 @@ const Calendar = () => {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         >
           <motion.div 
             initial={{ scale: 0.95, y: 20 }}
             animate={{ scale: 1, y: 0 }}
-            className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-900 rounded-lg shadow-xl dark:shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-800">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
                   {isEditMode ? 'Edit Event' : 'Add New Event'}
                 </h3>
                 <Button 
@@ -515,7 +515,7 @@ const Calendar = () => {
                     setIsModalOpen(false);
                     setIsEditMode(false);
                   }}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   <X className="h-5 w-5" />
                 </Button>
@@ -523,79 +523,79 @@ const Calendar = () => {
               
               <form className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Activity</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity</label>
                   <input
                     type="text"
                     placeholder="Event name"
                     value={eventDetails.activity}
                     onChange={(e) => setEventDetails({ ...eventDetails, activity: e.target.value })}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 
                 {!isEditMode && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
                       <input
                         type="date"
                         value={eventDetails.date}
                         onChange={(e) => setEventDetails({ ...eventDetails, date: e.target.value })}
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
                       <input
                         type="time"
                         value={eventDetails.time}
                         onChange={(e) => setEventDetails({ ...eventDetails, time: e.target.value })}
-                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                       />
                     </div>
                   </div>
                 )}
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                   <input
                     type="text"
                     placeholder="Where is the event?"
                     value={eventDetails.location}
                     onChange={(e) => setEventDetails({ ...eventDetails, location: e.target.value })}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                   <textarea
                     placeholder="Event details"
                     value={eventDetails.description}
                     onChange={(e) => setEventDetails({ ...eventDetails, description: e.target.value })}
                     rows={3}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   ></textarea>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
                     <select
                       value={eventDetails.priority_level}
                       onChange={(e) => setEventDetails({ ...eventDetails, priority_level: e.target.value as 'important' | 'normal' })}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                     >
                       <option value="important">Important</option>
                       <option value="normal">Normal</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
                     <select
                       value={eventDetails.color}
                       onChange={(e) => setEventDetails({ ...eventDetails, color: e.target.value as 'red' | 'blue' | 'green' })}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] outline-none"
+                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary dark:focus:ring-primary dark:focus:border-primary outline-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                     >
                       <option value="red">Red</option>
                       <option value="blue">Blue</option>
@@ -612,13 +612,13 @@ const Calendar = () => {
                     setIsModalOpen(false);
                     setIsEditMode(false);
                   }}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={isEditMode ? handleUpdateEvent : handleAddEvent}
-                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white"
+                  className="bg-primary hover:bg-primary/90 text-white"
                 >
                   {isEditMode ? 'Update Event' : 'Save Event'}
                 </Button>
@@ -633,56 +633,56 @@ const Calendar = () => {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         >
           <motion.div 
             initial={{ scale: 0.95, y: 20 }}
             animate={{ scale: 1, y: 0 }}
-            className="bg-white rounded-lg shadow-xl max-w-md w-full"
+            className="bg-white dark:bg-gray-900 rounded-lg shadow-xl dark:shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700"
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-800">Event Details</h3>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Event Details</h3>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setIsViewModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
               
               <div className={`p-4 rounded-lg mb-4 ${
-                selectedEvent.color === 'blue' ? 'bg-blue-50 border border-blue-100' :
-                selectedEvent.color === 'red' ? 'bg-red-50 border border-red-100' :
-                selectedEvent.color === 'green' ? 'bg-green-50 border border-green-100' : 
-                'bg-gray-50 border border-gray-100'
+                selectedEvent.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800' :
+                selectedEvent.color === 'red' ? 'bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800' :
+                selectedEvent.color === 'green' ? 'bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800' : 
+                'bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
               }`}>
-                <h4 className="text-lg font-bold mb-2">{selectedEvent.activity}</h4>
+                <h4 className="text-lg font-bold mb-2 text-gray-900 dark:text-gray-100">{selectedEvent.activity}</h4>
                 
                 <div className="space-y-3">
                   <div className="flex items-start">
-                    <Clock className="h-5 w-5 mt-0.5 mr-2 text-gray-500 flex-shrink-0" />
+                    <Clock className="h-5 w-5 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Time</p>
-                      <p className="text-gray-800">{selectedEvent.time}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Time</p>
+                      <p className="text-gray-800 dark:text-gray-200">{selectedEvent.time}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <MapPin className="h-5 w-5 mt-0.5 mr-2 text-gray-500 flex-shrink-0" />
+                    <MapPin className="h-5 w-5 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Location</p>
-                      <p className="text-gray-800">{selectedEvent.location}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</p>
+                      <p className="text-gray-800 dark:text-gray-200">{selectedEvent.location}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <Info className="h-5 w-5 mt-0.5 mr-2 text-gray-500 flex-shrink-0" />
+                    <Info className="h-5 w-5 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Description</p>
-                      <p className="text-gray-800 whitespace-pre-line">{selectedEvent.description || 'No description provided'}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
+                      <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{selectedEvent.description || 'No description provided'}</p>
                     </div>
                   </div>
                 </div>
@@ -696,7 +696,7 @@ const Calendar = () => {
                       await handleDeleteEvent();
                     }
                   }}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Event
@@ -706,7 +706,7 @@ const Calendar = () => {
                     setIsViewModalOpen(false);
                     openEditModal(selectedEvent);
                   }}
-                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white"
+                  className="bg-primary hover:bg-primary/90 text-white"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Event

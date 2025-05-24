@@ -210,28 +210,28 @@ const Jobs = () => {
   };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
+    <div className='container mx-auto px-4 py-8 dark:bg-gray-900'>
       <div className='flex justify-between items-center mb-8'>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Job Opportunities</h1>
-          <p className="text-gray-500">{jobs.length} available positions</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Job Opportunities</h1>
+          <p className="text-gray-500 dark:text-gray-400">{jobs.length} available positions</p>
         </div>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#203a87] hover:bg-[#1a2f6d] text-white">
+            <Button className="bg-primary hover:bg-primary/90 text-white">
               <PlusIcon className='mr-2 h-4 w-4' /> Post New Job
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
             <DialogHeader>
-              <DialogTitle>Create Job Opportunity</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-gray-900 dark:text-gray-100">Create Job Opportunity</DialogTitle>
+              <DialogDescription className="text-gray-500 dark:text-gray-400">
                 Fill in the details for the new job posting
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateJob} className='space-y-4'>
               <div className="space-y-2">
-                <Label htmlFor="title">Job Title *</Label>
+                <Label htmlFor="title" className="text-gray-700 dark:text-gray-300">Job Title *</Label>
                 <Input 
                   id="title"
                   value={currentJob.title}
@@ -239,11 +239,12 @@ const Jobs = () => {
                     ...currentJob, 
                     title: e.target.value
                   })}
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   required 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Job Description *</Label>
+                <Label htmlFor="description" className="text-gray-700 dark:text-gray-300">Job Description *</Label>
                 <Textarea 
                   id="description"
                   value={currentJob.description}
@@ -251,16 +252,18 @@ const Jobs = () => {
                     ...currentJob, 
                     description: e.target.value
                   })}
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   rows={5}
                   required 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="image">Company Logo/Image</Label>
+                <Label htmlFor="image" className="text-gray-700 dark:text-gray-300">Company Logo/Image</Label>
                 <Input 
                   id="image"
                   type="file"
                   accept="image/*"
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       setCurrentJob({
@@ -272,7 +275,7 @@ const Jobs = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="link">Application Link (Optional)</Label>
+                <Label htmlFor="link" className="text-gray-700 dark:text-gray-300">Application Link (Optional)</Label>
                 <Input 
                   id="link"
                   type="url"
@@ -281,10 +284,11 @@ const Jobs = () => {
                     ...currentJob, 
                     link: e.target.value
                   })}
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="https://example.com/apply"
                 />
               </div>
-              <Button type='submit' className="w-full bg-[#203a87] hover:bg-[#1a2f6d] text-white">
+              <Button type='submit' className="w-full bg-primary hover:bg-primary/90 text-white">
                 Post Job
               </Button>
             </form>
@@ -295,11 +299,11 @@ const Jobs = () => {
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {jobs.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500">No job opportunities posted yet</p>
+            <p className="text-gray-500 dark:text-gray-400">No job opportunities posted yet</p>
           </div>
         ) : (
           jobs.map((job) => (
-            <Card key={job.id} className='hover:shadow-lg transition-shadow duration-300'>
+            <Card key={job.id} className='hover:shadow-lg transition-shadow duration-300 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'>
               {job.image && (
                 <div className="relative h-48 w-full">
                   <Image
@@ -311,13 +315,13 @@ const Jobs = () => {
                 </div>
               )}
               <CardHeader>
-                <CardTitle className="text-xl">{job.title}</CardTitle>
-                <div className="text-sm text-muted-foreground">
+                <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{job.title}</CardTitle>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   Posted on {new Date(job.date).toLocaleDateString()} at {job.time}
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 mb-4 line-clamp-3">
+                <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
                   {job.description}
                 </p>
                 <div className="flex justify-between items-center">
@@ -326,7 +330,7 @@ const Jobs = () => {
                       href={job.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-[#203a87] hover:underline font-medium"
+                      className="text-primary hover:text-primary/90 font-medium"
                     >
                       Apply Now
                     </a>
@@ -335,6 +339,7 @@ const Jobs = () => {
                     <Button 
                       variant="outline" 
                       size="icon"
+                      className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
                       onClick={() => {
                         setCurrentJob(job);
                         setIsEditModalOpen(true);
@@ -345,6 +350,7 @@ const Jobs = () => {
                     <Button 
                       variant="destructive" 
                       size="icon"
+                      className="bg-red-600 hover:bg-red-700 text-white"
                       onClick={() => {
                         setJobToDelete(job.id);
                         setDeleteDialogOpen(true);
@@ -362,16 +368,16 @@ const Jobs = () => {
 
       {/* Edit Job Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Edit Job Opportunity</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">Edit Job Opportunity</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">
               Make changes to this job posting
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditJob} className='space-y-4'>
             <div className="space-y-2">
-              <Label htmlFor="edit-title">Job Title *</Label>
+              <Label htmlFor="edit-title" className="text-gray-700 dark:text-gray-300">Job Title *</Label>
               <Input 
                 id="edit-title"
                 value={currentJob.title}
@@ -379,11 +385,12 @@ const Jobs = () => {
                   ...currentJob, 
                   title: e.target.value
                 })}
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 required 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Job Description *</Label>
+              <Label htmlFor="edit-description" className="text-gray-700 dark:text-gray-300">Job Description *</Label>
               <Textarea 
                 id="edit-description"
                 value={currentJob.description}
@@ -391,14 +398,15 @@ const Jobs = () => {
                   ...currentJob, 
                   description: e.target.value
                 })}
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 rows={5}
                 required 
               />
             </div>
             <div className="space-y-2">
-              <Label>Current Image</Label>
+              <Label className="text-gray-700 dark:text-gray-300">Current Image</Label>
               {currentJob.image && typeof currentJob.image === 'string' && (
-                <div className="relative h-32 w-32">
+                <div className="relative h-32 w-32 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <Image
                     src={getImageUrl(currentJob.image)}
                     alt="Current job image"
@@ -407,11 +415,12 @@ const Jobs = () => {
                   />
                 </div>
               )}
-              <Label htmlFor="edit-image">Upload New Image</Label>
+              <Label htmlFor="edit-image" className="text-gray-700 dark:text-gray-300">Upload New Image</Label>
               <Input 
                 id="edit-image"
                 type="file"
                 accept="image/*"
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     setCurrentJob({
@@ -423,7 +432,7 @@ const Jobs = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-link">Application Link (Optional)</Label>
+              <Label htmlFor="edit-link" className="text-gray-700 dark:text-gray-300">Application Link (Optional)</Label>
               <Input 
                 id="edit-link"
                 type="url"
@@ -432,10 +441,11 @@ const Jobs = () => {
                   ...currentJob, 
                   link: e.target.value
                 })}
+                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 placeholder="https://example.com/apply"
               />
             </div>
-            <Button type='submit' className="w-full bg-[#203a87] hover:bg-[#1a2f6d] text-white">
+            <Button type='submit' className="w-full bg-primary hover:bg-primary/90 text-white">
               Update Job
             </Button>
           </form>
@@ -444,13 +454,13 @@ const Jobs = () => {
 
       {/* Success Modal */}
       <Dialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
           <DialogHeader>
             <div className="flex justify-center">
               <div className="relative">
-                <div className="w-16 h-16 bg-[#203a87]/10 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                   <svg 
-                    className="w-12 h-12 text-[#203a87] animate-checkmark"
+                    className="w-12 h-12 text-primary animate-checkmark"
                     viewBox="0 0 52 52" 
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -481,17 +491,17 @@ const Jobs = () => {
                 </div>
               </div>
             </div>
-            <DialogTitle className="text-center text-[#203a87] text-2xl mt-4 font-semibold">
+            <DialogTitle className="text-center text-primary text-2xl mt-4 font-semibold">
               Success!
             </DialogTitle>
           </DialogHeader>
           <div className="text-center py-4 space-y-2 px-4">
-            <p className="text-lg font-medium text-gray-800">{successMessage}</p>
+            <p className="text-lg font-medium text-gray-800 dark:text-gray-200">{successMessage}</p>
           </div>
           <DialogFooter className="flex justify-center pb-4">
             <Button 
               onClick={() => setIsSuccessModalOpen(false)}
-              className="px-8 bg-[#203a87] hover:bg-[#1a2f6d] text-white transition-all duration-300 hover:shadow-md"
+              className="px-8 bg-primary hover:bg-primary/90 text-white transition-all duration-300 hover:shadow-md"
             >
               Close
             </Button>
@@ -502,24 +512,24 @@ const Jobs = () => {
       {/* Delete Confirmation Dialog */}
       <AlertDialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialog.Portal>
-          <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
-          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
-            <AlertDialog.Title className="text-lg font-semibold">
+          <AlertDialog.Overlay className="bg-black/60 backdrop-blur-sm fixed inset-0" />
+          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white dark:bg-gray-900 p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <AlertDialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Delete Job Posting
             </AlertDialog.Title>
-            <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+            <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600 dark:text-gray-400">
               Are you sure you want to delete this job posting? This action cannot be undone.
             </AlertDialog.Description>
             <div className="flex justify-end gap-4">
               <AlertDialog.Cancel asChild>
-                <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                <button className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
                   Cancel
                 </button>
               </AlertDialog.Cancel>
               <AlertDialog.Action asChild>
                 <button 
                   onClick={handleDeleteJob}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg"
                 >
                   Delete
                 </button>

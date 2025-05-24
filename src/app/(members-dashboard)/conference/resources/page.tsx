@@ -76,6 +76,16 @@ interface ConferenceDetails {
   }[];
 }
 
+// Add new interface for resources
+interface ResourceType {
+  resource_id: number;
+  resource_type: string;
+  caption: string;
+  date: string;
+  file: string;
+  conference_id: number;
+}
+
 // Media Carousel Component
 const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'videos' }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -139,6 +149,115 @@ const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'video
             <ChevronRight className="w-5 h-5" />
           </button>
         </>
+      )}
+    </div>
+  );
+};
+
+// Add ResourceCard component
+const ResourceCard = ({ resource }: { resource: ResourceType }) => {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <FileText className="w-6 h-6 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-foreground truncate">{resource.caption}</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Added on {new Date(resource.date).toLocaleDateString()}
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <a
+                href={resource.file}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-sm text-primary hover:text-primary/80 font-medium"
+              >
+                Download Resource
+                <ExternalLink className="w-4 h-4 ml-1" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Add ResourcesSection component
+const ResourcesSection = ({ conferenceId }: { conferenceId: number }) => {
+  const [resources, setResources] = useState<ResourceType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/landing/conference_resources/${conferenceId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${bearerToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch resources");
+        }
+
+        const data = await response.json();
+        if (data.status === "success") {
+          setResources(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+        showToast.error("Failed to load resources");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (conferenceId) {
+      fetchResources();
+    }
+  }, [conferenceId, bearerToken]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-foreground">Conference Resources</h2>
+      </div>
+      {resources.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {resources.map((resource) => (
+            <ResourceCard key={resource.resource_id} resource={resource} />
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No Resources Available</h3>
+              <p className="text-muted-foreground">
+                There are no resources available for this conference yet.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -271,39 +390,7 @@ const ConferenceDetailsView = ({ conference, conferenceDetails, loading, onBack 
               </div>
 
               {/* Resources Section */}
-              <div className="mt-8">
-                <h2 className="text-xl font-bold text-foreground mb-4">Resources</h2>
-                {conferenceDetails.resources?.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {conferenceDetails.resources.map((resource) => (
-                      <div key={resource.resource_id} className="bg-muted/50 p-4 rounded-lg border">
-                        <div className="flex items-start gap-3">
-                          <FileText className="w-5 h-5 text-primary" />
-                          <div>
-                            <h3 className="font-medium text-foreground">{resource.caption}</h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Added on {new Date(resource.date).toLocaleDateString()}
-                            </p>
-                            {resource.file && (
-                              <a
-                                href={resource.file}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center mt-2 text-primary hover:text-primary/80 text-sm"
-                              >
-                                Download Resource
-                                <ExternalLink className="w-4 h-4 ml-1" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">No resources available</p>
-                )}
-              </div>
+              <ResourcesSection conferenceId={conference.id} />
 
               {/* Virtual Event Section */}
               <div className="mt-8">

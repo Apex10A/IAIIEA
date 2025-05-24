@@ -1,254 +1,301 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@radix-ui/react-label';
-import * as Toggle from '@radix-ui/react-toggle';
-import { Loader2, Mail, Lock, User, Smartphone, Globe, Bell } from 'lucide-react';
-import { toast } from 'sonner';
-import * as Select from '@radix-ui/react-select';
+import { Loader2, User, Mail, Phone, Building2, GraduationCap, MapPin } from 'lucide-react';
+import { showToast } from '@/utils/toast';
+
+interface UserDetails {
+  user_id: string;
+  f_name: string;
+  m_name: string;
+  l_name: string;
+  name: string;
+  email: string;
+  phone: string;
+  country: string;
+  institution: string;
+  whatsapp_no: string;
+  area_of_specialization: string;
+  profession: string;
+  postal_addr: string;
+  residential_addr: string;
+  type: string;
+  role: string;
+}
 
 export default function AccountSettings() {
   const { data: session, update } = useSession();
-  const router = useRouter();
-  
-  // Form states
-  const [profileForm, setProfileForm] = useState({
-    name: session?.user?.name || '',
-    email: session?.user?.email || '',
-    phone: session?.user?.phone || '',
-    bio: session?.user?.bio || ''
-  });
-  
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  
-  const [preferences, setPreferences] = useState({
-    darkMode: false,
-    notifications: true,
-    newsletter: true,
-    language: 'en'
-  });
-  
-  const [isLoading, setIsLoading] = useState({
-    profile: false,
-    password: false,
-    preferences: false
-  });
-  
-  const [activeTab, setActiveTab] = useState('profile');
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
-  // Handler functions
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setProfileForm(prev => ({ ...prev, [name]: value }));
-  };
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordForm(prev => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    fetchUserDetails();
+  }, [session]);
 
-  const handlePreferenceChange = (name: string, value: any) => {
-    setPreferences(prev => ({ ...prev, [name]: value }));
-  };
+  const fetchUserDetails = async () => {
+    if (!bearerToken || !session?.user?.userData?.user_id) return;
 
-  const handleProfileSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(prev => ({ ...prev, profile: true }));
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update session
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name: profileForm.name,
-          bio: profileForm.bio,
-          phone: profileForm.phone
+      setIsFetching(true);
+      const response = await fetch(
+        `${API_URL}/admin/user_details/${session.user.userData.user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
         }
-      });
-      
-      toast.success('Profile updated successfully');
+      );
+
+      if (!response.ok) throw new Error('Failed to fetch user details');
+
+      const data = await response.json();
+      setUserDetails(data.data);
     } catch (error) {
-      toast.error('Failed to update profile');
+      console.error('Error fetching user details:', error);
+      showToast.error('Failed to load user details');
     } finally {
-      setIsLoading(prev => ({ ...prev, profile: false }));
+      setIsFetching(false);
     }
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-    
-    setIsLoading(prev => ({ ...prev, password: true }));
-    
+    if (!userDetails) return;
+
+    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Password changed successfully');
-      setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+      const response = await fetch(`${API_URL}/admin/update_user`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: userDetails.user_id,
+          f_name: userDetails.f_name,
+          m_name: userDetails.m_name,
+          l_name: userDetails.l_name,
+          email: userDetails.email,
+          phone: userDetails.phone,
+          country: userDetails.country,
+          institution: userDetails.institution,
+          whatsapp_no: userDetails.whatsapp_no,
+          area_of_specialization: userDetails.area_of_specialization,
+          profession: userDetails.profession,
+          postal_addr: userDetails.postal_addr,
+          residential_addr: userDetails.residential_addr,
+          type: userDetails.type
+        }),
       });
+
+      if (!response.ok) throw new Error('Failed to update profile');
+
+      showToast.success('Profile updated successfully');
+      await fetchUserDetails(); // Refresh user details
     } catch (error) {
-      toast.error('Failed to change password');
+      console.error('Error updating profile:', error);
+      showToast.error('Failed to update profile');
     } finally {
-      setIsLoading(prev => ({ ...prev, password: false }));
+      setIsLoading(false);
     }
   };
 
-  const handlePreferencesSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(prev => ({ ...prev, preferences: true }));
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      toast.success('Preferences updated');
-    } catch (error) {
-      toast.error('Failed to update preferences');
-    } finally {
-      setIsLoading(prev => ({ ...prev, preferences: false }));
-    }
-  };
-
+  if (isFetching) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6 bg-white rounded-lg shadow-sm">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Account Settings</h1>
-      
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-gray-200 mb-6">
-        <button
-          className={`px-4 py-2 font-medium text-sm md:text-base ${
-            activeTab === 'profile' 
-              ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-          onClick={() => setActiveTab('profile')}
-        >
-          Profile
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm md:text-base ${
-            activeTab === 'security' 
-              ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-          onClick={() => setActiveTab('security')}
-        >
-          Security
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm md:text-base ${
-            activeTab === 'preferences' 
-              ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-          onClick={() => setActiveTab('preferences')}
-        >
-          Preferences
-        </button>
+    <div className="max-w-4xl mx-auto p-4 md:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div className="relative h-32 bg-gradient-to-r from-blue-500 to-blue-600">
+          <div className="absolute -bottom-16 left-6">
+            <Avatar className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 bg-white">
+              <AvatarImage
+                src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${userDetails?.name}`}
+                alt={userDetails?.name}
+              />
+              <AvatarFallback className="bg-gray-100">
+                {userDetails?.name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </div>
       </div>
       
-      {/* Profile Tab */}
-      {activeTab === 'profile' && (
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="flex flex-col items-center">
-              <Avatar className="w-24 h-24 mb-3">
-                <AvatarImage src={session?.user?.image || ''} className="bg-gray-100" />
-                <AvatarFallback className="text-2xl bg-gray-200 text-gray-700">
-                  {session?.user?.name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <Button variant="outline" size="sm" className="text-gray-700 border-gray-300">
-                Change Photo
-              </Button>
+        <div className="pt-20 px-6 pb-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Personal Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Personal Information
+                </h3>
+
+                <div>
+                  <Label htmlFor="f_name">First Name</Label>
+                  <Input
+                    id="f_name"
+                    value={userDetails?.f_name || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, f_name: e.target.value }))}
+                    className="mt-1"
+                  />
             </div>
             
-            <form onSubmit={handleProfileSubmit} className="flex-1 space-y-4">
               <div>
-                <Label htmlFor="name" className="text-gray-700 mb-1 block">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Label htmlFor="m_name">Middle Name</Label>
                   <Input
-                    id="name"
-                    name="name"
-                    value={profileForm.name}
-                    onChange={handleProfileChange}
-                    className="pl-10 text-gray-800"
+                    id="m_name"
+                    value={userDetails?.m_name || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, m_name: e.target.value }))}
+                    className="mt-1"
                   />
                 </div>
+
+                <div>
+                  <Label htmlFor="l_name">Last Name</Label>
+                  <Input
+                    id="l_name"
+                    value={userDetails?.l_name || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, l_name: e.target.value }))}
+                    className="mt-1"
+                  />
               </div>
               
               <div>
-                <Label htmlFor="email" className="text-gray-700 mb-1 block">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    name="email"
                     type="email"
-                    value={profileForm.email}
-                    onChange={handleProfileChange}
+                    value={userDetails?.email || ''}
                     disabled
-                    className="pl-10 bg-gray-50 text-gray-600"
+                    className="mt-1 bg-gray-50"
                   />
                 </div>
               </div>
+
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Contact Information
+                </h3>
               
               <div>
-                <Label htmlFor="phone" className="text-gray-700 mb-1 block">Phone Number</Label>
-                <div className="relative">
-                  <Smartphone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Label htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
-                    name="phone"
-                    type="tel"
-                    value={profileForm.phone}
-                    onChange={handleProfileChange}
-                    className="pl-10 text-gray-800"
+                    value={userDetails?.phone || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, phone: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="whatsapp_no">WhatsApp Number</Label>
+                  <Input
+                    id="whatsapp_no"
+                    value={userDetails?.whatsapp_no || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, whatsapp_no: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    value={userDetails?.country || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, country: e.target.value }))}
+                    className="mt-1"
                   />
                 </div>
               </div>
+
+              {/* Professional Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Professional Information
+                </h3>
+
+                <div>
+                  <Label htmlFor="institution">Institution</Label>
+                  <Input
+                    id="institution"
+                    value={userDetails?.institution || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, institution: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="profession">Profession</Label>
+                  <Input
+                    id="profession"
+                    value={userDetails?.profession || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, profession: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="area_of_specialization">Area of Specialization</Label>
+                  <Input
+                    id="area_of_specialization"
+                    value={userDetails?.area_of_specialization || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, area_of_specialization: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Address Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Address Information
+                </h3>
               
               <div>
-                <Label htmlFor="bio" className="text-gray-700 mb-1 block">Bio</Label>
+                  <Label htmlFor="postal_addr">Postal Address</Label>
                 <textarea
-                  id="bio"
-                  name="bio"
-                  value={profileForm.bio}
-                  onChange={handleProfileChange}
+                    id="postal_addr"
+                    value={userDetails?.postal_addr || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, postal_addr: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
-                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Tell us about yourself..."
                 />
               </div>
               
-              <div className="pt-2">
+                <div>
+                  <Label htmlFor="residential_addr">Residential Address</Label>
+                  <textarea
+                    id="residential_addr"
+                    value={userDetails?.residential_addr || ''}
+                    onChange={(e) => setUserDetails(prev => ({ ...prev!, residential_addr: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
                 <Button 
                   type="submit" 
-                  disabled={isLoading.profile}
+                disabled={isLoading}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  {isLoading.profile ? (
+                {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Saving...
@@ -261,188 +308,6 @@ export default function AccountSettings() {
             </form>
           </div>
         </div>
-      )}
-      
-      {/* Security Tab */}
-      {activeTab === 'security' && (
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="currentPassword" className="text-gray-700 mb-1 block">Current Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input
-                id="currentPassword"
-                name="currentPassword"
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={handlePasswordChange}
-                className="pl-10 text-gray-800"
-                required
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="newPassword" className="text-gray-700 mb-1 block">New Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={handlePasswordChange}
-                className="pl-10 text-gray-800"
-                required
-                minLength={8}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="confirmPassword" className="text-gray-700 mb-1 block">Confirm New Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={handlePasswordChange}
-                className="pl-10 text-gray-800"
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="pt-2">
-            <Button 
-              type="submit" 
-              disabled={isLoading.password}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isLoading.password ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                'Change Password'
-              )}
-            </Button>
-          </div>
-        </form>
-      )}
-      
-      {/* Preferences Tab */}
-      {activeTab === 'preferences' && (
-        <form onSubmit={handlePreferencesSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2 text-gray-800">
-              <Bell className="h-5 w-5 text-gray-700" />
-              Notifications
-            </h3>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <Label htmlFor="notifications" className="text-gray-700">Email Notifications</Label>
-                <p className="text-sm text-gray-600">Receive email notifications</p>
-              </div>
-              <Toggle.Root
-                id="notifications"
-                pressed={preferences.notifications}
-                onPressedChange={(pressed) => handlePreferenceChange('notifications', pressed)}
-                className="w-11 h-6 bg-gray-300 rounded-full relative data-[state=on]:bg-blue-600 transition-colors"
-              >
-                <span className="block w-5 h-5 bg-white rounded-full shadow-sm absolute top-0.5 left-0.5 data-[state=on]:left-[1.375rem] transition-all" />
-              </Toggle.Root>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <Label htmlFor="newsletter" className="text-gray-700">Newsletter</Label>
-                <p className="text-sm text-gray-600">Receive our monthly newsletter</p>
-              </div>
-              <Toggle.Root
-                id="newsletter"
-                pressed={preferences.newsletter}
-                onPressedChange={(pressed) => handlePreferenceChange('newsletter', pressed)}
-                className="w-11 h-6 bg-gray-300 rounded-full relative data-[state=on]:bg-blue-600 transition-colors"
-              >
-                <span className="block w-5 h-5 bg-white rounded-full shadow-sm absolute top-0.5 left-0.5 data-[state=on]:left-[1.375rem] transition-all" />
-              </Toggle.Root>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2 text-gray-800">
-              <Globe className="h-5 w-5 text-gray-700" />
-              Language & Appearance
-            </h3>
-            
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <Label htmlFor="language" className="text-gray-700 mb-2 block">Language</Label>
-              <Select.Root
-                value={preferences.language}
-                onValueChange={(value) => handlePreferenceChange('language', value)}
-              >
-                <Select.Trigger className="inline-flex items-center justify-between w-full h-10 px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-800">
-                  <Select.Value placeholder="Select a language" />
-                  <Select.Icon className="text-gray-500" />
-                </Select.Trigger>
-                <Select.Content className="overflow-hidden bg-white rounded-md shadow-lg border border-gray-200 z-50">
-                  <Select.Viewport className="p-1">
-                    <Select.Item value="en" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
-                      English
-                    </Select.Item>
-                    <Select.Item value="es" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
-                      Spanish
-                    </Select.Item>
-                    <Select.Item value="fr" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
-                      French
-                    </Select.Item>
-                    <Select.Item value="de" className="text-sm rounded px-3 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer">
-                      German
-                    </Select.Item>
-                  </Select.Viewport>
-                </Select.Content>
-              </Select.Root>
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <Label htmlFor="darkMode" className="text-gray-700">Dark Mode</Label>
-                <p className="text-sm text-gray-600">Toggle dark theme</p>
-              </div>
-              <Toggle.Root
-                id="darkMode"
-                pressed={preferences.darkMode}
-                onPressedChange={(pressed) => handlePreferenceChange('darkMode', pressed)}
-                className="w-11 h-6 bg-gray-300 rounded-full relative data-[state=on]:bg-blue-600 transition-colors"
-              >
-                <span className="block w-5 h-5 bg-white rounded-full shadow-sm absolute top-0.5 left-0.5 data-[state=on]:left-[1.375rem] transition-all" />
-              </Toggle.Root>
-            </div>
-          </div>
-          
-          <div className="pt-2">
-            <Button 
-              type="submit" 
-              disabled={isLoading.preferences}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {isLoading.preferences ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Preferences'
-              )}
-            </Button>
-          </div>
-        </form>
-      )}
     </div>
   );
 }

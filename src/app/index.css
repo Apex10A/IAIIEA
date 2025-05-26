@@ -23,25 +23,6 @@ h1 {
 }
 
 /* For WebKit Browsers (Chrome, Safari, Edge) */
-::-webkit-scrollbar {
-    width: 16px;
-}
-
-::-webkit-scrollbar-track {
-    background: #fff;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #D5B93C;
-    border-radius: 10px;
-    border: 6px solid #fff;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
 
 html {
     scroll-behavior: smooth;

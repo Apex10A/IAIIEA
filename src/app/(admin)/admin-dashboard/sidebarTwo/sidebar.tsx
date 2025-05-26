@@ -66,11 +66,7 @@ const portalItems: NavItem[] = [
       icon: AnnouncementIcon,
 
     },
-   {
-    name: 'Daily Meals', 
-    path: '/admin-dashboard/daily-meals',
-    icon: MealsIcon,
-  },
+  
 
     {
     name: 'Speakers List', 
@@ -106,11 +102,16 @@ const portalItems: NavItem[] = [
         path: '/admin-dashboard/conferences',
         icon: ResourcesIcon 
       },
-      { 
-        name: 'Messages', 
-        path: '/admin-dashboard/conferences/messages',
-        icon: MembersIcon 
-      },
+       {
+    name: 'Daily Meals', 
+    path: '/admin-dashboard/conferences/daily-meals',
+    icon: MealsIcon,
+  },
+      // { 
+      //   name: 'Messages', 
+      //   path: '/admin-dashboard/conferences/messages',
+      //   icon: MembersIcon 
+      // },
         {
     name: 'Conference Schedule', 
     path: '/admin-dashboard/conferences/conference-schedule',
@@ -139,16 +140,16 @@ const portalItems: NavItem[] = [
         path: '/admin-dashboard/training',
         icon: ResourcesIcon 
       },
-      { 
-        name: 'Broadcast', 
-        path: '/admin-dashboard/training/broadcast',
-        icon: MembersIcon 
-      },
-      { 
-        name: 'Gallery', 
-        path: '/admin-dashboard/training/gallery',
-        icon: ResourcesIcon 
-      },
+      // { 
+      //   name: 'Broadcast', 
+      //   path: '/admin-dashboard/training/broadcast',
+      //   icon: MembersIcon 
+      // },
+      // { 
+      //   name: 'Gallery', 
+      //   path: '/admin-dashboard/training/gallery',
+      //   icon: ResourcesIcon 
+      // },
       // ... other sub items
     ]
   },

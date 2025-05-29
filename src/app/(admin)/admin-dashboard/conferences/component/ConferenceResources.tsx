@@ -304,8 +304,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                   <h2 className="text-md md:text-xl font-bold text-gray-900 dark:text-gray-100">Conference Schedules</h2>
                   <div className='flex flex-col sm:flex-row gap-2'>
-                    
-                    <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 text-gray-700 rounded-md text-primary-foreground text-sm font-medium transition-colors dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                    <Button variant='outline' className="bg-primary text-white hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                       Upload Conference Proceedings
                     </Button>
                   </div>
@@ -337,6 +336,40 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                   </div>
                 ) : (
                   <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No schedules available</p>
+                )}
+              </div>
+
+              {/* Speakers Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-md md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Speakers</h2>
+                {conferenceDetails?.speakers?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {conferenceDetails.speakers.map((speaker, index) => (
+                      <div key={index} className="bg-muted/50 p-4 rounded-lg border dark:border-gray-700">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-muted">
+                            <Image
+                              src={speaker.picture || '/placeholder.jpg'}
+                              alt={speaker.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100">{speaker.name}</h3>
+                            {speaker.portfolio && (
+                              <p className="text-sm text-gray-700 dark:text-gray-400">{speaker.portfolio}</p>
+                            )}
+                            {speaker.title && (
+                              <p className="text-sm text-gray-700 dark:text-gray-400 mt-1">{speaker.title}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No speakers available</p>
                 )}
               </div>
 

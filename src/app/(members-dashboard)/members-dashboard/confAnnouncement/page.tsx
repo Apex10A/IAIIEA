@@ -27,6 +27,7 @@ import { PlusIcon, EditIcon, TrashIcon, Loader2 } from 'lucide-react';
 import Image from "next/image";
 import { format, parseISO } from 'date-fns';
 import { showToast } from '@/utils/toast';
+import { useSearchParams } from 'next/navigation';
 
 interface Announcement {
   id: number;
@@ -73,6 +74,8 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     linked_id: ''
   });
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const conferenceId = searchParams.get('conferenceId');
 
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
@@ -102,7 +105,13 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   const fetchAnnouncements = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/announcements/conference/9`, {
+      if (!conferenceId) {
+        setAnnouncements([]);
+        showToast.error("No conference selected");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/announcements/conference/${conferenceId}`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }
@@ -141,10 +150,10 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   };
 
   useEffect(() => {
-    if (bearerToken) {
+    if (bearerToken && conferenceId) {
       fetchAnnouncements();
     }
-  }, [bearerToken]);
+  }, [bearerToken, conferenceId]);
 
   // Handle create announcement
   const handleCreateAnnouncement = async () => {
@@ -423,7 +432,15 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
         </Dialog>
       </div>
 
-      {isLoading ? (
+      {!conferenceId ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Calendar className="h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900">No Conference Selected</h3>
+          <p className="text-gray-500 mt-1">
+            Please select a conference to view its announcements.
+          </p>
+        </div>
+      ) : isLoading ? (
         <LoadingState />
       ) : announcements.length === 0 ? (
         <EmptyState />

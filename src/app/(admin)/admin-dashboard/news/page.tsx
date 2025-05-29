@@ -21,7 +21,7 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 import 'react-quill/dist/quill.snow.css';
 
 interface NewsItem {
-  id: string | number;
+  news_id: string | number;
   title: string;
   date: string;
   time: string;
@@ -73,6 +73,7 @@ const NewsPage = () => {
   const [isLoadingNews, setIsLoadingNews] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [newsToDelete, setNewsToDelete] = useState<string | number | null>(null);
   const [viewingNews, setViewingNews] = useState<NewsItem | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState<boolean>(false);
@@ -266,6 +267,7 @@ const NewsPage = () => {
   };
 
   const handleDelete = async (newsId: string | number): Promise<void> => {
+     console.log("Setting news to delete:", newsId); // Add this
     setNewsToDelete(newsId);
     setDeleteDialogOpen(true);
   };
@@ -283,21 +285,27 @@ const NewsPage = () => {
         body: JSON.stringify({ news_id: newsToDelete }),
       });
 
-      const result = await response.json();
-      if (response.ok) {
-        showToast.success("News deleted successfully!");
-        fetchNews(selectedConferenceId || undefined);
-      } else {
-        showToast.error(result.message || "Failed to delete news.");
-      }
-    } catch (error) {
-      console.error("Error deleting news:", error);
-      showToast.error("An error occurred while deleting news.");
-    } finally {
-      setDeleteDialogOpen(false);
-      setNewsToDelete(null);
+     if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
-  };
+
+    const result = await response.json();
+    if (result.status === "success") {
+      showToast.success("News deleted successfully!");
+      fetchNews(selectedConferenceId || undefined);
+    } else {
+      throw new Error(result.message || "Failed to delete news");
+    }
+  } catch (error) {
+    console.error("Error deleting news:", error);
+    showToast.error(error instanceof Error ? error.message : "An error occurred while deleting news.");
+  } finally {
+    setIsDeleting(false);
+    setDeleteDialogOpen(false);
+    setNewsToDelete(null);
+  }
+};
 
   const handleEdit = (newsItem: NewsItem): void => {
     setFormData({
@@ -643,12 +651,19 @@ const NewsPage = () => {
                 </button>
               </AlertDialog.Cancel>
               <AlertDialog.Action asChild>
-                <button 
-                  onClick={confirmDelete}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-                >
-                  Delete
-                </button>
+               <button 
+             onClick={confirmDelete}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 flex items-center justify-center"
+            disabled={isDeleting}
+          >
+            {isDeleting && (
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </button>
               </AlertDialog.Action>
             </div>
           </AlertDialog.Content>
@@ -670,7 +685,7 @@ const NewsPage = () => {
         ) : (
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {news.map((newsItem) => (
-              <Card key={newsItem.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={newsItem.news_id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video relative overflow-hidden bg-gray-100">
                   {newsItem.image ? (
                     <img
@@ -725,7 +740,7 @@ const NewsPage = () => {
                     <Button 
                       variant="destructive" 
                       size="sm" 
-                      onClick={() => handleDelete(newsItem.id)}
+                      onClick={() => handleDelete(newsItem.news_id)}
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete

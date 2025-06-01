@@ -1,49 +1,211 @@
 'use client'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import CarouselLandingPage from "./CarouselLandingPage"
-import Carousel from "@/modules/ui/carousel"
-import { EmblaOptionsType } from 'embla-carousel'
+import { motion } from 'framer-motion';
+import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight, FaBookOpen, FaCalendar } from 'react-icons/fa';
 import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
-import { motion } from 'framer-motion';
 import Sponsors from './sponsors'
-import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight, FaBookOpen } from 'react-icons/fa';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import 'swiper/css/effect-fade';
 
-interface Book {
-  id: number
-  name: string
-  overview: string
-  description: string
-  image: string
-  journalLink: string
+interface Event {
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: string;
+  flyer: string;
+  type?: 'conference' | 'seminar';
+}
+
+interface EventDetails {
+  id: number;
+  is_registered: boolean;
+  gallery: string[];
+  speakers: Array<{
+    name: string;
+    title?: string;
+    portfolio?: string;
+    picture?: string;
+  }>;
 }
 
 const LandingPage: React.FC = () => {
-  const OPTIONS: EmblaOptionsType = {}
-  const SLIDE_COUNT = 5
-  const SLIDES = Array.from(Array(SLIDE_COUNT).keys())
+  const [conferences, setConferences] = useState<Event[]>([]);
+  const [seminars, setSeminars] = useState<Event[]>([]);
+  const [incomingEvents, setIncomingEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        // Fetch conferences
+        const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
+        const confData = await confResponse.json();
+        let incomingConferences: Event[] = [];
+        if (confData.status === "success") {
+          incomingConferences = confData.data
+            .filter((conf: Event) => conf.status === "Incoming")
+            .map((conf: Event) => ({ ...conf, type: 'conference' }));
+        }
+
+        // Fetch seminars
+        const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
+        const semData = await semResponse.json();
+        let incomingSeminars: Event[] = [];
+        if (semData.status === "success") {
+          incomingSeminars = semData.data
+            .filter((sem: Event) => sem.status === "Incoming")
+            .map((sem: Event) => ({ ...sem, type: 'seminar' }));
+        }
+
+        // Combine and set incoming events
+        setIncomingEvents([...incomingConferences, ...incomingSeminars]);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   const publications = [
     {
       id: 1,
       title: "JOURNAL OF INNOVATIONS IN EDUCATIONAL ASSESSMENT (JIEA)",
       volume: "VOL.1, NO.1, May, 2019",
-      image: "/book.png", // Replace with your actual image path
+      image: "/book.png",
       link: "https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1"
     }
-    // Add more publications here if needed
   ];
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
-      <CarouselLandingPage/>
+      {/* Hero Section with Dynamic Event Carousel */}
+      <section className="relative h-screen w-full overflow-hidden">
+        <Swiper
+          modules={[Autoplay, Pagination, Navigation, EffectFade]}
+          effect="fade"
+          spaceBetween={0}
+          slidesPerView={1}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+          }}
+          pagination={{
+            clickable: true,
+            bulletClass: 'swiper-pagination-bullet !bg-white/50 !opacity-100',
+            bulletActiveClass: 'swiper-pagination-bullet-active !bg-white',
+          }}
+          navigation={{
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          }}
+          className="h-full w-full [&_.swiper-button-next]:!text-white [&_.swiper-button-prev]:!text-white [&_.swiper-pagination]:!bottom-12"
+        >
+          {incomingEvents.map((event) => (
+            <SwiperSlide key={event.id} className="h-full w-full">
+              <div className="relative h-full w-full">
+                <Image
+                  src={event.flyer || (event.type === 'conference' ? '/DSA.JPG' : '/DSA2.JPG')}
+                  alt={event.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/40"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="container mx-auto px-4 md:px-8">
+                    <div className="max-w-4xl mx-auto">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center space-y-6 md:space-y-8"
+                      >
+                        <div className="flex items-center justify-center gap-4">
+                          <span className="inline-block px-4 py-2 bg-[#D5B93C] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
+                            {event.status}
+                          </span>
+                          <span className="inline-block px-4 py-2 bg-[#0B142F] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
+                            {event.type === 'conference' ? 'Conference' : 'Seminar'}
+                          </span>
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                          {event.title}
+                        </h1>
+                        <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-medium">
+                          {event.theme}
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-white/90">
+                          <div className="flex items-center gap-3">
+                            <FaUsers className="w-5 h-5 md:w-6 md:h-6" />
+                            <span className="font-medium text-base md:text-lg">{event.venue}</span>
+                          </div>
+                          <div className="hidden sm:block text-2xl text-white/50">•</div>
+                          <div className="flex items-center gap-3">
+                            <FaCalendar className="w-5 h-5 md:w-6 md:h-6" />
+                            <span className="font-medium text-base md:text-lg">{event.date}</span>
+                          </div>
+                        </div>
+                        <div className="pt-8 relative z-50">
+                          <Link
+                            href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
+                            className="relative inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-[#D5B93C] text-white text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                          >
+                            Learn More <FaArrowRight className="ml-3 w-5 h-5" />
+                          </Link>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-40">
+          <motion.div
+            animate={{
+              y: [0, 10, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
+          >
+            <motion.div
+              animate={{
+                y: [0, 15, 0],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="w-1 h-3 bg-white/50 rounded-full mt-2"
+            />
+          </motion.div>
+        </div>
+      </section>
 
       {/* About Section - Modified with "Our Journey" */}
       <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
@@ -254,16 +416,38 @@ const LandingPage: React.FC = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            {/* <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
             <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
               Join our premier events designed to advance educational assessment practices worldwide
-            </p> */}
+            </p>
           </motion.div>
 
-          <div className="">
-            <RealConference/>
-            <RealSeminar/>
-            {/* <Sponsors/> */}
+          <div className="space-y-12">
+            <div>
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-2xl font-bold text-[#0B142F]">Conferences</h3>
+                <Link 
+                  href="/conferences"
+                  className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors"
+                >
+                  See All Conferences <FaArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </div>
+              <RealConference />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-2xl font-bold text-[#0B142F]">Seminars</h3>
+                <Link 
+                  href="/seminars"
+                  className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors"
+                >
+                  See All Seminars <FaArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </div>
+              <RealSeminar />
+            </div>
           </div>
         </div>
       </section>

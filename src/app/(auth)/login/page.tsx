@@ -19,11 +19,18 @@ export default function LoginPage() {
   const [defaultInpType, setDefaultInpType] = useState<"text" | "password">("password");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [agreeToPrivacy, setAgreeToPrivacy] = useState(false); // New state for checkbox
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    if (!agreeToPrivacy) { // Check if user agreed to privacy policy
+      showToast.error('Please agree to the privacy policy');
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -176,6 +183,31 @@ export default function LoginPage() {
                 </div>
               </motion.div>
 
+              {/* Privacy Policy Checkbox */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="flex items-start space-x-2"
+              >
+                <div className="flex items-center h-5">
+                  <input
+                    id="privacy-checkbox"
+                    type="checkbox"
+                    checked={agreeToPrivacy}
+                    onChange={(e) => setAgreeToPrivacy(e.target.checked)}
+                    className="w-4 h-4 text-[#203A87] border-gray-300 rounded focus:ring-[#203A87]"
+                    required
+                  />
+                </div>
+                <label htmlFor="privacy-checkbox" className="text-sm text-gray-700">
+                  I agree to IAIIEA in using my personal data to carry out my request in line with its{' '}
+                  <Link href="/privacy-policy" className="text-[#203A87] hover:underline">
+                    Privacy Policy
+                  </Link>.
+                </label>
+              </motion.div>
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -184,7 +216,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full h-12 mt-2 rounded-lg bg-[#203A87] hover:bg-[#152a61] text-white font-bold uppercase transition-colors shadow-md tracking-widest "
-                  disabled={!identifier || !password || isLoading}
+                  disabled={!identifier || !password || !agreeToPrivacy || isLoading}
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2">
@@ -212,8 +244,6 @@ export default function LoginPage() {
                 Sign up
               </Link>
             </motion.div>
-
-         
           </CardContent>
         </Card>
       </motion.div>

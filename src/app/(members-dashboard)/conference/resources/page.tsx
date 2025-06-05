@@ -525,17 +525,18 @@ const ConferenceResources: React.FC = () => {
       if (data.status === "success") {
         const sortedConferences = data.data.sort(
           (a: Conference, b: Conference) => {
-            const yearA = a.title.match(/\d{4}/)?.[0] || "0";
-            const yearB = b.title.match(/\d{4}/)?.[0] || "0";
-            return parseInt(yearB) - parseInt(yearA);
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateA.getTime() - dateB.getTime();
           }
         );
         setConferences(sortedConferences);
         
         if (sortedConferences.length > 0) {
-          const latestConference = sortedConferences[0];
-          setSelectedConference(latestConference);
-          fetchConferenceDetails(latestConference.id);
+          const incomingConference = sortedConferences[0];
+          setSelectedConference(incomingConference);
+          fetchConferenceDetails(incomingConference.id);
+          setViewMode("details");
         }
       }
     } catch (error) {

@@ -222,25 +222,7 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
             </a>
           )}
           
-          <div className='flex space-x-2'>
-            <Button 
-              variant='outline' 
-              size='icon'
-              onClick={() => {
-                setCurrentAnnouncement(announcement);
-                setIsEditModalOpen(true);
-              }}
-            >
-              <EditIcon className='h-4 w-4' />
-            </Button>
-            <Button 
-              variant='destructive' 
-              size='icon'
-            //   onClick={() => handleDeleteAnnouncement(announcement.id)}
-            >
-              <TrashIcon className='h-4 w-4' />
-            </Button>
-          </div>
+        
         </div>
       </CardContent>
     </Card>

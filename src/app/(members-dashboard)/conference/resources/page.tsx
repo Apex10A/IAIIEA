@@ -410,6 +410,31 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 )}
               </div>
 
+              {/* Speakers Section */}
+              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
+                <h2 className="text-md md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Speakers</h2>
+                {conferenceDetails.speakers?.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {conferenceDetails.speakers.map((speaker, index) => (
+                      <div key={index} className="flex flex-col items-center text-center">
+                        <Image
+                          src={speaker.picture}
+                          alt={speaker.name}
+                          width={150}
+                          height={150}
+                          className="rounded-full mb-4"
+                        />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{speaker.name}</h3>
+                        <p className="text-sm text-gray-700 dark:text-gray-400">{speaker.title}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-400">{speaker.portfolio}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground dark:text-gray-400 text-center py-8">No speakers available</p>
+                )}
+              </div>
+
               {/* Certification Section */}
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <h2 className="text-md md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Certification</h2>

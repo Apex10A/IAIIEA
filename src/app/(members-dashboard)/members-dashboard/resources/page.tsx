@@ -5,6 +5,7 @@ import { Resource, ResourcesPage } from './resources';
 import { useSession } from "next-auth/react";
 import { showToast } from '@/utils/toast';
 import Image from 'next/image';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Page = () => {
   const { data: session } = useSession();

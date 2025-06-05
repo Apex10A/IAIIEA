@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
                 className="text-3xl sm:text-4xl font-bold mb-2"
               >
                 Privacy Policy
-              </motion.h1>
+              </motion.h1> 
               <p className="text-blue-100">Last updated: March 6, 2024</p>
             </div>
             <Link 

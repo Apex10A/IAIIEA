@@ -40,6 +40,7 @@ interface Announcement {
   image?: File | string | null;
   viewer: 'all' | 'members' | 'conference' | 'seminar' | 'speaker';
   linked_id?: string;
+  conferenceTitle?: string;
 }
 
 interface AnnouncementsResponse {
@@ -53,6 +54,14 @@ interface AnnouncementsResponse {
 interface ViewerBadgeProps {
   viewer: 'all' | 'members' | 'conference' | 'seminar' | 'speaker';
   linkedId?: string;
+}
+
+interface Conference {
+  id: number;
+  title: string;
+  date: string;
+  theme: string;
+  is_registered: boolean;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -76,8 +85,10 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const conferenceId = searchParams.get('conferenceId');
+  const [conferences, setConferences] = useState<Conference[]>([]);
+  const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
 
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const bearerToken = session?.user?.token || session?.accessToken;
 
   // Format date to be more readable
   const formatDate = (dateString: string) => {
@@ -101,44 +112,50 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     }
   };
 
-  // Fetch announcements
-  const fetchAnnouncements = async () => {
+  const fetchConferences = async () => {
     setIsLoading(true);
     try {
-      if (!conferenceId) {
-        setAnnouncements([]);
-        showToast.error("No conference selected");
-        return;
+      const response = await fetch(`${API_URL}/landing/events`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
+        }
+      });
+      const data = await response.json();
+      console.log('Conferences API response:', data); // Log the API response
+      if (data.status === "success") {
+        setConferences(data.data);
+      } else {
+        showToast.error("Failed to load conferences");
       }
+    } catch (error) {
+      console.error("Error fetching conferences:", error);
+      showToast.error("Failed to load conferences");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const fetchAnnouncements = async (conferenceId: number) => {
+    setIsLoading(true);
+    try {
       const response = await fetch(`${API_URL}/announcements/conference/${conferenceId}`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }
       });
-      
       const data: AnnouncementsResponse = await response.json();
-      
+      console.log('Announcements API response:', data); // Log the API response
       if (data.status === "success" && data.data) {
         const formattedAnnouncements = Object.entries(data.data)
           .flatMap(([date, announcements]) =>
             announcements.map(announcement => ({
               ...announcement,
-              date
+              date,
+              conferenceTitle: data.data[date][0].conferenceTitle
             }))
-          )
-          .sort((a, b) => {
-            const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
-            if (dateCompare === 0) {
-              return new Date(`2000/01/01 ${b.time}`).getTime() - 
-                     new Date(`2000/01/01 ${a.time}`).getTime();
-            }
-            return dateCompare;
-          });
-        
+          );
         setAnnouncements(formattedAnnouncements);
       } else {
-        console.error('Invalid data structure:', data);
         setAnnouncements([]);
       }
     } catch (error) {
@@ -150,10 +167,10 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   };
 
   useEffect(() => {
-    if (bearerToken && conferenceId) {
-      fetchAnnouncements();
+    if (bearerToken) {
+      fetchConferences();
     }
-  }, [bearerToken, conferenceId]);
+  }, [bearerToken]);
 
   // Handle create announcement
   const handleCreateAnnouncement = async () => {
@@ -177,7 +194,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
 
       if (response.ok) {
         showToast.success('Announcement created successfully!');
-        fetchAnnouncements();
+        fetchAnnouncements(selectedConference?.id || 0);
         setIsCreateModalOpen(false);
         setCurrentAnnouncement({
           id: undefined,
@@ -211,7 +228,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
 
       if (response.ok) {
         showToast.success('Announcement deleted successfully!');
-        fetchAnnouncements();
+        fetchAnnouncements(selectedConference?.id || 0);
         setIsDeleteModalOpen(false);
         setSelectedAnnouncementId(null);
       } else {
@@ -226,6 +243,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   // Handle edit announcement
   const handleEditAnnouncement = async () => {
     if (!currentAnnouncement.id) return;
+    
     
     try {
       const formData = new FormData();
@@ -247,7 +265,7 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
 
       if (response.ok) {
         showToast.success('Announcement updated successfully!');
-        fetchAnnouncements();
+        fetchAnnouncements(selectedConference?.id || 0);
         setIsEditModalOpen(false);
         setCurrentAnnouncement({
           id: undefined,
@@ -332,11 +350,20 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     </div>
   );
 
+  const handleViewAnnouncements = (conference: Conference) => {
+    if (conference.is_registered) {
+      setSelectedConference(conference);
+      fetchAnnouncements(conference.id);
+    } else {
+      showToast.error("You need to register for this conference to view announcements.");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Conference Announcements</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-primary">Conference Announcements</h1>
           <p className="text-muted-foreground mt-1">
             Stay updated with the latest news and information
           </p>
@@ -432,127 +459,37 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
         </Dialog>
       </div>
 
-      {!conferenceId ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Calendar className="h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">No Conference Selected</h3>
-          <p className="text-gray-500 mt-1">
-            Please select a conference to view its announcements.
-          </p>
-        </div>
-      ) : isLoading ? (
+      {isLoading ? (
         <LoadingState />
-      ) : announcements.length === 0 ? (
+      ) : conferences && conferences.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {announcements.map((announcement) => (
+          {conferences && conferences.map((conference) => (
             <Card 
-              key={announcement.id} 
+              key={conference.id} 
               className="hover:shadow-lg transition-all duration-300 h-full flex flex-col"
             >
-              {announcement.image && (
-                <div className="relative w-full h-48">
-                  <Image
-                    src={
-                      typeof announcement.image === 'string'
-                        ? announcement.image.startsWith('http') 
-                          ? announcement.image 
-                          : `${API_URL}/${announcement.image}`
-                        : URL.createObjectURL(announcement.image as File)
-                    }
-                    alt={announcement.title || 'Announcement image'}
-                    fill
-                    className="object-cover rounded-t-lg"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = '/placeholder-image.jpg';
-                    }}
-                  />
-                </div>
-              )}
-              
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl">{announcement.title}</CardTitle>
-                  <ViewerBadge viewer={announcement.viewer} linkedId={announcement.linked_id} />
-                </div>
+                <CardTitle className="text-xl text-primary">{conference.title}</CardTitle>
                 <div className="flex items-center text-sm text-muted-foreground gap-2">
                   <Calendar size={14} />
-                  <span>{formatDate(announcement.date)}</span>
-                  <Clock size={14} className="ml-2" />
-                  <span>{formatTime(announcement.time)}</span>
+                  <span>{conference.date}</span>
                 </div>
               </CardHeader>
-              
               <CardContent className="flex-grow">
                 <p className="text-muted-foreground line-clamp-3">
-                  {announcement.description}
+                  {conference.theme}
                 </p>
               </CardContent>
-              
               <CardFooter className="flex justify-between items-center pt-4">
-                {announcement.link && (
-                  <Button asChild variant="ghost" size="sm">
-                    <a 
-                      href={announcement.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1"
-                    >
-                      <ExternalLink size={16} />
-                      Learn More
-                    </a>
-                  </Button>
-                )}
-                
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      setCurrentAnnouncement(announcement);
-                      setIsEditModalOpen(true);
-                    }}
-                  >
-                    <EditIcon size={16} className="mr-1" />
-                    Edit
-                  </Button>
-                  
-                  <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={() => setSelectedAnnouncementId(announcement.id)}
-                      >
-                        <TrashIcon size={16} className="mr-1" />
-                        Delete
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Confirm Deletion</DialogTitle>
-                      </DialogHeader>
-                      <div className="py-4">
-                        <p>Are you sure you want to delete this announcement? This action cannot be undone.</p>
-                      </div>
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button 
-                          variant="destructive"
-                          onClick={handleDeleteAnnouncement}
-                        >
-                          Delete
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleViewAnnouncements(conference)}
+                >
+                  View Announcements
+                </Button>
               </CardFooter>
             </Card>
           ))}

@@ -4,11 +4,29 @@ import {
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter,
+  DialogClose
+} from '@/components/ui/dialog';
 import { useSession } from "next-auth/react";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Trash2, ExternalLink, Calendar, Clock, PlusIcon, EditIcon, TrashIcon, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from "next/image";
-import { Calendar, MapPin } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { showToast } from '@/utils/toast';
+import { useSearchParams } from 'next/navigation';
 
 interface Announcement {
   id: number;
@@ -21,16 +39,7 @@ interface Announcement {
   image?: File | string | null;
   viewer: 'all' | 'members' | 'conference' | 'seminar' | 'speaker';
   linked_id?: string;
-}
-
-interface Seminar {
-  id: number;
-  title: string;
-  theme: string;
-  venue: string;
-  date: string;
-  status: 'Ongoing' | 'Incoming' | 'Completed';
-  resources: any[];
+  seminarTitle?: string;
 }
 
 interface AnnouncementsResponse {
@@ -41,93 +50,116 @@ interface AnnouncementsResponse {
   };
 }
 
-interface SeminarsResponse {
-  status: string;
-  message: string;
-  data: Seminar[];
+interface ViewerBadgeProps {
+  viewer: 'all' | 'members' | 'conference' | 'seminar' | 'speaker';
+  linkedId?: string;
+}
+
+interface Seminar {
+  id: number;
+  title: string;
+  date: string;
+  theme: string;
+  is_registered: boolean;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const SeminarAnnouncementsPage: React.FC = () => {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { data: session } = useSession();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [currentAnnouncement, setCurrentAnnouncement] = useState<Partial<Announcement>>({
+    id: undefined,
+    title: '',
+    description: '',
+    image: null,
+    link: '',
+    viewer: 'all',
+    linked_id: ''
+  });
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const seminarId = searchParams.get('seminarId');
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [selectedSeminar, setSelectedSeminar] = useState<Seminar | null>(null);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const { data: session } = useSession();
 
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Fetch seminars
+  // Format date to be more readable
+  const formatDate = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), 'MMMM d, yyyy');
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Format time to 12-hour format
+  const formatTime = (timeString: string) => {
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const hourNum = parseInt(hours);
+      const period = hourNum >= 12 ? 'PM' : 'AM';
+      const displayHour = hourNum % 12 || 12;
+      return `${displayHour}:${minutes} ${period}`;
+    } catch {
+      return timeString;
+    }
+  };
+
   const fetchSeminars = async () => {
     setIsLoading(true);
-    setError(null);
     try {
       const response = await fetch(`${API_URL}/landing/seminars`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch seminars');
-      }
-
-      const data: SeminarsResponse = await response.json();
+      const data = await response.json();
       if (data.status === "success") {
-        // Filter only Ongoing or Upcoming seminars
-        const activeSeminars = data.data.filter((seminar) => 
-          seminar.status === "Ongoing" || seminar.status === "Incoming"
-        );
-        setSeminars(activeSeminars);
+        setSeminars(data.data);
+      } else {
+        showToast.error("Failed to load seminars");
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred while fetching seminars');
-      console.error('Failed to fetch seminars:', error);
+      console.error("Error fetching seminars:", error);
+      showToast.error("Failed to load seminars");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch announcements for a specific seminar
-  const fetchSeminarAnnouncements = async (seminarId: number) => {
+  const fetchAnnouncements = async (seminarId: number) => {
+    setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/announcements/seminar/8-${seminarId}`, {
+      const response = await fetch(`${API_URL}/announcements/seminar/${seminarId}`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch announcements');
-      }
-
       const data: AnnouncementsResponse = await response.json();
       if (data.status === "success" && data.data) {
         const formattedAnnouncements = Object.entries(data.data)
           .flatMap(([date, announcements]) =>
-            announcements.map((announcement) => ({
+            announcements.map(announcement => ({
               ...announcement,
-              date
+              date,
+              seminarTitle: data.data[date][0].seminarTitle
             }))
-          )
-          .sort((a, b) => {
-            const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
-            if (dateCompare === 0) {
-              return new Date(`2000/01/01 ${b.time}`).getTime() - 
-                     new Date(`2000/01/01 ${a.time}`).getTime();
-            }
-            return dateCompare;
-          });
-        
+          );
         setAnnouncements(formattedAnnouncements);
       } else {
         setAnnouncements([]);
       }
     } catch (error) {
-      console.error('Failed to fetch announcements:', error);
+      console.error('Failed to fetch announcements', error);
       setAnnouncements([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,116 +169,147 @@ const SeminarAnnouncementsPage: React.FC = () => {
     }
   }, [bearerToken]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-muted-foreground">Loading seminars...</p>
-        </div>
-      </div>
-    );
-  }
+  // Viewer badge component
+  const ViewerBadge: React.FC<ViewerBadgeProps> = ({ viewer, linkedId }) => {
+    const getBadgeColor = () => {
+      if (!viewer) return 'bg-gray-100 text-gray-800';
+     
+      switch (viewer) {
+        case 'all': return 'bg-green-100 text-green-800';
+        case 'members': return 'bg-yellow-100 text-yellow-800';
+        case 'conference': return 'bg-blue-100 text-blue-800';
+        case 'seminar': return 'bg-purple-100 text-purple-800';
+        case 'speaker': return 'bg-orange-100 text-orange-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    };
 
-  if (error) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-red-600">
-          <p>Error: {error}</p>
-          <button 
-            onClick={() => fetchSeminars()}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </Card>
-    );
-  }
+    const displayText = viewer 
+      ? viewer.charAt(0).toUpperCase() + viewer.slice(1)
+      : 'Unknown';
 
-  if (seminars.length === 0) {
     return (
-      <div className="p-8">
-        <div className="text-center space-y-4">
-          <h3 className="text-xl font-semibold text-gray-900">No Active Seminars</h3>
-          <p className="text-muted-foreground">
-            There are currently no ongoing or upcoming seminars. Please check back later.
+      <span className={`px-2 py-1 rounded text-xs font-medium ${getBadgeColor()}`}>
+        {displayText}
+        {linkedId && ` (${linkedId})`}
+      </span>
+    );
+  };
+
+  // Loading state
+  const LoadingState = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(3)].map((_, i) => (
+        <Card key={i} className="animate-pulse">
+          <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+          <CardHeader>
+            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4 mt-2"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-4 bg-gray-200 rounded w-full mt-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6 mt-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-4/6 mt-2"></div>
+          </CardContent>
+          <CardFooter>
+            <div className="h-8 bg-gray-200 rounded w-24"></div>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // Empty state
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <Calendar className="h-12 w-12 text-gray-400 mb-4" />
+      <h3 className="text-lg font-medium text-gray-900">No announcements</h3>
+      <p className="text-gray-500 mt-1">
+        There are no announcements to display at this time.
+      </p>
+    </div>
+  );
+
+  const handleViewAnnouncements = (seminar: Seminar) => {
+    if (seminar.is_registered) {
+      setSelectedSeminar(seminar);
+      fetchAnnouncements(seminar.id);
+    } else {
+      showToast.error("You need to register for this seminar to view announcements.");
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-primary">Seminar Announcements</h1>
+          <p className="text-muted-foreground mt-1">
+            Stay updated with the latest news and information
           </p>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="space-y-8 p-4">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-          Seminars & Announcements
-        </h1>
-        <p className="text-muted-foreground">
-          Select a seminar to view its announcements
-        </p>
-      </div>
-
-      {/* Seminars List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {seminars.map((seminar) => (
-          <Card 
-            key={seminar.id}
-            className={`cursor-pointer transition-all duration-300 hover:shadow-lg
-              ${selectedSeminar?.id === seminar.id ? 'border-2 border-primary' : ''}`}
-            onClick={() => {
-              setSelectedSeminar(seminar);
-              fetchSeminarAnnouncements(seminar.id);
-            }}
-          >
-            <CardHeader>
-              <CardTitle className="text-lg line-clamp-2">{seminar.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground line-clamp-2">{seminar.theme}</p>
-              
-              <div className="flex items-center space-x-2 text-sm">
-                <Calendar className="w-4 h-4" />
-                <span>{seminar.date}</span>
-              </div>
-              
-              {seminar.venue && (
-                <div className="flex items-center space-x-2 text-sm">
-                  <MapPin className="w-4 h-4" />
-                  <span>{seminar.venue}</span>
+      {isLoading ? (
+        <LoadingState />
+      ) : seminars && seminars.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {seminars && seminars.map((seminar) => (
+            <Card 
+              key={seminar.id} 
+              className="hover:shadow-lg transition-all duration-300 h-full flex flex-col"
+            >
+              <CardHeader>
+                <CardTitle className="text-xl text-primary">{seminar.title}</CardTitle>
+                <div className="flex items-center text-sm text-muted-foreground gap-2">
+                  <Calendar size={14} />
+                  <span>{seminar.date}</span>
                 </div>
-              )}
-              
-              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium
-                ${seminar.status === 'Incoming' 
-                  ? 'bg-blue-100 text-blue-800' 
-                  : 'bg-green-100 text-green-800'
-                }`}
-              >
-                {seminar.status}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-muted-foreground line-clamp-3">
+                  {seminar.theme}
+                </p>
+              </CardContent>
+              <CardFooter className="flex justify-between items-center pt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleViewAnnouncements(seminar)}
+                >
+                  View Announcements
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Announcements Section */}
+      {/* Selected Seminar Announcements */}
       {selectedSeminar && (
-        <div className="mt-8 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Announcements for {selectedSeminar.title}
             </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedSeminar(null)}
+            >
+              Back to Seminars
+            </Button>
           </div>
-          
+
           {announcements.length === 0 ? (
             <Card className="p-8">
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-medium text-gray-900">No Announcements Available</h3>
-                {/* <p className="text-muted-foreground">
-                  Make payment to view announcements or check back later for updates.
-                </p> */}
+                <p className="text-muted-foreground">
+                  There are no announcements for this seminar yet.
+                </p>
               </div>
             </Card>
           ) : (
@@ -279,7 +342,7 @@ const SeminarAnnouncementsPage: React.FC = () => {
                   
                   <CardHeader>
                     <div className="text-sm text-muted-foreground mb-2">
-                      {announcement.date} - {announcement.time}
+                      {formatDate(announcement.date)} - {formatTime(announcement.time)}
                     </div>
                     <CardTitle className="line-clamp-2">{announcement.title}</CardTitle>
                   </CardHeader>
@@ -296,19 +359,7 @@ const SeminarAnnouncementsPage: React.FC = () => {
                         className="inline-flex items-center space-x-1 text-primary hover:underline mt-4"
                       >
                         <span>Learn More</span>
-                        <svg 
-                          className="w-4 h-4" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            strokeWidth={2} 
-                            d="M14 5l7 7m0 0l-7 7m7-7H3" 
-                          />
-                        </svg>
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
                   </CardContent>

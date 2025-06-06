@@ -485,8 +485,10 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({
 
 interface ConferenceDetailsProps {
   conference: Conference;
+  conferences: Conference[];
   onBack: () => void;
   onViewResources: (conference: Conference) => void;
+  onViewDetails: (conference: Conference) => void;
 }
 
 interface ApiResponse<T> {
@@ -521,8 +523,10 @@ const fetchConferenceDetails = async (
 
 const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
   conference,
+  conferences,
   onBack,
   onViewResources,
+  onViewDetails,
 }) => {
   const [conferenceDetails, setConferenceDetails] =
     useState<ConferenceDetails | null>(null);
@@ -836,6 +840,68 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           <p className="text-gray-500 text-center py-8">No resources available</p>
         )}
       </div>
+
+      {/* Past Seminars Section */}
+      <div className="space-y-4 mt-8">
+        <h2 className="text-2xl font-bold text-gray-900">Past Seminars</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {conferences
+            .filter((c: Conference) => c.id !== conference.id)
+            .map((pastConference: Conference) => (
+              <div key={pastConference.id} className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
+                <div className="relative group">
+                  <div className="absolute z-20 bottom-5 left-5">
+                    <span
+                      className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
+                        pastConference?.status === "Completed"
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {pastConference?.status}
+                    </span>
+                  </div>
+                  <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
+                    {pastConference.flyer ? (
+                      <Image
+                        src={pastConference.flyer}
+                        alt={pastConference.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        <FileText className="w-12 h-12" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <h2 className="text-gray-900 text-lg font-semibold line-clamp-2">
+                      {pastConference.title}
+                    </h2>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                    {pastConference.theme}
+                  </p>
+                  <div className="flex items-center text-gray-500 text-xs mb-4">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    <span>{formatDate(pastConference.date)}</span>
+                  </div>
+                </div>
+                <div className="px-4 pb-4">
+                  <button
+                    onClick={() => onViewDetails(pastConference)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
     </div>
   );
 };
@@ -1059,8 +1125,10 @@ const ConferenceResources: React.FC = () => {
       ) : viewMode === "details" && selectedConference ? (
         <ConferenceDetails
           conference={selectedConference}
+          conferences={conferences}
           onBack={handleBackToDashboard}
           onViewResources={handleViewResources}
+          onViewDetails={handleViewDetails}
         />
       ) : (
         <div className="space-y-6">

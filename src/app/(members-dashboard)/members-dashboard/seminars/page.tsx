@@ -317,6 +317,18 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
   );
 };
 
+interface UserData {
+  token: string;
+  // Add other user data properties as needed
+}
+
+interface Session {
+  user?: {
+    token?: string;
+    userData?: UserData;
+  };
+}
+
 interface AddResourceModalProps {
   conferenceId: number;
   onSuccess: () => void;
@@ -330,8 +342,8 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
-  const { data: session } = useSession();
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const { data: resourceSession } = useSession() as { data: Session | null };
+  const bearerToken = resourceSession?.user?.token || resourceSession?.user?.userData?.token;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -485,8 +497,12 @@ interface ApiResponse<T> {
 
 const fetchConferenceDetails = async (
   id: number,
-  bearerToken: string
+  bearerToken: string | undefined
 ): Promise<ApiResponse<ConferenceDetails>> => {
+  if (!bearerToken) {
+    throw new Error("No authentication token available");
+  }
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${id}`,
     {
@@ -512,16 +528,23 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
     useState<ConferenceDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
-  const { data: session } = useSession();
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const { data: detailsSession } = useSession() as { data: Session | null };
+  const bearerToken = detailsSession?.user?.token || detailsSession?.user?.userData?.token;
 
   useEffect(() => {
     const getConferenceDetails = async () => {
+      if (!bearerToken) {
+        setLoading(false);
+        showToast.error("Authentication required");
+        return;
+      }
+
       try {
-        const response = await fetchConferenceDetails(conference.id, bearerToken);
+        const response = await fetchConferenceDetails(conference.id, bearerToken as string);
         setConferenceDetails(response.data);
       } catch (error) {
         console.error("Error fetching conference details:", error);
+        showToast.error("Failed to load conference details");
       } finally {
         setLoading(false);
       }
@@ -824,11 +847,11 @@ const ConferenceResources: React.FC = () => {
   const [selectedConference, setSelectedConference] =
     useState<Conference | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "details" | "resources">(
-    "list"
+    "details"
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: session } = useSession();
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const { data: mainSession } = useSession() as { data: Session | null };
+  const bearerToken = mainSession?.user?.token || mainSession?.user?.userData?.token;
 
   const fetchConferences = async () => {
     try {
@@ -846,6 +869,9 @@ const ConferenceResources: React.FC = () => {
           }
         );
         setConferences(sortedConferences);
+        if (sortedConferences.length > 0) {
+          setSelectedConference(sortedConferences[0]);
+        }
       }
     } catch (error) {
       console.error("Error fetching conferences:", error);

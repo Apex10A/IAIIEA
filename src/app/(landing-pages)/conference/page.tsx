@@ -552,8 +552,8 @@ export default function ConferencePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
             title="Early Bird"
-            priceUsd={conference.payments.early_bird_registration[attendanceType].usd}
-            priceNaira={conference.payments.early_bird_registration[attendanceType].naira}
+            priceUsd={conference.payments.early_bird_registration[attendanceType]?.usd || '0'}
+            priceNaira={conference.payments.early_bird_registration[attendanceType]?.naira || '0'}
             features={[
               `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
               'Conference materials',
@@ -570,43 +570,47 @@ export default function ConferencePage() {
             attendanceType={attendanceType}
           />
 
-          <PaymentPlanCard
-            title="Normal"
-            priceUsd={conference.payments.normal_registration[attendanceType].usd}
-            priceNaira={conference.payments.normal_registration[attendanceType].naira}
-            features={[
-              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
-              'Conference materials',
-              'Digital certificate',
-              'Standard registration'
-            ]}
-            isCurrentPlan={conference.is_registered && conference.current_plan === 'normal_registration'}
-            isRegistered={conference.is_registered}
-            onClick={() => {
-              setSelectedPlan('normal_registration');
-              handleRegisterClick();
-            }}
-            attendanceType={attendanceType}
-          />
+          {conference.payments.normal_registration && (
+            <PaymentPlanCard
+              title="Normal"
+              priceUsd={conference.payments.normal_registration[attendanceType]?.usd || '0'}
+              priceNaira={conference.payments.normal_registration[attendanceType]?.naira || '0'}
+              features={[
+                `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
+                'Conference materials',
+                'Digital certificate',
+                'Standard registration'
+              ]}
+              isCurrentPlan={conference.is_registered && conference.current_plan === 'normal_registration'}
+              isRegistered={conference.is_registered}
+              onClick={() => {
+                setSelectedPlan('normal_registration');
+                handleRegisterClick();
+              }}
+              attendanceType={attendanceType}
+            />
+          )}
 
-          <PaymentPlanCard
-            title="Late"
-            priceUsd={conference.payments.late_registration[attendanceType].usd}
-            priceNaira={conference.payments.late_registration[attendanceType].naira}
-            features={[
-              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
-              'Conference materials',
-              'Digital certificate',
-              'Late registration'
-            ]}
-            isCurrentPlan={conference.is_registered && conference.current_plan === 'late_registration'}
-            isRegistered={conference.is_registered}
-            onClick={() => {
-              setSelectedPlan('late_registration');
-              handleRegisterClick();
-            }}
-            attendanceType={attendanceType}
-          />
+          {conference.payments.late_registration && (
+            <PaymentPlanCard
+              title="Late"
+              priceUsd={conference.payments.late_registration[attendanceType]?.usd || '0'}
+              priceNaira={conference.payments.late_registration[attendanceType]?.naira || '0'}
+              features={[
+                `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
+                'Conference materials',
+                'Digital certificate',
+                'Late registration'
+              ]}
+              isCurrentPlan={conference.is_registered && conference.current_plan === 'late_registration'}
+              isRegistered={conference.is_registered}
+              onClick={() => {
+                setSelectedPlan('late_registration');
+                handleRegisterClick();
+              }}
+              attendanceType={attendanceType}
+            />
+          )}
         </div>
       );
     } else if (conference.payments.basic) {
@@ -615,8 +619,8 @@ export default function ConferencePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
             title="Basic"
-            priceUsd={conference.payments.basic[attendanceType].usd}
-            priceNaira={conference.payments.basic[attendanceType].naira}
+            priceUsd={conference.payments.basic[attendanceType]?.usd || '0'}
+            priceNaira={conference.payments.basic[attendanceType]?.naira || '0'}
             features={[
               `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
               'Conference materials',
@@ -631,44 +635,48 @@ export default function ConferencePage() {
             attendanceType={attendanceType}
           />
 
-          <PaymentPlanCard
-            title="Standard"
-            priceUsd={conference.payments.standard[attendanceType].usd}
-            priceNaira={conference.payments.standard[attendanceType].naira}
-            features={[
-              'Everything in Basic',
-              attendanceType === 'virtual' ? 'Enhanced virtual experience' : 'Physical attendance',
-              attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking',
-              attendanceType === 'physical' ? 'Printed materials' : 'Digital goodies'
-            ]}
-            isCurrentPlan={conference.is_registered && conference.current_plan === 'standard'}
-            isRegistered={conference.is_registered}
-            isPopular
-            onClick={() => {
-              setSelectedPlan('standard');
-              handleRegisterClick();
-            }}
-            attendanceType={attendanceType}
-          />
+          {conference.payments.standard && (
+            <PaymentPlanCard
+              title="Standard"
+              priceUsd={conference.payments.standard[attendanceType]?.usd || '0'}
+              priceNaira={conference.payments.standard[attendanceType]?.naira || '0'}
+              features={[
+                'Everything in Basic',
+                attendanceType === 'virtual' ? 'Enhanced virtual experience' : 'Physical attendance',
+                attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking',
+                attendanceType === 'physical' ? 'Printed materials' : 'Digital goodies'
+              ]}
+              isCurrentPlan={conference.is_registered && conference.current_plan === 'standard'}
+              isRegistered={conference.is_registered}
+              isPopular
+              onClick={() => {
+                setSelectedPlan('standard');
+                handleRegisterClick();
+              }}
+              attendanceType={attendanceType}
+            />
+          )}
 
-          <PaymentPlanCard
-            title="Premium"
-            priceUsd={conference.payments.premium[attendanceType].usd}
-            priceNaira={conference.payments.premium[attendanceType].naira}
-            features={[
-              'Everything in Standard',
-              attendanceType === 'virtual' ? 'VIP virtual lounge' : 'VIP seating',
-              attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner',
-              'Exclusive gifts'
-            ]}
-            isCurrentPlan={conference.is_registered && conference.current_plan === 'premium'}
-            isRegistered={conference.is_registered}
-            onClick={() => {
-              setSelectedPlan('premium');
-              handleRegisterClick();
-            }}
-            attendanceType={attendanceType}
-          />
+          {conference.payments.premium && (
+            <PaymentPlanCard
+              title="Premium"
+              priceUsd={conference.payments.premium[attendanceType]?.usd || '0'}
+              priceNaira={conference.payments.premium[attendanceType]?.naira || '0'}
+              features={[
+                'Everything in Standard',
+                attendanceType === 'virtual' ? 'VIP virtual lounge' : 'VIP seating',
+                attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner',
+                'Exclusive gifts'
+              ]}
+              isCurrentPlan={conference.is_registered && conference.current_plan === 'premium'}
+              isRegistered={conference.is_registered}
+              onClick={() => {
+                setSelectedPlan('premium');
+                handleRegisterClick();
+              }}
+              attendanceType={attendanceType}
+            />
+          )}
         </div>
       );
     } else {
@@ -713,28 +721,40 @@ export default function ConferencePage() {
   return (
     <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
       {/* Header with Countdown and Button */}
-      <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-12 gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl mx-auto pt-8 md:pt-12 gap-6">
         <div className="w-full md:w-auto">
           {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
         </div>
-        <Button
-          className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
-          onClick={handleRegisterClick}
-        >
-          {conference.is_registered ? (
-            "Go to Dashboard"
-          ) : (
-            "Register Now"
-          )}
-        </Button>
+        {session ? (
+          <Button
+            className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+            onClick={handleRegisterClick}
+          >
+            {conference.is_registered ? (
+              "Go to Dashboard"
+            ) : (
+              "Register Now"
+            )}
+          </Button>
+        ) : (
+          <Button
+            className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+            onClick={() => router.push('/auth/signin')}
+          >
+            Sign in to Register
+          </Button>
+        )}
       </div>
 
       {/* Hero Section */}
-      <div className="mb-12 mt-8">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">
-          {conference.theme}
+      <div className="mb-12 mt-8 max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-4 leading-tight text-center">
+          {conference.title}
         </h1>
-        <div className="flex flex-wrap gap-4 md:gap-6">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight text-center">
+          {conference.theme}
+        </h2>
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <Calendar className="w-5 h-5" />
             <span>{conference.date}</span>
@@ -760,7 +780,7 @@ export default function ConferencePage() {
       </div>
 
       {/* Main Content */}
-      <div className="space-y-16">
+      <div className="space-y-16 max-w-7xl mx-auto">
         {/* Overview Section */}
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
@@ -809,14 +829,14 @@ export default function ConferencePage() {
               <CardTitle className="text-[#D5B93C]">Important Dates</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col space-y-4">
                 {conference.important_date.map((date, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 bg-white/5 p-3 rounded-lg"
+                    className="flex items-start gap-3 bg-white/5 p-4 rounded-lg"
                   >
                     <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                    <span>{date}</span>
+                    <span className="text-lg">{date}</span>
                   </div>
                 ))}
               </div>
@@ -824,71 +844,28 @@ export default function ConferencePage() {
           </Card>
         </section>
 
-        {/* Speakers Section */}
-        <section>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-            Speakers
-          </h2>
-
-          {conference.speakers?.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {conference.speakers.map((speaker, index) => (
-                <Card
-                  key={index}
-                  className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors"
-                >
-                  <CardContent className="p-0">
-                    <div className="relative h-48 w-full">
-                      <img
-                        src={speaker.picture}
-                        alt={speaker.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = "/placeholder.jpg";
-                        }}
-                      />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold mb-1">{speaker.name}</h3>
-                      <p className="text-[#D5B93C] text-sm mb-2">
-                        {speaker.title}
-                      </p>
-                      <p className="text-white/70 text-sm">
-                        {speaker.portfolio}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-white/70">
-              Speaker information will be available soon.
-            </div>
-          )}
-        </section>
-
-        {/* Flyer Section */}
-      
-        <section>
+        {/* Call for Papers Section */}
+        <section className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Call for papers 
           </h2>
-          <p className="text-white max-w-[60%]">
-            We invite submissions for IAIIEA conference 2024. We seek innovative
-            research and insights on a topic which aligns with the conference
-            theme. Please <a href="https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1" className='underline font-bold text-[#D5B93C]'>submit</a> your abstract by [deadline] to
-            iaiiea2024@iaiiea.org. The paper should, specifically, address
-            issues outlined in the associated sub-themes.
-          </p>
-          <Button 
-            className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold mt-3"
-            onClick={downloadFlyer}
-            disabled={!conference.flyer}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download Flyer
-          </Button>
+          <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 md:p-8">
+            <p className="text-white text-base md:text-lg leading-relaxed">
+              We invite submissions for IAIIEA conference 2024. We seek innovative
+              research and insights on a topic which aligns with the conference
+              theme. Please <a href="https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1" className='underline font-bold text-[#D5B93C]'>submit</a> your abstract by [deadline] to
+              iaiiea2024@iaiiea.org. The paper should, specifically, address
+              issues outlined in the associated sub-themes.
+            </p>
+            <Button 
+              className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold mt-6"
+              onClick={downloadFlyer}
+              disabled={!conference.flyer}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Flyer
+            </Button>
+          </div>
         </section>
 
         {/* Gallery Section */}
@@ -907,7 +884,7 @@ export default function ConferencePage() {
           </h2>
 
           {/* Current Plan Indicator */}
-          {conference.is_registered && conference.current_plan && (
+          {session && conference.is_registered && conference.current_plan && (
             <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
               <div className="flex items-center gap-3">
                 <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />

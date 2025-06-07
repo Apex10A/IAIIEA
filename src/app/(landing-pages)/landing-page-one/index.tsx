@@ -425,26 +425,26 @@ const LandingPage: React.FC = () => {
           <div className="space-y-12">
             <div>
               <div className="flex justify-between items-center mb-8">
-                <h3 className="text-2xl font-bold text-[#0B142F]">Conferences</h3>
-                <Link 
+                {/* <h3 className="text-2xl font-bold text-[#0B142F]">Conferences</h3> */}
+                {/* <Link 
                   href="/conferences"
                   className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors"
                 >
                   See All Conferences <FaArrowRight className="ml-2 w-4 h-4" />
-                </Link>
+                </Link> */}
               </div>
               <RealConference />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-8">
-                <h3 className="text-2xl font-bold text-[#0B142F]">Seminars</h3>
-                <Link 
+                {/* <h3 className="text-2xl font-bold text-[#0B142F]">Seminars</h3> */}
+                {/* <Link 
                   href="/seminars"
                   className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors"
                 >
                   See All Seminars <FaArrowRight className="ml-2 w-4 h-4" />
-                </Link>
+                </Link> */}
               </div>
               <RealSeminar />
             </div>

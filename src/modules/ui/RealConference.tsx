@@ -21,6 +21,7 @@ const SeminarCards = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -148,12 +149,23 @@ const SeminarCards = () => {
 
   return (
     <div className="container mx-auto px-4">
-      <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-12 text-center">
-        Our Conferences
-      </h2>
+      <div className="flex justify-between items-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F]">
+          Our Conferences
+        </h2>
+        {seminars.length > 3 && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-[#203A87] hover:text-[#152a61] font-medium flex items-center gap-2 transition-colors"
+          >
+            {showAll ? 'Show Less' : 'See All'}
+            <FiBookOpen className="w-4 h-4" />
+          </button>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {seminars.map((seminar, index) => (
+        {(showAll ? seminars : seminars.slice(0, 3)).map((seminar, index) => (
           <motion.div
             key={seminar.id}
             initial={{ opacity: 0, y: 20 }}

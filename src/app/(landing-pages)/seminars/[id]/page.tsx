@@ -359,7 +359,7 @@ export default function SeminarPage() {
   return (
     <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
       {/* Header with Countdown and Button */}
-      <div className="flex flex-col md:flex-row items-center justify-between w-full pt-8 md:pt-12 gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl mx-auto pt-8 md:pt-12 gap-6">
         <div className="w-full md:w-auto">
           {seminarDate && <CountdownTimer targetDate={seminarDate} />}
         </div>
@@ -376,11 +376,14 @@ export default function SeminarPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="mb-12 mt-8">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-6 leading-tight">
-          {seminar.theme}
+      <div className="mb-12 mt-8 max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-4 leading-tight text-center">
+          {seminar.title}
         </h1>
-        <div className="flex flex-wrap gap-4 md:gap-6">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight text-center">
+          {seminar.theme}
+        </h2>
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <Calendar className="w-5 h-5" />
             <span>{seminar.date}</span>
@@ -406,7 +409,7 @@ export default function SeminarPage() {
       </div>
 
       {/* Main Content */}
-      <div className="space-y-16">
+      <div className="space-y-16 max-w-7xl mx-auto">
         {/* Overview Section */}
         {seminar.sub_theme && seminar.sub_theme.length > 0 && (
           <section>
@@ -544,9 +547,14 @@ export default function SeminarPage() {
             {/* Basic Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
               seminar.is_registered && seminar.current_plan === 'basic' ? 
-              'border-[#D5B93C]' : 'border-[#D5B93C]/30'
-            }`}>
-              <div className="p-6">
+              'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
+            } relative`}>
+              {seminar.is_registered && seminar.current_plan === 'basic' && (
+                <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+                  ACTIVE ACCESS
+                </div>
+              )}
+              <div className={`p-6 ${seminar.is_registered && seminar.current_plan === 'basic' ? 'pt-16' : ''}`}>
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
                 
                 <div className="space-y-4">
@@ -585,8 +593,9 @@ export default function SeminarPage() {
                   
                   {seminar.is_registered ? (
                     seminar.current_plan === 'basic' ? (
-                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                        Your Current Plan
+                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                        <Check className="w-5 h-5" />
+                        <span>Your Active Plan</span>
                       </div>
                     ) : (
                       <button 
@@ -614,9 +623,14 @@ export default function SeminarPage() {
             {/* Standard Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 transform md:-translate-y-2 ${
               seminar.is_registered && seminar.current_plan === 'standard' ? 
-              'border-[#D5B93C]' : 'border-[#D5B93C]'
-            }`}>
-              <div className="p-6 relative">
+              'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]'
+            } relative`}>
+              {seminar.is_registered && seminar.current_plan === 'standard' && (
+                <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+                  ACTIVE ACCESS
+                </div>
+              )}
+              <div className={`p-6 relative ${seminar.is_registered && seminar.current_plan === 'standard' ? 'pt-16' : ''}`}>
                 {!seminar.is_registered && (
                   <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
                     POPULAR
@@ -660,8 +674,9 @@ export default function SeminarPage() {
                   
                   {seminar.is_registered ? (
                     seminar.current_plan === 'standard' ? (
-                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                        Your Current Plan
+                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                        <Check className="w-5 h-5" />
+                        <span>Your Active Plan</span>
                       </div>
                     ) : (
                       <button 
@@ -689,9 +704,14 @@ export default function SeminarPage() {
             {/* Premium Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
               seminar.is_registered && seminar.current_plan === 'premium' ? 
-              'border-[#D5B93C]' : 'border-[#D5B93C]/30'
-            }`}>
-              <div className="p-6">
+              'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
+            } relative`}>
+              {seminar.is_registered && seminar.current_plan === 'premium' && (
+                <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+                  ACTIVE ACCESS
+                </div>
+              )}
+              <div className={`p-6 ${seminar.is_registered && seminar.current_plan === 'premium' ? 'pt-16' : ''}`}>
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Premium Access</h3>
                 
                 <div className="space-y-4">
@@ -730,8 +750,9 @@ export default function SeminarPage() {
                   
                   {seminar.is_registered ? (
                     seminar.current_plan === 'premium' ? (
-                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                        Your Current Plan
+                      <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                        <Check className="w-5 h-5" />
+                        <span>Your Active Plan</span>
                       </div>
                     ) : (
                       <button 

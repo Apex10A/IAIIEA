@@ -15,6 +15,7 @@ import {
   User,
   LogIn,
   Download,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -352,9 +353,16 @@ const PaymentPlanCard = ({
   attendanceType: 'virtual' | 'physical';
 }) => {
   return (
-    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${isCurrentPlan ? 'border-[#D5B93C]' : isPopular ? 'border-[#D5B93C]' : 'border-[#D5B93C]/30'} ${isPopular ? 'transform md:-translate-y-2' : ''}`}>
-      <div className="p-6 relative">
-        {isPopular && !isRegistered && (
+    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+      isCurrentPlan ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : isPopular ? 'border-[#D5B93C]' : 'border-[#D5B93C]/30'
+    } ${isPopular ? 'transform md:-translate-y-2' : ''} relative`}>
+      {isCurrentPlan && (
+        <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+          ACTIVE ACCESS
+        </div>
+      )}
+      <div className={`p-6 relative ${isCurrentPlan ? 'pt-16' : ''}`}>
+        {isPopular && !isRegistered && !isCurrentPlan && (
           <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
             POPULAR
           </div>
@@ -385,8 +393,9 @@ const PaymentPlanCard = ({
           
           {isRegistered ? (
             isCurrentPlan ? (
-              <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center">
-                Your Current Plan
+              <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                <Check className="w-5 h-5" />
+                <span>Your Active Plan</span>
               </div>
             ) : (
               <button 

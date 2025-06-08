@@ -1,8 +1,7 @@
 "use client"
 import React from 'react';
-import { MapPin, Calendar, Clock, DollarSign, User } from 'lucide-react';
+import { MapPin, Calendar, Clock, Check, User } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import "@/app/index.css"
 
 interface SeminarDetails {
@@ -11,7 +10,7 @@ interface SeminarDetails {
   venue: string;
   date: string;
   start_time: string;
-  speakers?: { name: string; title: string; picture: string }[];
+  speakers?: { name: string; title: string; picture: string; portfolio: string }[];
   payments?: {
     [key: string]: {
       virtual?: { usd?: number; naira?: number };
@@ -47,37 +46,39 @@ const SeminarLandingPage = () => {
   }, [seminarId]);
 
   if (!seminarDetails) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center conference-bg">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#D5B93C] mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading seminar details...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section with Background */}
-      <section className="relative h-screen">
-        {/* Background Image Overlay */}
-        <div className="absolute inset-0 bg-[#1A2A5C] bg-opacity-90">
-          <div className="absolute inset-0 bg-[url('/api/placeholder/1920/1080')] mix-blend-overlay opacity-30" />
-        </div>
-
-        {/* Content */}
-        <div className="relative h-full flex items-center justify-center text-white px-6">
-          <div className="text-center max-w-4xl">
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-bold mb-6">{seminarDetails.title}</h1>
-            <p className="text-xl md:text-2xl mb-8">
-              <span className="text-[#D5B93C]">Theme: </span>
+    <div className="min-h-screen conference-bg">
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center px-4 md:px-8 lg:px-16">
+        <div className="max-w-7xl mx-auto w-full pt-16 md:pt-24">
+          <div className="text-center">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-4 leading-tight">
+              {seminarDetails.title}
+            </h1>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-8 leading-tight">
               {seminarDetails.theme}
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 text-lg">
-              <div className="flex items-center">
-                <MapPin className="w-6 h-6 mr-2 text-[#D5B93C]" />
+            </h2>
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
+                <MapPin className="w-5 h-5" />
                 <span>{seminarDetails.venue}</span>
               </div>
-              <div className="flex items-center">
-                <Calendar className="w-6 h-6 mr-2 text-[#D5B93C]" />
+              <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
+                <Calendar className="w-5 h-5" />
                 <span>{seminarDetails.date}</span>
               </div>
-              <div className="flex items-center">
-                <Clock className="w-6 h-6 mr-2 text-[#D5B93C]" />
+              <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
+                <Clock className="w-5 h-5" />
                 <span>{seminarDetails.start_time}</span>
               </div>
             </div>
@@ -87,22 +88,28 @@ const SeminarLandingPage = () => {
 
       {/* Speakers Section */}
       {seminarDetails.speakers && seminarDetails.speakers.length > 0 && (
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-6">
-            <h2 className="text-4xl font-bold mb-12 text-center">Featured Speakers</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section className="py-20 px-4 md:px-8 lg:px-16">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-12 pb-2 border-b border-[#D5B93C] inline-block">
+              Featured Speakers
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {seminarDetails.speakers.map((speaker, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="relative h-64 w-full">
+                <div key={index} className="bg-white/5 backdrop-blur-sm rounded-lg overflow-hidden border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="relative h-48 w-full">
                     <img
                       src={speaker.picture}
                       alt={speaker.name}
-                      className="object-cover w-full h-full"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.jpg";
+                      }}
                     />
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">{speaker.name}</h3>
-                    <p className="text-gray-600">{speaker.title}</p>
+                    <h3 className="text-xl font-bold text-white mb-1">{speaker.name}</h3>
+                    <p className="text-[#D5B93C] text-sm mb-2">{speaker.title}</p>
+                    <p className="text-white/70 text-sm">{speaker.portfolio}</p>
                   </div>
                 </div>
               ))}
@@ -113,50 +120,68 @@ const SeminarLandingPage = () => {
 
       {/* Pricing Section */}
       {seminarDetails.payments && Object.keys(seminarDetails.payments).length > 0 && (
-        <section className="py-20">
-          <div className="container mx-auto px-6">
-            <h2 className="text-4xl font-bold mb-12 text-center">Registration Packages</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {Object.entries(seminarDetails.payments).map(([tier, details]) => (
+        <section className="py-20 px-4 md:px-8 lg:px-16">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-12 pb-2 border-b border-[#D5B93C] inline-block">
+              Registration Packages
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Object.entries(seminarDetails.payments).map(([tier, details], index) => (
                 details && (
-                  <div key={tier} className="bg-white rounded-lg shadow-lg p-8">
-                    <h3 className="text-2xl font-semibold mb-4 capitalize">{tier}</h3>
-                    
-                    {details.virtual && (
-                      <div className="mb-6">
-                        <h4 className="text-lg font-semibold mb-2">Virtual</h4>
-                        <p className="text-[#D5B93C] font-bold">
-                          {details.virtual.usd && `USD $${details.virtual.usd}`}
-                          {details.virtual.usd && details.virtual.naira && ' / '}
-                          {details.virtual.naira && `₦${details.virtual.naira}`}
-                        </p>
-                      </div>
-                    )}
+                  <div 
+                    key={tier} 
+                    className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+                      index === 1 ? 'border-[#D5B93C] transform md:-translate-y-2' : 'border-[#D5B93C]/30'
+                    }`}
+                  >
+                    <div className="p-6 relative">
+                      {index === 1 && (
+                        <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
+                          POPULAR
+                        </div>
+                      )}
+                      <h3 className="text-xl font-bold text-[#0E1A3D] mb-4 capitalize">{tier}</h3>
+                      
+                      <div className="space-y-4">
+                        {details.virtual && (
+                          <div className="text-center">
+                            <h4 className="text-lg font-semibold mb-2 text-[#0E1A3D]">Virtual</h4>
+                            <p className="text-3xl font-bold text-[#0E1A3D]">
+                              ${details.virtual.usd || '0'}
+                            </p>
+                            <p className="text-lg text-gray-700">
+                              ₦{details.virtual.naira || '0'}
+                            </p>
+                          </div>
+                        )}
 
-                    {details.physical && (
-                      <div className="mb-6">
-                        <h4 className="text-lg font-semibold mb-2">Physical</h4>
-                        <p className="text-[#D5B93C] font-bold">
-                          {details.physical.usd && `USD $${details.physical.usd}`}
-                          {details.physical.usd && details.physical.naira && ' / '}
-                          {details.physical.naira && `₦${details.physical.naira}`}
-                        </p>
-                      </div>
-                    )}
+                        {details.physical && (
+                          <div className="text-center">
+                            <h4 className="text-lg font-semibold mb-2 text-[#0E1A3D]">Physical</h4>
+                            <p className="text-3xl font-bold text-[#0E1A3D]">
+                              ${details.physical.usd || '0'}
+                            </p>
+                            <p className="text-lg text-gray-700">
+                              ₦{details.physical.naira || '0'}
+                            </p>
+                          </div>
+                        )}
 
-                    {details.package && details.package.length > 0 && (
-                      <div>
-                        <h4 className="text-lg font-semibold mb-2">Includes:</h4>
-                        <ul className="space-y-2">
-                          {details.package.map((item, index) => (
-                            <li key={index} className="flex items-center">
-                              <DollarSign className="w-4 h-4 mr-2 text-[#D5B93C]" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
+                        {details.package && details.package.length > 0 && (
+                          <div className="pt-2">
+                            <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+                            <ul className="space-y-2 text-sm text-gray-700">
+                              {details.package.map((item, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 )
               ))}

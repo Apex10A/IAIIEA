@@ -14,7 +14,7 @@ import SeminarsWebinars from "@/app/(members-dashboard)/members-dashboard/semina
 import MembersDirectory from '@/app/(members-dashboard)/members-dashboard/membersdirectory/page';
 import IAIIEAResources from '@/app/(members-dashboard)/members-dashboard/resources/page';
 import Forum from "@/app/(members-dashboard)/members-dashboard/forum/page";
-import Payment from "@/app/(members-dashboard)/members-dashboard/payment/Payment";
+import Payment from "@/app/(members-dashboard)/members-dashboard/payment/page";
 import Settings from '@/app/(members-dashboard)/members-dashboard/settings/page';
 import Resources from "@/app/(members-dashboard)/conference/resources/page"
 import Participants from "@/app/(members-dashboard)/conference/participants/page"

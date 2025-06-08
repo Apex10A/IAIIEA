@@ -21,16 +21,16 @@ import {
   DialogTitle, 
   DialogDescription 
 } from '@/modules/ui/dialog';
+import { Badge } from '@/modules/ui/badge';
+import { Calendar, Search, Filter, X } from 'lucide-react';
 
 // Interfaces
 interface PaymentDetail {
-  name: string;
-  email: string;
-  payment_type: string;
+  title: string;
   payment_id: string;
   amount: number;
   currency: string;
-  date: string;
+  sub_payments: Record<string, number> | [];
 }
 
 interface FilterState {
@@ -39,6 +39,7 @@ interface FilterState {
   minAmount: string;
   maxAmount: string;
   paymentType: string;
+  searchQuery: string;
 }
 
 const PaymentHistory: React.FC = () => {
@@ -47,7 +48,7 @@ const PaymentHistory: React.FC = () => {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 8; // Number of items to display per page
+  const ITEMS_PER_PAGE = 8;
 
   // State for payments and filtering
   const [paymentHistory, setPaymentHistory] = useState<PaymentDetail[]>([]);
@@ -61,13 +62,13 @@ const PaymentHistory: React.FC = () => {
     dateTo: '',
     minAmount: '',
     maxAmount: '',
-    paymentType: ''
+    paymentType: '',
+    searchQuery: ''
   });
+  const [showFilters, setShowFilters] = useState(false);
   const [paymentTypes, setPaymentTypes] = useState<string[]>([]);
   
   // Selection and details state
-  const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
-  const [isAllSelected, setIsAllSelected] = useState(false);
   const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentDetail | null>(null);
 
   // Memoized pagination logic
@@ -87,146 +88,19 @@ const PaymentHistory: React.FC = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
-
-  const truncateText = (text: string, maxLength: number = 20) => {
-    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-  };
-
-  // Pagination handlers
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
-    }
-  };
-
-  // Pagination rendering function
-  const renderPagination = () => {
-    const pageNumbers = [];
-    const displayRange = 2; // Number of pages to show around the current page
-  
-    // Always show first page
-    if (totalPages > 1) {
-      pageNumbers.push(
-        <button
-          key={1}
-          onClick={() => setCurrentPage(1)}
-          className={`px-4 py-2 rounded ${
-            currentPage === 1 
-              ? 'bg-[#fef08a] text-black' 
-              : 'border-2 border-[#fef08a] bg-transparent text-black'
-          }`}
-        >
-          1
-        </button>
-      );
-    }
-  
-    // Add ellipsis and surrounding pages before current page
-    if (currentPage > displayRange + 2) {
-      pageNumbers.push(
-        <span key="start-ellipsis" className="px-2">
-          ...
-        </span>
-      );
-    }
-  
-    // Calculate start and end for middle range
-    const startPage = Math.max(2, currentPage - displayRange);
-    const endPage = Math.min(totalPages - 1, currentPage + displayRange);
-  
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(
-        <button
-          key={i}
-          onClick={() => setCurrentPage(i)}
-          className={`px-4 py-2 rounded ${
-            currentPage === i 
-              ? 'bg-[#fef08a] text-black' 
-              : 'border-2 border-[#fef08a] bg-transparent text-black'
-          }`}
-        >
-          {i}
-        </button>
-      );
-    }
-  
-    // Add ellipsis and pages after current page
-    if (currentPage < totalPages - (displayRange + 1)) {
-      pageNumbers.push(
-        <span key="end-ellipsis" className="px-2">
-          ...
-        </span>
-      );
-    }
-  
-    // Always show last page
-    if (totalPages > 1) {
-      pageNumbers.push(
-        <button
-          key={totalPages}
-          onClick={() => setCurrentPage(totalPages)}
-          className={`px-4 py-2 rounded ${
-            currentPage === totalPages 
-              ? 'bg-[#fef08a] text-black' 
-              : 'border-2 border-[#fef08a] bg-transparent text-black'
-          }`}
-        >
-          {totalPages}
-        </button>
-      );
-    }
-  
-    return pageNumbers;
-  };
-
-  // Selection handlers
-  const handleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedPayments([]);
+  const getStatusColor = (title: string) => {
+    if (title.toLowerCase().includes('conference')) {
+      return 'bg-blue-100 text-blue-800';
+    } else if (title.toLowerCase().includes('membership')) {
+      return 'bg-purple-100 text-purple-800';
     } else {
-      setSelectedPayments(filteredPayments.map(payment => payment.payment_id));
+      return 'bg-gray-100 text-gray-800';
     }
-    setIsAllSelected(!isAllSelected);
   };
-
-  const handlePaymentSelect = (paymentId: string) => {
-    setSelectedPayments(prev => 
-      prev.includes(paymentId)
-        ? prev.filter(id => id !== paymentId)
-        : [...prev, paymentId]
-    );
-  };
-
-  // Details popup handlers
-  const openPaymentDetails = (payment: PaymentDetail) => {
-    setSelectedPaymentDetail(payment);
-  };
-
-  const closePaymentDetails = () => {
-    setSelectedPaymentDetail(null);
-  };
-
-  // API configuration
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   // Fetch payment history
   useEffect(() => {
     const fetchPaymentHistory = async () => {
-      // Check if session and token are available
       if (status !== 'authenticated' || !session?.user) {
         setError('Not authenticated');
         setIsLoading(false);
@@ -235,9 +109,9 @@ const PaymentHistory: React.FC = () => {
 
       try {
         setIsLoading(true);
-        const response = await axios.get(`${API_URL}/admin/payment_history`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/payment_history`, {
           headers: {
-            'Authorization': `Bearer ${bearerToken}`
+            'Authorization': `Bearer ${session.user.token}`
           }
         });
         
@@ -247,8 +121,8 @@ const PaymentHistory: React.FC = () => {
           setFilteredPayments(paymentData);
           
           // Extract unique payment types
-          // const uniqueTypes = [...new Set(paymentData.map(payment => payment.payment_type))];
-          // setPaymentTypes(uniqueTypes);
+          const uniqueTypes = [...new Set(paymentData.map((payment: PaymentDetail) => payment.title))];
+          setPaymentTypes(uniqueTypes);
           
           setError(null);
         } else {
@@ -270,15 +144,12 @@ const PaymentHistory: React.FC = () => {
   const applyFilters = () => {
     let result = [...paymentHistory];
 
-    // Date filter
-    if (filters.dateFrom) {
+    // Search query filter
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
       result = result.filter(payment => 
-        new Date(payment.date) >= new Date(filters.dateFrom)
-      );
-    }
-    if (filters.dateTo) {
-      result = result.filter(payment => 
-        new Date(payment.date) <= new Date(filters.dateTo)
+        payment.title.toLowerCase().includes(query) ||
+        payment.payment_id.toLowerCase().includes(query)
       );
     }
 
@@ -297,12 +168,12 @@ const PaymentHistory: React.FC = () => {
     // Payment type filter
     if (filters.paymentType) {
       result = result.filter(payment => 
-        payment.payment_type === filters.paymentType
+        payment.title === filters.paymentType
       );
     }
 
     setFilteredPayments(result);
-    setCurrentPage(1); // Reset to first page when filters are applied
+    setCurrentPage(1);
   };
 
   // Reset filters
@@ -312,22 +183,23 @@ const PaymentHistory: React.FC = () => {
       dateTo: '',
       minAmount: '',
       maxAmount: '',
-      paymentType: ''
+      paymentType: '',
+      searchQuery: ''
     });
     setFilteredPayments(paymentHistory);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
-  // Render loading state
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-gray-500">Loading payment history...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D5B93C]"></div>
       </div>
     );
   }
 
-  // Render authentication error
+  // Error states
   if (status === 'unauthenticated' || error === 'Not authenticated') {
     return (
       <div className="bg-red-50 p-4 rounded-md">
@@ -336,7 +208,6 @@ const PaymentHistory: React.FC = () => {
     );
   }
 
-  // Render other error states
   if (error) {
     return (
       <div className="bg-red-50 p-4 rounded-md">
@@ -347,87 +218,103 @@ const PaymentHistory: React.FC = () => {
 
   return (
     <div>
-      {/* Filters */}
-      <h1 className='text-red-500 text-lg pb-3'>Filter by:</h1>
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Date From</label>
-          <Input 
-            type="date" 
-            value={filters.dateFrom}
-            onChange={(e) => setFilters(prev => ({...prev, dateFrom: e.target.value}))}
+      {/* Search and Filter Bar */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Input
+            type="text"
+            placeholder="Search payments..."
+            value={filters.searchQuery}
+            onChange={(e) => setFilters(prev => ({...prev, searchQuery: e.target.value}))}
+            className="pl-10"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Date To</label>
-          <Input 
-            type="date" 
-            value={filters.dateTo}
-            onChange={(e) => setFilters(prev => ({...prev, dateTo: e.target.value}))}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Payment Type</label>
-          <Select 
-            value={filters.paymentType}
-            onValueChange={(value) => setFilters(prev => ({...prev, paymentType: value}))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Payment Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {paymentTypes.map((type) => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Min Amount</label>
-          <Input 
-            type="number" 
-            value={filters.minAmount}
-            onChange={(e) => setFilters(prev => ({...prev, minAmount: e.target.value}))}
-            placeholder="Minimum Amount"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Max Amount</label>
-          <Input 
-            type="number" 
-            value={filters.maxAmount}
-            onChange={(e) => setFilters(prev => ({...prev, maxAmount: e.target.value}))}
-            placeholder="Maximum Amount"
-          />
-        </div>
-        <div className="flex items-end space-x-2">
-          <Button onClick={applyFilters} className='bg-[#fef08a]'>Apply Filters</Button>
-          <Button variant="outline" onClick={resetFilters}>Reset</Button>
-        </div>
+        <Button
+          variant="outline"
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center gap-2"
+        >
+          <Filter className="h-4 w-4" />
+          {showFilters ? 'Hide Filters' : 'Show Filters'}
+        </Button>
       </div>
+
+      {/* Filters Panel */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
+                <Select 
+                  value={filters.paymentType}
+                  onValueChange={(value) => setFilters(prev => ({...prev, paymentType: value}))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Payment Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Types</SelectItem>
+                    {paymentTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Min Amount</label>
+                <Input 
+                  type="number" 
+                  value={filters.minAmount}
+                  onChange={(e) => setFilters(prev => ({...prev, minAmount: e.target.value}))}
+                  placeholder="Minimum Amount"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Max Amount</label>
+                <Input 
+                  type="number" 
+                  value={filters.maxAmount}
+                  onChange={(e) => setFilters(prev => ({...prev, maxAmount: e.target.value}))}
+                  placeholder="Maximum Amount"
+                />
+              </div>
+              <div className="flex items-end gap-2">
+                <Button onClick={applyFilters} className="bg-[#D5B93C] text-[#0E1A3D] hover:bg-[#D5B93C]/90">
+                  Apply Filters
+                </Button>
+                <Button variant="outline" onClick={resetFilters}>
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Payment History Table */}
       {filteredPayments.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-500">No payment history found.</p>
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <Calendar className="h-12 w-12 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900">No payment history found</h3>
+          <p className="text-gray-500 mt-1">Try adjusting your filters or search criteria</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50px]">
-                  <input 
-                    type="checkbox" 
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Payment Type</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Payment ID</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -435,27 +322,21 @@ const PaymentHistory: React.FC = () => {
             <TableBody>
               {paginatedPayments.map((payment) => (
                 <TableRow key={payment.payment_id}>
+                  <TableCell className="font-medium">{payment.title}</TableCell>
+                  <TableCell className="font-mono text-sm">{payment.payment_id}</TableCell>
                   <TableCell>
-                    <input 
-                      type="checkbox" 
-                      checked={selectedPayments.includes(payment.payment_id)}
-                      onChange={() => handlePaymentSelect(payment.payment_id)}
-                      className="form-checkbox h-5 w-5 text-blue-600"
-                    />
+                    <Badge className={getStatusColor(payment.title)}>
+                      {payment.title}
+                    </Badge>
                   </TableCell>
-                  <TableCell className='text-slate-600'>{truncateText(payment.name)}</TableCell>
-                  <TableCell className='text-slate-600'>{truncateText(payment.email)}</TableCell>
-                  <TableCell className='text-slate-600'>{payment.payment_type}</TableCell>
-                  <TableCell className='text-slate-600'>{truncateText(payment.payment_id)}</TableCell>
-                  <TableCell className="text-right text-slate-600">
+                  <TableCell className="text-right font-medium">
                     {formatCurrency(payment.amount, payment.currency)}
                   </TableCell>
                   <TableCell>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className='text-slate-600 border-slate-500 '
-                      onClick={() => openPaymentDetails(payment)}
+                      onClick={() => setSelectedPaymentDetail(payment)}
                     >
                       View Details
                     </Button>
@@ -465,18 +346,20 @@ const PaymentHistory: React.FC = () => {
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={5} className="text-center">
                   <div className="flex justify-center items-center space-x-2 mt-4">
                     <Button 
-                      onClick={handlePrevPage} 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
                       disabled={currentPage === 1}
                       variant="outline"
                     >
                       Previous
                     </Button>
-                    {renderPagination()}
+                    <span className="text-sm text-gray-600">
+                      Page {currentPage} of {totalPages}
+                    </span>
                     <Button 
-                      onClick={handleNextPage} 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
                       disabled={currentPage === totalPages}
                       variant="outline"
                     >
@@ -490,50 +373,57 @@ const PaymentHistory: React.FC = () => {
         </div>
       )}
 
-<AnimatePresence>
-  <Dialog open={!!selectedPaymentDetail} onOpenChange={closePaymentDetails}>
-    <DialogContent>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 300, 
-          damping: 20 
-        }}
-      >
-        <DialogHeader>
-          <h1 className='text-2xl'>Payment Details</h1>
-          <DialogDescription>
-            {selectedPaymentDetail && (
-              <div className="space-y-4 my-5">
+      {/* Payment Details Dialog */}
+      <Dialog open={!!selectedPaymentDetail} onOpenChange={() => setSelectedPaymentDetail(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Payment Details</DialogTitle>
+          </DialogHeader>
+          {selectedPaymentDetail && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className='text-lg'>{selectedPaymentDetail.name}</span>
+                  <p className="text-sm font-medium text-gray-500">Title</p>
+                  <p className="mt-1">{selectedPaymentDetail.title}</p>
                 </div>
                 <div>
-                  <span className='text-lg'>{selectedPaymentDetail.email}</span>
+                  <p className="text-sm font-medium text-gray-500">Type</p>
+                  <Badge className={`mt-1 ${getStatusColor(selectedPaymentDetail.title)}`}>
+                    {selectedPaymentDetail.title}
+                  </Badge>
                 </div>
                 <div>
-                 <span className='text-lg'>{selectedPaymentDetail.payment_type}</span>
+                  <p className="text-sm font-medium text-gray-500">Amount</p>
+                  <p className="mt-1 font-medium">
+                    {formatCurrency(selectedPaymentDetail.amount, selectedPaymentDetail.currency)}
+                  </p>
                 </div>
                 <div>
-                  <span className='text-lg'>{selectedPaymentDetail.payment_id}</span>
-                </div>
-                <div>
-                 <span className='text-lg'>{formatCurrency(selectedPaymentDetail.amount, selectedPaymentDetail.currency)}</span>
-                </div>
-                <div>
-                  <span className='text-lg'>{formatDate(selectedPaymentDetail.date)}</span>
+                  <p className="text-sm font-medium text-gray-500">Payment ID</p>
+                  <p className="mt-1 font-mono text-sm">{selectedPaymentDetail.payment_id}</p>
                 </div>
               </div>
-            )}
-          </DialogDescription>
-        </DialogHeader>
-      </motion.div>
-    </DialogContent>
-  </Dialog>
-</AnimatePresence>
+              {selectedPaymentDetail.sub_payments && 
+               typeof selectedPaymentDetail.sub_payments === 'object' && 
+               Object.keys(selectedPaymentDetail.sub_payments).length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">Sub Payments</p>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    {Object.entries(selectedPaymentDetail.sub_payments).map(([plan, amount]) => (
+                      <div key={plan} className="flex justify-between items-center py-2 border-b last:border-0">
+                        <span className="font-medium">{plan}</span>
+                        <span className="text-gray-600">
+                          {formatCurrency(amount, selectedPaymentDetail.currency)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

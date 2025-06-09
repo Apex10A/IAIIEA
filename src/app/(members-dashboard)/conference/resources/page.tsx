@@ -791,7 +791,7 @@ const ConferenceResources: React.FC = () => {
                     No resources yet
                   </h3>
                   <p className="text-gray-700 dark:text-gray-400">
-                    Add resources to make them available to attendees
+                   See resources available to attendees
                   </p>
                 </div>
               )}

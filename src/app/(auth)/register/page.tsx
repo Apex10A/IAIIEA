@@ -59,6 +59,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [agreeToPrivacy, setAgreeToPrivacy] = useState(false)
 
   const registrationTypes = [
     { value: "Individual", label: "Individual" },
@@ -92,6 +93,11 @@ export default function RegisterPage() {
   })
 
   const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
+    if (!agreeToPrivacy) {
+      showToast.error('Please agree to the privacy policy');
+      return;
+    }
+    
     setIsLoading(true)
 
     try {
@@ -406,14 +412,14 @@ export default function RegisterPage() {
                 name="qualifications"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-medium text-[#b0abab] text-sm">
+                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
                     Qualifications<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         id="qualifications"
                         type="text"
-                        placeholder="Degree"
+                        placeholder="Enter your academic qualifications"
                         required
                         {...field}
                         disabled={isLoading}
@@ -435,7 +441,7 @@ export default function RegisterPage() {
                       <Input
                         id="aos"
                         type="text"
-                        placeholder="Course/Department"
+                        placeholder="Enter your area of specialization"
                         required
                         {...field}
                         disabled={isLoading}
@@ -451,13 +457,13 @@ export default function RegisterPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    Institution Name Addr<span className="text-brand-primary">*</span>
+                    Institution Name & Address<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         id="ina"
                         type="text"
-                        placeholder="University of California"
+                        placeholder="Enter your institution name and address"
                         required
                         {...field}
                         disabled={isLoading}
@@ -470,6 +476,26 @@ export default function RegisterPage() {
               {/* Phone, Email, Postal Address, Country, etc. */}
              </div>
               
+              {/* Privacy Policy Checkbox */}
+              <div className="flex items-start space-x-2 mb-4">
+                <div className="flex items-center h-5">
+                  <input
+                    id="privacy-checkbox"
+                    type="checkbox"
+                    checked={agreeToPrivacy}
+                    onChange={(e) => setAgreeToPrivacy(e.target.checked)}
+                    className="w-4 h-4 text-[#203A87] border-gray-300 rounded focus:ring-[#203A87]"
+                    required
+                  />
+                </div>
+                <label htmlFor="privacy-checkbox" className="text-sm text-gray-700">
+                  I agree to IAIIEA in using my personal data to carry out my request in line with its{' '}
+                  <Link href="/privacy-policy" className="text-[#203A87] hover:underline">
+                    Privacy Policy
+                  </Link>.
+                </label>
+              </div>
+
               <div className="flex flex-col w-full">
               <Button
                 type="submit"

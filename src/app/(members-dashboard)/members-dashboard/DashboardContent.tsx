@@ -5,6 +5,7 @@ import { UserDataType } from '@/app/(members-dashboard)/members-dashboard/dash/t
 import { CheckCircle, AlertCircle, Loader2, Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
 import Calendar from "./calendar";
 import { useSession } from "next-auth/react";
+import Link from 'next/link';
 
 interface Event {
   id: number;
@@ -536,10 +537,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
+          <Link href="/events" className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
             <h3 className="font-medium text-gray-800 mb-2">Register for Events</h3>
             <p className="text-sm text-gray-600">Browse and register for upcoming conferences and seminars</p>
-          </button>
+          </Link>
           <button className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
             <h3 className="font-medium text-gray-800 mb-2">View Resources</h3>
             <p className="text-sm text-gray-600">Access materials from past events</p>

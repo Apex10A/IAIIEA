@@ -164,10 +164,18 @@ const LandingPage: React.FC = () => {
                         </div>
                         <div className="pt-8 relative z-50">
                           <Link
-                            href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
-                            className="relative inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-[#D5B93C] text-white text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                            // href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
+                            href={'/register'}
+                            className="relative inline-flex items-center md:mr-4 px-6 md:px-8 py-3 md:py-4 bg-[#D5B93C] text-white text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
                           >
-                            Learn More <FaArrowRight className="ml-3 w-5 h-5" />
+                           How to Join <FaArrowRight className="ml-3 w-5 h-5" />
+                          </Link>
+                          <Link
+                            // href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
+                            href={'/about'}
+                            className="relative inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-transparent border border-[#D5B93C] text-white text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                          >
+                           About IAIIEA <FaArrowRight className="ml-3 w-5 h-5" />
                           </Link>
                         </div>
                       </motion.div>

@@ -533,24 +533,24 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
         <Calendar events={calendarEvents} />
       </div>
 
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/events" className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
-            <h3 className="font-medium text-gray-800 mb-2">Register for Events</h3>
-            <p className="text-sm text-gray-600">Browse and register for upcoming conferences and seminars</p>
-          </Link>
-          <button className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
-            <h3 className="font-medium text-gray-800 mb-2">View Resources</h3>
-            <p className="text-sm text-gray-600">Access materials from past events</p>
-          </button>
-          <button className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
-            <h3 className="font-medium text-gray-800 mb-2">Update Profile</h3>
-            <p className="text-sm text-gray-600">Manage your account information</p>
-          </button>
-        </div>
-      </div>
+     {/* Quick Actions */}
+  <div className="mb-8">
+    <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Link href="/incoming-events" className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
+        <h3 className="font-medium text-gray-800 mb-2">Register for Events</h3>
+        <p className="text-sm text-gray-600">Browse and register for upcoming conferences and seminars</p>
+      </Link>
+      <button className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
+        <h3 className="font-medium text-gray-800 mb-2">View Resources</h3>
+        <p className="text-sm text-gray-600">Access materials from past events</p>
+      </button>
+      <button className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
+        <h3 className="font-medium text-gray-800 mb-2">Update Profile</h3>
+        <p className="text-sm text-gray-600">Manage your account information</p>
+      </button>
+    </div>
+  </div> 
     </div>
   );
 };

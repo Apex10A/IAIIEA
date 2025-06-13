@@ -5,6 +5,8 @@ import { Lexend, Poppins } from 'next/font/google';
 import "./globals.css";
 import Providers from './providers'
 import { ToastProvider } from '@/components/providers/toast-provider';
+import { ThemeProvider } from "@/components/theme-provider";
+import { OnlineStatusProvider } from "@/context/OnlineStatusContext";
 
 const lexend = Lexend({
   subsets: ['latin'],
@@ -39,16 +41,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${lexend.variable} ${poppins.variable} antialiased`}
       >
-        <Suspense fallback={<Loading />}>
-        <Providers>
-            {children}
-          <ToastProvider />
-        </Providers>
-        </Suspense>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <OnlineStatusProvider>
+            <Suspense fallback={<Loading />}>
+              <Providers>
+                {children}
+                <ToastProvider />
+              </Providers>
+            </Suspense>
+          </OnlineStatusProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

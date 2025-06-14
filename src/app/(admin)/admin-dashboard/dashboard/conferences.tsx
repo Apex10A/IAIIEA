@@ -226,22 +226,22 @@ const DashboardConferences = () => {
       animate={{ opacity: 1 }}
       className="bg-white dark:bg-gray-800 rounded-xl min-h-[300px] cursor-pointer dark:border-gray-700"
     >
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-4 md:mb-6">
         {activeConferences.length > 2 && (
-          <Link href="/conferences" className="text-sm font-medium text-[#0E1A3D] dark:text-gray-300 hover:underline flex items-center">
-            View all <ChevronRight className="h-4 w-4 ml-1" />
+          <Link href="/conferences" className="text-sm md:text-base font-medium text-[#0E1A3D] dark:text-gray-300 hover:underline flex items-center">
+            View all <ChevronRight className="h-4 w-4 md:h-5 md:w-5 ml-1" />
           </Link>
         )}
       </div>
 
       {displayConferences.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400 p-6">
-          <Calendar className="h-12 w-12 mb-4 text-gray-300 dark:text-gray-600" />
-          <p className="text-lg">No upcoming conferences</p>
-          <p className="text-sm mt-1">Check back later for upcoming events</p>
+          <Calendar className="h-12 w-12 md:h-16 md:w-16 mb-4 text-gray-300 dark:text-gray-600" />
+          <p className="text-lg md:text-xl">No upcoming conferences</p>
+          <p className="text-sm md:text-base mt-1">Check back later for upcoming events</p>
         </div>
       ) : (
-        <div className="space-y-4 pb-6 ">
+        <div className="space-y-4 pb-6">
           {displayConferences.map((conference) => {
             const memberData = conferenceMembersData[conference.id] || { members: [], total: 0 };
             const status = statusConfig[conference.status] || statusConfig.Incoming;
@@ -252,25 +252,25 @@ const DashboardConferences = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="p-4 border dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:shadow-gray-700/30 transition-shadow"
+                className="p-4 md:p-6 border dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:shadow-gray-700/30 transition-shadow"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 dark:text-white">{conference.title}</h3>
+                    <h3 className="font-semibold text-base md:text-lg text-gray-800 dark:text-white">{conference.title}</h3>
                     {conference.theme && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{conference.theme}</p>
+                      <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">{conference.theme}</p>
                     )}
                     
-                    <div className="md:flex items-center mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="md:flex items-center mt-3 text-sm md:text-base text-gray-500 dark:text-gray-400">
                       <div className='flex items-center'>
-                        <Calendar className="h-4 w-4 mr-1.5" />
+                        <Calendar className="h-4 w-4 md:h-5 md:w-5 mr-1.5" />
                         <span className='flex'>{conference.date}</span>
                       </div>
                       {conference.venue && (
                         <>
                           <div className='flex items-center pt-2 md:pt-0'>
                             <span className="mx-2 hidden md:flex">•</span>
-                            <MapPin className="h-4 w-4 mr-1.5" />
+                            <MapPin className="h-4 w-4 md:h-5 md:w-5 mr-1.5" />
                             <span>{conference.venue}</span>
                           </div>
                         </>
@@ -279,8 +279,8 @@ const DashboardConferences = () => {
                     
                     <div className="flex items-center mt-3">
                       <div className="flex items-center mr-4">
-                        <Users className="h-4 w-4 mr-1.5 text-gray-500 dark:text-gray-400" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400 flex">
+                        <Users className="h-4 w-4 md:h-5 md:w-5 mr-1.5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-sm md:text-base text-gray-600 dark:text-gray-400 flex">
                           {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
                         </span>
                       </div>
@@ -293,7 +293,7 @@ const DashboardConferences = () => {
                     </div>
                   </div>
                   
-                  <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                  <div className={`flex items-center px-3 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium ${status.color}`}>
                     {status.icon}
                     <span className="ml-1.5">{status.label}</span>
                   </div>

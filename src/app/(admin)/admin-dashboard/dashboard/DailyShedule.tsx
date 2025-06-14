@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import ConferenceScheduleModal from "./ConferenceScheduleModal";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { showToast } from '@/utils/toast';
+import { motion } from 'framer-motion';
 
 import Image from "next/image";
 import Link from "next/link";
@@ -192,168 +193,124 @@ const ConferenceSchedule = () => {
   }
 
   return (
-    <div className="space-y-6 w-full">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Conference Schedules</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            View schedules for upcoming and past conferences
-          </p>
+    <div className="space-y-4">
+      {isLoading ? (
+        <div className="animate-pulse space-y-4">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700">
+              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+              <div className="space-y-3">
+                {[...Array(2)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-    <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded}>
-          <Button className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Schedule
-          </Button>
-        </ConferenceScheduleModal>
-      </div>
-
-      {conferences.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <p className="text-gray-500 mb-4">No conferences available yet.</p>
-          <Button asChild>
-            <Link href="/admin/conferences/create">
-              Create your first conference
-            </Link>
-          </Button>
+      ) : error ? (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-200 p-4 rounded-lg">
+          <p className="font-medium">Error loading schedule</p>
+          <p className="text-sm mt-1">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-3 text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : conferences.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500 dark:text-gray-400">No conferences available</p>
         </div>
       ) : (
         <div className="space-y-4">
           {conferences.map((conference) => (
-            <Card key={conference.id} className="overflow-hidden">
-              <button
+            <motion.div
+              key={conference.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden"
+            >
+              <div 
+                className="p-4 md:p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 onClick={() => toggleConference(conference.id)}
-                className="w-full text-left"
               >
-                <CardHeader className="flex flex-row items-center justify-between hover:bg-gray-50 transition-colors p-4 sm:p-6">
-                  <div className="flex items-center gap-4">
-                    {conference.flyer && (
-                      <div className="relative h-16 w-16 rounded-md overflow-hidden">
-                        <Image
-                          src={conference.flyer}
-                          alt={conference.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {conference.title}
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          conference.status === "Incoming" 
-                            ? "bg-blue-100 text-blue-800" 
-                            : "bg-gray-100 text-gray-800"
-                        }`}>
-                          {conference.status}
-                        </span>
-                      </CardTitle>
-                      <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        {conference.date}
-                      </p>
-                    </div>
-                  </div>
-                  {expandedConference === conference.id ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                  )}
-                </CardHeader>
-              </button>
-              
-              {expandedConference === conference.id && (
-                <CardContent className="p-4 sm:p-6 pt-0">
-                  <div className="mb-4">
-                    <h3 className="font-medium text-gray-900">{conference.theme}</h3>
-                    <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                      <MapPin className="h-4 w-4" />
-                      {conference.venue}
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white truncate">
+                      {conference.title}
+                    </h3>
+                    <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                      {conference.theme}
                     </p>
+                    <div className="flex flex-wrap gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center">
+                        <Calendar className="h-4 w-4 md:h-5 md:w-5 mr-1.5" />
+                        {formatDate(conference.date)}
+                      </span>
+                      <span className="flex items-center">
+                        <MapPin className="h-4 w-4 md:h-5 md:w-5 mr-1.5" />
+                        {conference.venue}
+                      </span>
+                    </div>
                   </div>
-                  
-                  {conference.schedule.length === 0 ? (
-                    <div className="rounded-lg border border-dashed p-6 text-center">
-                      <p className="text-gray-500 mb-4">No schedules available for this conference.</p>
-                      {/* <Button asChild>
-                        <Link href={`/admin/conferences/${conference.id}/create-schedule`}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Schedule
-                        </Link>
-                      </Button> */}
+                  <ChevronRight 
+                    className={`h-5 w-5 md:h-6 md:w-6 text-gray-400 transition-transform ${
+                      expandedConference === conference.id ? 'rotate-90' : ''
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {expandedConference === conference.id && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="border-t dark:border-gray-700"
+                >
+                  <div className="p-4 md:p-6">
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[600px]">
+                        <thead>
+                          <tr className="border-b dark:border-gray-700">
+                            <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Time</th>
+                            <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Activity</th>
+                            <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Venue</th>
+                            <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Facilitator</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {conference.schedule.map((item, index) => (
+                            <tr 
+                              key={index}
+                              className="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                            >
+                              <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                {formatTime(item.start)} - {formatTime(item.end)}
+                              </td>
+                              <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+                                {item.activity}
+                              </td>
+                              <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+                                {item.venue}
+                              </td>
+                              <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+                                {item.facilitator}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {conference.schedule.map((schedule) => (
-                        <Card key={schedule.schedule_id} className="hover:shadow-md transition-shadow h-full">
-                          <CardHeader className="pb-3">
-                            <div className="flex justify-between items-start gap-2">
-                              <CardTitle className="text-lg line-clamp-2">
-                                {schedule.activity}
-                              </CardTitle>
-                              <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                                {schedule.day}
-                              </span>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <div className="mt-0.5">
-                                <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">{formatDate(schedule.start)}</p>
-                                {schedule.start !== schedule.end && (
-                                  <p className="text-xs text-muted-foreground">
-                                    to {formatDate(schedule.end)}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-3">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm">
-                                {formatTime(schedule.start)} - {formatTime(schedule.end)}
-                              </p>
-                            </div>
-                            
-                            <div className="flex items-center gap-3">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm">{schedule.venue}</p>
-                            </div>
-                            
-                            <div className="flex items-center gap-3">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm">Facilitator: {schedule.facilitator}</p>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="flex justify-between items-center pt-4 border-t">
-                            <p className="text-xs text-muted-foreground">
-                              Posted: {new Date(schedule.posted).toLocaleDateString()}
-                            </p>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/conferences/${conference.id}/schedule/${schedule.schedule_id}/edit`}>
-                                  Edit
-                                </Link>
-                              </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </CardFooter>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
+                  </div>
+                </motion.div>
               )}
-            </Card>
+            </motion.div>
           ))}
         </div>
       )}

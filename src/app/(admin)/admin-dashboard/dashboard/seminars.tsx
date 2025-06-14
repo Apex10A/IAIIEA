@@ -215,13 +215,14 @@ const DashboardSeminars = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl min-h-[300px] ">
+    <div className="bg-white dark:bg-gray-800 rounded-xl min-h-[300px]">
       {displaySeminars.length === 0 ? (
-        <div className="text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-700/30 rounded text-center">
-          No upcoming seminars available
+        <div className="text-gray-500 dark:text-gray-400 p-4 md:p-6 bg-gray-50 dark:bg-gray-700/30 rounded text-center">
+          <p className="text-lg md:text-xl">No upcoming seminars available</p>
+          <p className="text-sm md:text-base mt-2">Check back later for upcoming events</p>
         </div>
       ) : (
-        <div className="space-y-4 ">
+        <div className="space-y-4 p-4 md:p-6">
           {displaySeminars.map((seminar) => {
             const memberData = seminarMembersData[seminar.id] || { members: [], total: 0 };
             
@@ -231,25 +232,25 @@ const DashboardSeminars = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="p-4 border dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:shadow-gray-700/30 transition-shadow"
+                className="p-4 md:p-6 border dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:shadow-gray-700/30 transition-shadow"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 dark:text-white">{seminar.title}</h3>
+                    <h3 className="font-semibold text-base md:text-lg text-gray-800 dark:text-white">{seminar.title}</h3>
                     {seminar.theme && (
-                      <p className="text-sm text-gray-800 dark:text-gray-300 mt-1">{seminar.theme}</p>
+                      <p className="text-sm md:text-base text-gray-800 dark:text-gray-300 mt-1">{seminar.theme}</p>
                     )}
                     
-                    <div className="md:flex items-center mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="md:flex items-center mt-3 text-sm md:text-base text-gray-500 dark:text-gray-400">
                       <div className='flex items-center'>
-                        <Calendar className="h-4 w-4 mr-1.5" />
+                        <Calendar className="h-4 w-4 md:h-5 md:w-5 mr-1.5" />
                         <span className='flex'>{seminar.date}</span>
                       </div>
                       {seminar.venue && (
                         <>
                           <div className='flex items-center pt-2 md:pt-0'>
                             <span className="mx-2 hidden md:flex">•</span>
-                            <MapPin className="h-4 w-4 mr-1.5" />
+                            <MapPin className="h-4 w-4 md:h-5 md:w-5 mr-1.5" />
                             <span>{seminar.venue}</span>
                           </div>
                         </>
@@ -258,8 +259,8 @@ const DashboardSeminars = () => {
                     
                     <div className="flex items-center mt-3">
                       <div className="flex items-center mr-4">
-                        <Users className="h-4 w-4 mr-1.5 text-gray-500 dark:text-gray-400" />
-                        <span className="text-sm text-gray-600 dark:text-gray-300 flex">
+                        <Users className="h-4 w-4 md:h-5 md:w-5 mr-1.5 text-gray-500 dark:text-gray-400" />
+                        <span className="text-sm md:text-base text-gray-600 dark:text-gray-300 flex">
                           {memberData.total} {memberData.total === 1 ? 'Participant' : 'Participants'}
                         </span>
                       </div>

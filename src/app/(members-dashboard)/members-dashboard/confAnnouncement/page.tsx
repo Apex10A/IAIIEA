@@ -20,7 +20,7 @@ import {
 import { useSession } from "next-auth/react";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, ExternalLink, Calendar, Clock } from 'lucide-react';
+import { Trash2, ExternalLink, Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusIcon, EditIcon, TrashIcon, Loader2 } from 'lucide-react';
@@ -64,6 +64,10 @@ interface Conference {
   is_registered: boolean;
 }
 
+interface ConferenceDetails {
+  is_registered: boolean;
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
@@ -87,6 +91,8 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
   const conferenceId = searchParams.get('conferenceId');
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "announcements">("list");
 
   const bearerToken = session?.user?.token || session?.accessToken;
 
@@ -163,6 +169,29 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
       setAnnouncements([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchConferenceDetails = async (id: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch conference details");
+      }
+
+      const data = await response.json();
+      setConferenceDetails(data.data);
+    } catch (error) {
+      console.error("Error fetching conference details:", error);
+      showToast.error("Failed to load conference details");
     }
   };
 
@@ -350,14 +379,116 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
     </div>
   );
 
-  const handleViewAnnouncements = (conference: Conference) => {
-    if (conference.is_registered) {
-      setSelectedConference(conference);
-      fetchAnnouncements(conference.id);
-    } else {
+  const handleViewAnnouncements = async (conference: Conference) => {
+    setSelectedConference(conference);
+    await fetchConferenceDetails(conference.id);
+    
+    if (!conferenceDetails?.is_registered) {
       showToast.error("You need to register for this conference to view announcements.");
+    } else {
+      await fetchAnnouncements(conference.id);
+      setViewMode("announcements");
     }
   };
+
+  const handleBackToList = () => {
+    setViewMode("list");
+    setSelectedConference(null);
+    setConferenceDetails(null);
+    setAnnouncements([]);
+  };
+
+  if (viewMode === "announcements" && selectedConference) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <Button
+              onClick={handleBackToList}
+              variant="outline"
+              className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to conferences
+            </Button>
+          </div>
+
+          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {selectedConference.title}
+              </h1>
+              <p className="text-gray-700 dark:text-gray-400 mt-1">
+                {selectedConference.theme}
+              </p>
+            </div>
+
+            {isLoading ? (
+              <LoadingState />
+            ) : announcements.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Calendar className="w-10 h-10 text-gray-500 dark:text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
+                  No announcements yet
+                </h3>
+                <p className="text-gray-700 dark:text-gray-400">
+                  There are no announcements for this conference at the moment.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(announcements.reduce((acc, announcement) => {
+                  const date = announcement.date;
+                  if (!acc[date]) acc[date] = [];
+                  acc[date].push(announcement);
+                  return acc;
+                }, {} as Record<string, typeof announcements>)).map(([date, dateAnnouncements]) => (
+                  <div key={date} className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      {date}
+                    </h2>
+                    <div className="grid gap-4">
+                      {dateAnnouncements.map((announcement) => (
+                        <Card key={announcement.id} className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                                {announcement.title}
+                              </h3>
+                              <p className="text-sm text-gray-700 dark:text-gray-400">
+                                {announcement.description}
+                              </p>
+                              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <Clock className="w-4 h-4" />
+                                <span>{announcement.time}</span>
+                              </div>
+                            </div>
+                            {announcement.file && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2"
+                                onClick={() => window.open(`${API_URL}/${announcement.file}`, '_blank')}
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                                View File
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -481,6 +612,22 @@ const AnnouncementsPage: React.FC<{ loginResponse?: any }> = ({ loginResponse })
                 <p className="text-muted-foreground line-clamp-3">
                   {conference.theme}
                 </p>
+                {selectedConference?.id === conference.id && !conferenceDetails?.is_registered && (
+                  <div className="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          You need to register for this conference to view announcements.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
               <CardFooter className="flex justify-between items-center pt-4">
                 <Button 

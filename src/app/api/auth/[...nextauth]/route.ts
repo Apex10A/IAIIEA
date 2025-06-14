@@ -41,6 +41,7 @@ interface UserData {
   email: string;
   registration: string;
   membership_due_date: string;
+  token?: string;
 }
 
 interface MemberLoginResponse {

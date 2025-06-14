@@ -1,12 +1,48 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "@/app/index.css"
 import { showToast } from "@/utils/toast";
 import { X, CheckCircle, AlertCircle } from 'lucide-react';
+import { useSession } from "next-auth/react";
+import { useSearchParams } from 'next/navigation';
+
+interface ConferenceDetails {
+  id: string;
+  theme: string;
+  date: string;
+  is_registered: boolean;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  hearAbout: string;
+  otherSource: string;
+  contentQuality: string;
+  contentRelevance: string;
+  beneficialSession: string;
+  beneficialSessionReason: string;
+  speakerKnowledge: string;
+  presentationEffectiveness: string;
+  organizationRating: string;
+  venueSatisfaction: string;
+  registrationRating: string;
+  networkingSatisfaction: string;
+  overallExperience: string;
+  significantTakeaway: string;
+  futureSuggestions: string;
+  additionalComments: string;
+  contactForFollowUp: string;
+}
 
 const ConferenceEvaluationForm = () => {
+  const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const conferenceId = searchParams.get('id');
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
   const [currentSection, setCurrentSection] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     // Personal Info
     name: '',
     email: '',
@@ -33,7 +69,32 @@ const ConferenceEvaluationForm = () => {
     contactForFollowUp: ''
   });
 
-  const handleInputChange = (e) => {
+  useEffect(() => {
+    const fetchConferenceDetails = async () => {
+      if (!conferenceId || !bearerToken) return;
+      
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`, {
+          headers: {
+            'Authorization': `Bearer ${bearerToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+          setConferenceDetails(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching conference details:', error);
+        showToast.error('Failed to load conference details');
+      }
+    };
+
+    fetchConferenceDetails();
+  }, [conferenceId, bearerToken]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -41,7 +102,7 @@ const ConferenceEvaluationForm = () => {
     }));
   };
 
-  const validateSection = (section) => {
+  const validateSection = (section: number): boolean => {
     if (section === 1) {
       if (!formData.name) {
         showToast.error('Please enter your full name');
@@ -112,34 +173,111 @@ const ConferenceEvaluationForm = () => {
     }
   };
 
-// Add this function to your component
-const generateCertificate = (name: string) => {
+const generateCertificate = (name: string, theme: string, date: string) => {
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="1003" height="757" viewBox="0 0 1003 757" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1" y="1" width="1001" height="755" fill="#FFFDF7"/>
-  <rect x="1" y="1" width="1001" height="755" stroke="#D5B93C" stroke-width="2" stroke-dasharray="250 250"/>
-  
-  <!-- Main content (shortened for brevity, include your full SVG paths here) -->
-  <path d="M296.488 140.48C288.872 140.48 282.248..." fill="#203A87"/>
-  
-  <!-- Name Section - This is where we'll insert the attendee's name -->
-  <text x="50%" y="380" font-family="Arial" font-size="32" font-weight="bold" text-anchor="middle" fill="#203A87">
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with subtle pattern -->
+  <rect x="0" y="0" width="1200" height="800" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1200" height="800" fill="url(#pattern)" opacity="0.05"/>
+
+  <!-- Decorative Border -->
+  <rect x="20" y="20" width="1160" height="760" rx="10" stroke="#D5B93C" stroke-width="2" fill="none"/>
+  <rect x="40" y="40" width="1120" height="720" rx="8" stroke="#152A61" stroke-width="1" fill="none"/>
+
+  <!-- Top Blue Curved Banner -->
+  <path d="M0 0 H1200 V250 C900 300, 300 300, 0 250 V0 Z" fill="#203A87"/>
+  <path d="M0 0 H1200 V240 C900 290, 300 290, 0 240 V0 Z" fill="#152A61"/>
+
+  <!-- Gold Border Top -->
+  <rect x="0" y="0" width="1200" height="4" fill="#D5B93C"/>
+  <rect x="0" y="246" width="1200" height="2" fill="#D5B93C"/>
+
+  <!-- Certificate Title -->
+  <text x="50%" y="120" font-family="Lexend, sans-serif" font-size="56" font-weight="bold" text-anchor="middle" fill="#FFFFFF">
+    CERTIFICATE OF
+  </text>
+  <text x="50%" y="180" font-family="Lexend, sans-serif" font-size="42" text-anchor="middle" fill="#D5B93C">
+    PARTICIPATION
+  </text>
+
+  <!-- Decorative Elements -->
+  <circle cx="100" cy="150" r="60" fill="#152A61"/>
+  <circle cx="100" cy="150" r="55" fill="#203A87"/>
+  <circle cx="100" cy="150" r="40" fill="#D5B93C"/>
+  <path d="M100 110 L120 170 L80 170 Z" fill="#FFFFFF"/> <!-- Star -->
+  <path d="M100 190 L60 250 L140 250 Z" fill="#203A87"/> <!-- Bottom ribbon part 1 -->
+  <path d="M100 190 L140 250 L180 190 Z" fill="#203A87"/> <!-- Bottom ribbon part 2 -->
+
+  <!-- "THIS IS TO CERTIFY THAT" -->
+  <text x="50%" y="320" font-family="Lexend, sans-serif" font-size="20" text-anchor="middle" fill="#0B142F">
+    THIS IS TO CERTIFY THAT
+  </text>
+
+  <!-- Name Section -->
+  <text x="50%" y="380" font-family="Lexend, sans-serif" font-size="48" font-weight="normal" text-anchor="middle" fill="#0B142F">
     ${escapeHtml(name)}
   </text>
-  
-  <!-- Certificate text -->
-  <text x="50%" y="420" font-family="Arial" font-size="18" text-anchor="middle" fill="#0B142F">
-    has successfully completed the conference
+  <line x1="30%" y1="390" x2="70%" y2="390" stroke="#CCCCCC" stroke-width="1"/>
+
+  <!-- Participation text -->
+  <text x="50%" y="450" font-family="Lexend, sans-serif" font-size="20" text-anchor="middle" fill="#0B142F">
+    PARTICIPATED AT THE CONFERENCE:
+  </text>
+
+  <!-- Theme -->
+  <text x="50%" y="500" font-family="Lexend, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#0B142F">
+    "${escapeHtml(theme)}"
+  </text>
+
+  <!-- Date -->
+  <text x="50%" y="540" font-family="Lexend, sans-serif" font-size="20" text-anchor="middle" fill="#0B142F">
+    ON: ${date}
   </text>
   
-  <!-- Rest of your SVG content -->
-  <path d="M521.816 176V153.6H531.48C532.888..." fill="#D5B93C"/>
-  <path d="M71.8 524.152C73.576 524.152 75.128..." fill="#203A87"/>
-  <path d="M412.12 271.06V272.54H408.32V285H406.5V272.54H402.68V271.06H412.12Z" fill="#0B142F"/>
+  <!-- IAIIEA Logo (Text Representation) -->
+  <g transform="translate(100, 650)">
+    <text x="0" y="0" font-family="Lexend, sans-serif" font-size="24" font-weight="bold" fill="#0B142F">
+      IAIIEA
+    </text>
+    <text x="0" y="30" font-family="Lexend, sans-serif" font-size="14" fill="#0B142F">
+      International Association for Innovations
+    </text>
+    <text x="0" y="50" font-family="Lexend, sans-serif" font-size="14" fill="#0B142F">
+      In Educational Assessment
+    </text>
+  </g>
+
+  <!-- Signature Section -->
+  <g transform="translate(800, 650)">
+    <line x1="0" y1="0" x2="150" y2="0" stroke="#0B142F" stroke-width="1"/>
+    <text x="75" y="25" font-family="Lexend, sans-serif" font-size="16" text-anchor="middle" fill="#0B142F">
+      Signature
+    </text>
+    <line x1="0" y1="50" x2="150" y2="50" stroke="#0B142F" stroke-width="1"/>
+    <text x="75" y="75" font-family="Lexend, sans-serif" font-size="16" text-anchor="middle" fill="#0B142F">
+      President
+    </text>
+  </g>
+
+  <!-- Bottom Pattern -->
+  <rect x="0" y="780" width="1200" height="20" fill="#203A87"/>
+  <path d="M0 780" fill="#D5B93C"/>
+  <rect x="0" y="780" width="1200" height="20" fill="url(#pattern)"/>
+
+  <!-- Certificate ID -->
+  <text x="50%" y="760" font-family="Lexend, sans-serif" font-size="12" text-anchor="middle" fill="#0B142F" opacity="0.7">
+    Certificate ID: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
+  </text>
+
+  <!-- Definitions -->
+  <defs>
+    <pattern id="pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 0 L10 20 L20 0 Z" fill="#D5B93C"/>
+    </pattern>
+  </defs>
 </svg>`;
 };
 
-// Helper function to safely escape HTML
 const escapeHtml = (str: string) => {
   return str
     .replace(/&/g, "&amp;")
@@ -149,13 +287,22 @@ const escapeHtml = (str: string) => {
     .replace(/'/g, "&#039;");
 };
 
-// Update your handleSubmit function
-const handleSubmit = async (e) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   if (validateSection(2)) {
     try {
-      // Generate certificate with user's name
-      const certificateSvg = generateCertificate(formData.name);
+      if (!conferenceDetails) {
+        showToast.error('Conference details not found');
+        return;
+      }
+
+      if (!conferenceDetails.is_registered) {
+        showToast.error('You must be registered for the conference to receive a certificate');
+        return;
+      }
+      
+      // Generate certificate with user's name, conference theme, and date
+      const certificateSvg = generateCertificate(formData.name, conferenceDetails.theme, conferenceDetails.date);
       
       // Create download link
       const svgBlob = new Blob([certificateSvg], { type: 'image/svg+xml' });
@@ -173,17 +320,13 @@ const handleSubmit = async (e) => {
         window.URL.revokeObjectURL(url);
       }, 100);
       
-      showToast.success('Thank you for your feedback! Certificate downloaded.', {
-        icon: <CheckCircle className="text-green-500" />,
-      });
+      showToast.success('Thank you for your feedback! Certificate downloaded.');
       
       // Submit form data to your backend
       // await submitToBackend(formData);
       
     } catch (error) {
-      showToast.error('Error generating certificate', {
-        icon: <AlertCircle className="text-red-500" />,
-      });
+      showToast.error('Error generating certificate');
       console.error(error);
     }
   }

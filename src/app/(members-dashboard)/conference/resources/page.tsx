@@ -439,7 +439,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700 mb-6">
                 <h2 className="text-md md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Certification</h2>
                 <p className="text-gray-700 dark:text-gray-400 text-sm">
-                  You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold text-primary dark:text-primary-400">here</Link>
+                  You can get your certificate of attendance <Link href={`/members-dashboard/conference-evaluation?id=${conference.id}`} className="underline font-bold text-primary dark:text-primary-400">here</Link>
                 </p>
               </div>
 
@@ -705,7 +705,86 @@ const ConferenceResources: React.FC = () => {
     );
   }
 
+  if (viewMode === "list") {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Conferences</h1>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {conferences.map((conference) => (
+              <div
+                key={conference.id}
+                className="bg-card rounded-lg shadow-md overflow-hidden border dark:border-gray-700 hover:shadow-lg transition-shadow duration-200"
+              >
+                <div className="p-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    {conference.title}
+                  </h2>
+                  <p className="text-gray-700 dark:text-gray-400 mb-4">{conference.theme}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {conference.tags?.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => handleViewResources(conference)}
+                      className="text-primary hover:text-primary/80 text-sm font-medium"
+                    >
+                      View Resources
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (viewMode === "resources" && selectedConference && conferenceDetails) {
+    // Show warning and hide content if registration is incomplete
+    if (session?.user?.userData?.registration === "incomplete") {
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <button
+                onClick={handleBackToList}
+                className="flex items-center gap-2 text-gray-700 text-primary hover:text-primary/80 text-sm font-medium dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to conferences
+              </button>
+            </div>
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    Your registration is incomplete. Please complete your registration to access all features.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
@@ -717,10 +796,12 @@ const ConferenceResources: React.FC = () => {
               <ArrowLeft className="w-4 h-4" />
               Back to conferences
             </button>
-            <AddResourceModal
-              conferenceId={selectedConference.id}
-              onSuccess={() => fetchConferences()}
-            />
+            {conferenceDetails.is_registered && (
+              <AddResourceModal
+                conferenceId={selectedConference.id}
+                onSuccess={() => fetchConferences()}
+              />
+            )}
           </div>
 
           <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700">
@@ -733,69 +814,92 @@ const ConferenceResources: React.FC = () => {
               </div>
             </div>
 
-            {/* Gallery Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Gallery</h2>
-              {conferenceDetails.gallery?.length > 0 ? (
-                <MediaCarousel items={conferenceDetails.gallery} type="gallery" />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-400 text-center py-8">No gallery images available</p>
-              )}
-            </div>
-
-            {/* Sponsors Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Sponsors</h2>
-              {conferenceDetails.sponsors?.length > 0 ? (
-                <MediaCarousel 
-                  items={conferenceDetails.sponsors.map(sponsor => ({
-                    logo: sponsor.logo,
-                    name: sponsor.name
-                  }))} 
-                  type="sponsors" 
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-400 text-center py-8">No sponsors available</p>
-              )}
-            </div>
-
-            {/* Videos Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Videos</h2>
-              {conferenceDetails.videos?.length > 0 ? (
-                <MediaCarousel items={conferenceDetails.videos} type="videos" />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-400 text-center py-8">No videos available</p>
-              )}
-            </div>
-
-            {/* Resources Section */}
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Documents</h2>
-              {conferenceDetails.resources?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {conferenceDetails.resources.map((resource) => (
-                    <ResourceCard
-                      key={resource.resource_id}
-                      resource={resource}
-                      onDelete={() => {}}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <FileText className="w-10 h-10 text-gray-500 dark:text-gray-400" />
+            {/* Show warning if not registered for conference */}
+            {!conferenceDetails.is_registered && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6 rounded">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
-                    No resources yet
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-400">
-                   See resources available to attendees
-                  </p>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      You need to register for this conference to view all details.
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Only show content if registered for conference */}
+            {conferenceDetails.is_registered && (
+              <>
+                {/* Gallery Section */}
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Gallery</h2>
+                  {conferenceDetails.gallery?.length > 0 ? (
+                    <MediaCarousel items={conferenceDetails.gallery} type="gallery" />
+                  ) : (
+                    <p className="text-gray-700 dark:text-gray-400 text-center py-8">No gallery images available</p>
+                  )}
+                </div>
+
+                {/* Sponsors Section */}
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Sponsors</h2>
+                  {conferenceDetails.sponsors?.length > 0 ? (
+                    <MediaCarousel 
+                      items={conferenceDetails.sponsors.map(sponsor => ({
+                        logo: sponsor.logo,
+                        name: sponsor.name
+                      }))} 
+                      type="sponsors" 
+                    />
+                  ) : (
+                    <p className="text-gray-700 dark:text-gray-400 text-center py-8">No sponsors available</p>
+                  )}
+                </div>
+
+                {/* Videos Section */}
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Videos</h2>
+                  {conferenceDetails.videos?.length > 0 ? (
+                    <MediaCarousel items={conferenceDetails.videos} type="videos" />
+                  ) : (
+                    <p className="text-gray-700 dark:text-gray-400 text-center py-8">No videos available</p>
+                  )}
+                </div>
+
+                {/* Resources Section */}
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Documents</h2>
+                  {conferenceDetails.resources?.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {conferenceDetails.resources.map((resource) => (
+                        <ResourceCard
+                          key={resource.resource_id}
+                          resource={resource}
+                          onDelete={() => {}}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                        <FileText className="w-10 h-10 text-gray-500 dark:text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        No resources yet
+                      </h3>
+                      <p className="text-gray-700 dark:text-gray-400">
+                       See resources available to attendees
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

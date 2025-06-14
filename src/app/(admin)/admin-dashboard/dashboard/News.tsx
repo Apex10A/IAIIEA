@@ -658,8 +658,20 @@ const NewsPage = () => {
       {/* News listing */}
       <div className="mt-8">
         {isLoadingNews ? (
-          <div className="flex items-center justify-center h-40">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+          <div className="animate-pulse space-y-4">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700">
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+                <div className="space-y-3">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="flex items-center space-x-4">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         ) : news.length === 0 ? (
           <Card>
@@ -668,72 +680,65 @@ const NewsPage = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {news.map((newsItem) => (
-              <Card key={newsItem.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-video relative overflow-hidden bg-gray-100">
-                  {newsItem.image ? (
-                    <img
-                      src={newsItem.image}
-                      alt={newsItem.title}
-                      className="object-cover w-full h-full"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder-news.jpg';
-                        target.alt = 'News image not available';
-                      }}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
-                      No image available
-                    </div>
-                  )}
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{newsItem.title}</h3>
-                  
-                  {(newsItem.date || newsItem.time) && (
-                    <p className="text-sm text-gray-500 mb-2">
-                      {newsItem.date && new Date(newsItem.date).toLocaleDateString()}
-                      {newsItem.date && newsItem.time && ' • '}
-                      {newsItem.time && newsItem.time}
-                    </p>
-                  )}
-                  
-                  <div 
-                    className="text-gray-600 mt-2 line-clamp-3" 
-                    dangerouslySetInnerHTML={{ __html: newsItem.description }} 
-                  />
-                  
-                  <div className="flex justify-end mt-4 gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleView(newsItem)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleEdit(newsItem)}
-                    >
-                      <Edit2 className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm" 
-                      onClick={() => handleDelete(newsItem.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px]">
+              <thead>
+                <tr className="border-b dark:border-gray-700">
+                  <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Title</th>
+                  <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Date</th>
+                  <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Time</th>
+                  <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Social Media</th>
+                  <th className="text-left py-3 px-4 text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {news.map((item) => (
+                  <tr 
+                    key={item.id}
+                    className="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  >
+                    <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+                      <div className="max-w-[200px] truncate" title={item.title}>
+                        {item.title}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                      {item.date}
+                    </td>
+                    <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                      {item.time}
+                    </td>
+                    <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+                      <div className="max-w-[150px] truncate" title={item.social_media}>
+                        {item.social_media}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleView(item)}
+                          className="p-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                        >
+                          <Eye className="h-4 w-4 md:h-5 md:w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="p-1 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded"
+                        >
+                          <Edit2 className="h-4 w-4 md:h-5 md:w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+                        >
+                          <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

@@ -299,35 +299,35 @@ const Calendar = () => {
       {/* Calendar Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-4 w-full sm:w-auto">
-          <h2 className="text-xl font-semibold dark:text-white hidden sm:block">Calendar</h2>
+          <h2 className="text-xl md:text-2xl font-semibold dark:text-white hidden sm:block">Calendar</h2>
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={goToPreviousMonth}
-              className="h-8 w-8 p-0 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="h-8 w-8 md:h-10 md:w-10 p-0 dark:border-gray-600 dark:hover:bg-gray-700"
             >
-              <ChevronLeft className="h-4 w-4 dark:text-gray-300" />
+              <ChevronLeft className="h-4 w-4 md:h-5 md:w-5 dark:text-gray-300" />
             </Button>
-            <span className="text-md font-medium text-gray-700 dark:text-gray-300 text-center min-w-[120px]">
+            <span className="text-md md:text-lg font-medium text-gray-700 dark:text-gray-300 text-center min-w-[120px] md:min-w-[150px]">
               {currentMonth.title} 
             </span>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={goToNextMonth}
-              className="h-8 w-8 p-0 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="h-8 w-8 md:h-10 md:w-10 p-0 dark:border-gray-600 dark:hover:bg-gray-700"
             >
-              <ChevronRight className="h-4 w-4 dark:text-gray-300" />
+              <ChevronRight className="h-4 w-4 md:h-5 md:w-5 dark:text-gray-300" />
             </Button>
           </div>
         </div>
         
         <Button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800 w-full sm:w-auto"
+          className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800 w-full sm:w-auto text-sm md:text-base"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
           Add Event
         </Button>
       </div>
@@ -340,7 +340,7 @@ const Calendar = () => {
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
               <div
                 key={day}
-                className="text-center font-semibold text-gray-600 dark:text-gray-400 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-700 rounded"
+                className="text-center font-semibold text-gray-600 dark:text-gray-400 text-xs sm:text-sm md:text-base border border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-700 rounded"
               >
                 {day}
               </div>
@@ -348,8 +348,10 @@ const Calendar = () => {
           </div>
           
           {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr overflow-x-auto">
-            {renderCalendarDays()}
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr min-w-[800px]">
+              {renderCalendarDays()}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -366,92 +368,92 @@ const Calendar = () => {
             animate={{ scale: 1, y: 0 }}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Add New Event</h3>
+                <h3 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-white">Add New Event</h3>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setIsModalOpen(false)}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5 md:h-6 md:w-6" />
                 </Button>
               </div>
               
               <form className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activity</label>
+                  <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Activity</label>
                   <input
                     type="text"
                     placeholder="Event name"
                     value={eventDetails.activity}
                     onChange={(e) => setEventDetails({ ...eventDetails, activity: e.target.value })}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                    <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
                     <input
                       type="date"
                       value={eventDetails.date}
                       onChange={(e) => setEventDetails({ ...eventDetails, date: e.target.value })}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+                    <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
                     <input
                       type="time"
                       value={eventDetails.time}
                       onChange={(e) => setEventDetails({ ...eventDetails, time: e.target.value })}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                  <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                   <input
                     type="text"
                     placeholder="Where is the event?"
                     value={eventDetails.location}
                     onChange={(e) => setEventDetails({ ...eventDetails, location: e.target.value })}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                   <textarea
                     placeholder="Event details"
                     value={eventDetails.description}
                     onChange={(e) => setEventDetails({ ...eventDetails, description: e.target.value })}
                     rows={3}
-                    className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   ></textarea>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                    <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
                     <select
                       value={eventDetails.priority_level}
                       onChange={(e) => setEventDetails({ ...eventDetails, priority_level: e.target.value as 'important' | 'normal' })}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     >
                       <option value="important">Important</option>
                       <option value="normal">Normal</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                    <label className="block text-sm md:text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
                     <select
                       value={eventDetails.color}
                       onChange={(e) => setEventDetails({ ...eventDetails, color: e.target.value as 'red' | 'blue' | 'green' })}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className="w-full p-2 md:p-3 text-sm md:text-base border rounded-md focus:ring-2 focus:ring-[#0E1A3D] dark:focus:ring-blue-600 focus:border-[#0E1A3D] dark:focus:border-blue-600 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     >
                       <option value="red">Red</option>
                       <option value="blue">Blue</option>
@@ -465,13 +467,13 @@ const Calendar = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => setIsModalOpen(false)}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 text-sm md:text-base"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={handleAddEvent}
-                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800"
+                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800 text-sm md:text-base"
                 >
                   Save Event
                 </Button>
@@ -493,49 +495,49 @@ const Calendar = () => {
             animate={{ scale: 1, y: 0 }}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full"
           >
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Event Details</h3>
+                <h3 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-white">Event Details</h3>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setIsViewModalOpen(false)}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5 md:h-6 md:w-6" />
                 </Button>
               </div>
               
-              <div className={`p-4 rounded-lg mb-4 ${
+              <div className={`p-4 md:p-6 rounded-lg mb-4 ${
                 selectedEvent.color === 'blue' ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800' :
                 selectedEvent.color === 'red' ? 'bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800' :
                 selectedEvent.color === 'green' ? 'bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800' : 
                 'bg-gray-50 dark:bg-gray-700/30 border border-gray-100 dark:border-gray-700'
               }`}>
-                <h4 className="text-lg font-bold mb-2 dark:text-white">{selectedEvent.activity}</h4>
+                <h4 className="text-lg md:text-xl font-bold mb-2 dark:text-white">{selectedEvent.activity}</h4>
                 
                 <div className="space-y-3">
                   <div className="flex items-start">
-                    <Clock className="h-5 w-5 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                    <Clock className="h-5 w-5 md:h-6 md:w-6 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Time</p>
-                      <p className="text-gray-800 dark:text-gray-200">{selectedEvent.time}</p>
+                      <p className="text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Time</p>
+                      <p className="text-sm md:text-base text-gray-800 dark:text-gray-200">{selectedEvent.time}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <MapPin className="h-5 w-5 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                    <MapPin className="h-5 w-5 md:h-6 md:w-6 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</p>
-                      <p className="text-gray-800 dark:text-gray-200">{selectedEvent.location}</p>
+                      <p className="text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Location</p>
+                      <p className="text-sm md:text-base text-gray-800 dark:text-gray-200">{selectedEvent.location}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <Info className="h-5 w-5 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                    <Info className="h-5 w-5 md:h-6 md:w-6 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
-                      <p className="text-gray-800 dark:text-gray-200 whitespace-pre-line">{selectedEvent.description || 'No description provided'}</p>
+                      <p className="text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Description</p>
+                      <p className="text-sm md:text-base text-gray-800 dark:text-gray-200 whitespace-pre-line">{selectedEvent.description || 'No description provided'}</p>
                     </div>
                   </div>
                 </div>
@@ -544,7 +546,7 @@ const Calendar = () => {
               <div className="flex justify-end">
                 <Button 
                   onClick={() => setIsViewModalOpen(false)}
-                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800"
+                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800 text-sm md:text-base"
                 >
                   Close
                 </Button>

@@ -153,6 +153,36 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
   handleMealSelection
 }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [participantCount, setParticipantCount] = useState(0);
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  useEffect(() => {
+    const fetchParticipantCount = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/conference_member/${conference.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${bearerToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch participants");
+
+        const data = await response.json();
+        setParticipantCount(data.data.length);
+      } catch (err) {
+        console.error("Error fetching participant count:", err);
+      }
+    };
+
+    if (conference.id && bearerToken) {
+      fetchParticipantCount();
+    }
+  }, [conference.id, bearerToken]);
 
   if (loading) {
     return (
@@ -210,7 +240,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               {conference.title}
             </h1>
             <p className="text-gray-700 text-sm dark:text-gray-300">
-              {conferenceDetails.registered_count || 0} people have registered for this conference
+              {participantCount} people have registered for this conference
             </p>
           </div>
           

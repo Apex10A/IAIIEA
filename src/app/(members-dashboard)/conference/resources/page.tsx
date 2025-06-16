@@ -669,10 +669,14 @@ const ConferenceResources: React.FC = () => {
   };
 
   const handleBackToList = () => {
-    setViewMode("list");
-    if (conferences.length > 0) {
-      setSelectedConference(conferences[0]);
-      fetchConferenceDetails(conferences[0].id);
+    if (viewMode === "resources") {
+      setViewMode("details");
+    } else {
+      setViewMode("list");
+      if (conferences.length > 0) {
+        setSelectedConference(conferences[0]);
+        fetchConferenceDetails(conferences[0].id);
+      }
     }
   };
 

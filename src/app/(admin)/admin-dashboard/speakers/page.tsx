@@ -366,7 +366,7 @@ export default function SpeakersManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-gradient-to-r from-[#203a87] to-indigo-700 text-white py-12">
+      <header className="bg-gradient-to-r from-[#0052CC] to-[#0052CC] text-white py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold text-center">Speakers Management</h1>
           <p className="text-xl text-center mt-4 max-w-2xl mx-auto">
@@ -392,7 +392,7 @@ export default function SpeakersManagement() {
         <div className="mb-8">
           <button 
             onClick={openAddModal}
-            className="flex items-center justify-center bg-[#203a87] hover:bg-indigo-800 text-white font-medium py-3 px-6 rounded-lg shadow-md transition-colors duration-300"
+            className="flex items-center justify-center bg-[#0052CC] hover:bg-[#003B8E] text-white font-medium py-3 px-6 rounded-lg shadow-md transition-colors duration-300"
           >
             <Plus className="mr-2" size={20} />
             Add New Speaker
@@ -404,7 +404,7 @@ export default function SpeakersManagement() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : speakers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {speakers.map((speaker) => (
               <div 
                 key={speaker.id} 
@@ -758,7 +758,7 @@ export default function SpeakersManagement() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-[#203a87] hover:bg-indigo-800 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center"
+                  className="bg-[#0052CC] hover:bg-[#003B8E] text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center"
                 >
                   {isSubmitting && (
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
@@ -844,7 +844,7 @@ export default function SpeakersManagement() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="bg-[#203a87] hover:bg-indigo-800 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                  className="bg-[#0052CC] hover:bg-[#003B8E] text-white font-medium py-2 px-6 rounded-lg transition-colors"
                 >
                   Close
                 </button>

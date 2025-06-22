@@ -160,13 +160,18 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
       }
 
       setIsLoading(true);
+      // Convert day to number before sending
+      const payload = {
+        ...scheduleDetails,
+        day: Number(scheduleDetails.day),
+      };
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/add_conference_schedule`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${bearerToken}`,
         },
-        body: JSON.stringify(scheduleDetails),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -255,14 +260,19 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
 
               <div>
                 <label className="block text-sm font-medium mb-1">Day</label>
-                <input
-                  type="text"
+                <select
                   value={scheduleDetails.day}
                   onChange={(e) => handleInputChange("day", e.target.value)}
                   className="w-full px-3 py-2 border rounded-md"
-                  placeholder="e.g., Day 1"
                   required
-                />
+                >
+                  <option value="" disabled>Select day</option>
+                  <option value="1">Day 1</option>
+                  <option value="2">Day 2</option>
+                  <option value="3">Day 3</option>
+                  <option value="4">Day 4</option>
+                  <option value="5">Day 5</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { showToast } from '@/utils/toast';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 import Image from "next/image";
 import Link from "next/link";
@@ -40,6 +41,7 @@ const ConferenceSchedule = () => {
   const [expandedConference, setExpandedConference] = useState<number | null>(null);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const [pendingDeleteScheduleId, setPendingDeleteScheduleId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchConferences();
@@ -127,7 +129,7 @@ const ConferenceSchedule = () => {
     setExpandedConference(expandedConference === id ? null : id);
   };
     const handleScheduleAdded = () => {
-    fetchSchedules();
+    fetchConferences();
     showToast.success("Schedule added successfully!");
   };
 
@@ -228,12 +230,7 @@ const ConferenceSchedule = () => {
             View schedules for upcoming and past conferences
           </p>
         </div>
-    <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded}>
-          <Button className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Schedule
-          </Button>
-        </ConferenceScheduleModal>
+    <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded} />
       </div>
 
       {conferences.length === 0 ? (
@@ -366,14 +363,44 @@ const ConferenceSchedule = () => {
                                   Edit
                                 </Link>
                               </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleDeleteSchedule(schedule.schedule_id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
+                              <AlertDialog.Root open={pendingDeleteScheduleId === schedule.schedule_id} onOpenChange={(open) => { if (!open) setPendingDeleteScheduleId(null); }}>
+                                <AlertDialog.Trigger asChild>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => setPendingDeleteScheduleId(schedule.schedule_id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Delete
+                                  </Button>
+                                </AlertDialog.Trigger>
+                                <AlertDialog.Portal>
+                                  <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                                  <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                                    <AlertDialog.Title className="text-lg font-semibold">
+                                      Delete Schedule
+                                    </AlertDialog.Title>
+                                    <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                                      Are you sure you want to delete this schedule? This action cannot be undone.
+                                    </AlertDialog.Description>
+                                    <div className="flex justify-end gap-4">
+                                      <AlertDialog.Cancel asChild>
+                                        <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                                          Cancel
+                                        </button>
+                                      </AlertDialog.Cancel>
+                                      <AlertDialog.Action asChild>
+                                        <button 
+                                          onClick={() => { handleDeleteSchedule(schedule.schedule_id); setPendingDeleteScheduleId(null); }}
+                                          className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                                        >
+                                          Delete
+                                        </button>
+                                      </AlertDialog.Action>
+                                    </div>
+                                  </AlertDialog.Content>
+                                </AlertDialog.Portal>
+                              </AlertDialog.Root>
                             </div>
                           </CardFooter>
                         </Card>

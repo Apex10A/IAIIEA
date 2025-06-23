@@ -149,6 +149,34 @@ const ConferenceSchedule = () => {
     });
   };
 
+  const handleDeleteSchedule = async (schedule_id: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_schedule`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${bearerToken}`,
+        },
+        body: JSON.stringify({ schedule_id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete schedule: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      if (result.status === "success") {
+        showToast.success("Schedule deleted successfully!");
+        // Optionally refresh the list of schedules here
+        if (handleScheduleAdded) handleScheduleAdded(); // or a dedicated refresh function
+      } else {
+        throw new Error(result.message || "Failed to delete schedule");
+      }
+    } catch (error) {
+      showToast.error(error instanceof Error ? error.message : "An error occurred while deleting the schedule");
+    }
+  };
+
    // Render loading skeleton
   if (isLoading) {
     return (
@@ -341,6 +369,7 @@ const ConferenceSchedule = () => {
                               <Button 
                                 variant="destructive" 
                                 size="sm"
+                                onClick={() => handleDeleteSchedule(schedule.schedule_id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete

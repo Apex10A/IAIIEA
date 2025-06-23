@@ -8,9 +8,11 @@ import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown,
 import { Button } from "@/components/ui/button";
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { useForm } from 'react-hook-form';
 
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from 'framer-motion';
 
 interface Schedule {
   schedule_id: number;
@@ -42,6 +44,9 @@ const ConferenceSchedule = () => {
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [pendingDeleteScheduleId, setPendingDeleteScheduleId] = useState<number | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+  const { register, handleSubmit, reset } = useForm<Schedule>();
 
   useEffect(() => {
     fetchConferences();
@@ -130,7 +135,7 @@ const ConferenceSchedule = () => {
   };
     const handleScheduleAdded = () => {
     fetchConferences();
-    showToast.success("Schedule added successfully!");
+    // showToast.success("Schedule added successfully!");
   };
 
   const formatDate = (dateString: string) => {
@@ -179,6 +184,48 @@ const ConferenceSchedule = () => {
     }
   };
 
+  const openEditModal = (schedule: Schedule) => {
+    setEditingSchedule(schedule);
+    setEditModalOpen(true);
+    reset(schedule);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingSchedule(null);
+  };
+
+  const handleEditSchedule = async (data: Schedule) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_conference_schedule`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${bearerToken}`,
+        },
+        body: JSON.stringify({
+          schedule_id: editingSchedule?.schedule_id,
+          day: data.day,
+          start: data.start,
+          end: data.end,
+          activity: data.activity,
+          venue: data.venue,
+          facilitator: data.facilitator,
+        }),
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        showToast.success('Schedule updated successfully!');
+        fetchConferences();
+        closeEditModal();
+      } else {
+        throw new Error(result.message || 'Failed to update schedule');
+      }
+    } catch (error) {
+      showToast.error(error instanceof Error ? error.message : 'An error occurred while updating the schedule');
+    }
+  };
+
    // Render loading skeleton
   if (isLoading) {
     return (
@@ -222,7 +269,7 @@ const ConferenceSchedule = () => {
   }
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-6 w-full max-w-4xl mx-auto px-2 sm:px-4 md:ml-64">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Conference Schedules</h1>
@@ -358,10 +405,8 @@ const ConferenceSchedule = () => {
                               Posted: {new Date(schedule.posted).toLocaleDateString()}
                             </p>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/conferences/${conference.id}/schedule/${schedule.schedule_id}/edit`}>
-                                  Edit
-                                </Link>
+                              <Button variant="outline" size="sm" onClick={() => openEditModal(schedule)}>
+                                Edit
                               </Button>
                               <AlertDialog.Root open={pendingDeleteScheduleId === schedule.schedule_id} onOpenChange={(open) => { if (!open) setPendingDeleteScheduleId(null); }}>
                                 <AlertDialog.Trigger asChild>
@@ -412,6 +457,93 @@ const ConferenceSchedule = () => {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Edit Schedule Modal - render outside the map, only if editingSchedule is not null */}
+      {editingSchedule && (
+        <AlertDialog.Root open={editModalOpen} onOpenChange={setEditModalOpen}>
+          <AlertDialog.Portal>
+            <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+            <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[95vh] w-[90vw] max-w-[600px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-lg focus:outline-none z-50 overflow-y-auto">
+              <AlertDialog.Title className="text-2xl font-bold mb-4">Edit Schedule</AlertDialog.Title>
+              <form onSubmit={handleSubmit(handleEditSchedule)} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Day</label>
+                  <input
+                    type="text"
+                    {...register('day', { required: true })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      {...register('start', { required: true })}
+                      className="w-full px-3 py-2 border rounded-md"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">End Date</label>
+                    <input
+                      type="date"
+                      {...register('end', { required: true })}
+                      className="w-full px-3 py-2 border rounded-md"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Activity</label>
+                  <input
+                    type="text"
+                    {...register('activity', { required: true })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Venue</label>
+                  <input
+                    type="text"
+                    {...register('venue', { required: true })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Facilitator</label>
+                  <input
+                    type="text"
+                    {...register('facilitator', { required: true })}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  />
+                </div>
+                <div className="flex justify-end gap-4 pt-4">
+                  <AlertDialog.Cancel asChild>
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                      onClick={closeEditModal}
+                    >
+                      Cancel
+                    </button>
+                  </AlertDialog.Cancel>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#203a87] rounded-md hover:bg-[#152a61]"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </AlertDialog.Content>
+          </AlertDialog.Portal>
+        </AlertDialog.Root>
       )}
     </div>
   );

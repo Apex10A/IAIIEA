@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import Events from '@/app/(admin)/admin-dashboard/conferences/component/events'
 import TrainingResources from './component/TrainingResources';
-import Resources from '@/app/(admin)/admin-dashboard/conferences/component/ResourcesPage'
+import Resources from '@/app/(admin)/admin-dashboard/training/component/resourcesPage'
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 
 const Page = () => {

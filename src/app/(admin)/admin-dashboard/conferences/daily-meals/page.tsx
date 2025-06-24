@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import * as AspectRatio from "@radix-ui/react-aspect-ratio";
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 interface Conference {
   id: number;
@@ -221,6 +222,9 @@ const ConferenceMeals = () => {
   const [isFetchingMeals, setIsFetchingMeals] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [pendingDeleteMealId, setPendingDeleteMealId] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<Meal & { conferenceId?: number; imageFile?: File | null; previewImage?: string | null } | null>(null);
   
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -326,6 +330,76 @@ const ConferenceMeals = () => {
   const handleConferenceChange = (id: string) => {
     const conferenceId = parseInt(id, 10);
     setSelectedConferenceId(conferenceId);
+  };
+
+  const openEditModal = (meal: Meal) => {
+    // Find the conferenceId for this meal (if available)
+    const confId = selectedConferenceId;
+    setEditingMeal({
+      ...meal,
+      conferenceId: confId ?? undefined,
+      imageFile: null,
+      previewImage: meal.image || null,
+    });
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingMeal(null);
+  };
+
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editingMeal) return;
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setEditingMeal(prev => prev ? {
+        ...prev,
+        imageFile: file,
+        previewImage: URL.createObjectURL(file)
+      } : null);
+    }
+  };
+
+  const handleEditMealSubmit = async () => {
+    if (!editingMeal || !editingMeal.name || !editingMeal.conferenceId) {
+      showToast.error('Please fill in all fields and select a conference');
+      return;
+    }
+    if (!editingMeal.meal_id) {
+      showToast.error('Meal ID is missing!');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('meal_id', editingMeal.meal_id.toString());
+    formData.append('name', editingMeal.name);
+    formData.append('conference_id', editingMeal.conferenceId.toString());
+    if (editingMeal.imageFile) {
+      formData.append('image', editingMeal.imageFile);
+    }
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_meal`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+        },
+        body: formData
+      });
+      if (!response.ok) throw new Error('Failed to edit meal');
+      showToast.success('Meal updated successfully');
+      if (editingMeal.conferenceId) {
+        fetchMeals(editingMeal.conferenceId);
+        setSelectedConferenceId(editingMeal.conferenceId);
+      }
+      closeEditModal();
+    } catch (error) {
+      console.error('Error editing meal:', error);
+      showToast.error('Failed to update meal. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -455,7 +529,7 @@ const ConferenceMeals = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {meals.map((meal) => (
                 <Card key={meal.meal_id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <AspectRatio.Root ratio={16 / 9}>
@@ -486,23 +560,57 @@ const ConferenceMeals = () => {
                   </CardContent>
                   <CardFooter className="flex justify-end p-4 pt-0">
                     <Button 
-                      variant="destructive" 
-                      size="sm" 
-                      onClick={() => {
-                        if (confirm('Are you sure you want to delete this meal?')) {
-                          handleDeleteMeal(meal.meal_id);
-                        }
-                      }}
-                      disabled={isDeleting === meal.meal_id}
-                      className="gap-1"
+                      variant="secondary"
+                      size="sm"
+                      className="gap-1 mr-2"
+                      onClick={() => openEditModal(meal)}
                     >
-                      {isDeleting === meal.meal_id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                      Delete
+                      Edit
                     </Button>
+                    <AlertDialog.Root open={pendingDeleteMealId === meal.meal_id} onOpenChange={(open) => { if (!open) setPendingDeleteMealId(null); }}>
+                      <AlertDialog.Trigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => setPendingDeleteMealId(meal.meal_id)}
+                          disabled={isDeleting === meal.meal_id}
+                          className="gap-1"
+                        >
+                          {isDeleting === meal.meal_id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                          Delete
+                        </Button>
+                      </AlertDialog.Trigger>
+                      <AlertDialog.Portal>
+                        <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
+                        <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[400px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
+                          <AlertDialog.Title className="text-lg font-semibold">
+                            Delete Meal
+                          </AlertDialog.Title>
+                          <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
+                            Are you sure you want to delete this meal? This action cannot be undone.
+                          </AlertDialog.Description>
+                          <div className="flex justify-end gap-4">
+                            <AlertDialog.Cancel asChild>
+                              <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                                Cancel
+                              </button>
+                            </AlertDialog.Cancel>
+                            <AlertDialog.Action asChild>
+                              <button 
+                                onClick={() => { handleDeleteMeal(meal.meal_id); setPendingDeleteMealId(null); }}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+                              >
+                                Delete
+                              </button>
+                            </AlertDialog.Action>
+                          </div>
+                        </AlertDialog.Content>
+                      </AlertDialog.Portal>
+                    </AlertDialog.Root>
                   </CardFooter>
                 </Card>
               ))}
@@ -520,6 +628,101 @@ const ConferenceMeals = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Meal Modal */}
+      <Dialog.Root open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[90vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-xl focus:outline-none z-50">
+            <div className="flex items-center justify-between mb-4">
+              <Dialog.Title className="text-xl font-semibold text-gray-800">Edit Meal</Dialog.Title>
+              <Dialog.Close asChild>
+                <button className="rounded-sm opacity-70 hover:opacity-100">
+                  <Cross2Icon className="h-5 w-5" />
+                </button>
+              </Dialog.Close>
+            </div>
+            {editingMeal && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Conference</label>
+                  <Select 
+                    value={editingMeal.conferenceId?.toString() || ""} 
+                    onValueChange={id => setEditingMeal(prev => prev ? { ...prev, conferenceId: parseInt(id, 10) } : null)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a conference" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {conferences.map((conference) => (
+                        <SelectItem key={conference.id} value={conference.id.toString()}>
+                          {conference.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Meal Name</label>
+                  <input
+                    type="text"
+                    value={editingMeal.name}
+                    onChange={e => setEditingMeal(prev => prev ? { ...prev, name: e.target.value } : null)}
+                    className="w-full px-3 py-2 border rounded-md text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    placeholder="Enter meal name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Meal Image</label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                      {editingMeal.previewImage ? (
+                        <img 
+                          src={editingMeal.previewImage} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-4 text-gray-500">
+                          <ImageIcon className="h-8 w-8 mb-2" />
+                          <span className="text-sm">Click to upload image</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleEditImageChange}
+                        className="hidden" 
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="mt-6 flex justify-end gap-3">
+              <Dialog.Close asChild>
+                <Button variant="outline">
+                  Cancel
+                </Button>
+              </Dialog.Close>
+              <Button
+                onClick={handleEditMealSubmit}
+                disabled={isLoading}
+                className="gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>Save Changes</>
+                )}
+              </Button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 };

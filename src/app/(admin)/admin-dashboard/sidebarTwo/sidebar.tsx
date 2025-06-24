@@ -262,7 +262,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, onNavigate, hasPaid = fa
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="h-screen fixed mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-hidden"
+      className="h-screen fixed mt-16 w-64 bg-[#0e1a3d] dark:bg-gray-900 shadow-xl flex flex-col overflow-hidden hidden md:flex z-40"
     >
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="flex flex-col gap-0.5 p-3">

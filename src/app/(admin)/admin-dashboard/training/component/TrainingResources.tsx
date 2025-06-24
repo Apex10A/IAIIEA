@@ -165,7 +165,6 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           <ArrowLeft className="w-4 h-4" />
           Back to seminars
         </Button>
-        <AddFileModal/>
       </div>
      
       <div className="bg-card rounded-lg shadow-md overflow-hidden border dark:border-gray-700">
@@ -194,7 +193,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               {conference.title}
             </h1>
             <p className="text-muted-foreground text-sm dark:text-gray-300">
-              {conferenceDetails.registered_count || 0} people have registered for this conference
+              {conferenceDetails?.registered_count || 0} people have registered for this conference
             </p>
           </div>
           
@@ -224,7 +223,17 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           {/* Edit and Delete Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 mt-5">
             <EditSeminarModal 
-              conference={conference} 
+              seminar={{
+                id: conference.id,
+                title: conference.title,
+                theme: conference.theme,
+                venue: conference.venue,
+                start_date: conferenceDetails?.start_date || '',
+                start_time: conferenceDetails?.start_time || '',
+                status: conference.status,
+                speakers: conferenceDetails?.speakers || [],
+                payments: conferenceDetails?.payments || []
+              }}
               onSuccess={onEdit}
               trigger={
                 <Button variant="outline" className="w-full sm:w-auto text-sm dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
@@ -700,7 +709,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                 {seminarDetails.resources.map((resource) => (
                   <div key={resource.resource_id} className="bg-gray-50 dark:bg-muted/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div className="flex flex-col gap-4">
-                      {resource.resource_type.toLowerCase().includes('video') ? (
+                      {resource.resource_type?.toLowerCase().includes('video') ? (
                         <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                           <video
                             src={resource.file}
@@ -724,7 +733,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                           <p className="text-sm text-gray-600 dark:text-gray-400">{resource.resource_type}</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{resource.date}</p>
                         </div>
-                        {!resource.resource_type.toLowerCase().includes('video') && (
+                        {!resource.resource_type?.toLowerCase().includes('video') && (
                           <a 
                             href={resource.file}
                             target="_blank"
@@ -888,6 +897,11 @@ const TrainingResources: React.FC = () => {
         />
       ) : (
         <div className="space-y-8">
+          {/* Add New Seminar Button */}
+          <div className="flex justify-end">
+            <AddFileModal onSuccess={fetchSeminars} />
+          </div>
+
           {selectedSeminar && seminarDetails && (
             <div className="space-y-4">
               <SeminarDetailsView

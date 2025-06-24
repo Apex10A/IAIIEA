@@ -34,6 +34,8 @@ interface FormData {
   venue: string;
   start: string;
   end: string;
+  mode: string;
+  is_free: string;
   subthemes_input: string[];
   workshops_input: string[];
   important_date: string[];
@@ -139,6 +141,8 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
     venue: '',
     start: '',
     end: '',
+    mode: '',
+    is_free: '',
     basic_naira: '',
     basic_usd: '',
     basic_package: [],
@@ -166,6 +170,8 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
       venue: details.venue || '',
       start: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
       end: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
+      mode: '',
+      is_free: '',
       basic_naira: details.payments?.basic?.physical?.naira || '',
       basic_usd: details.payments?.basic?.physical?.usd || '',
       basic_package: details.payments?.basic?.package || [],
@@ -288,7 +294,9 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
         theme: formData.theme,
         venue: formData.venue,
         start: startDate.toISOString().slice(0, 19).replace('T', ' '),
-        end: endDate.toISOString().slice(0, 19).replace('T', ' ')
+        end: endDate.toISOString().slice(0, 19).replace('T', ' '),
+        mode: formData.mode,
+        is_free: formData.is_free
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_seminar/1`, {
@@ -433,25 +441,55 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                     />
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="start">Start Date & Time</Label>
-                      <Input
-                        id="start"
-                        type="datetime-local"
-                        value={formData.start}
-                        onChange={(e) => handleInputChange('start', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="end">End Date & Time</Label>
-                      <Input
-                        id="end"
-                        type="datetime-local"
-                        value={formData.end}
-                        onChange={(e) => handleInputChange('end', e.target.value)}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mode">Mode</Label>
+                    <select
+                      id="mode"
+                      value={formData.mode}
+                      onChange={e => handleInputChange('mode', e.target.value)}
+                      className="w-full border rounded-md p-2"
+                      required
+                    >
+                      <option value="">Select mode</option>
+                      <option value="Physical">Physical</option>
+                      <option value="Virtual">Virtual</option>
+                      <option value="Virtual_Physical">Hybrid (Virtual & Physical)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="is_free">Seminar Type</Label>
+                    <select
+                      id="is_free"
+                      value={formData.is_free}
+                      onChange={e => handleInputChange('is_free', e.target.value)}
+                      className="w-full border rounded-md p-2"
+                      required
+                    >
+                      <option value="">Select type</option>
+                      <option value="free">Free</option>
+                      <option value="paid">Paid</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="start">Start Date & Time</Label>
+                    <Input
+                      id="start"
+                      type="datetime-local"
+                      value={formData.start}
+                      onChange={(e) => handleInputChange('start', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="end">End Date & Time</Label>
+                    <Input
+                      id="end"
+                      type="datetime-local"
+                      value={formData.end}
+                      onChange={(e) => handleInputChange('end', e.target.value)}
+                    />
                   </div>
                 </CardContent>
               </Card>

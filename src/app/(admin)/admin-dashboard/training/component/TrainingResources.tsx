@@ -493,34 +493,34 @@ const formatEventDate = (dateStr?: string, timeStr?: string) => {
 };
 
 const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onViewDetails }) => (
-  <div className="rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-card dark:border-gray-700 dark:hover:shadow-gray-700/30">
-    <div className="p-4">
-      <div className="flex items-start justify-between mb-3">
-        <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold line-clamp-2">
+  <div className="rounded-xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden bg-white dark:bg-gray-800 group transform hover:-translate-y-1">
+    <div className="p-6">
+      <div className="flex items-start justify-between mb-4">
+        <h2 className="text-gray-900 dark:text-white text-lg font-semibold line-clamp-2">
           {seminar.title}
         </h2>
         <span
           className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
             seminar?.status === "Completed"
               ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-              : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
           }`}
         >
           {seminar?.status}
         </span>
       </div>
-      <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
+      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
         {seminar.theme}
       </p>
-      <div className="flex items-center text-gray-600 dark:text-gray-400 text-xs mb-4">
-        <Calendar className="w-3 h-3 mr-1 text-gray-600 dark:text-gray-400" />
+      <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs mb-6">
+        <Calendar className="w-4 h-4 mr-2 text-blue-500" />
         <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">{seminar.date}</p>
       </div>
     </div>
-    <div className="px-4 pb-4">
+    <div className="px-6 pb-6">
       <button
         onClick={() => onViewDetails(seminar)}
-        className="w-full bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-gray-700 dark:text-gray-100 text-primary-foreground text-sm font-medium transition-colors"
+        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-md"
       >
         View Details
       </button>
@@ -542,7 +542,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -550,7 +550,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
   if (!seminarDetails) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-foreground dark:text-gray-100">Failed to load seminar details</p>
+        <p className="text-gray-900 dark:text-white">Failed to load seminar details</p>
       </div>
     );
   }
@@ -561,30 +561,30 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
         <Button
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to seminars
         </Button>
       </div>
      
-      <div className="bg-card rounded-lg shadow-md overflow-hidden border dark:border-gray-700">
-        <div className="p-4 sm:p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               {seminar.title}
             </h1>
           </div>
           
           <div className="mb-4">
-            <p className="text-lg sm:text-2xl text-gray-700 uppercase font-bold dark:text-gray-300">
+            <p className="text-lg sm:text-xl text-blue-700 dark:text-blue-300 uppercase font-bold">
               {seminar.theme}
             </p>
           </div>
       
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <Calendar className="w-5 h-5 text-blue-500" />
               <div>
                 <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">
                   {formatEventDate(seminarDetails.start_date, seminarDetails.start_time)}
@@ -592,7 +592,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <MapPin className="w-5 h-5 text-blue-500" />
               <div>
                 <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">{seminar.venue}</p>
               </div>
@@ -600,7 +600,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
           </div>
 
           {/* Edit and Delete Buttons */}
-          <div className="flex flex-col sm:flex-row gap-2 mt-5">
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <EditSeminarModal 
               seminar={{
                 id: seminar.id,
@@ -615,7 +615,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
               }}
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                <Button variant="outline" className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50">
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Seminar
                 </Button>
@@ -624,7 +624,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
             
             <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
               <AlertDialog.Trigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                <Button variant="outline" className="w-full sm:w-auto text-sm text-red-600 dark:text-red-400 border-red-200 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete Seminar
                 </Button>
@@ -662,22 +662,27 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
 
             <Button 
               variant="outline" 
-              className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+              className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50"
               onClick={() => onViewResources(seminar)}
             >
               View Resources
             </Button>
           </div>
+        </div>
 
+        <div className="p-6">
           {/* Speakers Section */}
           {seminarDetails.speakers && seminarDetails.speakers.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Speakers</h2>
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                Speakers
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {seminarDetails.speakers.map((speaker, index) => (
-                  <div key={index} className="bg-gray-50 dark:bg-muted/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-lg border border-blue-200 dark:border-gray-600">
                     <div className="flex items-center gap-4">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-muted">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden bg-blue-100 dark:bg-gray-600 ring-2 ring-blue-200 dark:ring-gray-600">
                         <Image
                           src={speaker.picture || '/speakers/speaker_avatar.png'}
                           alt={speaker.name}
@@ -686,12 +691,12 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                         />
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">{speaker.name}</h3>
+                        <h3 className="font-medium text-gray-900 dark:text-white">{speaker.name}</h3>
                         {speaker.portfolio && (
                           <p className="text-sm text-gray-600 dark:text-gray-400">{speaker.portfolio}</p>
                         )}
                         {speaker.title && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{speaker.title}</p>
+                          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">{speaker.title}</p>
                         )}
                       </div>
                     </div>
@@ -703,11 +708,14 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
 
           {/* Resources Section */}
           {seminarDetails.resources && seminarDetails.resources.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Resources</h2>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                Resources
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {seminarDetails.resources.map((resource) => (
-                  <div key={resource.resource_id} className="bg-gray-50 dark:bg-muted/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div key={resource.resource_id} className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-lg border border-green-200 dark:border-gray-600">
                     <div className="flex flex-col gap-4">
                       {resource.resource_type?.toLowerCase().includes('video') ? (
                         <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -723,14 +731,14 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                           </video>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center aspect-video rounded-lg bg-gray-100 dark:bg-gray-800">
-                          <FileText className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+                        <div className="flex items-center justify-center aspect-video rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-gray-800 dark:to-gray-700">
+                          <FileText className="w-12 h-12 text-green-500 dark:text-green-400" />
                         </div>
                       )}
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-900 dark:text-gray-100">{resource.caption}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{resource.resource_type}</p>
+                          <h3 className="font-medium text-gray-900 dark:text-white">{resource.caption}</h3>
+                          <p className="text-sm text-green-600 dark:text-green-400">{resource.resource_type}</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{resource.date}</p>
                         </div>
                         {!resource.resource_type?.toLowerCase().includes('video') && (
@@ -738,7 +746,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                             href={resource.file}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary hover:text-primary/80"
+                            className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
                           >
                             <FileText className="w-5 h-5" />
                           </a>
@@ -877,61 +885,74 @@ const TrainingResources: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      {viewMode === "details" && selectedSeminar ? (
-        <SeminarDetailsView
-          seminar={selectedSeminar}
-          seminarDetails={seminarDetails}
-          loading={detailsLoading}
-          onBack={handleBackToList}
-          onViewResources={handleViewResources}
-          onEdit={() => fetchSeminarDetails(selectedSeminar.id)}
-          onDelete={() => handleDeleteSeminar(selectedSeminar.id)}
-        />
-      ) : (
-        <div className="space-y-8">
-          {/* Add New Seminar Button */}
-          <div className="flex justify-end">
-            <AddFileModal onSuccess={fetchSeminars} />
-          </div>
-
-          {selectedSeminar && seminarDetails && (
-            <div className="space-y-4">
-              <SeminarDetailsView
-                seminar={selectedSeminar}
-                seminarDetails={seminarDetails}
-                loading={detailsLoading}
-                onBack={handleBackToList}
-                onViewResources={handleViewResources}
-                onEdit={() => fetchSeminarDetails(selectedSeminar.id)}
-                onDelete={() => handleDeleteSeminar(selectedSeminar.id)}
-              />
-            </div>
-          )}
-
-          {seminars.length > 1 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Past Seminars</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {seminars.slice(1).map((seminar) => (
-                  <SeminarCard
-                    key={seminar.id}
-                    seminar={seminar}
-                    onViewDetails={handleViewDetails}
-                  />
-                ))}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto py-8 px-4">
+        {viewMode === "details" && selectedSeminar ? (
+          <SeminarDetailsView
+            seminar={selectedSeminar}
+            seminarDetails={seminarDetails}
+            loading={detailsLoading}
+            onBack={handleBackToList}
+            onViewResources={handleViewResources}
+            onEdit={() => fetchSeminarDetails(selectedSeminar.id)}
+            onDelete={() => handleDeleteSeminar(selectedSeminar.id)}
+          />
+        ) : (
+          <div className="space-y-8">
+            {/* Header Section with Add Button */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-gray-700 p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Training Seminars</h1>
+                  <p className="text-gray-600 dark:text-gray-300">Manage and view all your training seminars</p>
+                </div>
+                <AddFileModal onSuccess={fetchSeminars} />
               </div>
             </div>
-          )}
-        </div>
-      )}
+
+            {selectedSeminar && seminarDetails && (
+              <div className="space-y-4">
+                <SeminarDetailsView
+                  seminar={selectedSeminar}
+                  seminarDetails={seminarDetails}
+                  loading={detailsLoading}
+                  onBack={handleBackToList}
+                  onViewResources={handleViewResources}
+                  onEdit={() => fetchSeminarDetails(selectedSeminar.id)}
+                  onDelete={() => handleDeleteSeminar(selectedSeminar.id)}
+                />
+              </div>
+            )}
+
+            {seminars.length > 1 && (
+              <div className="space-y-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    Past Seminars
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {seminars.slice(1).map((seminar) => (
+                      <SeminarCard
+                        key={seminar.id}
+                        seminar={seminar}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

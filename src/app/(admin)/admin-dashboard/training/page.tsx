@@ -30,9 +30,7 @@ const Page = () => {
 
   return (
     <div className='bg-gray-50 dark:bg-transparent min-h-screen'>
-      <div className='px-5 py-3 mb-6 bg-white dark:bg-transparent border-b border-gray-200 dark:border-gray-800'>
-        <h1 className='text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100'>Training</h1>
-      </div>
+      
       {/* <div>
         <ButtonProp
           options={['Create Conference Events', 'Create Conference Resources']}

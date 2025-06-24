@@ -21,6 +21,8 @@ interface Step1Data {
   venue: string;
   start: string;
   end: string;
+  mode: string;
+  is_free: string;
 }
 
 interface Step2Data {
@@ -49,7 +51,9 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
     theme: '',
     venue: '',
     start: '',
-    end: ''
+    end: '',
+    mode: '',
+    is_free: '',
   });
 
   const [step2Data, setStep2Data] = useState<Step2Data>({
@@ -116,7 +120,9 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
           theme: '',
           venue: '',
           start: '',
-          end: ''
+          end: '',
+          mode: '',
+          is_free: '',
         });
         setStep2Data({
           token: '',
@@ -341,6 +347,35 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
                   className="w-full border rounded-md p-2"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Mode</label>
+                <select
+                  value={step1Data.mode}
+                  onChange={e => setStep1Data(prev => ({ ...prev, mode: e.target.value }))}
+                  className="w-full border rounded-md p-2"
+                  required
+                >
+                  <option value="">Select mode</option>
+                  <option value="Physical">Physical</option>
+                  <option value="Virtual">Virtual</option>
+                  <option value="Virtual_Physical">Hybrid (Virtual & Physical)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Seminar Type</label>
+                <select
+                  value={step1Data.is_free}
+                  onChange={e => setStep1Data(prev => ({ ...prev, is_free: e.target.value }))}
+                  className="w-full border rounded-md p-2"
+                  required
+                >
+                  <option value="">Select type</option>
+                  <option value="free">Free</option>
+                  <option value="paid">Paid</option>
+                </select>
               </div>
 
               <button

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Upload } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Download, File, Video, Music, FileText } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { Trash2 } from 'lucide-react';
@@ -226,6 +226,35 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
           </div>
         </TabsContent>
       </Tabs>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Seminar Resources</CardTitle>
+            <AddResourceModal seminarId={resources[0]?.seminar_id || ''} onSuccess={() => {}} />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {resources.length === 0 ? (
+            <p className="text-gray-500">No resources yet.</p>
+          ) : (
+            <ul>
+              {resources.map(resource => (
+                <li key={resource.resource_id} className="flex items-center justify-between py-2 border-b">
+                  <span>
+                    <ResourceTypeBadge type={resource.resource_type} />
+                    {resource.caption}
+                  </span>
+                  <div>
+                    <Button onClick={() => {}}>View</Button>
+                    <Button variant="destructive" onClick={() => onDelete?.(resource.resource_id!)}>Delete</Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
@@ -384,6 +413,41 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
             Upload Resources
           </Button>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ResourceTypeBadge: React.FC<{ type: ResourceType }> = ({ type }) => {
+  const getBadgeColor = () => {
+    switch (type) {
+      case 'Video': return 'bg-blue-100 text-blue-800';
+      case 'Audio': return 'bg-green-100 text-green-800';
+      case 'PDF': return 'bg-yellow-100 text-yellow-800';
+      case 'PPT': return 'bg-purple-100 text-purple-800';
+      case 'DOCX': return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-sm ${getBadgeColor()}`}>
+      {type.charAt(0).toUpperCase() + type.slice(1)}
+    </span>
+  );
+};
+
+const AddResourceModal: React.FC<{ seminarId: string; onSuccess: () => void }> = ({ seminarId, onSuccess }) => {
+  // Implementation of AddResourceModal component
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="flex items-center gap-2">
+          <Upload className="w-4 h-4" />
+          Add Resource
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        {/* Add resource form content */}
       </DialogContent>
     </Dialog>
   );

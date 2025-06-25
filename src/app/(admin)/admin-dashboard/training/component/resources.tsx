@@ -17,16 +17,17 @@ import { format } from 'date-fns';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { showToast } from '@/utils/toast';
+import { useSession } from 'next-auth/react';
 
 export type ResourceType = 'Video' | 'Audio' | 'PDF' | 'PPT' | 'DOCX';
 
 export interface Resource {
-  resource_id?: string;
-  resource_type: ResourceType;
-  resource: string | File[];
+  resource_id: number;
+  resource_type: string | null;
   caption: string;
-  created_at?: string;
-  seminar_id: string
+  date: string;
+  file: string;
 }
 
 interface ResourcesPageProps {
@@ -58,7 +59,7 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
               <video 
                 controls 
                 className="w-full rounded-lg"
-                src={typeof resource.resource === 'string' ? resource.resource : undefined}
+                src={typeof resource.file === 'string' ? resource.file : undefined}
               >
                 Your browser does not support the video tag.
               </video>
@@ -66,21 +67,21 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
               <audio 
                 controls 
                 className="w-full"
-                src={typeof resource.resource === 'string' ? resource.resource : undefined}
+                src={typeof resource.file === 'string' ? resource.file : undefined}
               >
                 Your browser does not support the audio tag.
               </audio>
             )
           ) : (
             <div className="flex items-center justify-center h-40 bg-gray-100 rounded-lg">
-              {getFileIcon(resource.resource_type)}
+              {getFileIcon(resource.resource_type as ResourceType)}
             </div>
           )}
           
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">
-              {resource.created_at 
-                ? format(new Date(resource.created_at), 'PPP') 
+              {resource.date 
+                ? format(new Date(resource.date), 'PPP') 
                 : 'No date'}
             </span>
           </div>
@@ -88,7 +89,7 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
       </CardContent>
       
       <div className="flex items-center gap-2 px-4">
-        {getFileIcon(resource.resource_type)}
+        {getFileIcon(resource.resource_type as ResourceType)}
         <span className="font-semibold truncate max-w-[200px]">
           <h1 className='text-md md:text-lg'>{resource.caption}</h1>
         </span>
@@ -99,11 +100,11 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
           <div className="flex gap-2">
             <button className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2">
               <Download className="w-5 h-5" />
-              <span className='text-sm'>Download {resource.resource_type.toLowerCase()}</span>
+              <span className='text-sm'>Download {resource.resource_type?.toLowerCase()}</span>
             </button>
           </div>
           
-          {onDelete && resource.resource_id && (
+          {onDelete && resource.resource_id.toString() && (
             <AlertDialog.Root>
               <AlertDialog.Trigger asChild>
                 <button className="text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
@@ -115,10 +116,10 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
                 <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
                 <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
                   <AlertDialog.Title className="text-lg font-semibold">
-                    Delete {resource.resource_type}
+                    Delete {resource.resource_type?.toLowerCase()}
                   </AlertDialog.Title>
                   <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                    Are you sure you want to delete this {resource.resource_type.toLowerCase()}? This action cannot be undone.
+                    Are you sure you want to delete this {resource.resource_type?.toLowerCase()}? This action cannot be undone.
                   </AlertDialog.Description>
                   <div className="flex justify-end gap-4">
                     <AlertDialog.Cancel asChild>
@@ -128,7 +129,7 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
                     </AlertDialog.Cancel>
                     <AlertDialog.Action asChild>
                       <button 
-                        onClick={() => onDelete(resource.resource_id!)}
+                        onClick={() => onDelete(resource.resource_id.toString())}
                         className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
                       >
                         Delete
@@ -158,7 +159,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
   }, [initialResources]);
 
   const mediaResources = resources.filter(r => r.resource_type === 'Video' || r.resource_type === 'Audio');
-  const documentResources = resources.filter(r => ['PDF', 'PPT', 'DOCX'].includes(r.resource_type));
+  const documentResources = resources.filter(r => ['PDF', 'PPT', 'DOCX'].includes(r.resource_type as ResourceType));
 
   return (
     <div className="container mx-auto p-6">
@@ -195,7 +196,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
             {mediaResources.length > 0 ? (
               mediaResources.map((resource) => (
                 <ResourceCard 
-                  key={resource.resource_id} 
+                  key={resource.resource_id.toString()} 
                   resource={resource} 
                   onDelete={onDelete}
                 />
@@ -213,7 +214,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
             {documentResources.length > 0 ? (
               documentResources.map((resource) => (
                 <ResourceCard 
-                  key={resource.resource_id} 
+                  key={resource.resource_id.toString()} 
                   resource={resource} 
                   onDelete={onDelete}
                 />
@@ -231,7 +232,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Seminar Resources</CardTitle>
-            <AddResourceModal seminarId={resources[0]?.seminar_id || ''} onSuccess={() => {}} />
+            <AddResourceModal seminarId={resources[0]?.resource_id || 0} onSuccess={() => {}} />
           </div>
         </CardHeader>
         <CardContent>
@@ -240,14 +241,14 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
           ) : (
             <ul>
               {resources.map(resource => (
-                <li key={resource.resource_id} className="flex items-center justify-between py-2 border-b">
+                <li key={resource.resource_id.toString()} className="flex items-center justify-between py-2 border-b">
                   <span>
-                    <ResourceTypeBadge type={resource.resource_type} />
+                    <ResourceTypeBadge type={resource.resource_type as ResourceType} />
                     {resource.caption}
                   </span>
                   <div>
                     <Button onClick={() => {}}>View</Button>
-                    <Button variant="destructive" onClick={() => onDelete?.(resource.resource_id!)}>Delete</Button>
+                    <Button variant="destructive" onClick={() => onDelete?.(resource.resource_id.toString())}>Delete</Button>
                   </div>
                 </li>
               ))}
@@ -295,8 +296,8 @@ const ResourceUploadModal: React.FC<{ onUpload: (resource: Resource) => Promise<
         resource_type: resourceType,
         resource: Array.from(files),
         caption: caption.trim(),
-        created_at: date || new Date().toISOString(),
-        seminar_id: seminarId.trim() // Use the conference ID from state
+        date: date || new Date().toISOString(),
+        file: Array.from(files)[0].name
       });
       
       setFiles(null);
@@ -436,18 +437,131 @@ const ResourceTypeBadge: React.FC<{ type: ResourceType }> = ({ type }) => {
   );
 };
 
-const AddResourceModal: React.FC<{ seminarId: string; onSuccess: () => void }> = ({ seminarId, onSuccess }) => {
-  // Implementation of AddResourceModal component
+const RESOURCE_TYPES = ['Video', 'Audio', 'PPT', 'PDF', 'Docx'];
+
+const AddResourceModal: React.FC<{ seminarId: number; onSuccess: () => void }> = ({ seminarId, onSuccess }) => {
+  const { data: session } = useSession();
+  const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const [open, setOpen] = useState(false);
+  const [resourceType, setResourceType] = useState('');
+  const [caption, setCaption] = useState('');
+  const [date, setDate] = useState('');
+  const [files, setFiles] = useState<FileList | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFiles(e.target.files);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resourceType || !caption || !date || !files || files.length === 0) {
+      showToast.error('Please fill all fields and select at least one file.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('resource_type', resourceType);
+      formData.append('caption', caption);
+      formData.append('date', date);
+      formData.append('seminar_id', seminarId.toString());
+      for (let i = 0; i < files.length; i++) {
+        formData.append('resources[]', files[i]);
+      }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/upload_seminar_resource`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`
+        },
+        body: formData
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        showToast.success('Resource uploaded successfully!');
+        setOpen(false);
+        setResourceType('');
+        setCaption('');
+        setDate('');
+        setFiles(null);
+        onSuccess();
+      } else {
+        showToast.error(data.message || 'Failed to upload resource');
+      }
+    } catch (error) {
+      showToast.error('Failed to upload resource');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="default" className="flex items-center gap-2">
           <Upload className="w-4 h-4" />
           Add Resource
         </Button>
       </DialogTrigger>
       <DialogContent>
-        {/* Add resource form content */}
+        <DialogHeader>
+          <DialogTitle>Add Seminar Resource</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-2">Resource Type</label>
+            <select
+              value={resourceType}
+              onChange={e => setResourceType(e.target.value as ResourceType)}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select type</option>
+              {RESOURCE_TYPES.map(rt => (
+                <option key={rt} value={rt}>{rt}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block mb-2">Select Files</label>
+            <Input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="w-full"
+              required
+            />
+            {files && (
+              <p className="text-sm text-gray-500 mt-2">
+                Selected: {Array.from(files).map(file => file.name).join(', ')}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block mb-2">Caption</label>
+            <Input
+              type="text"
+              value={caption}
+              onChange={e => setCaption(e.target.value)}
+              placeholder="Enter a descriptive caption"
+              className="w-full"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-2">Date</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="w-full"
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Uploading...' : 'Upload Resource'}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -528,8 +528,6 @@ const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onViewDetails }) => 
   </div>
 );
 
-const RESOURCE_TYPES = ['Video', 'Audio', 'PPT', 'PDF', 'Docx'];
-
 const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
   seminar,
   seminarDetails,
@@ -540,9 +538,6 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
   onViewResources,
 }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [resources, setResources] = useState(seminarDetails.resources || []);
-  const [editResource, setEditResource] = useState(null);
-  const [deleteResourceId, setDeleteResourceId] = useState<string | null>(null);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
@@ -560,7 +555,6 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
         }
       });
       showToast.success('Resource deleted');
-      setDeleteResourceId(null);
       await refreshResources();
     } catch (error) {
       showToast.error('Failed to delete resource');
@@ -741,16 +735,13 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 Resources
               </h2>
-              <AddResourceModal seminarId={seminar.id} onSuccess={refreshResources} resource={editResource} onClose={() => setEditResource(null)} />
-              <Button onClick={() => setEditResource(null)} className="bg-green-600 hover:bg-green-700 text-white">
-                + Add Resource
-              </Button>
+              <AddResourceModal seminarId={seminar.id} onSuccess={refreshResources} />
             </div>
-            {resources.length === 0 ? (
+            {seminarDetails.resources?.length === 0 ? (
               <p className="text-gray-500">No resources yet.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {resources.map((resource) => (
+                {seminarDetails.resources.map((resource) => (
                   <div key={resource.resource_id} className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-lg border border-green-200 dark:border-gray-600 flex flex-col gap-2">
                     <div className="flex flex-col gap-4">
                       {resource.resource_type?.toLowerCase().includes('video') ? (
@@ -778,10 +769,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                           <p className="text-sm text-gray-600 dark:text-gray-400">{resource.date}</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Button size="sm" variant="outline" onClick={() => setEditResource(resource)}>
-                            Edit
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => setDeleteResourceId(resource.resource_id)}>
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteResource(resource.resource_id)}>
                             Delete
                           </Button>
                         </div>
@@ -797,37 +785,6 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                         </a>
                       )}
                     </div>
-                    {/* Delete confirmation dialog */}
-                    {deleteResourceId === resource.resource_id && (
-                      <AlertDialog.Root open={true} onOpenChange={() => setDeleteResourceId(null)}>
-                        <AlertDialog.Portal>
-                          <AlertDialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-                          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[400px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                            <AlertDialog.Title className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                              Delete Resource
-                            </AlertDialog.Title>
-                            <AlertDialog.Description className="mt-4 mb-6 text-gray-700 dark:text-gray-300">
-                              Are you sure you want to delete this resource? This action cannot be undone.
-                            </AlertDialog.Description>
-                            <div className="flex justify-end gap-4">
-                              <AlertDialog.Cancel asChild>
-                                <Button variant="outline" className="text-gray-900 border-gray-200 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800">
-                                  Cancel
-                                </Button>
-                              </AlertDialog.Cancel>
-                              <AlertDialog.Action asChild>
-                                <Button 
-                                  variant="destructive"
-                                  onClick={() => handleDeleteResource(resource.resource_id)}
-                                >
-                                  Delete
-                                </Button>
-                              </AlertDialog.Action>
-                            </div>
-                          </AlertDialog.Content>
-                        </AlertDialog.Portal>
-                      </AlertDialog.Root>
-                    )}
                   </div>
                 ))}
               </div>

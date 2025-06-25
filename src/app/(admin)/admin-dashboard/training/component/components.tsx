@@ -13,11 +13,13 @@ import {
   Loader2,
   Plus,
   FileUp,
-  Trash2
+  Trash2,
+  Upload
 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
 import { Resource, AddResourceModalProps } from "./resources";
+import { Seminar } from "./index";
 
 interface ResourceCardProps {
   resource: Resource;
@@ -81,29 +83,56 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
 };
 
 export const AddResourceModal: React.FC<AddResourceModalProps> = ({
-  conferenceId,
+  seminarId: _seminarId,
   onSuccess,
 }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
+  const [seminars, setSeminars] = useState<Seminar[]>([]);
+  const [selectedSeminarId, setSelectedSeminarId] = useState<number | null>(null);
+  const [date, setDate] = useState("");
+  const [resourceType, setResourceType] = useState("");
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
+  React.useEffect(() => {
+    const fetchSeminars = async () => {
+      if (!bearerToken) return;
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`, {
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch seminars");
+        const data = await response.json();
+        if (data.status === "success") {
+          setSeminars(data.data);
+          if (data.data.length > 0) setSelectedSeminarId(data.data[0].id);
+        }
+      } catch (err) {
+        showToast.error("Failed to load seminars");
+      }
+    };
+    fetchSeminars();
+  }, [bearerToken]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !caption) return;
-
+    if (!file || !caption || !selectedSeminarId || !date || !resourceType) return;
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("resources[]", file);
       formData.append("caption", caption);
-      formData.append("conference_id", conferenceId.toString());
-
+      formData.append("seminar_id", selectedSeminarId.toString());
+      formData.append("date", date);
+      formData.append("resource_type", resourceType);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/upload_conference_resource`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/upload_seminar_resource`,
         {
           method: "POST",
           headers: {
@@ -112,11 +141,9 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
           body: formData,
         }
       );
-
       if (!response.ok) {
         throw new Error("Failed to add resource");
       }
-
       showToast.success("Resource added successfully");
       setOpen(false);
       onSuccess();
@@ -131,10 +158,10 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
-          <Plus className="w-4 h-4" />
+        <Button variant='default' className="flex items-center gap-2">
+        <Upload className="w-4 h-4" />
           Add Resource
-        </button>
+        </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
@@ -151,6 +178,53 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
           </div>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Seminar
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  value={selectedSeminarId ?? ''}
+                  onChange={e => setSelectedSeminarId(Number(e.target.value))}
+                  required
+                >
+                  {seminars.map(seminar => (
+                    <option key={seminar.id} value={seminar.id}>
+                      {seminar.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resource Date
+                </label>
+                <input
+                  type="date"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resource Type
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  value={resourceType}
+                  onChange={e => setResourceType(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select type</option>
+                  <option value="Video">Video</option>
+                  <option value="Audio">Audio</option>
+                  <option value="PPT">PPT</option>
+                  <option value="PDF">PDF</option>
+                  <option value="Docx">Docx</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Resource File
@@ -215,7 +289,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
               </Dialog.Close>
               <button
                 type="submit"
-                disabled={loading || !file || !caption}
+                disabled={loading || !file || !caption || !selectedSeminarId || !date || !resourceType}
                 className="px-4 py-2 text-sm font-medium text-white bg-[#203a87] rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}

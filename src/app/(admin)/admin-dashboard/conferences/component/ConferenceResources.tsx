@@ -164,7 +164,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           <ArrowLeft className="w-4 h-4" />
           Back to conferences
         </Button>
-        <AddFileModal/>
+        {/* <AddFileModal/> */}
       </div>
      
       <div className="bg-card rounded-lg shadow-md overflow-hidden border dark:border-gray-700">
@@ -617,102 +617,158 @@ const ConferenceResources: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   if (viewMode === "resources" && selectedConference && conferenceDetails) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <button
-              onClick={handleBackToList}
-              className="flex items-center gap-2 text-gray-700 text-primary hover:text-primary/80 text-sm font-medium dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to conferences
-            </button>
-            <AddResourceModal
-              conferenceId={selectedConference.id}
-              onSuccess={() => fetchConferences()}
-            />
-          </div>
-
-          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border dark:border-gray-700">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {selectedConference.title}
-                </h1>
-                <p className="text-gray-700 dark:text-gray-400">{selectedConference.theme}</p>
+              <button
+                onClick={handleBackToList}
+                className="flex items-center gap-2 text-gray-700 text-primary hover:text-primary/80 text-sm font-medium dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to conferences
+              </button>
+              <AddResourceModal
+                conferenceId={selectedConference.id}
+                onSuccess={() => fetchConferences()}
+              />
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-gray-700 p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    {selectedConference.title}
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-300">{selectedConference.theme}</p>
+                </div>
               </div>
-            </div>
 
-            {/* Gallery Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Gallery</h2>
-              {conferenceDetails.gallery?.length > 0 ? (
-                <MediaCarousel items={conferenceDetails.gallery} type="gallery" />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-400 text-center py-8">No gallery images available</p>
-              )}
-            </div>
-
-            {/* Sponsors Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Sponsors</h2>
-              {conferenceDetails.sponsors?.length > 0 ? (
-                <MediaCarousel 
-                  items={conferenceDetails.sponsors.map(sponsor => ({
-                    logo: sponsor.logo,
-                    name: sponsor.name
-                  }))} 
-                  type="sponsors" 
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-400 text-center py-8">No sponsors available</p>
-              )}
-            </div>
-
-            {/* Videos Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Videos</h2>
-              {conferenceDetails.videos?.length > 0 ? (
-                <MediaCarousel items={conferenceDetails.videos} type="videos" />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-400 text-center py-8">No videos available</p>
-              )}
-            </div>
-
-            {/* Resources Section */}
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Documents</h2>
-              {conferenceDetails.resources?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {conferenceDetails.resources.map((resource) => (
-                    <ResourceCard
-                      key={resource.resource_id}
-                      resource={resource}
-                      onDelete={() => {}}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <FileText className="w-10 h-10 text-gray-500 dark:text-gray-400" />
+              {/* Gallery Section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                  Gallery
+                </h2>
+                {conferenceDetails.gallery?.length > 0 ? (
+                  <MediaCarousel items={conferenceDetails.gallery} type="gallery" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <FileText className="w-10 h-10 mb-2 text-indigo-400" />
+                    <p>No gallery images available</p>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
-                    No resources yet
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-400">
-                    Add resources to make them available to attendees
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* Sponsors Section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  Sponsors
+                </h2>
+                {conferenceDetails.sponsors?.length > 0 ? (
+                  <MediaCarousel 
+                    items={conferenceDetails.sponsors.map((sponsor: any) => ({
+                      logo: sponsor.logo || '',
+                      name: sponsor.name || '',
+                    }))} 
+                    type="sponsors" 
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <FileText className="w-10 h-10 mb-2 text-blue-400" />
+                    <p>No sponsors available</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Videos Section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                  Videos
+                </h2>
+                {conferenceDetails.videos?.length > 0 ? (
+                  <MediaCarousel items={conferenceDetails.videos} type="videos" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <FileText className="w-10 h-10 mb-2 text-indigo-400" />
+                    <p>No videos available</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Resources Section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Resources
+                </h2>
+                {conferenceDetails.resources?.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {conferenceDetails.resources.map((resource) => (
+                      <div key={resource.resource_id} className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-lg border border-green-200 dark:border-gray-600 flex flex-col gap-2">
+                        <div className="flex flex-col gap-4">
+                          {resource.resource_type?.toLowerCase().includes('video') ? (
+                            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                              <video
+                                src={resource.file}
+                                controls
+                                className="w-full h-full object-cover"
+                                poster="/video-thumbnail.png"
+                                preload="metadata"
+                              >
+                                <source src={resource.file} type="video/mp4" />
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center aspect-video rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-gray-800 dark:to-gray-700">
+                              <FileText className="w-12 h-12 text-green-500 dark:text-green-400" />
+                            </div>
+                          )}
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900 dark:text-white">{resource.caption}</h3>
+                              <p className="text-sm text-green-600 dark:text-green-400">{resource.resource_type}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{resource.date}</p>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Button size="sm" variant="destructive" onClick={() => {/* TODO: implement delete */}}>
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                          {!resource.resource_type?.toLowerCase().includes('video') && (
+                            <a 
+                              href={resource.file}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                            >
+                              <FileText className="w-5 h-5" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <FileText className="w-10 h-10 mb-2 text-green-400" />
+                    <p>No resources yet.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -721,49 +777,67 @@ const ConferenceResources: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      {viewMode === "details" && selectedConference ? (
-        <ConferenceDetailsView
-          conference={selectedConference}
-          conferenceDetails={conferenceDetails}
-          loading={detailsLoading}
-          onBack={handleBackToList}
-          onViewResources={handleViewResources}
-          onEdit={() => fetchConferenceDetails(selectedConference.id)}
-          onDelete={() => handleDeleteConference(selectedConference.id)}
-        />
-      ) : (
-        <div className="space-y-8">
-          {selectedConference && conferenceDetails && (
-            <div className="space-y-4">
-              <ConferenceDetailsView
-                conference={selectedConference}
-                conferenceDetails={conferenceDetails}
-                loading={detailsLoading}
-                onBack={handleBackToList}
-                onViewResources={handleViewResources}
-                onEdit={() => fetchConferenceDetails(selectedConference.id)}
-                onDelete={() => handleDeleteConference(selectedConference.id)}
-              />
-            </div>
-          )}
-
-          {conferences.length > 1 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Past Conferences</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {conferences.slice(1).map((conference) => (
-                  <ConferenceCard
-                    key={conference.id}
-                    conference={conference}
-                    onViewDetails={handleViewDetails}
-                  />
-                ))}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto py-8 px-4">
+        {viewMode === "details" && selectedConference ? (
+          <ConferenceDetailsView
+            conference={selectedConference}
+            conferenceDetails={conferenceDetails}
+            loading={detailsLoading}
+            onBack={handleBackToList}
+            onViewResources={handleViewResources}
+            onEdit={() => fetchConferenceDetails(selectedConference.id)}
+            onDelete={() => handleDeleteConference(selectedConference.id)}
+          />
+        ) : (
+          <div className="space-y-8">
+            {/* Header Section with Add Button */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-gray-700 p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Conferences</h1>
+                  <p className="text-gray-600 dark:text-gray-300">Manage and view all your conferences</p>
+                </div>
+                <AddFileModal onSuccess={fetchConferences} />
               </div>
             </div>
-          )}
-        </div>
-      )}
+
+            {selectedConference && conferenceDetails && (
+              <div className="space-y-4">
+                <ConferenceDetailsView
+                  conference={selectedConference}
+                  conferenceDetails={conferenceDetails}
+                  loading={detailsLoading}
+                  onBack={handleBackToList}
+                  onViewResources={handleViewResources}
+                  onEdit={() => fetchConferenceDetails(selectedConference.id)}
+                  onDelete={() => handleDeleteConference(selectedConference.id)}
+                />
+              </div>
+            )}
+
+            {conferences.length > 1 && (
+              <div className="space-y-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    Past Conferences
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {conferences.slice(1).map((conference) => (
+                      <ConferenceCard
+                        key={conference.id}
+                        conference={conference}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

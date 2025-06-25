@@ -30,9 +30,9 @@ const Page = () => {
 
   return (
     <div className=''>
-      <div className=' px-5 py-3 mb-6 '>
+      {/* <div className=' px-5 py-3 mb-6 '>
         <h1 className='text-xl md:text-2xl text-gray-700 dark:text-gray-300'>Conferences</h1>
-      </div>
+      </div> */}
       {/* <div>
         <ButtonProp
           options={['Create Conference Events', 'Create Conference Resources']}

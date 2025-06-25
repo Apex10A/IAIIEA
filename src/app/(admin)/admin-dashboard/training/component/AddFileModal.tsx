@@ -4,6 +4,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { showToast } from '@/utils/toast';
+import { Button } from '@/components/ui/button';
 
 interface Speaker {
   speaker_id: number;
@@ -378,12 +379,13 @@ const CreateSeminarModal: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
                 </select>
               </div>
 
-              <button
+              <Button
                 type="submit"
+                variant='default'
                 className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
                 Next Step
-              </button>
+              </Button>
             </form>
           ) : (
             <form onSubmit={handleStep2Submit} className="space-y-6">

@@ -682,13 +682,13 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
               </AlertDialog.Portal>
             </AlertDialog.Root>
 
-            <Button 
+            {/* <Button 
               variant="outline" 
               className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50"
               onClick={() => onViewResources(seminar)}
             >
               View Resources
-            </Button>
+            </Button> */}
           </div>
         </div>
 

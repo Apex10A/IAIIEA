@@ -22,6 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2, Upload, Pencil, X } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { useRouter } from 'next/navigation';
 
 interface GalleryYear {
   year: string;
@@ -36,6 +38,11 @@ interface GalleryImage {
   image: string;
 }
 
+interface GalleryActivity {
+  slug: string;
+  activity: string;
+}
+
 interface ApiResponse<T> {
   status: string;
   message: string;
@@ -45,8 +52,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const GalleryManagement = () => {
   const [years, setYears] = useState<GalleryYear[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const [yearImages, setYearImages] = useState<GalleryImage[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const { data: session } = useSession();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -64,7 +69,13 @@ const GalleryManagement = () => {
   // Update form state
   const [updateYear, setUpdateYear] = useState("");
   const [updateCaption, setUpdateCaption] = useState("");
+  const [activities, setActivities] = useState<GalleryActivity[]>([]);
+  const [selectedActivitySlug, setSelectedActivitySlug] = useState<string>("");
+  const [isCreateActivityModalOpen, setIsCreateActivityModalOpen] = useState(false);
+  const [newActivityName, setNewActivityName] = useState("");
+
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const router = useRouter();
 
   useEffect(() => {
     fetchGalleryYears();
@@ -102,38 +113,6 @@ const GalleryManagement = () => {
     }
   };
 
-  const fetchYearGallery = async (year: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_URL}/landing/gallery/${year}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${bearerToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch gallery for year ${year}`);
-      }
-
-      const data: ApiResponse<GalleryImage[]> = await response.json();
-      
-      if (data.status === 'success') {
-        setYearImages(data.data);
-        setSelectedYear(year);
-      } else {
-        throw new Error(data.message || `Failed to fetch gallery for year ${year}`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      console.error('Error fetching year gallery:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     setSelectedFiles(files);
@@ -147,18 +126,65 @@ const GalleryManagement = () => {
     });
   };
 
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch(`${API_URL}/admin/list_gallery_activity/`, {
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setActivities(data.data);
+      }
+    } catch (err) {
+      showToast.error('Failed to fetch activities');
+    }
+  };
+
+  useEffect(() => {
+    if (isUploadModalOpen) {
+      fetchActivities();
+    }
+  }, [isUploadModalOpen]);
+
+  const handleCreateActivity = async () => {
+    if (!newActivityName) return;
+    try {
+      const response = await fetch(`${API_URL}/admin/create_gallery_activity`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${bearerToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ activity: newActivityName }),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        showToast.success('Activity created');
+        setIsCreateActivityModalOpen(false);
+        setNewActivityName("");
+        fetchActivities();
+      } else {
+        showToast.error(data.message || 'Failed to create activity');
+      }
+    } catch (err) {
+      showToast.error('Failed to create activity');
+    }
+  };
+
   const handleUpload = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('year', uploadYear);
+      formData.append('activity_slug', selectedActivitySlug);
       formData.append('caption', uploadCaption);
       selectedFiles.forEach(file => {
         formData.append('gallery[]', file);
       });
-
       const response = await fetch(`${API_URL}/admin/upload_gallery`, {
         method: 'POST',
         headers: {
@@ -166,14 +192,10 @@ const GalleryManagement = () => {
         },
         body: formData,
       });
-
       if (!response.ok) {
         throw new Error('Failed to upload gallery');
-        showToast.error('Failed to upload gallery');
       }
-
       const data = await response.json();
-      
       if (data.status === 'success') {
         setIsUploadModalOpen(false);
         clearUploadForm();
@@ -181,7 +203,6 @@ const GalleryManagement = () => {
         showToast.success('Gallery uploaded successfully');
       } else {
         throw new Error(data.message || 'Failed to upload gallery');
-        showToast.error(data.message || 'Failed to upload gallery');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -222,9 +243,6 @@ const GalleryManagement = () => {
       
       if (data.status === 'success') {
         showToast.success('Gallery image deleted successfully');
-        if (selectedYear) {
-          fetchYearGallery(selectedYear);
-        }
       } else {
         throw new Error(data.message || 'Failed to delete gallery image');
         showToast.error(data.message || 'Failed to delete gallery image');
@@ -267,9 +285,6 @@ const GalleryManagement = () => {
       if (data.status === 'success') {
         showToast.success('Gallery info updated successfully');
         setIsUpdateModalOpen(false);
-        if (selectedYear) {
-          fetchYearGallery(selectedYear);
-        }
       } else {
         throw new Error(data.message || 'Failed to update gallery info');
         showToast.error(data.message || 'Failed to update gallery info');
@@ -315,7 +330,7 @@ const GalleryManagement = () => {
           <Card 
             key={year.year}
             className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => fetchYearGallery(year.year)}
+            onClick={() => router.push(`/admin-dashboard/gallery/${year.year}`)}
           >
             <CardHeader>
               <CardTitle>Year {year.year}</CardTitle>
@@ -330,78 +345,6 @@ const GalleryManagement = () => {
           </Card>
         ))}
       </div>
-
-      {/* Selected Year Gallery */}
-      {selectedYear && (
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Gallery {selectedYear}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {yearImages.map((image) => (
-              <Card key={image.gallery_id}>
-                <CardContent className="pt-6">
-                  <img
-                    src={image.image}
-                    alt={image.caption}
-                    className="w-full h-48 object-cover rounded-md"
-                  />
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <span className="text-sm text-gray-600">{image.caption}</span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={isLoading}
-                      onClick={() => {
-                        setSelectedImage(image);
-                        setUpdateYear(image.year);
-                        setUpdateCaption(image.caption);
-                        setIsUpdateModalOpen(true);
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                    <AlertDialog.Root>
-  <AlertDialog.Trigger asChild>
-    <button  className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-      <Trash2 className="w-4 h-4" />
-      <span>Delete</span>
-    </button>
-  </AlertDialog.Trigger>
-  <AlertDialog.Portal>
-    <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
-    <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
-      <AlertDialog.Title className="text-lg font-semibold">
-        Delete Image
-      </AlertDialog.Title>
-      <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-        Are you sure you want to delete this Image? This action cannot be undone.
-      </AlertDialog.Description>
-      <div className="flex justify-end gap-4">
-        <AlertDialog.Cancel asChild>
-          <button className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-            Cancel
-          </button>
-        </AlertDialog.Cancel>
-        <AlertDialog.Action asChild>
-          <button 
-          onClick={() => handleDelete(image.gallery_id)}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-          >
-            Delete
-          </button>
-        </AlertDialog.Action>
-      </div>
-    </AlertDialog.Content>
-  </AlertDialog.Portal>
-</AlertDialog.Root>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Upload Modal */}
       <Dialog open={isUploadModalOpen} onOpenChange={(open) => {
@@ -421,6 +364,29 @@ const GalleryManagement = () => {
                 onChange={(e) => setUploadYear(e.target.value)}
                 placeholder="2024"
               />
+            </div>
+            <div>
+              <Label htmlFor="activity">Activity</Label>
+              <div className="flex gap-2 items-center">
+                <Select
+                  value={selectedActivitySlug}
+                  onValueChange={setSelectedActivitySlug}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select activity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activities.map((activity) => (
+                      <SelectItem key={activity.slug} value={activity.slug}>
+                        {activity.activity}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button type="button" size="sm" onClick={() => setIsCreateActivityModalOpen(true)}>
+                  + New
+                </Button>
+              </div>
             </div>
             <div>
               <Label htmlFor="caption">Caption</Label>
@@ -478,7 +444,7 @@ const GalleryManagement = () => {
             </Button>
             <Button 
               onClick={handleUpload}
-              disabled={isLoading || !uploadYear || !uploadCaption || !selectedFiles.length}
+              disabled={isLoading || !uploadYear || !uploadCaption || !selectedFiles.length || !selectedActivitySlug}
             >
               {isLoading ? 'Uploading...' : 'Upload'}
             </Button>
@@ -523,6 +489,34 @@ const GalleryManagement = () => {
               disabled={isLoading || !updateYear || !updateCaption}
             >
               {isLoading ? 'Updating...' : 'Update'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Activity Modal */}
+      <Dialog open={isCreateActivityModalOpen} onOpenChange={setIsCreateActivityModalOpen}>
+        <DialogContent className="sm:max-w-[350px]">
+          <DialogHeader>
+            <DialogTitle>Create New Activity</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div>
+              <Label htmlFor="new-activity">Activity Name</Label>
+              <Input
+                id="new-activity"
+                value={newActivityName}
+                onChange={(e) => setNewActivityName(e.target.value)}
+                placeholder="e.g. 2025 Stakeholders meeting"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsCreateActivityModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateActivity} disabled={!newActivityName}>
+              Create
             </Button>
           </div>
         </DialogContent>

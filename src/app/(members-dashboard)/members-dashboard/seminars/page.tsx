@@ -170,27 +170,27 @@ interface ConferenceCardProps {
   conference: Conference;
   onViewResources: (conference: Conference) => void;
   onViewDetails: (conference: Conference) => void;
-  onDeleteConference: (id: number) => void;
-  onEditConference: (conference: Conference) => void;
+  // onDeleteConference: (id: number) => void;
+  // onEditConference: (conference: Conference) => void;
 }
 
 const ConferenceCard: React.FC<ConferenceCardProps> = ({
   conference,
   onViewResources,
   onViewDetails,
-  onDeleteConference,
-  onEditConference,
+  // onDeleteConference,
+  // onEditConference,
 }) => {
   const resourceCount = conference.resources?.length || 0;
 
-  const handleDelete = async () => {
-    try {
-      await onDeleteConference(conference.id);
-      showToast.success("Conference deleted successfully");
-    } catch (error) {
-      showToast.error("Failed to delete conference");
-    }
-  };
+  // const handleDelete = async () => {
+  //   try {
+  //     await onDeleteConference(conference.id);
+  //     showToast.success("Conference deleted successfully");
+  //   } catch (error) {
+  //     showToast.error("Failed to delete conference");
+  //   }
+  // };
 
   return (
     <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
@@ -258,10 +258,10 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
 
 interface ResourceCardProps {
   resource: Resource;
-  onDelete: (resourceId: number) => void;
+  // onDelete: (resourceId: number) => void;
 }
 
-const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
+const ResourceCard: React.FC<ResourceCardProps> = ({ resource}) => {
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -270,14 +270,14 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
     });
   };
 
-  const handleDelete = async () => {
-    try {
-      await onDelete(resource.resource_id);
-      showToast.success("Resource deleted successfully");
-    } catch (error) {
-      showToast.error("Failed to delete resource");
-    }
-  };
+  // const handleDelete = async () => {
+  //   try {
+  //     await onDelete(resource.resource_id);
+  //     showToast.success("Resource deleted successfully");
+  //   } catch (error) {
+  //     showToast.error("Failed to delete resource");
+  //   }
+  // };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow">
@@ -290,12 +290,12 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
             <h3 className="text-sm font-medium text-gray-900 mb-1">
               {resource.caption}
             </h3>
-            <button
-              onClick={handleDelete}
+            {/* <button
+              // onClick={handleDelete}
               className="text-gray-400 hover:text-red-500 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </button> */}
           </div>
           <p className="text-xs text-gray-500 mb-3">
             Added on {formatDate(resource.date)}
@@ -334,154 +334,154 @@ interface AddResourceModalProps {
   onSuccess: () => void;
 }
 
-const AddResourceModal: React.FC<AddResourceModalProps> = ({
-  conferenceId,
-  onSuccess,
-}) => {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [caption, setCaption] = useState("");
-  const { data: resourceSession } = useSession() as { data: Session | null };
-  const bearerToken = resourceSession?.user?.token || resourceSession?.user?.userData?.token;
+// const AddResourceModal: React.FC<AddResourceModalProps> = ({
+//   conferenceId,
+//   onSuccess,
+// }) => {
+//   const [open, setOpen] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [file, setFile] = useState<File | null>(null);
+//   const [caption, setCaption] = useState("");
+//   const { data: resourceSession } = useSession() as { data: Session | null };
+//   const bearerToken = resourceSession?.user?.token || resourceSession?.user?.userData?.token;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !caption) return;
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!file || !caption) return;
 
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("caption", caption);
-      formData.append("conference_id", conferenceId.toString());
+//     setLoading(true);
+//     try {
+//       const formData = new FormData();
+//       formData.append("file", file);
+//       formData.append("caption", caption);
+//       formData.append("conference_id", conferenceId.toString());
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/add_resource`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-          },
-          body: formData,
-        }
-      );
+//       const response = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_URL}/admin/add_resource`,
+//         {
+//           method: "POST",
+//           headers: {
+//             Authorization: `Bearer ${bearerToken}`,
+//           },
+//           body: formData,
+//         }
+//       );
 
-      if (!response.ok) {
-        throw new Error("Failed to add resource");
-      }
+//       if (!response.ok) {
+//         throw new Error("Failed to add resource");
+//       }
 
-      showToast.success("Resource added successfully");
-      setOpen(false);
-      onSuccess();
-    } catch (error) {
-      console.error("Error adding resource:", error);
-      showToast.error("Failed to add resource");
-    } finally {
-      setLoading(false);
-    }
-  };
+//       showToast.success("Resource added successfully");
+//       setOpen(false);
+//       onSuccess();
+//     } catch (error) {
+//       console.error("Error adding resource:", error);
+//       showToast.error("Failed to add resource");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-  return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
-          <Plus className="w-4 h-4" />
-          Add Resource
-        </button>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-white rounded-lg shadow-lg p-6 focus:outline-none">
-          <div className="flex justify-between items-center mb-4">
-            <Dialog.Title className="text-lg font-semibold">
-              Add New Resource
-            </Dialog.Title>
-            <Dialog.Close asChild>
-              <button className="text-gray-500 hover:text-gray-700">
-                <Cross2Icon className="w-5 h-5" />
-              </button>
-            </Dialog.Close>
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Resource File
-                </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    {file ? (
-                      <div className="text-sm text-gray-600">
-                        {file.name} ({Math.round(file.size / 1024)} KB)
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex justify-center">
-                          <FileUp className="w-12 h-12 text-gray-400" />
-                        </div>
-                        <div className="flex text-sm text-gray-600">
-                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                            <span>Upload a file</span>
-                            <input
-                              type="file"
-                              className="sr-only"
-                              onChange={(e) =>
-                                setFile(e.target.files?.[0] || null)
-                              }
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                          PDF, DOCX, PPTX up to 10MB
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="caption"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Caption
-                </label>
-                <input
-                  type="text"
-                  id="caption"
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
-                  Cancel
-                </button>
-              </Dialog.Close>
-              <button
-                type="submit"
-                disabled={loading || !file || !caption}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                {loading ? "Uploading..." : "Upload Resource"}
-              </button>
-            </div>
-          </form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
-};
+//   return (
+//     <Dialog.Root open={open} onOpenChange={setOpen}>
+//       <Dialog.Trigger asChild>
+//         <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+//           <Plus className="w-4 h-4" />
+//           Add Resource
+//         </button>
+//       </Dialog.Trigger>
+//       <Dialog.Portal>
+//         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+//         <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-white rounded-lg shadow-lg p-6 focus:outline-none">
+//           <div className="flex justify-between items-center mb-4">
+//             <Dialog.Title className="text-lg font-semibold">
+//               Add New Resource
+//             </Dialog.Title>
+//             <Dialog.Close asChild>
+//               <button className="text-gray-500 hover:text-gray-700">
+//                 <Cross2Icon className="w-5 h-5" />
+//               </button>
+//             </Dialog.Close>
+//           </div>
+//           <form onSubmit={handleSubmit}>
+//             <div className="space-y-4">
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700 mb-1">
+//                   Resource File
+//                 </label>
+//                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+//                   <div className="space-y-1 text-center">
+//                     {file ? (
+//                       <div className="text-sm text-gray-600">
+//                         {file.name} ({Math.round(file.size / 1024)} KB)
+//                       </div>
+//                     ) : (
+//                       <>
+//                         <div className="flex justify-center">
+//                           <FileUp className="w-12 h-12 text-gray-400" />
+//                         </div>
+//                         <div className="flex text-sm text-gray-600">
+//                           <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+//                             <span>Upload a file</span>
+//                             <input
+//                               type="file"
+//                               className="sr-only"
+//                               onChange={(e) =>
+//                                 setFile(e.target.files?.[0] || null)
+//                               }
+//                             />
+//                           </label>
+//                           <p className="pl-1">or drag and drop</p>
+//                         </div>
+//                         <p className="text-xs text-gray-500">
+//                           PDF, DOCX, PPTX up to 10MB
+//                         </p>
+//                       </>
+//                     )}
+//                   </div>
+//                 </div>
+//               </div>
+//               <div>
+//                 <label
+//                   htmlFor="caption"
+//                   className="block text-sm font-medium text-gray-700 mb-1"
+//                 >
+//                   Caption
+//                 </label>
+//                 <input
+//                   type="text"
+//                   id="caption"
+//                   value={caption}
+//                   onChange={(e) => setCaption(e.target.value)}
+//                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                   required
+//                 />
+//               </div>
+//             </div>
+//             <div className="mt-6 flex justify-end gap-3">
+//               <Dialog.Close asChild>
+//                 <button
+//                   type="button"
+//                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+//                 >
+//                   Cancel
+//                 </button>
+//               </Dialog.Close>
+//               <button
+//                 type="submit"
+//                 disabled={loading || !file || !caption}
+//                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+//               >
+//                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+//                 {loading ? "Uploading..." : "Upload Resource"}
+//               </button>
+//             </div>
+//           </form>
+//         </Dialog.Content>
+//       </Dialog.Portal>
+//     </Dialog.Root>
+//   );
+// };
 
 interface ConferenceDetailsProps {
   conference: Conference;
@@ -832,7 +832,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
               <ResourceCard
                 key={resource.resource_id}
                 resource={resource}
-                onDelete={() => {}}
+                // onDelete={() => {}}
               />
             ))}
           </div>
@@ -951,73 +951,73 @@ const ConferenceResources: React.FC = () => {
     fetchConferences();
   }, []);
 
-  const handleDeleteConference = async (id: number) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: id }),
-        }
-      );
+  // const handleDeleteConference = async (id: number) => {
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_conference`,
+  //       {
+  //         method: "DELETE",
+  //         headers: {
+  //           Authorization: `Bearer ${bearerToken}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ id: id }),
+  //       }
+  //     );
 
-      if (response.ok) {
-        showToast.success("Conference deleted successfully");
-        setConferences((prev) => prev.filter((conf) => conf.id !== id));
-      } else {
-        throw new Error("Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      showToast.error("Failed to delete conference");
-    }
-  };
+  //     if (response.ok) {
+  //       showToast.success("Conference deleted successfully");
+  //       setConferences((prev) => prev.filter((conf) => conf.id !== id));
+  //     } else {
+  //       throw new Error("Delete failed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Delete failed:", error);
+  //     showToast.error("Failed to delete conference");
+  //   }
+  // };
 
-  const handleDeleteResource = async (resourceId: number) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ resource_id: resourceId }),
-        }
-      );
+  // const handleDeleteResource = async (resourceId: number) => {
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`,
+  //       {
+  //         method: "DELETE",
+  //         headers: {
+  //           Authorization: `Bearer ${bearerToken}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ resource_id: resourceId }),
+  //       }
+  //     );
 
-      if (response.ok) {
-        if (selectedConference) {
-          const updatedResources = selectedConference.resources.filter(
-            (resource) => resource.resource_id !== resourceId
-          );
-          setSelectedConference({
-            ...selectedConference,
-            resources: updatedResources,
-          });
+  //     if (response.ok) {
+  //       if (selectedConference) {
+  //         const updatedResources = selectedConference.resources.filter(
+  //           (resource) => resource.resource_id !== resourceId
+  //         );
+  //         setSelectedConference({
+  //           ...selectedConference,
+  //           resources: updatedResources,
+  //         });
 
-          setConferences((prev) =>
-            prev.map((conf) =>
-              conf.id === selectedConference.id
-                ? { ...conf, resources: updatedResources }
-                : conf
-            )
-          );
-        }
-        showToast.success("Resource deleted successfully");
-      } else {
-        throw new Error("Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-      showToast.error("Failed to delete resource");
-    }
-  };
+  //         setConferences((prev) =>
+  //           prev.map((conf) =>
+  //             conf.id === selectedConference.id
+  //               ? { ...conf, resources: updatedResources }
+  //               : conf
+  //           )
+  //         );
+  //       }
+  //       showToast.success("Resource deleted successfully");
+  //     } else {
+  //       throw new Error("Delete failed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Delete failed:", error);
+  //     showToast.error("Failed to delete resource");
+  //   }
+  // };
 
   const handleViewDetails = (conference: Conference) => {
     setSelectedConference(conference);
@@ -1078,10 +1078,10 @@ const ConferenceResources: React.FC = () => {
               <ArrowLeft className="w-4 h-4" />
               Back to seminars
             </button>
-            <AddResourceModal
+            {/* <AddResourceModal
               conferenceId={selectedConference.id}
               onSuccess={handleResourceAdded}
-            />
+            /> */}
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -1103,7 +1103,7 @@ const ConferenceResources: React.FC = () => {
                   <ResourceCard
                     key={resource.resource_id}
                     resource={resource}
-                    onDelete={handleDeleteResource}
+                    // onDelete={handleDeleteResource}
                   />
                 ))}
               </div>
@@ -1187,10 +1187,10 @@ const ConferenceResources: React.FC = () => {
                     conference={conference}
                     onViewResources={handleViewResources}
                     onViewDetails={handleViewDetails}
-                    onDeleteConference={handleDeleteConference}
-                    onEditConference={() => {
-                      /* Add edit functionality */
-                    }}
+                    // onDeleteConference={handleDeleteConference}
+                    // onEditConference={() => {
+                    //   /* Add edit functionality */
+                    // }}
                   />
                 )
               )}

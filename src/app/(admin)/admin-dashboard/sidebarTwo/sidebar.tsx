@@ -78,6 +78,11 @@ const portalItems: NavItem[] = [
       icon: NewsIcon,
       path: '/admin-dashboard/news',
     },
+    { 
+      name: 'Gallery', 
+      path: '/admin-dashboard/gallery',
+      icon: ResourcesIcon 
+    },
       { 
         name: 'Membership Portal', 
         icon: MembersIcon,
@@ -117,11 +122,7 @@ const portalItems: NavItem[] = [
     path: '/admin-dashboard/conferences/conference-schedule',
     icon: ConferenceScheduleIcon,
   },
-      { 
-        name: 'Gallery', 
-        path: '/admin-dashboard/gallery',
-        icon: ResourcesIcon 
-      },
+     
       // ... other sub items
     ]
   },

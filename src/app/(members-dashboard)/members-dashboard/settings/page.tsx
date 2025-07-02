@@ -42,12 +42,12 @@ export default function AccountSettings() {
   }, [session]);
 
   const fetchUserDetails = async () => {
-    if (!bearerToken || !session?.user?.userData?.user_id) return;
+    if (!bearerToken) return;
 
     try {
       setIsFetching(true);
       const response = await fetch(
-        `${API_URL}/admin/user_details/${session.user.userData.user_id}`,
+        `${API_URL}/view_profile_details`,
         {
           headers: {
             Authorization: `Bearer ${bearerToken}`,
@@ -73,27 +73,24 @@ export default function AccountSettings() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/admin/update_user`, {
-        method: 'PUT',
+      const response = await fetch(`${API_URL}/edit_profile_data`, {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: userDetails.user_id,
           f_name: userDetails.f_name,
           m_name: userDetails.m_name,
           l_name: userDetails.l_name,
-          email: userDetails.email,
           phone: userDetails.phone,
-          country: userDetails.country,
           institution: userDetails.institution,
           whatsapp_no: userDetails.whatsapp_no,
           area_of_specialization: userDetails.area_of_specialization,
           profession: userDetails.profession,
           postal_addr: userDetails.postal_addr,
           residential_addr: userDetails.residential_addr,
-          type: userDetails.type
+          type: userDetails.type,
         }),
       });
 
@@ -118,31 +115,30 @@ export default function AccountSettings() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-        <div className="relative h-32 bg-gradient-to-r from-blue-500 to-blue-600">
-          <div className="absolute -bottom-16 left-6">
-            <Avatar className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 bg-white">
+    <div className=" mx-auto p-4 md:p-8">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+        {/* Profile Header */}
+        <div className="relative flex items-end">
+          <div className="absolute left-1/2 -bottom-16 transform -translate-x-1/2">
+            <Avatar className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-white">
               <AvatarImage
                 src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${userDetails?.name}`}
                 alt={userDetails?.name}
               />
-              <AvatarFallback className="bg-gray-100">
+              <AvatarFallback className="bg-gray-100 text-3xl">
                 {userDetails?.name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
           </div>
-      </div>
-      
-        <div className="pt-20 px-6 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Personal Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Personal Information
-                </h3>
+        </div>
 
+        {/* Form */}
+        <div className="pt-24 px-6 pb-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Personal Info */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Personal Information</h3>
                 <div>
                   <Label htmlFor="f_name">First Name</Label>
                   <Input
@@ -151,9 +147,9 @@ export default function AccountSettings() {
                     onChange={(e) => setUserDetails(prev => ({ ...prev!, f_name: e.target.value }))}
                     className="mt-1"
                   />
-            </div>
-            
-              <div>
+                </div>
+                
+                <div>
                   <Label htmlFor="m_name">Middle Name</Label>
                   <Input
                     id="m_name"
@@ -171,9 +167,9 @@ export default function AccountSettings() {
                     onChange={(e) => setUserDetails(prev => ({ ...prev!, l_name: e.target.value }))}
                     className="mt-1"
                   />
-              </div>
-              
-              <div>
+                </div>
+                
+                <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -184,14 +180,10 @@ export default function AccountSettings() {
                   />
                 </div>
               </div>
-
-              {/* Contact Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Contact Information
-                </h3>
-              
-              <div>
+              {/* Contact Info */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Contact Information</h3>
+                <div>
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
@@ -221,13 +213,9 @@ export default function AccountSettings() {
                   />
                 </div>
               </div>
-
-              {/* Professional Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Professional Information
-                </h3>
-
+              {/* Professional Info */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Professional Information</h3>
                 <div>
                   <Label htmlFor="institution">Institution</Label>
                   <Input
@@ -258,24 +246,20 @@ export default function AccountSettings() {
                   />
                 </div>
               </div>
-
-              {/* Address Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Address Information
-                </h3>
-              
-              <div>
+              {/* Address Info */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Address Information</h3>
+                <div>
                   <Label htmlFor="postal_addr">Postal Address</Label>
-                <textarea
+                  <textarea
                     id="postal_addr"
                     value={userDetails?.postal_addr || ''}
                     onChange={(e) => setUserDetails(prev => ({ ...prev!, postal_addr: e.target.value }))}
                     className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                />
-              </div>
-              
+                    rows={3}
+                  />
+                </div>
+                
                 <div>
                   <Label htmlFor="residential_addr">Residential Address</Label>
                   <textarea
@@ -288,26 +272,25 @@ export default function AccountSettings() {
                 </div>
               </div>
             </div>
-
-            <div className="flex justify-end mt-6">
-                <Button 
-                  type="submit" 
+            <div className="flex justify-end mt-8">
+              <Button
+                type="submit"
                 disabled={isLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg shadow"
+              >
                 {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Changes'
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
   );
 }

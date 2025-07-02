@@ -269,21 +269,24 @@ const ConferenceSchedule = () => {
   }
 
   return (
-    <div className="space-y-6 w-full max-w-4xl mx-auto px-2 sm:px-4 md:ml-64">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 space-y-6 w-full max-w-4xl mx-auto px-2 sm:px-4 md:ml-64">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Conference Schedules</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            Conference Schedules
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
             View schedules for upcoming and past conferences
           </p>
         </div>
-    <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded} />
+        <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded} />
       </div>
 
       {conferences.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <p className="text-gray-500 mb-4">No conferences available yet.</p>
-          <Button asChild>
+        <div className="rounded-lg border border-dashed p-8 text-center bg-white dark:bg-gray-800 shadow-lg">
+          <p className="text-gray-500 dark:text-gray-300 mb-4">No conferences available yet.</p>
+          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
             <Link href="/admin/conferences/create">
               Create your first conference
             </Link>
@@ -292,12 +295,12 @@ const ConferenceSchedule = () => {
       ) : (
         <div className="space-y-4">
           {conferences.map((conference) => (
-            <Card key={conference.id} className="overflow-hidden">
+            <Card key={conference.id} className="overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-blue-700">
               <button
                 onClick={() => toggleConference(conference.id)}
                 className="w-full text-left"
               >
-                <CardHeader className="flex flex-row items-center justify-between hover:bg-gray-50 transition-colors p-4 sm:p-6">
+                <CardHeader className="flex flex-row items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors p-4 sm:p-6">
                   <div className="flex items-center gap-4">
                     {conference.flyer && (
                       <div className="relative h-16 w-16 rounded-md overflow-hidden">
@@ -310,60 +313,52 @@ const ConferenceSchedule = () => {
                       </div>
                     )}
                     <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
                         {conference.title}
-                        <span className={`text-xs px-2 py-1 rounded-full ${
+                        <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
                           conference.status === "Incoming" 
-                            ? "bg-blue-100 text-blue-800" 
-                            : "bg-gray-100 text-gray-800"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" 
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-700/30 dark:text-gray-300"
                         }`}>
                           {conference.status}
                         </span>
                       </CardTitle>
-                      <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                      <p className="text-sm text-gray-500 dark:text-gray-300 mt-1 flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-blue-500" />
                         {conference.date}
                       </p>
                     </div>
                   </div>
                   {expandedConference === conference.id ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
+                    <ChevronUp className="h-5 w-5 text-blue-500" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
+                    <ChevronDown className="h-5 w-5 text-blue-500" />
                   )}
                 </CardHeader>
               </button>
-              
               {expandedConference === conference.id && (
                 <CardContent className="p-4 sm:p-6 pt-0">
                   <div className="mb-4">
-                    <h3 className="font-medium text-gray-900">{conference.theme}</h3>
-                    <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                      <MapPin className="h-4 w-4" />
+                    <h3 className="font-medium text-gray-900 dark:text-white">{conference.theme}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-2 mt-1">
+                      <MapPin className="h-4 w-4 text-blue-500" />
                       {conference.venue}
                     </p>
                   </div>
-                  
                   {conference.schedule.length === 0 ? (
-                    <div className="rounded-lg border border-dashed p-6 text-center">
-                      <p className="text-gray-500 mb-4">No schedules available for this conference.</p>
-                      {/* <Button asChild>
-                        <Link href={`/admin/conferences/${conference.id}/create-schedule`}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Schedule
-                        </Link>
-                      </Button> */}
+                    <div className="rounded-lg border border-dashed p-6 text-center bg-blue-50 dark:bg-blue-900/20">
+                      <p className="text-gray-500 dark:text-gray-300 mb-4">No schedules available for this conference.</p>
                     </div>
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {conference.schedule.map((schedule) => (
-                        <Card key={schedule.schedule_id} className="hover:shadow-md transition-shadow h-full">
+                        <Card key={schedule.schedule_id} className="hover:shadow-xl transition-shadow h-full bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-green-200 dark:border-green-700">
                           <CardHeader className="pb-3">
                             <div className="flex justify-between items-start gap-2">
-                              <CardTitle className="text-lg line-clamp-2">
+                              <CardTitle className="text-lg line-clamp-2 text-gray-900 dark:text-white">
                                 {schedule.activity}
                               </CardTitle>
-                              <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                              <span className="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-500/10">
                                 {schedule.day}
                               </span>
                             </div>
@@ -371,41 +366,38 @@ const ConferenceSchedule = () => {
                           <CardContent className="space-y-3">
                             <div className="flex items-start gap-3">
                               <div className="mt-0.5">
-                                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                                <CalendarDays className="h-4 w-4 text-blue-500" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">{formatDate(schedule.start)}</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">{formatDate(schedule.start)}</p>
                                 {schedule.start !== schedule.end && (
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-gray-500 dark:text-gray-300">
                                     to {formatDate(schedule.end)}
                                   </p>
                                 )}
                               </div>
                             </div>
-                            
                             <div className="flex items-center gap-3">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm">
+                              <Clock className="h-4 w-4 text-blue-500" />
+                              <p className="text-sm text-gray-900 dark:text-white">
                                 {formatTime(schedule.start)} - {formatTime(schedule.end)}
                               </p>
                             </div>
-                            
                             <div className="flex items-center gap-3">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm">{schedule.venue}</p>
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              <p className="text-sm text-gray-900 dark:text-white">{schedule.venue}</p>
                             </div>
-                            
                             <div className="flex items-center gap-3">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <p className="text-sm">Facilitator: {schedule.facilitator}</p>
+                              <User className="h-4 w-4 text-blue-500" />
+                              <p className="text-sm text-gray-900 dark:text-white">Facilitator: {schedule.facilitator}</p>
                             </div>
                           </CardContent>
-                          <CardFooter className="flex justify-between items-center pt-4 border-t">
-                            <p className="text-xs text-muted-foreground">
+                          <CardFooter className="flex justify-between items-center pt-4 border-t border-green-100 dark:border-green-700">
+                            <p className="text-xs text-gray-500 dark:text-gray-300">
                               Posted: {new Date(schedule.posted).toLocaleDateString()}
                             </p>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm" onClick={() => openEditModal(schedule)}>
+                              <Button variant="outline" size="sm" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800" onClick={() => openEditModal(schedule)}>
                                 Edit
                               </Button>
                               <AlertDialog.Root open={pendingDeleteScheduleId === schedule.schedule_id} onOpenChange={(open) => { if (!open) setPendingDeleteScheduleId(null); }}>

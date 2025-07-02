@@ -210,10 +210,33 @@ const PaymentPage: React.FC = () => {
     }
   };
 
-  const handleCancelConfirm = () => {
+  const handleCancelConfirm = async () => {
+    if (!canceledPaymentId) return;
     setShowCancelDialog(false);
-    setCanceledPaymentId(null);
-    showToast.error('Payment was canceled');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cancel_payment/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${bearerToken}`,
+        },
+        body: JSON.stringify({ payment_id: canceledPaymentId }),
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        showToast.success('Payment canceled successfully');
+        await fetchPendingPayments();
+      } else {
+        showToast.error(result.message || 'Failed to cancel payment');
+      }
+    } catch (error) {
+      showToast.error('Failed to cancel payment');
+    } finally {
+      setCanceledPaymentId(null);
+    }
   };
 
   const handleCancelDismiss = () => {
@@ -290,6 +313,16 @@ const PaymentPage: React.FC = () => {
                                           Processing...
                                         </span>
                                       ) : 'Make Payment'}
+                                    </Button>
+                                    <Button
+                                      variant="destructive"
+                                      onClick={() => {
+                                        setCanceledPaymentId(payment.payment_id);
+                                        setShowCancelDialog(true);
+                                      }}
+                                      className="w-full sm:w-auto"
+                                    >
+                                      Cancel Payment
                                     </Button>
                                   </div>
                                 </div>

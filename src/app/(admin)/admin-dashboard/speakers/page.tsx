@@ -366,7 +366,7 @@ export default function SpeakersManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-gradient-to-r from-[#0052CC] to-[#0052CC] text-white py-12">
+      <header className="bg-[#203A87] text-white py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold text-center">Speakers Management</h1>
           <p className="text-xl text-center mt-4 max-w-2xl mx-auto">
@@ -392,7 +392,7 @@ export default function SpeakersManagement() {
         <div className="mb-8">
           <button 
             onClick={openAddModal}
-            className="flex items-center justify-center bg-[#0052CC] hover:bg-[#003B8E] text-white font-medium py-3 px-6 rounded-lg shadow-md transition-colors duration-300"
+            className="flex items-center justify-center bg-[#203A87] hover:bg-[#003B8E] text-white font-medium py-3 px-6 rounded-lg shadow-md transition-colors duration-300"
           >
             <Plus className="mr-2" size={20} />
             Add New Speaker

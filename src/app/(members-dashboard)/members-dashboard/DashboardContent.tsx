@@ -361,7 +361,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
             <div>
               <p className="font-medium text-blue-800">Current Membership</p>
-              <p className="text-sm text-blue-600">{user.registration}</p>
+              <p className="text-sm text-blue-600">{user?.registration}</p>
             </div>
             <div className="bg-blue-100 px-3 py-1 rounded-full text-blue-800 text-sm font-medium">
               Active

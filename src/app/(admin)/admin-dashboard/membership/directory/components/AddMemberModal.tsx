@@ -50,6 +50,7 @@ const AddMembers = () => {
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [open, setOpen] = useState(false);
 
   const registrationTypes = [
     { value: "Individual", label: "Individual" },
@@ -100,6 +101,7 @@ const AddMembers = () => {
       
       console.log('Member registered successfully', data)
       showToast.success('Member registered successfully')
+      setOpen(false);
       
     } catch (err: any) {
       console.error("Registration error:", err)
@@ -110,7 +112,7 @@ const AddMembers = () => {
   }
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <Button className='bg-[#203a87] font-semibold text-white'>
           Add Members
@@ -387,6 +389,7 @@ const AddMembers = () => {
                   <Button 
                     type="button" 
                     variant="secondary" 
+                    className='text-white'
                     disabled={isLoading}
                   >
                     Cancel

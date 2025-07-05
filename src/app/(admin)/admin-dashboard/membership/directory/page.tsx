@@ -313,7 +313,7 @@ const Page = () => {
                               </AlertDialog.Description>
                               <div className="mt-6 flex justify-end gap-4">
                                 <AlertDialog.Cancel asChild>
-                                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+                                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 text-white rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
                                     Cancel
                                   </button>
                                 </AlertDialog.Cancel>

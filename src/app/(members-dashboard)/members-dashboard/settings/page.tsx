@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@radix-ui/react-label';
-import { Loader2, User, Mail, Phone, Building2, GraduationCap, MapPin } from 'lucide-react';
+import { Loader2, User, Mail, Phone, Building2, GraduationCap, MapPin, Home, Globe, Briefcase, Settings } from 'lucide-react';
 import { showToast } from '@/utils/toast';
 
 interface UserDetails {
@@ -108,187 +108,261 @@ export default function AccountSettings() {
 
   if (isFetching) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-[#203A87] mx-auto mb-4" />
+          <p className="text-[#0B142F] font-medium">Loading your profile...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className=" mx-auto p-4 md:p-8">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
-        {/* Profile Header */}
-        <div className="relative flex items-end">
-          <div className="absolute left-1/2 -bottom-16 transform -translate-x-1/2">
-            <Avatar className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-white">
-              <AvatarImage
-                src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${userDetails?.name}`}
-                alt={userDetails?.name}
-              />
-              <AvatarFallback className="bg-gray-100 text-3xl">
-                {userDetails?.name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
+    <div className="min-h-screen bg-gradient-to-br from-[#0E1A3D]/5 via-[#203A87]/5 to-[#D5B93C]/5 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg mb-4">
+            <Settings className="w-6 h-6 text-[#203A87]" />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0E1A3D] via-[#203A87] to-[#D5B93C] bg-clip-text text-transparent">
+              Account Settings
+            </h1>
           </div>
+          <p className="text-[#0B142F] max-w-md mx-auto">
+            Manage your personal information and preferences
+          </p>
         </div>
 
-        {/* Form */}
-        <div className="pt-24 px-6 pb-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Personal Info */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Personal Information</h3>
-                <div>
-                  <Label htmlFor="f_name">First Name</Label>
-                  <Input
-                    id="f_name"
-                    value={userDetails?.f_name || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, f_name: e.target.value }))}
-                    className="mt-1"
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
+          {/* Avatar Section */}
+          <div className="relative bg-gradient-to-r from-[#0E1A3D] via-[#203A87] to-[#D5B93C] p-8">
+            <div className="absolute inset-0 bg-black/10"></div>
+            <div className="relative flex items-end justify-center">
+              <div className="relative">
+                <Avatar className="w-36 h-36 rounded-full border-6 border-white shadow-2xl bg-white">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${userDetails?.name}`}
+                    alt={userDetails?.name}
                   />
-                </div>
-                
-                <div>
-                  <Label htmlFor="m_name">Middle Name</Label>
-                  <Input
-                    id="m_name"
-                    value={userDetails?.m_name || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, m_name: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="l_name">Last Name</Label>
-                  <Input
-                    id="l_name"
-                    value={userDetails?.l_name || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, l_name: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={userDetails?.email || ''}
-                    disabled
-                    className="mt-1 bg-gray-50"
-                  />
-                </div>
-              </div>
-              {/* Contact Info */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Contact Information</h3>
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    value={userDetails?.phone || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, phone: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="whatsapp_no">WhatsApp Number</Label>
-                  <Input
-                    id="whatsapp_no"
-                    value={userDetails?.whatsapp_no || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, whatsapp_no: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    value={userDetails?.country || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, country: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              {/* Professional Info */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Professional Information</h3>
-                <div>
-                  <Label htmlFor="institution">Institution</Label>
-                  <Input
-                    id="institution"
-                    value={userDetails?.institution || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, institution: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="profession">Profession</Label>
-                  <Input
-                    id="profession"
-                    value={userDetails?.profession || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, profession: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="area_of_specialization">Area of Specialization</Label>
-                  <Input
-                    id="area_of_specialization"
-                    value={userDetails?.area_of_specialization || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, area_of_specialization: e.target.value }))}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              {/* Address Info */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 border-b pb-2">Address Information</h3>
-                <div>
-                  <Label htmlFor="postal_addr">Postal Address</Label>
-                  <textarea
-                    id="postal_addr"
-                    value={userDetails?.postal_addr || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, postal_addr: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="residential_addr">Residential Address</Label>
-                  <textarea
-                    id="residential_addr"
-                    value={userDetails?.residential_addr || ''}
-                    onChange={(e) => setUserDetails(prev => ({ ...prev!, residential_addr: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
+                  <AvatarFallback className="bg-gradient-to-br from-[#0E1A3D]/10 to-[#203A87]/10 text-4xl font-bold text-[#0E1A3D]">
+                    {userDetails?.name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2 bg-[#D5B93C] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
               </div>
             </div>
-            <div className="flex justify-end mt-8">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg shadow"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
+            <div className="text-center mt-6">
+              <h2 className="text-2xl font-bold text-white mb-2">{userDetails?.name}</h2>
+              <p className="text-[#D5B93C] font-medium">{userDetails?.type} Member</p>
             </div>
-          </form>
+          </div>
+
+          <div className="p-8">
+                      <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Personal Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] rounded-lg">
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#0B142F]">Personal Information</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="f_name" className="text-sm font-medium text-[#0B142F] mb-2 block">First Name</Label>
+                      <Input
+                        id="f_name"
+                        value={userDetails?.f_name || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, f_name: e.target.value }))}
+                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
+                        placeholder="Enter your first name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="m_name" className="text-sm font-medium text-[#0B142F] mb-2 block">Middle Name</Label>
+                      <Input
+                        id="m_name"
+                        value={userDetails?.m_name || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, m_name: e.target.value }))}
+                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
+                        placeholder="Enter your middle name"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="l_name" className="text-sm font-medium text-[#0B142F] mb-2 block">Last Name</Label>
+                      <Input
+                        id="l_name"
+                        value={userDetails?.l_name || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, l_name: e.target.value }))}
+                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
+                        placeholder="Enter your last name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="email" className="text-sm font-medium text-[#0B142F] mb-2 block">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={userDetails?.email || ''}
+                        disabled
+                        className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Contact Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-gradient-to-r from-[#D5B93C] to-[#c4aa36] rounded-lg">
+                      <Phone className="w-5 h-5 text-[#0E1A3D]" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#0B142F]">Contact Information</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="phone" className="text-sm font-medium text-[#0B142F] mb-2 block">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        value={userDetails?.phone || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, phone: e.target.value }))}
+                        className="border-gray-200 focus:border-[#D5B93C] focus:ring-[#D5B93C] transition-colors"
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="whatsapp_no" className="text-sm font-medium text-[#0B142F] mb-2 block">WhatsApp Number</Label>
+                      <Input
+                        id="whatsapp_no"
+                        value={userDetails?.whatsapp_no || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, whatsapp_no: e.target.value }))}
+                        className="border-gray-200 focus:border-[#D5B93C] focus:ring-[#D5B93C] transition-colors"
+                        placeholder="Enter your WhatsApp number"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="country" className="text-sm font-medium text-[#0B142F] mb-2 block">Country</Label>
+                      <Input
+                        id="country"
+                        value={userDetails?.country || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, country: e.target.value }))}
+                        className="border-gray-200 focus:border-[#D5B93C] focus:ring-[#D5B93C] transition-colors"
+                        placeholder="Enter your country"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Professional Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-gradient-to-r from-[#203A87] to-[#152a61] rounded-lg">
+                      <Briefcase className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#0B142F]">Professional Information</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="institution" className="text-sm font-medium text-[#0B142F] mb-2 block">Institution</Label>
+                      <Input
+                        id="institution"
+                        value={userDetails?.institution || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, institution: e.target.value }))}
+                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
+                        placeholder="Enter your institution"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="profession" className="text-sm font-medium text-[#0B142F] mb-2 block">Profession</Label>
+                      <Input
+                        id="profession"
+                        value={userDetails?.profession || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, profession: e.target.value }))}
+                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
+                        placeholder="Enter your profession"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="area_of_specialization" className="text-sm font-medium text-[#0B142F] mb-2 block">Area of Specialization</Label>
+                      <Input
+                        id="area_of_specialization"
+                        value={userDetails?.area_of_specialization || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, area_of_specialization: e.target.value }))}
+                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
+                        placeholder="Enter your specialization"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Address Information */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] rounded-lg">
+                      <Home className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#0B142F]">Address Information</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="postal_addr" className="text-sm font-medium text-[#0B142F] mb-2 block">Postal Address</Label>
+                      <textarea
+                        id="postal_addr"
+                        value={userDetails?.postal_addr || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, postal_addr: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] transition-colors resize-none"
+                        rows={3}
+                        placeholder="Enter your postal address"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="residential_addr" className="text-sm font-medium text-[#0B142F] mb-2 block">Residential Address</Label>
+                      <textarea
+                        id="residential_addr"
+                        value={userDetails?.residential_addr || ''}
+                        onChange={(e) => setUserDetails(prev => ({ ...prev!, residential_addr: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] transition-colors resize-none"
+                        rows={3}
+                        placeholder="Enter your residential address"
+                      />
+                    </div>
+                  </div>
+                </div>
+            </div>
+              {/* Submit Button */}
+              <div className="flex justify-center pt-8">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-[#0E1A3D] via-[#203A87] to-[#D5B93C] hover:from-[#152a61] hover:via-[#1a2a5a] hover:to-[#c4aa36] text-white px-12 py-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 font-semibold text-lg"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                      Saving Changes...
+                    </>
+                  ) : (
+                    <>
+                      <Settings className="mr-3 h-5 w-5" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

@@ -140,10 +140,8 @@ export default function AdminDashboardPage() {
           seminarParticipantsRes.json()
         ]);
 
-        // Generate dynamic recent activity based on fetched data
         const activities: ActivityItem[] = [];
         
-        // Add member activity if there are recent members
         if (membersData.data?.length > 0) {
           const recentMembers = membersData.data.slice(0, 2);
           recentMembers.forEach((member: any, index: number) => {
@@ -157,8 +155,6 @@ export default function AdminDashboardPage() {
             });
           });
         }
-
-        // Add conference activity if there are conferences
         if (conferencesData.data?.length > 0) {
           const recentConferences = conferencesData.data.slice(0, 1);
           recentConferences.forEach((conference: any, index: number) => {
@@ -173,7 +169,6 @@ export default function AdminDashboardPage() {
           });
         }
 
-        // Add seminar activity if there are seminars
         if (seminarsData.data?.length > 0) {
           const recentSeminars = seminarsData.data.slice(0, 1);
           recentSeminars.forEach((seminar: any, index: number) => {
@@ -188,14 +183,13 @@ export default function AdminDashboardPage() {
           });
         }
 
-        // Sort activities by timestamp (most recent first)
         activities.sort((a, b) => {
           const timeA = parseInt(a.timestamp.split(' ')[0]);
           const timeB = parseInt(b.timestamp.split(' ')[0]);
           return timeA - timeB;
         });
 
-        setRecentActivity(activities.slice(0, 5)); // Show only 5 most recent
+        setRecentActivity(activities.slice(0, 5));
 
         setStats([
           { 
@@ -339,7 +333,6 @@ export default function AdminDashboardPage() {
             </div>
             
             <div className="p-6 space-y-6">
-              {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
@@ -378,7 +371,6 @@ export default function AdminDashboardPage() {
                 </Card>
               </div>
 
-              {/* Report Actions */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-[#0E1A3D]">Generate Reports</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -401,7 +393,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Quick Analytics */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-[#0E1A3D]">Quick Analytics</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -455,7 +446,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#0E1A3D]">Dashboard</h1>
@@ -475,7 +465,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <motion.div
@@ -489,7 +478,6 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
       <div>
         <h2 className="text-xl font-semibold text-[#0E1A3D] mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -532,7 +520,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Recent Activity */}
       <div>
         <h2 className="text-xl font-semibold text-[#0E1A3D] mb-4">Recent Activity</h2>
         <Card>
@@ -561,7 +548,6 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* Reports Modal */}
       <ReportsModal />
     </div>
   );

@@ -3,34 +3,93 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import DashboardIcon from '@/assets/sidebarIcons/DashboardIcon';
-import BroadcastModal from "@/app/(admin)/admin-dashboard/dashboard/BroadcastModal";
-import DailySchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
-import Calendar from '@/app/(admin)/admin-dashboard/dashboard/calendar';
-import DailyMeals from '@/app/(admin)/admin-dashboard/dashboard/DailyMeals';
-import News from '@/app/(admin)/admin-dashboard/dashboard/News';
-import Speakers from '@/app/(admin)/admin-dashboard/dashboard/speakers';
-import ConferenceSchedule from "@/app/(admin)/admin-dashboard/dashboard/DailyShedule";
-import Conferences from "@/app/(admin)/admin-dashboard/dashboard/conferences";
-import Seminars from "@/app/(admin)/admin-dashboard/dashboard/seminars";
-import { FiCalendar, FiClock, FiBook, FiSettings, FiUsers, FiMic, FiBookOpen } from 'react-icons/fi';
+import { 
+  Users, 
+  Mic, 
+  Calendar, 
+  BookOpen, 
+  TrendingUp, 
+  Activity,
+  Clock,
+  FileText,
+  Bell
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+interface StatCard {
+  id: number;
+  name: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  change: string;
+  changeType: 'positive' | 'negative';
+  description: string;
+}
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
-  const [stats, setStats] = useState([
-    { id: 1, name: 'Total Members', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
-    { id: 2, name: 'Total Speakers', value: '0', icon: FiMic, change: '+0%', changeType: 'positive' },
-    { id: 3, name: 'Total Conferences', value: '0', icon: FiCalendar, change: '+0%', changeType: 'positive' },
-    { id: 4, name: 'Total Seminars', value: '0', icon: FiBookOpen, change: '+0%', changeType: 'positive' },
-    { id: 5, name: 'Conference Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
-    { id: 6, name: 'Seminar Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+  const [stats, setStats] = useState<StatCard[]>([
+    { 
+      id: 1, 
+      name: 'Total Members', 
+      value: '0', 
+      icon: Users, 
+      change: '+0%', 
+      changeType: 'positive',
+      description: 'Registered members'
+    },
+    { 
+      id: 2, 
+      name: 'Total Speakers', 
+      value: '0', 
+      icon: Mic, 
+      change: '+0%', 
+      changeType: 'positive',
+      description: 'Active speakers'
+    },
+    { 
+      id: 3, 
+      name: 'Total Conferences', 
+      value: '0', 
+      icon: Calendar, 
+      change: '+0%', 
+      changeType: 'positive',
+      description: 'Upcoming conferences'
+    },
+    { 
+      id: 4, 
+      name: 'Total Seminars', 
+      value: '0', 
+      icon: BookOpen, 
+      change: '+0%', 
+      changeType: 'positive',
+      description: 'Training seminars'
+    },
+    { 
+      id: 5, 
+      name: 'Conference Participants', 
+      value: '0', 
+      icon: Users, 
+      change: '+0%', 
+      changeType: 'positive',
+      description: 'Conference attendees'
+    },
+    { 
+      id: 6, 
+      name: 'Seminar Participants', 
+      value: '0', 
+      icon: Users, 
+      change: '+0%', 
+      changeType: 'positive',
+      description: 'Seminar attendees'
+    },
   ]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all data in parallel
         const [speakersRes, membersRes, conferencesRes, seminarsRes, confParticipantsRes, seminarParticipantsRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/user_list/speaker`, {
             headers: {
@@ -65,55 +124,60 @@ export default function AdminDashboardPage() {
           seminarParticipantsRes.json()
         ]);
 
-        // Update stats with actual counts
         setStats([
           { 
             id: 1, 
             name: 'Total Members', 
             value: membersData.data?.length.toString() || '0', 
-            icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
+            icon: Users, 
+            change: '+12%', 
+            changeType: 'positive',
+            description: 'Registered members'
           },
           { 
             id: 2, 
             name: 'Total Speakers', 
             value: speakersData.data?.length.toString() || '0', 
-            icon: FiMic, 
-            change: '+0%', 
-            changeType: 'positive' 
+            icon: Mic, 
+            change: '+8%', 
+            changeType: 'positive',
+            description: 'Active speakers'
           },
           { 
             id: 3, 
             name: 'Total Conferences', 
             value: conferencesData.data?.length.toString() || '0', 
-            icon: FiCalendar, 
-            change: '+0%', 
-            changeType: 'positive' 
+            icon: Calendar, 
+            change: '+15%', 
+            changeType: 'positive',
+            description: 'Upcoming conferences'
           },
           { 
             id: 4, 
             name: 'Total Seminars', 
             value: seminarsData.data?.length.toString() || '0', 
-            icon: FiBookOpen, 
-            change: '+0%', 
-            changeType: 'positive' 
+            icon: BookOpen, 
+            change: '+5%', 
+            changeType: 'positive',
+            description: 'Training seminars'
           },
           { 
             id: 5, 
             name: 'Conference Participants', 
             value: confParticipantsData.data?.length.toString() || '0', 
-            icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
+            icon: Users, 
+            change: '+20%', 
+            changeType: 'positive',
+            description: 'Conference attendees'
           },
           { 
             id: 6, 
             name: 'Seminar Participants', 
             value: seminarParticipantsData.data?.length.toString() || '0', 
-            icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
+            icon: Users, 
+            change: '+10%', 
+            changeType: 'positive',
+            description: 'Seminar attendees'
           },
         ]);
 
@@ -129,251 +193,165 @@ export default function AdminDashboardPage() {
     }
   }, [session]);
 
-  return (
-    <div className="min-h-screen bg-gray-50 px-2 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
-      {/* Header Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-[#0E1A3D] rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] opacity-90"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 md:gap-4">
-            <DashboardIcon className="w-8 h-8 md:w-10 md:h-10" />
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">Admin Dashboard</h1>
+  const StatCard = ({ stat }: { stat: StatCard }) => (
+    <Card className="hover:shadow-lg transition-shadow duration-200">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-600">
+          {stat.name}
+        </CardTitle>
+        <stat.icon className="h-4 w-4 text-[#0E1A3D]" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold text-[#0E1A3D]">
+          {loading ? (
+            <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+          ) : (
+            stat.value
+          )}
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {stat.description}
+        </p>
+        <div className="flex items-center mt-2">
+          <TrendingUp className={`h-3 w-3 ${
+            stat.changeType === 'positive' ? 'text-green-500' : 'text-red-500'
+          }`} />
+          <span className={`text-xs ml-1 ${
+            stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {stat.change} from last month
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const QuickActionCard = ({ title, description, icon: Icon, href }: {
+    title: string;
+    description: string;
+    icon: React.ComponentType<{ className?: string }>;
+    href: string;
+  }) => (
+    <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
+      <CardContent className="p-6">
+        <div className="flex items-center space-x-4">
+          <div className="p-3 bg-[#0E1A3D]/10 rounded-lg group-hover:bg-[#0E1A3D]/20 transition-colors">
+            <Icon className="h-6 w-6 text-[#0E1A3D]" />
           </div>
-          <p className="text-sm md:text-base text-gray-300 mt-2">
+          <div className="flex-1">
+            <h3 className="font-semibold text-[#0E1A3D]">{title}</h3>
+            <p className="text-sm text-gray-600">{description}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#0E1A3D]">Dashboard</h1>
+          <p className="text-gray-600 mt-1">
             Welcome back, {session?.user?.userData?.name || 'Admin'} 👋
           </p>
         </div>
-      </motion.div>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm">
+            <Activity className="h-4 w-4 mr-2" />
+            View Reports
+          </Button>
+        </div>
+      </div>
 
-      {/* Stats Cards */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8 -mt-4 sm:-mt-8 md:-mt-12 relative z-20"
-      >
-        {stats.slice(0, 4).map((stat) => (
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {stats.map((stat) => (
           <motion.div
             key={stat.id}
-            whileHover={{ y: -5 }}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 md:p-6 flex flex-col"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: stat.id * 0.1 }}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm md:text-base font-medium text-gray-500">{stat.name}</p>
-                <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mt-1">
-                  {loading ? (
-                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
-                  ) : (
-                    stat.value
-                  )}
-                </p>
-              </div>
-              <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                <stat.icon className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-[#0E1A3D]" />
-              </div>
-            </div>
-            <div className="mt-3 md:mt-4">
-              <p className={`text-xs md:text-sm font-medium ${
-                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stat.change} from last month
-              </p>
-            </div>
+            <StatCard stat={stat} />
           </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Additional Stats Cards for Participants */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mb-6 md:mb-8 relative z-20"
-      >
-        {stats.slice(4, 6).map((stat) => (
-          <motion.div
-            key={stat.id}
-            whileHover={{ y: -5 }}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-4 md:p-6 flex flex-col"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm md:text-base font-medium text-gray-500">{stat.name}</p>
-                <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mt-1">
-                  {loading ? (
-                    <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
-                  ) : (
-                    stat.value
-                  )}
-                </p>
-              </div>
-              <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                <stat.icon className="h-5 w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 text-[#0E1A3D]" />
-              </div>
-            </div>
-            <div className="mt-3 md:mt-4">
-              <p className={`text-xs md:text-sm font-medium ${
-                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stat.change} from last month
-              </p>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Main Content Grid */}
-      <div className="space-y-4 md:space-y-6">
-        {/* Conferences and Seminars Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl shadow-md"
-          >
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">Conferences</h2>
-                <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                  <FiCalendar className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-[#0E1A3D]" />
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <Conferences />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl shadow-md"
-          >
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">Seminars</h2>
-                <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                  <FiBookOpen className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-[#0E1A3D]" />
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <Seminars />
-              </div>
-            </div>
-          </motion.div>
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-xl font-semibold text-[#0E1A3D] mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <QuickActionCard
+            title="Add Member"
+            description="Register a new member"
+            icon={Users}
+            href="/admin-dashboard/membership/directory"
+          />
+          <QuickActionCard
+            title="Create Conference"
+            description="Schedule a new conference"
+            icon={Calendar}
+            href="/admin-dashboard/conferences"
+          />
+          <QuickActionCard
+            title="Post Announcement"
+            description="Send an announcement"
+            icon={Bell}
+            href="/admin-dashboard/announcement"
+          />
+          <QuickActionCard
+            title="Upload Resources"
+            description="Add new resources"
+            icon={FileText}
+            href="/admin-dashboard/membership/members-resources"
+          />
+          <QuickActionCard
+            title="Manage Schedule"
+            description="Update conference schedule"
+            icon={Clock}
+            href="/admin-dashboard/conferences/conference-schedule"
+          />
+          <QuickActionCard
+            title="View Payments"
+            description="Check payment status"
+            icon={TrendingUp}
+            href="/admin-dashboard/payment"
+          />
         </div>
+      </div>
 
-        {/* Calendar and Speakers Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white rounded-xl shadow-md"
-          >
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">Calendar</h2>
-                <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                  <FiCalendar className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-[#0E1A3D]" />
+      {/* Recent Activity */}
+      <div>
+        <h2 className="text-xl font-semibold text-[#0E1A3D] mb-4">Recent Activity</h2>
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">New member registered</p>
+                  <p className="text-xs text-gray-500">2 minutes ago</p>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <Calendar />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white rounded-xl shadow-md"
-          >
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">Speakers</h2>
-                <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                  <FiMic className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-[#0E1A3D]" />
+              <div className="flex items-center space-x-4">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Conference schedule updated</p>
+                  <p className="text-xs text-gray-500">1 hour ago</p>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <Speakers />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Conference Schedule and News Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white rounded-xl shadow-md"
-          >
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">Conference Schedule</h2>
-                <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                  <FiClock className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-[#0E1A3D]" />
+              <div className="flex items-center space-x-4">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">New announcement posted</p>
+                  <p className="text-xs text-gray-500">3 hours ago</p>
                 </div>
               </div>
-              <div className="overflow-x-auto max-h-[400px] md:max-h-[500px] lg:max-h-[600px]">
-                <ConferenceSchedule />
-              </div>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white rounded-xl shadow-md"
-          >
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">News Management</h2>
-                <div className="p-2 md:p-3 rounded-lg bg-[#0E1A3D]/10">
-                  <FiBook className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 text-[#0E1A3D]" />
-                </div>
-              </div>
-              <div className="overflow-x-auto max-h-[400px] md:max-h-[500px] lg:max-h-[600px]">
-                <News />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Broadcast Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white rounded-xl shadow-md"
-        >
-          <div className="p-4 md:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800">Broadcast Message</h2>
-                <p className="text-sm md:text-base text-gray-500 mt-1">
-                  Send a message to all users, members, and speakers
-                </p>
-              </div>
-              <div>
-                <BroadcastModal />
-              </div>
-            </div>
-          </div>
-        </motion.div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

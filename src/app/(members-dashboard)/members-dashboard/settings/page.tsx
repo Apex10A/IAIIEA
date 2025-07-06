@@ -118,25 +118,24 @@ export default function AccountSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0E1A3D]/5 via-[#203A87]/5 to-[#D5B93C]/5 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg mb-4">
+          <div className="inline-flex items-center gap-3 bg-white rounded-lg px-6 py-3 shadow-sm mb-4">
             <Settings className="w-6 h-6 text-[#203A87]" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0E1A3D] via-[#203A87] to-[#D5B93C] bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-[#0E1A3D]">
               Account Settings
             </h1>
           </div>
-          <p className="text-[#0B142F] max-w-md mx-auto">
+          <p className="text-gray-600 max-w-md mx-auto">
             Manage your personal information and preferences
           </p>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/20">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {/* Avatar Section */}
-          <div className="relative bg-gradient-to-r from-[#0E1A3D] via-[#203A87] to-[#D5B93C] p-8">
-            <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative bg-[#0E1A3D] p-8">
             <div className="relative flex items-end justify-center">
               <div className="relative">
                 <Avatar className="w-36 h-36 rounded-full border-6 border-white shadow-2xl bg-white">
@@ -144,7 +143,7 @@ export default function AccountSettings() {
                     src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${userDetails?.name}`}
                     alt={userDetails?.name}
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-[#0E1A3D]/10 to-[#203A87]/10 text-4xl font-bold text-[#0E1A3D]">
+                  <AvatarFallback className="bg-gray-100 text-4xl font-bold text-[#0E1A3D]">
                     {userDetails?.name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -165,7 +164,7 @@ export default function AccountSettings() {
                 {/* Personal Information */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] rounded-lg">
+                    <div className="p-2 bg-[#0E1A3D] rounded-lg">
                       <User className="w-5 h-5 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-[#0B142F]">Personal Information</h3>
@@ -220,7 +219,7 @@ export default function AccountSettings() {
                 {/* Contact Information */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-r from-[#D5B93C] to-[#c4aa36] rounded-lg">
+                    <div className="p-2 bg-[#D5B93C] rounded-lg">
                       <Phone className="w-5 h-5 text-[#0E1A3D]" />
                     </div>
                     <h3 className="text-xl font-bold text-[#0B142F]">Contact Information</h3>
@@ -264,7 +263,7 @@ export default function AccountSettings() {
                 {/* Professional Information */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-r from-[#203A87] to-[#152a61] rounded-lg">
+                    <div className="p-2 bg-[#203A87] rounded-lg">
                       <Briefcase className="w-5 h-5 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-[#0B142F]">Professional Information</h3>
@@ -308,7 +307,7 @@ export default function AccountSettings() {
                 {/* Address Information */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-gradient-to-r from-[#0E1A3D] to-[#203A87] rounded-lg">
+                    <div className="p-2 bg-[#0E1A3D] rounded-lg">
                       <Home className="w-5 h-5 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-[#0B142F]">Address Information</h3>
@@ -346,7 +345,7 @@ export default function AccountSettings() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-[#0E1A3D] via-[#203A87] to-[#D5B93C] hover:from-[#152a61] hover:via-[#1a2a5a] hover:to-[#c4aa36] text-white px-12 py-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 font-semibold text-lg"
+                  className="bg-[#203A87] hover:bg-[#152a61] text-white px-12 py-4 rounded-lg shadow-md transition-colors duration-200 font-semibold text-lg"
                 >
                   {isLoading ? (
                     <>

@@ -15,6 +15,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession({
@@ -26,6 +27,10 @@ export default function DashboardLayout({
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleSidebarCollapse = (collapsed: boolean) => {
+    setIsSidebarCollapsed(collapsed);
   };
 
   // Loading state while checking session
@@ -52,10 +57,13 @@ export default function DashboardLayout({
           onClose={() => setIsSidebarOpen(false)}
           currentPath={pathname}
           onNavigate={(path) => router.push(path)}
+          onCollapse={handleSidebarCollapse}
         />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${
+          isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-80'
+        }`}>
           {/* Header */}
           <DashboardHeader 
             isSidebarOpen={isSidebarOpen} 

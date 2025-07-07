@@ -28,16 +28,15 @@ import SeminarAnnouncements from "@/app/(members-dashboard)/members-dashboard/tr
 import Sidebar from '@/components/layout/sidebar/page';
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
 import LoadingDashboard from '@/app/(admin)/admin-dashboard/LoadingDashboard'
+import MembersCertificate from "@/app/(members-dashboard)/members-dashboard/members-certificate/page"
 
-// Import your page components
-// ... (keep your existing imports)
 
-// TypeScript interfaces
 type ComponentKey = 
   | 'Dashboard' | 'Announcement' | 'Payment' 
   | 'Seminar Directory' | 'Conference Announcements' 
   | 'Seminars' | 'Seminar Participants' 
   | 'Seminar Announcements' | 'Participants' 
+  | 'Certification'
   | 'Conferences' | 'Seminars'
   | 'Seminars / Webinars' | 'Directory' 
   | 'IAIIEA Resources' | 'Forum' | 'Settings';
@@ -94,6 +93,7 @@ export default function DashboardClient() {
       'Participants': <Participants />,
       'Seminars': <SeminarsWebinars />,
       'Conferences': <Conferences />,
+      'Certification': <MembersCertificate />,
       'Seminars / Webinars': <SeminarsWebinars />,
       'Directory': <MembersDirectory />,
       'IAIIEA Resources': <IAIIEAResources />,
@@ -124,16 +124,13 @@ export default function DashboardClient() {
   return (
     <ThemeProvider>
     <div className="h-screen flex flex-col bg-[#F9FAFF] overflow-hidden">
-      {/* Header */}
       <DashboardHeader 
         isSidebarOpen={isSidebarOpen} 
         toggleSidebar={toggleSidebar} 
       />
 
-      <div className="flex flex-1 overflow-hidden pt-16"> {/* Adjust pt based on header height */}
-        {/* Sidebar with overlay */}
+      <div className="flex flex-1 overflow-hidden pt-16"> 
         <AnimatePresence>
-          {/* Mobile overlay */}
           {isSidebarOpen && isMobile && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -143,8 +140,6 @@ export default function DashboardClient() {
               onClick={closeSidebar}
             />
           )}
-
-          {/* Sidebar */}
           <motion.div
             initial={isMobile ? { x: -300 } : false}
             animate={isMobile ? 
@@ -162,8 +157,6 @@ export default function DashboardClient() {
             />
           </motion.div>
         </AnimatePresence>
-
-        {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-[#F9FAFF]">
           <div className="p-4 md:p-6 max-w-8xl mx-auto">
             {renderComponent()}

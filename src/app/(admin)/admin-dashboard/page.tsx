@@ -195,7 +195,7 @@ export default function AdminDashboardPage() {
           { 
             id: 1, 
             name: 'Total Members', 
-            value: membersData.data?.length.toString() || '0', 
+            value: membersData?.data?.length.toString() || '0', 
             icon: Users, 
             change: '+12%', 
             changeType: 'positive',
@@ -204,7 +204,7 @@ export default function AdminDashboardPage() {
           { 
             id: 2, 
             name: 'Total Speakers', 
-            value: speakersData.data?.length.toString() || '0', 
+            value: speakersData?.data?.length.toString() || '0', 
             icon: Mic, 
             change: '+8%', 
             changeType: 'positive',
@@ -213,7 +213,7 @@ export default function AdminDashboardPage() {
           { 
             id: 3, 
             name: 'Total Conferences', 
-            value: conferencesData.data?.length.toString() || '0', 
+            value: conferencesData?.data?.length.toString() || '0', 
             icon: Calendar, 
             change: '+15%', 
             changeType: 'positive',
@@ -222,7 +222,7 @@ export default function AdminDashboardPage() {
           { 
             id: 4, 
             name: 'Total Seminars', 
-            value: seminarsData.data?.length.toString() || '0', 
+            value: seminarsData?.data?.length.toString() || '0', 
             icon: BookOpen, 
             change: '+5%', 
             changeType: 'positive',
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
           { 
             id: 5, 
             name: 'Conference Participants', 
-            value: confParticipantsData.data?.length.toString() || '0', 
+            value: confParticipantsData?.data?.length.toString() || '0', 
             icon: Users, 
             change: '+20%', 
             changeType: 'positive',
@@ -240,7 +240,7 @@ export default function AdminDashboardPage() {
           { 
             id: 6, 
             name: 'Seminar Participants', 
-            value: seminarParticipantsData.data?.length.toString() || '0', 
+            value: seminarParticipantsData?.data?.length.toString() || '0', 
             icon: Users, 
             change: '+10%', 
             changeType: 'positive',
@@ -453,7 +453,7 @@ export default function AdminDashboardPage() {
             Welcome back, {session?.user?.userData?.name || 'Admin'} 👋
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <Button 
             variant="outline" 
             size="sm"
@@ -462,7 +462,7 @@ export default function AdminDashboardPage() {
             <Activity className="h-4 w-4 mr-2" />
             View Reports
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

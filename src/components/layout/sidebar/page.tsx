@@ -99,7 +99,8 @@ const navigationItems: NavItem[] = [
     subItems: [
       { id: "directory", name: 'Directory', requiredPortal: 'membership', icon: MembersIcon },
       { id: "resources", name: 'IAIIEA Resources', requiredPortal: 'membership', icon: ResourcesIcon },
-      { id: "announcements", name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon }
+      { id: "announcements", name: 'Announcement', requiredPortal: 'membership', icon: AnnouncementIcon },
+      { id: "certifications", name: 'Certification', requiredPortal: 'membership', icon: AnnouncementIcon }
     ]
   },
   { 
@@ -110,7 +111,8 @@ const navigationItems: NavItem[] = [
     subItems: [
       { id: "participants", name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },
       { id: "conferences", name: 'Conferences', requiredPortal: 'conference', icon: ResourcesIcon },
-      { id: "conf-announcements", name: 'Conference Announcements', requiredPortal: 'conference', icon: AnnouncementIcon },
+      { id: "conf-announcements", name: 'Announcements', requiredPortal: 'conference', icon: AnnouncementIcon },
+       { id: "conf-certifications", name: 'Certification', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   },
   { 
@@ -121,7 +123,8 @@ const navigationItems: NavItem[] = [
     subItems: [
       { id: "seminar-participants", name: 'Seminar Participants', requiredPortal: 'seminar', icon: MembersIcon },
       { id: "seminar-resources", name: 'Seminars', requiredPortal: 'seminar', icon: ResourcesIcon },
-      { id: "seminar-announcements", name: 'Seminar Announcements', requiredPortal: 'seminar', icon: AnnouncementIcon },
+      { id: "seminar-announcements", name: 'Announcements', requiredPortal: 'seminar', icon: AnnouncementIcon },
+       { id: "seminar-certifications", name: 'Certifications', requiredPortal: 'seminar', icon: AnnouncementIcon },
     ]
   },
   { 

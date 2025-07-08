@@ -73,11 +73,17 @@ const PaymentHistory: React.FC = () => {
 
   const totalPages = Math.ceil(filteredPayments.length / ITEMS_PER_PAGE);
 
+  const USD_TO_NGN = 1528; // 1 USD = 1500 NGN (update as needed)
   const formatCurrency = (amount: number, currency: string) => {
+    let nairaAmount = amount;
+    if (currency === 'USD') {
+      nairaAmount = amount * USD_TO_NGN;
+    }
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: currency
-    }).format(amount);
+      currency: 'NGN',
+      maximumFractionDigits: 2
+    }).format(nairaAmount);
   };
 
   const formatDate = (dateString: string) => {
@@ -227,8 +233,8 @@ const PaymentHistory: React.FC = () => {
           setPaymentHistory(sortedPayments);
           setFilteredPayments(sortedPayments);
           
-          const uniqueTypes = [...new Set(paymentData.map((payment: PaymentDetail) => payment.payment_type))]
-            .filter(type => type.trim() !== '');
+          const uniqueTypes = ([...new Set(paymentData.map((payment: PaymentDetail) => payment.payment_type))] as string[])
+            .filter((type: string) => type.trim() !== '');
           setPaymentTypes(uniqueTypes);
           
           setError(null);

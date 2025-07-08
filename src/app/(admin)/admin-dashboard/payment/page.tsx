@@ -21,9 +21,9 @@ const Page = () => {
   };
 
   return (
-    <div className='p-4 md:p-6 lg:p-8 min-h-screen bg-background'>
-      <div className='px-4 py-3 mb-6 mt-6 md:mt-10 shadow-sm'>
-        <h1 className='text-xl md:text-2xl font-semibold text-black dark:text-white'>
+    <div className='p-4 md:p-6 lg:p-8 min-h-screen'>
+      <div className='px-4 py-3 mb-6 mt-6 md:mt-10 shadow-sm rounded-lg bg-white/80 dark:bg-gray-900/80 border-l-8 border-primary'>
+        <h1 className='text-xl md:text-2xl font-semibold text-primary dark:text-pink-300 drop-shadow'>
           {selectedSection}
         </h1>
       </div>

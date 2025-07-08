@@ -12,7 +12,6 @@ const ButtonProp: React.FC<ButtonPropProps> = ({
   selectedSection, 
   setSelectedSection 
 }) => {
-  // Create a handler function to wrap the state setter
   const handleSectionChange = (option: SectionType) => {
     setSelectedSection(option);
   };
@@ -33,8 +32,8 @@ const ButtonProp: React.FC<ButtonPropProps> = ({
             w-full sm:w-auto text-black dark:text-gray-300
             ${
               selectedSection === option 
-                ? 'bg-primary hover:bg-primary/90 ' 
-                : 'bg-white dark:bg-gray-900 text-black dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                ? 'bg-primary text-black shadow-lg border-primary ring-2 ring-primary/30 scale-105 transition-all duration-300' 
+                : 'bg-white text-black hover:bg-gray-50 dark:hover:bg-gray-800 opacity-80 border-gray-300'
             }
           `}
         >

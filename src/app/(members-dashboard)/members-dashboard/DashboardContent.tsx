@@ -54,20 +54,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
-        // Get the bearer token from session
         const token = session?.user?.token;
         
         if (!token) {
-          console.log('Session data:', session); // Debug log
+          console.log('Session data:', session); 
           throw new Error("No authentication token found. Please log in again.");
         }
-
         const headers = {
           'Authorization': `Bearer ${token}`
         };
 
-        // Fetch conferences
         try {
           const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`, {
             headers
@@ -83,7 +79,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           if (confData.status === 'success') {
             const incomingConfs = confData.data.filter((event: Event) => event.status === 'Incoming');
             console.log('Filtered incoming conferences:', incomingConfs);
-            
+                    
             // First set the basic conference data
             setConferences(incomingConfs);
             

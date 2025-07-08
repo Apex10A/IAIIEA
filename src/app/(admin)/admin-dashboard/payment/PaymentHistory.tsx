@@ -222,8 +222,10 @@ const PaymentHistory: React.FC = () => {
         
         if (response.data.status === 'success') {
           const paymentData = response.data.data;
-          setPaymentHistory(paymentData);
-          setFilteredPayments(paymentData);
+          // Sort by date descending (most recent first)
+          const sortedPayments = paymentData.slice().sort((a: PaymentDetail, b: PaymentDetail) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setPaymentHistory(sortedPayments);
+          setFilteredPayments(sortedPayments);
           
           const uniqueTypes = [...new Set(paymentData.map((payment: PaymentDetail) => payment.payment_type))]
             .filter(type => type.trim() !== '');
@@ -355,7 +357,7 @@ const PaymentHistory: React.FC = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
           <Input
             placeholder="Search payments..."
-            className="pl-10 bg-white dark:bg-gray-900 text-black dark:text-white border-border"
+            className="pl-10 bg-white dark:bg-gray-900 text-black dark:text-white border-border w-full"
             value={filters.searchQuery}
             onChange={(e) => {
               setFilters(prev => ({...prev, searchQuery: e.target.value}));
@@ -375,43 +377,43 @@ const PaymentHistory: React.FC = () => {
       </div>
 
       {/* Filters Card */}
-      <div className="rounded-lg border border-border dark:border-gray-600 bg-white dark:bg-gray-800 p-6">
+      <div className="rounded-lg border border-border dark:border-gray-600 bg-white dark:bg-gray-800 p-4 md:p-6">
         <h2 className="text-lg font-medium text-black dark:text-white mb-4">Filters</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-black dark:text-white">Date Range</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Input 
                 type="date" 
                 value={filters.dateFrom}
                 onChange={(e) => setFilters(prev => ({...prev, dateFrom: e.target.value}))}
-                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border w-full"
               />
               <Input 
                 type="date" 
                 value={filters.dateTo}
                 onChange={(e) => setFilters(prev => ({...prev, dateTo: e.target.value}))}
-                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border w-full"
               />
             </div>
           </div>
           
           <div className="space-y-2">
             <label className="text-sm font-medium text-black dark:text-white">Amount Range</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Input 
                 type="number" 
                 value={filters.minAmount}
                 onChange={(e) => setFilters(prev => ({...prev, minAmount: e.target.value}))}
                 placeholder="Min"
-                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border w-full"
               />
               <Input 
                 type="number" 
                 value={filters.maxAmount}
                 onChange={(e) => setFilters(prev => ({...prev, maxAmount: e.target.value}))}
                 placeholder="Max"
-                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border"
+                className="bg-white dark:bg-gray-900 text-black dark:text-white border-border w-full"
               />
             </div>
           </div>
@@ -422,7 +424,7 @@ const PaymentHistory: React.FC = () => {
               value={filters.paymentType}
               onValueChange={(value) => setFilters(prev => ({...prev, paymentType: value}))}
             >
-              <SelectTrigger className="bg-white dark:bg-gray-900 text-black dark:text-white border-border">
+              <SelectTrigger className="bg-white dark:bg-gray-900 text-black dark:text-white border-border w-full">
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-900">
@@ -435,17 +437,17 @@ const PaymentHistory: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex justify-end gap-2 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
           <Button 
             variant="outline" 
             onClick={resetFilters}
-            className="text-black dark:text-white border-border dark:border-gray-600"
+            className="text-black dark:text-white border-border dark:border-gray-600 w-full sm:w-auto"
           >
             Reset
           </Button>
           <Button 
             onClick={applyFilters}
-            className="bg-primary hover:bg-primary/90 text-black dark:text-white"
+            className="bg-primary hover:bg-primary/90 text-black dark:text-white w-full sm:w-auto"
           >
             Apply Filters
           </Button>
@@ -464,7 +466,7 @@ const PaymentHistory: React.FC = () => {
       ) : (
         <div className="rounded-lg border border-border overflow-hidden bg-white dark:bg-gray-900 dark:border-gray-700">
           <div className="relative overflow-x-auto">
-            <Table>
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow className="bg-gray-50 dark:bg-gray-800">
                   <TableHead className="w-[40px]">
@@ -573,16 +575,12 @@ const PaymentHistory: React.FC = () => {
       {/* Payment Details Dialog */}
       <AnimatePresence>
         <Dialog open={!!selectedPaymentDetail} onOpenChange={closePaymentDetails}>
-          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border border-border">
+          <DialogContent className="max-w-xs sm:max-w-md bg-white dark:bg-gray-900 border border-border">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 20 
-              }}
+              transition={{ duration: 0.6, ease: 'easeInOut' }}
             >
               <DialogHeader>
                 <DialogTitle className="text-black dark:text-white">Payment Details</DialogTitle>

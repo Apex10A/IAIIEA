@@ -28,7 +28,7 @@ import SeminarAnnouncements from "@/app/(members-dashboard)/members-dashboard/tr
 import Sidebar from '@/components/layout/sidebar/page';
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
 import LoadingDashboard from '@/app/(admin)/admin-dashboard/LoadingDashboard'
-import MembersCertificate from "@/app/(members-dashboard)/members-dashboard/members-certificate/page"
+import MembersCertificate from "@/app/(members-dashboard)/members-dashboard/certificates/page"
 
 
 type ComponentKey = 

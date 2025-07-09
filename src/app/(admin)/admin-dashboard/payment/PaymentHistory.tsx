@@ -471,13 +471,13 @@ const PaymentHistory: React.FC = () => {
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden bg-white dark:bg-gray-900 dark:border-gray-700">
-          <div className="relative overflow-x-auto">
-            <Table className="min-w-full">
+          <div className="relative overflow-x-auto min-w-[1200px]">
+            <Table className="w-[700px]">
               <TableHeader>
                 <TableRow className="bg-gray-50 dark:bg-gray-800">
                   <TableHead className="w-[40px]">
                     <input 
-                      type="checkbox" 
+                      type="checkbox"
                       checked={isAllSelected}
                       onChange={handleSelectAll}
                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"

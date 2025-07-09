@@ -182,8 +182,8 @@ const DuesSettings: React.FC = () => {
         <CardContent>
           <Tabs defaultValue="membership" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="membership" className="text-sm">Membership Fees</TabsTrigger>
-              <TabsTrigger value="additional" className="text-sm">Additional Fees</TabsTrigger>
+              <TabsTrigger value="membership" className="text-sm data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-primary/30 data-[state=active]:text-primary dark:data-[state=active]:text-white">Membership Fees</TabsTrigger>
+              <TabsTrigger value="additional" className="text-sm data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-primary/30 data-[state=active]:text-primary dark:data-[state=active]:text-white">Additional Fees</TabsTrigger>
             </TabsList>
             <TabsContent value="membership">
               <div className="rounded-md border bg-card">

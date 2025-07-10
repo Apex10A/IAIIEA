@@ -1,0 +1,13 @@
+{
+    "headers": [
+        {
+            "sources": "/(.*)",
+            "headers": [
+                {
+                    "key": "Content-Security-Policy",
+                    "value": "frame-ancestors  https://iaiiea.vercel.app/"
+                }
+            ]
+        }
+    ]
+}

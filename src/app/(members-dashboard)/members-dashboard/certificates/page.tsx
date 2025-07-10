@@ -2,15 +2,38 @@
 import React, { useRef } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
-import fingerprint from "./fingerprint.png";
+import iaiieaLogo from "@/assets/auth/images/IAIIEA Logo I.png";
+import FingerPrint from "./fingerprint.png"
+import BlueBg from "./blue.png"
+import YellowBg from "./yellowBg.png"
+import Gold from "./gold-celebration.png"
 
-const certificate = {
-  id: "1",
-  conferenceTitle: "CERTIFICATE OF MEMBERSHIP",
-  conferenceDate: "2023-06-15",
-  issueDate: "2023-06-20",
-  status: "available",
+
+const dummyData = {
+  name: "Onoja Inalegwu Moses",
+  membershipId: "MN118790308",
+  awardDate: "30-Jan-2025",
 };
+
+const GoldSeal = () => (
+  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: 'absolute', left: '50%', top: 60, transform: 'translateX(-50%)', zIndex: 2 }}>
+    <circle cx="40" cy="40" r="28" fill="#D5B93C" stroke="#B89B2B" strokeWidth="6" />
+    <circle cx="40" cy="40" r="18" fill="#F7E7A6" />
+    <rect x="36" y="60" width="8" height="18" rx="2" fill="#D5B93C" stroke="#B89B2B" strokeWidth="2" />
+    <polygon points="40,58 44,70 36,70" fill="#B89B2B" />
+  </svg>
+);
+
+const BottomBorder = () => (
+  <div style={{
+    width: '100%',
+    height: 24,
+    background: 'repeating-linear-gradient(90deg, #1e3a8a 0 32px, #D5B93C 32px 48px)',
+    marginTop: 24,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  }} />
+);
 
 const CertificatesPage = () => {
   const certRef = useRef<HTMLDivElement>(null);
@@ -19,7 +42,7 @@ const CertificatesPage = () => {
     if (certRef.current) {
       const canvas = await html2canvas(certRef.current, { backgroundColor: null });
       const link = document.createElement("a");
-      link.download = "certificate.png";
+      link.download = "certificate.jpg";
       link.href = canvas.toDataURL();
       link.click();
     }
@@ -48,75 +71,55 @@ const CertificatesPage = () => {
             background: "white",
             overflow: "hidden",
             position: "relative",
+            fontFamily: 'serif',
           }}
         >
-          {/* Watermark */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              pointerEvents: "none",
-              zIndex: 0,
-            }}
-          >
-            <Image
-              src={fingerprint}
-              alt="Certificate Fingerprint"
-              width={300}
-              height={300}
-              style={{
-                opacity: 0.07,
-                objectFit: "contain",
-              }}
-            />
+          {/* Blue Header with Gold Diagonal Stripes */}
+         <div>
+          <div>
+          <Image src={BlueBg} alt="IAIIEA Logo"  />
+          <Image src={YellowBg} alt="IAIIEA Logo" />
+          <Image src={Gold} alt="IAIIEA Logo" width={80} height={80} style={{ objectFit: 'contain' }} />
           </div>
-          {/* Blue Header */}
-          <div
-            style={{
-              background: "#1e3a8a",
-              width: "100%",
-              borderTopLeftRadius: "24px",
-              borderTopRightRadius: "24px",
-              zIndex: 1,
-              position: "relative",
-            }}
-          >
-            <h1 className="text-3xl font-bold py-8 text-center text-white tracking-widest">
-              {certificate.conferenceTitle}
-            </h1>
-          </div>
+         </div>
           {/* Certificate Content */}
-          <div className="relative z-10 w-full flex flex-col items-center px-8 py-6">
-            <div className="flex flex-col items-center w-full mb-6">
-              <h2 className="text-lg font-semibold mb-2">THIS CERTIFICATE WAS AWARDED TO</h2>
-              <h1 className="text-2xl font-bold mb-2">AUGUSTA EGWUAGU</h1>
-              <h2 className="text-lg font-semibold mb-4">AS A MEMBER OF IAIIEA</h2>
+          <div className="relative z-10 w-full flex flex-col items-center px-8 py-6" style={{ marginTop: 32 }}>
+            <div className="flex flex-col items-center w-full mb-4">
+              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 8, letterSpacing: 1 }}>THIS CERTIFICATE IS AWARDED TO</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: '#1e3a8a', marginBottom: 2, letterSpacing: 2 }}>{dummyData.name.toUpperCase()}</div>
+              <div style={{ width: 320, height: 2, background: '#D5B93C', borderRadius: 2, marginBottom: 8 }} />
+              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, letterSpacing: 1 }}>AS A MEMBER OF IAIIEA</div>
             </div>
-            <div className="flex items-center gap-8 mb-8">
+            <div className="flex items-center gap-12 mb-8">
               <div className="flex flex-col items-center">
-                <p className="font-semibold">Membership ID</p>
-                <p className="border-b border-gray-400 w-32 h-6"></p>
+                <div style={{ fontWeight: 600 }}>Membership ID</div>
+                <div style={{ borderBottom: '2px solid #D5B93C', width: 180, fontSize: 18, textAlign: 'center', marginTop: 2 }}>{dummyData.membershipId}</div>
               </div>
               <div className="flex flex-col items-center">
-                <p className="font-semibold">Date of Award</p>
-                <p className="border-b border-gray-400 w-32 h-6"></p>
+                <div style={{ fontWeight: 600 }}>Date of award</div>
+                <div style={{ borderBottom: '2px solid #D5B93C', width: 180, fontSize: 18, textAlign: 'center', marginTop: 2 }}>{dummyData.awardDate}</div>
               </div>
             </div>
-            <div className="flex items-center justify-between w-full px-12 mt-8">
+            <div className="flex items-center justify-between w-full px-16 mt-8" style={{ marginBottom: 32 }}>
               <div className="flex flex-col items-center">
-                <p className="border-b border-gray-400 w-32 h-6"></p>
-                <p className="mt-1 text-sm">President</p>
-              </div>
-              <div>
-                {/* Place for IAIIEA Logo if needed */}
+                <div style={{ borderBottom: '2px solid #1e3a8a', width: 120, height: 24 }}></div>
+                <div style={{ marginTop: 4, fontSize: 14 }}>President</div>
               </div>
               <div className="flex flex-col items-center">
-                <p className="border-b border-gray-400 w-32 h-6"></p>
-                <p className="mt-1 text-sm">Secretary</p>
+                <Image src={iaiieaLogo} alt="IAIIEA Logo" width={80} height={80} style={{ objectFit: 'contain' }} />
+                <div style={{ fontSize: 12, color: '#1e3a8a', fontWeight: 700, marginTop: 2, letterSpacing: 2 }}>IAIIEA</div>
+                <div style={{ fontSize: 10, color: '#1e3a8a', marginTop: -2 }}>International Association for Innovations<br />in Educational Assessment</div>
               </div>
+              <div className="flex flex-col items-center">
+                <div style={{ borderBottom: '2px solid #1e3a8a', width: 120, height: 24 }}></div>
+                <div style={{ marginTop: 4, fontSize: 14 }}>Secretary</div>
+              </div>
+            </div>
+            <div style={{ position: 'absolute', bottom: 40, left: 0, width: '100%', textAlign: 'center', fontSize: 12, color: '#888', letterSpacing: 1 }}>
+              This certificate is only valid for one year
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%' }}>
+              <BottomBorder />
             </div>
           </div>
         </div>

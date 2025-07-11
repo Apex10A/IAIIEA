@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { listRooms, joinRoom } from '@/action/meeting';
 import { useSession } from 'next-auth/react';

@@ -50,7 +50,7 @@ const CertificatesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4">
+    <div className="min-h-screen bg-gray-100 py-12 px-4 ">
       <h1 className="text-2xl font-bold mb-8 text-center">Membership Certificate</h1>
 
       <div className="flex justify-center mb-8">
@@ -62,110 +62,95 @@ const CertificatesPage = () => {
         </button>
       </div>
       {/* Certificate Section */}
-      <div className="flex justify-center">
-        <div
+      <div className="flex justify-center ">
+        <div className="bg-white "
           ref={certRef}
           style={{
             width: "792px",
             height: "712px",
             borderRadius: "24px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            background: "white",
             overflow: "hidden",
             position: "relative",
             fontFamily: 'serif',
           }}
         >
-          <div style={{ position: "relative", width: "100%", height: "200px" }}>
-
+          <div className="relative w-full h-[200px]">
             <Image
               src={BlueBg}
               alt="Blue Background"
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                zIndex: 2,
-              }}
+              className="absolute top-0 left-0 w-full h-full object-cover z-[2]"
             />
-
             <Image
               src={YellowBg}
               alt="Yellow Background"
-              style={{
-                position: "absolute",
-                top: "5px", 
-                left: 0,
-                width: "100%",
-                height: "100%", 
-                objectFit: "cover",
-                zIndex: 1,
-              }}
+              className="absolute top-[5px] left-0 w-full h-full object-cover z-[1]"
             />
-           
             <Image
               src={Gold}
               alt="Gold Seal"
               width={140}
               height={140}
+              className="absolute left-1/2 top-[120px] z-[3] object-contain"
+              style={{ transform: "translateX(-50%)" }}
+            />
+          </div>
+          {/* Certificate Content */}
+          <div className="relative z-10 w-full flex flex-col items-center px-8 py-6 mt-8">
+            <div className="absolute -top-[185px] text-center">
+              <h1><span className="cert text-5xl text-white tracking-widest">CERTIFICATE OF</span></h1>
+              <h1 className="text-2xl text-[#e5c029] tracking-[5px] mem font-[500]">MEMBERSHIP</h1>
+            </div>
+            <div className="flex flex-col items-center w-full mb-4 mt-4">
+              <div className="text-[16px] opacity-[0.6] font-normal mb-2 tracking-wider">THIS CERTIFICATE IS AWARDED TO</div>
+              <div className="text-[32px] cert font-bold text-[#1e3a8a]">{dummyData.name.toUpperCase()}</div>
+              <div className="w-[500px] h-[2px] bg-[#D5B93C] rounded mb-2" />
+              <div className="text-[16px] font-medium mb-4 tracking-wider  opacity-[0.6] ">AS A MEMBER OF IAIIEA</div>
+            </div>
+            <div className="flex items-center gap-12 mb-8">
+              <div className="flex flex-col items-center">
+                <div className="font-semibold">Membership ID</div>
+                <div className="border-b-2 border-[#D5B93C] w-[180px] text-[18px] text-center mt-1">{dummyData.membershipId}</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="font-semibold">Date of award</div>
+                <div className="border-b-2 border-[#D5B93C] w-[180px] text-[18px] text-center mt-1">{dummyData.awardDate}</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between w-full px-16 mt-8 mb-8">
+              <div className="flex flex-col items-center">
+                <div className="border-b-2 border-[#1e3a8a] w-[120px] h-6" />
+                <div className="mt-1 text-[14px]">President</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <Image src={iaiieaLogo} alt="IAIIEA Logo" width={80} height={80} className="object-contain" />
+                <div className="text-[12px] text-[#1e3a8a] font-bold mt-1 tracking-widest">IAIIEA</div>
+                <div className="text-[10px] text-[#1e3a8a] -mt-1">International Association for Innovations<br />in Educational Assessment</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="border-b-2 border-[#1e3a8a] w-[120px] h-6" />
+                <div className="mt-1 text-[14px]">Secretary</div>
+              </div>
+            </div>
+            <div className="absolute bottom-10 left-0 w-full text-center text-[12px] text-[#888] tracking-wider">
+              This certificate is only valid for one year
+            </div>
+            <div className="absolute bottom-0 left-0 w-full">
+              <BottomBorder />
+            </div>
+            <Image
+              src={FingerPrint}
+              alt="Gold Seal"
+            
               style={{
                 position: "absolute",
                 left: "50%",
-                top: "120px", // Adjust as needed
+                top: "-80px", // Adjust as needed
                 transform: "translateX(-50%)",
                 zIndex: 3,
                 objectFit: "contain",
               }}
             />
-          </div>
-          {/* Certificate Content */}
-          <div className="relative z-10 w-full flex flex-col items-center px-8 py-6" style={{ marginTop: 32 }}>
-
-            <div className="absolute top-[-185px] text-center">
-              <h1><span className="cert text-5xl text-white">CERTIFICATE OF</span></h1>
-              <h1 className=" text-2xl text-[#cfa64c] tracking-widest">MEMBERSHIP</h1>
-            </div>
-
-            <div className="flex flex-col items-center w-full mb-4 mt-4">
-              <div style={{ fontSize: 18, fontWeight: 400, marginBottom: 8, letterSpacing: 1 }}>THIS CERTIFICATE IS AWARDED TO</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: '#1e3a8a', marginBottom: 2, letterSpacing: 2 }}>{dummyData.name.toUpperCase()}</div>
-              <div style={{ width: 320, height: 2, background: '#D5B93C', borderRadius: 2, marginBottom: 8 }} />
-              <div style={{ fontSize: 18, fontWeight: 500, marginBottom: 16, letterSpacing: 1 }}>AS A MEMBER OF IAIIEA</div>
-            </div>
-            <div className="flex items-center gap-12 mb-8">
-              <div className="flex flex-col items-center">
-                <div style={{ fontWeight: 600 }}>Membership ID</div>
-                <div style={{ borderBottom: '2px solid #D5B93C', width: 180, fontSize: 18, textAlign: 'center', marginTop: 2 }}>{dummyData.membershipId}</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div style={{ fontWeight: 600 }}>Date of award</div>
-                <div style={{ borderBottom: '2px solid #D5B93C', width: 180, fontSize: 18, textAlign: 'center', marginTop: 2 }}>{dummyData.awardDate}</div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between w-full px-16 mt-8" style={{ marginBottom: 32 }}>
-              <div className="flex flex-col items-center">
-                <div style={{ borderBottom: '2px solid #1e3a8a', width: 120, height: 24 }}></div>
-                <div style={{ marginTop: 4, fontSize: 14 }}>President</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <Image src={iaiieaLogo} alt="IAIIEA Logo" width={80} height={80} style={{ objectFit: 'contain' }} />
-                <div style={{ fontSize: 12, color: '#1e3a8a', fontWeight: 700, marginTop: 2, letterSpacing: 2 }}>IAIIEA</div>
-                <div style={{ fontSize: 10, color: '#1e3a8a', marginTop: -2 }}>International Association for Innovations<br />in Educational Assessment</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div style={{ borderBottom: '2px solid #1e3a8a', width: 120, height: 24 }}></div>
-                <div style={{ marginTop: 4, fontSize: 14 }}>Secretary</div>
-              </div>
-            </div>
-            <div style={{ position: 'absolute', bottom: 40, left: 0, width: '100%', textAlign: 'center', fontSize: 12, color: '#888', letterSpacing: 1 }}>
-              This certificate is only valid for one year
-            </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%' }}>
-              <BottomBorder />
-            </div>
           </div>
         </div>
       </div>

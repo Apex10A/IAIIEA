@@ -471,8 +471,8 @@ const PaymentHistory: React.FC = () => {
         </div>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden bg-white dark:bg-gray-900 dark:border-gray-700">
-          <div className="relative overflow-x-auto min-w-[1200px]">
-            <Table className="w-[700px]">
+          <div className="overflow-x-auto min-w-[1200px]">
+            <Table className="w-full">
               <TableHeader>
                 <TableRow className="bg-gray-50 dark:bg-gray-800">
                   <TableHead className="w-[40px]">

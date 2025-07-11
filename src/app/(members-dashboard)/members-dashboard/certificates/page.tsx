@@ -66,16 +66,12 @@ const CertificatesPage = () => {
         <div className="bg-white "
           ref={certRef}
           style={{
-            width: "792px",
-            height: "712px",
-            borderRadius: "24px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            overflow: "hidden",
-            position: "relative",
-            fontFamily: 'serif',
+            width: "1188px",
+            height: "918px",
+         
           }}
         >
-          <div className="relative w-full h-[200px]">
+          <div className="relative w-full h-[300px]">
             <Image
               src={BlueBg}
               alt="Blue Background"
@@ -89,23 +85,23 @@ const CertificatesPage = () => {
             <Image
               src={Gold}
               alt="Gold Seal"
-              width={140}
-              height={140}
-              className="absolute left-1/2 top-[120px] z-[3] object-contain"
+              width={200}
+              height={200}
+              className="absolute left-1/2 top-[200px] z-[3] object-contain"
               style={{ transform: "translateX(-50%)" }}
             />
           </div>
           {/* Certificate Content */}
           <div className="relative z-10 w-full flex flex-col items-center px-8 py-6 mt-8">
-            <div className="absolute -top-[185px] text-center">
-              <h1><span className="cert text-5xl text-white tracking-widest">CERTIFICATE OF</span></h1>
-              <h1 className="text-2xl text-[#e5c029] tracking-[5px] mem font-[500]">MEMBERSHIP</h1>
+            <div className="absolute -top-[270px] text-center">
+              <h1><span className="cert text-7xl text-white tracking-widest mb-2">CERTIFICATE OF</span></h1>
+              <h1 className="text-4xl text-[#e5c029] tracking-[5px] mem font-[500]">MEMBERSHIP</h1>
             </div>
             <div className="flex flex-col items-center w-full mb-4 mt-4">
-              <div className="text-[16px] opacity-[0.6] font-normal mb-2 tracking-wider">THIS CERTIFICATE IS AWARDED TO</div>
-              <div className="text-[32px] cert font-bold text-[#1e3a8a]">{dummyData.name.toUpperCase()}</div>
+              <div className="text-2xl opacity-[0.6] font-normal mb-2 tracking-wider">THIS CERTIFICATE IS AWARDED TO</div>
+              <div className="text-5xl cert font-bold text-[#1e3a8a]">{dummyData.name.toUpperCase()}</div>
               <div className="w-[500px] h-[2px] bg-[#D5B93C] rounded mb-2" />
-              <div className="text-[16px] font-medium mb-4 tracking-wider  opacity-[0.6] ">AS A MEMBER OF IAIIEA</div>
+              <div className="text-2xl font-medium mb-4 tracking-wider  opacity-[0.6] ">AS A MEMBER OF IAIIEA</div>
             </div>
             <div className="flex items-center gap-12 mb-8">
               <div className="flex flex-col items-center">
@@ -135,9 +131,9 @@ const CertificatesPage = () => {
             <div className="absolute bottom-10 left-0 w-full text-center text-[12px] text-[#888] tracking-wider">
               This certificate is only valid for one year
             </div>
-            <div className="absolute bottom-0 left-0 w-full">
+            {/* <div className="absolute bottom-0 left-0 w-full">
               <BottomBorder />
-            </div>
+            </div> */}
             <Image
               src={FingerPrint}
               alt="Gold Seal"

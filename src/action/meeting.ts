@@ -21,8 +21,16 @@ export async function listRooms(token: string) {
   return res.data;
 }
 
-// Start a meeting room
-export async function startRoom(token: string, data: { id: number; access_code: string; }) {
+// Start a meeting room (full payload)
+export async function startRoom(token: string, data: {
+  id: number;
+  name: string;
+  logout_url: string;
+  message: string;
+  started_by: string;
+  keyword: string;
+  access_code: string;
+}) {
   const api = CallsWithBearer(BASE_URL, token);
   const res = await api.post('/start-room', data);
   return res.data;

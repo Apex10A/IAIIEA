@@ -31,6 +31,7 @@ import { showToast } from '@/utils/toast';
 import { Badge } from "@/components/ui/badge";
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { Progress } from "@/components/ui/progress";
+import type { ComponentProps } from "react";
 
 const VIEWER_COLORS = {
   all: { bg: 'bg-green-50', text: 'text-green-800', border: 'border-green-200' },
@@ -51,7 +52,12 @@ interface Announcement {
   viewer: 'all' | 'member' | 'conference' | 'seminar' | 'speaker';
   linked_id?: string;
   linked_title?: string;
+  images?: (string | File)[];
 }
+
+type AnnouncementFormData = Partial<Announcement> & {
+  images?: (string | File)[];
+};
 
 interface Conference {
   id: number;
@@ -71,7 +77,7 @@ const AnnouncementsPage = () => {
   const { data: session } = useSession();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
-  const [currentAnnouncement, setCurrentAnnouncement] = useState<Partial<Announcement>>({
+  const [currentAnnouncement, setCurrentAnnouncement] = useState<AnnouncementFormData>({
     title: '',
     description: '',
     viewer: 'all',
@@ -419,7 +425,7 @@ const AnnouncementsPage = () => {
           </p>
         </div>
         
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} className="z-50 bg-white">
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90">
               <PlusIcon className="mr-2 h-4 w-4 text-[#000]" />
@@ -607,7 +613,7 @@ const AnnouncementsPage = () => {
                     <span>Uploading...</span>
                     <span>{uploadProgress}%</span>
                   </div>
-                  <Progress value={uploadProgress} className="h-2" />
+                  <Progress value={uploadProgress} className="h-2" {...({} as ComponentProps<typeof Progress>)} />
                 </div>
               )}
               

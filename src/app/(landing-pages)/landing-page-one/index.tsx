@@ -51,7 +51,6 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        // Fetch conferences
         const confResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/events`);
         const confData = await confResponse.json();
         let incomingConferences: Event[] = [];
@@ -60,8 +59,6 @@ const LandingPage: React.FC = () => {
             .filter((conf: Event) => conf.status === "Incoming")
             .map((conf: Event) => ({ ...conf, type: 'conference' }));
         }
-
-        // Fetch seminars
         const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
         const semData = await semResponse.json();
         let incomingSeminars: Event[] = [];
@@ -70,8 +67,6 @@ const LandingPage: React.FC = () => {
             .filter((sem: Event) => sem.status === "Incoming")
             .map((sem: Event) => ({ ...sem, type: 'seminar' }));
         }
-
-        // Combine and set incoming events
         setIncomingEvents([...incomingConferences, ...incomingSeminars]);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -95,7 +90,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="bg-white">
-      {/* Hero Section with Dynamic Event Carousel */}
+
       <section className="relative h-screen w-full overflow-hidden">
         <Swiper
           modules={[Autoplay, Pagination, Navigation, EffectFade]}
@@ -187,7 +182,6 @@ const LandingPage: React.FC = () => {
           ))}
         </Swiper>
 
-        {/* Scroll Indicator */}
         <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-40">
           <motion.div
             animate={{
@@ -215,7 +209,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* About Section - Modified with "Our Journey" */}
       <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
@@ -229,8 +222,7 @@ const LandingPage: React.FC = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B142F] mb-6 leading-tight">
                 The International Association for Innovations in Educational Assessment (IAIIEA)
               </h1>
-              
-              {/* Our Journey Section */}
+ 
               <div className="mb-8">
                 <h2 className="text-3xl font-bold text-[#0B142F] mb-4">Our Journey So Far</h2>
                 <p className="text-lg text-[#0B142F]/80 mb-4">
@@ -298,7 +290,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Mission Pillars */}
       <section className="py-16 bg-[#F8F9FC]">
         <div className="container mx-auto px-4 md:px-8 lg:px-14">
           <motion.div
@@ -358,7 +349,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-       {/* Publications Section */}
        <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
         <div className="container mx-auto">
           <motion.div
@@ -414,7 +404,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Events Section */}
       <section className="py-20 px-4 md:px-8 lg:px-14 bg-[#E9EBF3]">
         <div className="container mx-auto">
           <motion.div

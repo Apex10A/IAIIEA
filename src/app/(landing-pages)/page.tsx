@@ -3,7 +3,6 @@ import React, { Suspense } from 'react'
 import "@/app/index.css"
 import LandingPageOne from "@/app/(landing-pages)/landing-page-one/index"
 
-// Create a loading component
 const Loading = () => {
   return (
     <div className="flex items-center justify-center min-h-screen">

@@ -113,11 +113,11 @@ const LandingPage: React.FC = () => {
           className="h-full w-full [&_.swiper-button-next]:!text-white [&_.swiper-button-prev]:!text-white [&_.swiper-pagination]:!bottom-12"
         >
           {incomingEvents.map((event) => (
-            <SwiperSlide key={event.id} className="h-full w-full">
+            <SwiperSlide key={event?.id} className="h-full w-full">
               <div className="relative h-full w-full">
                 <Image
-                  src={event.flyer || (event.type === 'conference' ? '/DSA.JPG' : '/DSA2.JPG')}
-                  alt={event.title}
+                  src={event?.flyer || (event?.type === 'conference' ? '/DSA.JPG' : '/DSA2.JPG')}
+                  alt={event?.title}
                   fill
                   className="object-cover"
                   priority
@@ -134,27 +134,27 @@ const LandingPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-center gap-4">
                           <span className="inline-block px-4 py-2 bg-[#D5B93C] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
-                            {event.status}
+                            {event?.status}
                           </span>
                           <span className="inline-block px-4 py-2 bg-[#0B142F] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
-                            {event.type === 'conference' ? 'Conference' : 'Seminar'}
+                            {event?.type === 'conference' ? 'Conference' : 'Seminar'}
                           </span>
                         </div>
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                          {event.title}
+                          {event?.title}
                         </h1>
                         <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-medium">
-                          {event.theme}
+                          {event?.theme}
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-white/90">
                           <div className="flex items-center gap-3">
                             <FaUsers className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="font-medium text-base md:text-lg">{event.venue}</span>
+                            <span className="font-medium text-base md:text-lg">{event?.venue}</span>
                           </div>
                           <div className="hidden sm:block text-2xl text-white/50">•</div>
                           <div className="flex items-center gap-3">
                             <FaCalendar className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="font-medium text-base md:text-lg">{event.date}</span>
+                            <span className="font-medium text-base md:text-lg">{event?.date}</span>
                           </div>
                         </div>
                         <div className="pt-8 relative z-50">
@@ -367,7 +367,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {publications.map((pub) => (
               <motion.div
-                key={pub.id}
+                key={pub?.id}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
@@ -376,8 +376,8 @@ const LandingPage: React.FC = () => {
               >
                 <div className="relative h-64">
                   <Image
-                    src={pub.image}
-                    alt={pub.title}
+                    src={pub?.image}
+                    alt={pub?.title}
                     fill
                     className="object-cover"
                   />
@@ -387,8 +387,8 @@ const LandingPage: React.FC = () => {
                     <FaBookOpen className="text-[#D5B93C] mr-2" size={24} />
                     <h3 className="text-xl font-bold text-[#0B142F]">PUBLICATIONS</h3>
                   </div>
-                  <h4 className="text-lg font-semibold text-[#0B142F] mb-2">{pub.title}</h4>
-                  <p className="text-[#0B142F]/80 mb-4">{pub.volume}</p>
+                  <h4 className="text-lg font-semibold text-[#0B142F] mb-2">{pub?.title}</h4>
+                  <p className="text-[#0B142F]/80 mb-4">{pub?.volume}</p>
                   <Link 
                     href={pub.link} 
                     target="_blank"

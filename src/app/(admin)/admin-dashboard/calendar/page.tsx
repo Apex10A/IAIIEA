@@ -332,14 +332,14 @@ const Calendar = () => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 text-gray-600 hover:text-gray-900"
+                className=" text-gray-300 p-1 h-6 w-6 hover:text-gray-900"
                 onClick={() => {
                   const dateStr = `${currentYear}-${(currentMonthIndex + 1).toString().padStart(2, '0')}-${dayNumber.toString().padStart(2, '0')}`;
                   setEventDetails(prev => ({ ...prev, date: dateStr }));
                   setIsModalOpen(true);
                 }}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 " />
               </Button>
             </div>
             <div className="mt-1 space-y-1 overflow-y-auto max-h-[80px]">

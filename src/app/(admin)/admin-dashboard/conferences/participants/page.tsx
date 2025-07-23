@@ -272,43 +272,43 @@ const ConferenceParticipantsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {conferences.map((conference) => (
                   <Card 
-                    key={conference.id} 
+                    key={conference?.id} 
                     className="hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => {
                       setSelectedConference(conference);
-                      fetchConferenceDetails(conference.id);
+                      fetchConferenceDetails(conference?.id);
                     }}
                   >
                     <CardContent className="p-0">
                       <div className="relative h-48 w-full">
                         <Image
                           src="/Meeting.png"
-                          alt={conference.title}
+                          alt={conference?.title}
                           fill
                           className="object-cover rounded-t-lg"
                         />
                         <div className="absolute bottom-4 left-4">
-                          <span className={`${getStatusColor(conference.status)} px-3 py-1 rounded-full text-xs font-medium`}>
-                            {conference.status}
+                          <span className={`${getStatusColor(conference?.status)} px-3 py-1 rounded-full text-xs font-medium`}>
+                            {conference?.status}
                           </span>
                         </div>
                       </div>
                       <div className="p-6">
                         <div className="flex justify-between items-start mb-3">
                           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-                            {conference.title}
+                            {conference?.title}
                           </h3>
                           <span className="text-gray-500 text-sm">
-                            {conference.year}
+                            {conference?.year}
                           </span>
                         </div>
                         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {conference.theme}
+                          {conference?.theme}
                         </p>
                         <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-4 w-4" />
-                            <span>{conference.date}</span>
+                            <span>{conference?.date}</span>
                           </div>
                         </div>
                         <button
@@ -323,18 +323,16 @@ const ConferenceParticipantsPage = () => {
               </div>
             </div>
           ) : (
-            // Conference Details and Participants View
             <div className="space-y-6">
-              {/* Conference Summary Card */}
               <Card>
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">
-                        {selectedConference.title}
+                        {selectedConference?.title}
                       </h2>
                       <p className="text-gray-600 mt-1">
-                        {selectedConference.theme}
+                        {selectedConference?.theme}
                       </p>
                       <div className="flex items-center space-x-4 mt-3">
                         <div className="flex items-center space-x-1 text-sm text-gray-500">
@@ -343,19 +341,19 @@ const ConferenceParticipantsPage = () => {
                         </div>
                         <div className="flex items-center space-x-1 text-sm text-gray-500">
                           <Users className="h-4 w-4" />
-                          <span>{filteredMembers.length} participants</span>
+                          <span>{filteredMembers?.length} participants</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <span className={`${getStatusColor(selectedConference.status)} px-3 py-1 rounded-full text-sm font-medium`}>
-                        {selectedConference.status}
+                      <span className={`${getStatusColor(selectedConference?.status)} px-3 py-1 rounded-full text-sm font-medium`}>
+                        {selectedConference?.status}
                       </span>
                     </div>
                   </div>
 
                   {/* Registration Status Message */}
-                  {conferenceDetails && !conferenceDetails.is_registered && (
+                  {conferenceDetails && !conferenceDetails?.is_registered && (
                     <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
                       <div className="flex">
                         <div className="flex-shrink-0">

@@ -56,7 +56,6 @@ export default function DashboardClient() {
     },
   });
 
-  // Check mobile viewport
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -104,12 +103,10 @@ export default function DashboardClient() {
     return components[activeComponent] || components['Dashboard'];
   };
 
-  // Loading state while checking session
   if (status === 'loading') {
     return <LoadingDashboard />;
   }
 
-  // Render loading screen or redirect if session is unavailable
   if (!session?.user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">

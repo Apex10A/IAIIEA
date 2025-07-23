@@ -79,18 +79,13 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           if (confData.status === 'success') {
             const incomingConfs = confData.data.filter((event: Event) => event.status === 'Incoming');
             console.log('Filtered incoming conferences:', incomingConfs);
-                    
-            // First set the basic conference data
             setConferences(incomingConfs);
-            
-            // Then fetch detailed data for each conference
             for (const conf of incomingConfs) {
               try {
                 const detailsResponse = await fetch(
                   `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conf.id}`,
                   { headers }
                 );
-                
                 if (!detailsResponse.ok) {
                   console.error(`Failed to fetch details for conference ${conf.id}:`, detailsResponse.status);
                   continue;
@@ -123,8 +118,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
             "Failed to load conferences: Network error"
           );
         }
-
-        // Fetch seminars with error handling
         try {
           const semResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`, {
             headers
@@ -138,20 +131,17 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           if (semData.status === 'success') {
             const incomingSems = semData.data.filter((event: Event) => event.status === 'Incoming');
             setSeminars(incomingSems);
-            
-            // Fetch details for each seminar
             for (const sem of incomingSems) {
               try {
                 const detailsResponse = await fetch(
                   `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${sem.id}`,
                   { headers }
                 );
-                
                 if (!detailsResponse.ok) {
                   console.error(`Failed to fetch details for seminar ${sem.id}:`, detailsResponse.status);
                   continue;
                 }
-                
+
                 const detailsData = await detailsResponse.json();
                 if (detailsData.status === 'success') {
                   setSeminars(prev => prev.map(existingSem => 
@@ -170,8 +160,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
         } catch (semError) {
           console.error("Error fetching seminars:", semError);
         }
-
-        // Fetch calendar events with error handling
         try {
           const year = new Date().getFullYear();
           const calResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/anual_calendar/${year}`, {
@@ -209,8 +197,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           const endpoint = type === 'conference' 
             ? `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${event.id}`
             : `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${event.id}`;
-          
-          // Add cache-busting query parameter
           const cacheBuster = new Date().getTime();
           const response = await fetch(`${endpoint}?_=${cacheBuster}`, {
             headers: {
@@ -528,8 +514,6 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
         </div>
         <Calendar events={calendarEvents} />
       </div>
-
-     {/* Quick Actions */}
   <div className="mb-8">
     <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

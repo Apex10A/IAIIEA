@@ -19,7 +19,6 @@ export default function DashboardPage() {
     }
   });
 
-  // Loading state
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
@@ -28,15 +27,13 @@ export default function DashboardPage() {
     );
   }
 
-  // If no session, return null (though this should be handled by onUnauthenticated)
   if (!session?.user) {
     return null;
   }
 
-  // Prepare user data
   const userData: UserDataType = {
-    name: session.user.name || 'User',
-    registration: (session.user as any).registration || '', // Adjust based on your session user type
+    name: session?.user?.name || 'User',
+    registration: (session?.user as any).registration || '', 
   };
 
   return <DashboardContent user={userData} />;

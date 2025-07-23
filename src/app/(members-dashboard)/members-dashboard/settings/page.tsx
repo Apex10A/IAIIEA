@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@radix-ui/react-label';
-import { Loader2, User, Mail, Phone, Building2, GraduationCap, MapPin, Home, Globe, Briefcase, Settings } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { showToast } from '@/utils/toast';
+import MembersCertificate from '@/app/(members-dashboard)/members-dashboard/members-certificate/page';
 
 interface UserDetails {
   user_id: string;
@@ -29,7 +29,7 @@ interface UserDetails {
 }
 
 export default function AccountSettings() {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -43,7 +43,6 @@ export default function AccountSettings() {
 
   const fetchUserDetails = async () => {
     if (!bearerToken) return;
-
     try {
       setIsFetching(true);
       const response = await fetch(
@@ -54,9 +53,7 @@ export default function AccountSettings() {
           },
         }
       );
-
       if (!response.ok) throw new Error('Failed to fetch user details');
-
       const data = await response.json();
       setUserDetails(data.data);
     } catch (error) {
@@ -70,7 +67,6 @@ export default function AccountSettings() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userDetails) return;
-
     setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}/edit_profile_data`, {
@@ -93,11 +89,9 @@ export default function AccountSettings() {
           type: userDetails.type,
         }),
       });
-
       if (!response.ok) throw new Error('Failed to update profile');
-
       showToast.success('Profile updated successfully');
-      await fetchUserDetails(); // Refresh user details
+      await fetchUserDetails();
     } catch (error) {
       console.error('Error updating profile:', error);
       showToast.error('Failed to update profile');
@@ -108,261 +102,146 @@ export default function AccountSettings() {
 
   if (isFetching) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-[#203A87] mx-auto mb-4" />
-          <p className="text-[#0B142F] font-medium">Loading your profile...</p>
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin mr-2" />
+        <span>Loading your profile...</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 bg-white rounded-lg px-6 py-3 shadow-sm mb-4">
-            <Settings className="w-6 h-6 text-[#203A87]" />
-            <h1 className="text-2xl font-bold text-[#0E1A3D]">
-              Account Settings
-            </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-full bg-white rounded shadow p-8">
+        <MembersCertificate />
+        <h1 className="text-2xl font-bold mb-2 text-center">Account Settings</h1>
+        <p className="text-gray-600 mb-8 text-center">Update your personal information below.</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <Label htmlFor="f_name">First Name</Label>
+            <Input
+              id="f_name"
+              value={userDetails?.f_name || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, f_name: e.target.value }))}
+              placeholder="Enter your first name"
+            />
           </div>
-          <p className="text-gray-600 max-w-md mx-auto">
-            Manage your personal information and preferences
-          </p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          {/* Avatar Section */}
-          <div className="relative bg-[#0E1A3D] p-8">
-            <div className="relative flex items-end justify-center">
-              <div className="relative">
-                <Avatar className="w-36 h-36 rounded-full border-6 border-white shadow-2xl bg-white">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${userDetails?.name}`}
-                    alt={userDetails?.name}
-                  />
-                  <AvatarFallback className="bg-gray-100 text-4xl font-bold text-[#0E1A3D]">
-                    {userDetails?.name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-2 -right-2 bg-[#D5B93C] w-8 h-8 rounded-full border-4 border-white flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-              </div>
-            </div>
-            <div className="text-center mt-6">
-              <h2 className="text-2xl font-bold text-white mb-2">{userDetails?.name}</h2>
-              <p className="text-[#D5B93C] font-medium">{userDetails?.type} Member</p>
-            </div>
+          <div>
+            <Label htmlFor="m_name">Middle Name</Label>
+            <Input
+              id="m_name"
+              value={userDetails?.m_name || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, m_name: e.target.value }))}
+              placeholder="Enter your middle name"
+            />
           </div>
-
-          <div className="p-8">
-                      <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Personal Information */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-[#0E1A3D] rounded-lg">
-                      <User className="w-5 h-5 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#0B142F]">Personal Information</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="f_name" className="text-sm font-medium text-[#0B142F] mb-2 block">First Name</Label>
-                      <Input
-                        id="f_name"
-                        value={userDetails?.f_name || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, f_name: e.target.value }))}
-                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
-                        placeholder="Enter your first name"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="m_name" className="text-sm font-medium text-[#0B142F] mb-2 block">Middle Name</Label>
-                      <Input
-                        id="m_name"
-                        value={userDetails?.m_name || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, m_name: e.target.value }))}
-                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
-                        placeholder="Enter your middle name"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="l_name" className="text-sm font-medium text-[#0B142F] mb-2 block">Last Name</Label>
-                      <Input
-                        id="l_name"
-                        value={userDetails?.l_name || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, l_name: e.target.value }))}
-                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
-                        placeholder="Enter your last name"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="email" className="text-sm font-medium text-[#0B142F] mb-2 block">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={userDetails?.email || ''}
-                        disabled
-                        className="bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed"
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Contact Information */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-[#D5B93C] rounded-lg">
-                      <Phone className="w-5 h-5 text-[#0E1A3D]" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#0B142F]">Contact Information</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="phone" className="text-sm font-medium text-[#0B142F] mb-2 block">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        value={userDetails?.phone || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, phone: e.target.value }))}
-                        className="border-gray-200 focus:border-[#D5B93C] focus:ring-[#D5B93C] transition-colors"
-                        placeholder="Enter your phone number"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="whatsapp_no" className="text-sm font-medium text-[#0B142F] mb-2 block">WhatsApp Number</Label>
-                      <Input
-                        id="whatsapp_no"
-                        value={userDetails?.whatsapp_no || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, whatsapp_no: e.target.value }))}
-                        className="border-gray-200 focus:border-[#D5B93C] focus:ring-[#D5B93C] transition-colors"
-                        placeholder="Enter your WhatsApp number"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="country" className="text-sm font-medium text-[#0B142F] mb-2 block">Country</Label>
-                      <Input
-                        id="country"
-                        value={userDetails?.country || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, country: e.target.value }))}
-                        className="border-gray-200 focus:border-[#D5B93C] focus:ring-[#D5B93C] transition-colors"
-                        placeholder="Enter your country"
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Professional Information */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-[#203A87] rounded-lg">
-                      <Briefcase className="w-5 h-5 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#0B142F]">Professional Information</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="institution" className="text-sm font-medium text-[#0B142F] mb-2 block">Institution</Label>
-                      <Input
-                        id="institution"
-                        value={userDetails?.institution || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, institution: e.target.value }))}
-                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
-                        placeholder="Enter your institution"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="profession" className="text-sm font-medium text-[#0B142F] mb-2 block">Profession</Label>
-                      <Input
-                        id="profession"
-                        value={userDetails?.profession || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, profession: e.target.value }))}
-                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
-                        placeholder="Enter your profession"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="area_of_specialization" className="text-sm font-medium text-[#0B142F] mb-2 block">Area of Specialization</Label>
-                      <Input
-                        id="area_of_specialization"
-                        value={userDetails?.area_of_specialization || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, area_of_specialization: e.target.value }))}
-                        className="border-gray-200 focus:border-[#203A87] focus:ring-[#203A87] transition-colors"
-                        placeholder="Enter your specialization"
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Address Information */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-[#0E1A3D] rounded-lg">
-                      <Home className="w-5 h-5 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#0B142F]">Address Information</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="postal_addr" className="text-sm font-medium text-[#0B142F] mb-2 block">Postal Address</Label>
-                      <textarea
-                        id="postal_addr"
-                        value={userDetails?.postal_addr || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, postal_addr: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] transition-colors resize-none"
-                        rows={3}
-                        placeholder="Enter your postal address"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="residential_addr" className="text-sm font-medium text-[#0B142F] mb-2 block">Residential Address</Label>
-                      <textarea
-                        id="residential_addr"
-                        value={userDetails?.residential_addr || ''}
-                        onChange={(e) => setUserDetails(prev => ({ ...prev!, residential_addr: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0E1A3D] focus:border-[#0E1A3D] transition-colors resize-none"
-                        rows={3}
-                        placeholder="Enter your residential address"
-                      />
-                    </div>
-                  </div>
-                </div>
-            </div>
-              {/* Submit Button */}
-              <div className="flex justify-center pt-8">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-[#203A87] hover:bg-[#152a61] text-white px-12 py-4 rounded-lg shadow-md transition-colors duration-200 font-semibold text-lg"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Saving Changes...
-                    </>
-                  ) : (
-                    <>
-                      <Settings className="mr-3 h-5 w-5" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
+          <div>
+            <Label htmlFor="l_name">Last Name</Label>
+            <Input
+              id="l_name"
+              value={userDetails?.l_name || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, l_name: e.target.value }))}
+              placeholder="Enter your last name"
+            />
           </div>
-        </div>
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={userDetails?.email || ''}
+              disabled
+              className="bg-gray-100 text-gray-500"
+            />
+          </div>
+          <div>
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              value={userDetails?.phone || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, phone: e.target.value }))}
+              placeholder="Enter your phone number"
+            />
+          </div>
+          <div>
+            <Label htmlFor="whatsapp_no">WhatsApp Number</Label>
+            <Input
+              id="whatsapp_no"
+              value={userDetails?.whatsapp_no || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, whatsapp_no: e.target.value }))}
+              placeholder="Enter your WhatsApp number"
+            />
+          </div>
+          <div>
+            <Label htmlFor="country">Country</Label>
+            <Input
+              id="country"
+              value={userDetails?.country || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, country: e.target.value }))}
+              placeholder="Enter your country"
+            />
+          </div>
+          <div>
+            <Label htmlFor="institution">Institution</Label>
+            <Input
+              id="institution"
+              value={userDetails?.institution || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, institution: e.target.value }))}
+              placeholder="Enter your institution"
+            />
+          </div>
+          <div>
+            <Label htmlFor="profession">Profession</Label>
+            <Input
+              id="profession"
+              value={userDetails?.profession || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, profession: e.target.value }))}
+              placeholder="Enter your profession"
+            />
+          </div>
+          <div>
+            <Label htmlFor="area_of_specialization">Area of Specialization</Label>
+            <Input
+              id="area_of_specialization"
+              value={userDetails?.area_of_specialization || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, area_of_specialization: e.target.value }))}
+              placeholder="Enter your specialization"
+            />
+          </div>
+          <div>
+            <Label htmlFor="postal_addr">Postal Address</Label>
+            <textarea
+              id="postal_addr"
+              value={userDetails?.postal_addr || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, postal_addr: e.target.value }))}
+              className="w-full px-3 py-2 border rounded"
+              rows={2}
+              placeholder="Enter your postal address"
+            />
+          </div>
+          <div>
+            <Label htmlFor="residential_addr">Residential Address</Label>
+            <textarea
+              id="residential_addr"
+              value={userDetails?.residential_addr || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, residential_addr: e.target.value }))}
+              className="w-full px-3 py-2 border rounded"
+              rows={2}
+              placeholder="Enter your residential address"
+            />
+          </div>
+          <div className="pt-4 flex justify-center">
+            <Button type="submit" disabled={isLoading} className="w-full max-w-xs">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving Changes...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

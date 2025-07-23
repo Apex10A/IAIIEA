@@ -139,7 +139,6 @@ const ConferenceParticipantsPage = () => {
     }
   };
 
-  // Fetch conference participants when a conference is selected
   useEffect(() => {
     const fetchConferenceParticipants = async () => {
       if (!selectedConference || !bearerToken) return;
@@ -173,7 +172,6 @@ const ConferenceParticipantsPage = () => {
     fetchConferenceParticipants();
   }, [selectedConference, bearerToken, API_URL]);
 
-  // Search functionality
   useEffect(() => {
     const filtered = members.filter(
       (member) =>
@@ -185,7 +183,7 @@ const ConferenceParticipantsPage = () => {
     setCurrentPage(1);
   }, [searchTerm, members]);
 
-  // Pagination logic
+
   const indexOfLastMember = currentPage * membersPerPage;
   const indexOfFirstMember = indexOfLastMember - membersPerPage;
   const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
@@ -267,9 +265,8 @@ const ConferenceParticipantsPage = () => {
             )}
           </div>
 
-          {/* Main Content Area */}
           {!selectedConference ? (
-            // Conference List View
+
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-gray-800">Available Conferences</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -112,7 +112,6 @@ export default function AccountSettings() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-full bg-white rounded shadow p-8">
-        <MembersCertificate />
         <h1 className="text-2xl font-bold mb-2 text-center">Account Settings</h1>
         <p className="text-gray-600 mb-8 text-center">Update your personal information below.</p>
         <form onSubmit={handleSubmit} className="space-y-6">

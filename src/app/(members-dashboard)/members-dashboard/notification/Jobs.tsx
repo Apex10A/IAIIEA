@@ -21,7 +21,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
 import Image from "next/image"
 
-// Define the Announcement type
 interface Announcement {
   id: number;
   title: string;
@@ -32,8 +31,6 @@ interface Announcement {
   link: string;
   image?: File | string | null;
 }
-
-// Define the API response type
 interface AnnouncementsResponse {
   status: string;
   message: string;
@@ -58,10 +55,8 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
     link: ''
   });
 
-  // Extract token from loginResponse
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Fetch announcements
   const fetchAnnouncements = async () => {
     try {
       const response = await fetch(`${API_URL}/jobs`, {
@@ -73,15 +68,12 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
       const data: AnnouncementsResponse = await response.json();
       
       if (data.status === "success" && data.data) {
-        // Transform the data to include date information
         const formattedAnnouncements = Object.entries(data.data).flatMap(([date, announcements]) => 
           announcements.map(announcement => ({
             ...announcement,
-            date // Add the date to each announcement
+            date 
           }))
         );
-        
-        // Sort announcements by date (most recent first)
         formattedAnnouncements.sort((a, b) => 
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
@@ -228,8 +220,6 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
     </Card>
   ))}
 </div>
-
-      {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -265,7 +255,7 @@ const Jobs: React.FC<{ loginResponse?: any }> = ({ loginResponse }) => {
           value={currentAnnouncement.id || ''}
           onChange={(e) => setCurrentAnnouncement({
             ...currentAnnouncement, 
-            id: Number(e.target.value) // Convert to number
+            id: Number(e.target.value) 
           })}
           required 
         />

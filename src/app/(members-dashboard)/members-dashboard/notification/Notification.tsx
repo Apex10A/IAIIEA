@@ -10,8 +10,6 @@ import { useSession } from "next-auth/react";
 const Page = () => {
   const { data: session } = useSession();
   const [selectedSection, setSelectedSection] = useState<SectionType>('Announcement');
-
-  // Show warning and hide content if registration is incomplete
   if (session?.user?.userData?.registration === "incomplete") {
     return (
       <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded">
@@ -65,7 +63,6 @@ const Page = () => {
       </div>
 
       <div className='py-10'>
-        {/* Render the content based on the selected section */}
         {renderContent()}
       </div>
     </div>

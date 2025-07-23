@@ -65,7 +65,6 @@ const ConferenceParticipantsPage = () => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
-  // Sort conferences by year (newest first)
   const sortConferences = (confs: Conference[]) => {
     return [...confs].sort((a, b) => {
       // const yearA = parseInt(a.title.match(/\d{4}/)?.[0] || "0";
@@ -74,7 +73,6 @@ const ConferenceParticipantsPage = () => {
     });
   };
 
-  // Fetch conferences
   useEffect(() => {
     const fetchConferences = async () => {
       if (!bearerToken) {
@@ -97,7 +95,6 @@ const ConferenceParticipantsPage = () => {
         const sortedConferences = sortConferences(data.data);
         setConferences(sortedConferences);
         
-        // Automatically select the latest conference (first in the sorted array)
         if (sortedConferences.length > 0) {
           const latestConference = sortedConferences[0];
           setSelectedConference(latestConference);
@@ -115,7 +112,6 @@ const ConferenceParticipantsPage = () => {
     fetchConferences();
   }, [bearerToken, API_URL]);
 
-  // Fetch conference details including registration status
   const fetchConferenceDetails = async (conferenceId: number) => {
     if (!bearerToken) return;
     
@@ -439,7 +435,7 @@ const ConferenceParticipantsPage = () => {
                           </TableHeader>
                           <TableBody>
                             {currentMembers.map((member) => (
-                              <TableRow key={member.id} className="hover:bg-gray-50">
+                              <TableRow key={member?.id} className="hover:bg-gray-50">
                                 {/* <TableCell>
                                   <input
                                     type="checkbox"
@@ -451,19 +447,19 @@ const ConferenceParticipantsPage = () => {
                                 <TableCell>
                                   <div className="flex items-center space-x-3">
                                     <img
-                                      src={`https://api.dicebear.com/8.x/initials/svg?seed=${member.name}`}
-                                      alt={`${member.name}'s avatar`}
+                                      src={`https://api.dicebear.com/8.x/initials/svg?seed=${member?.name}`}
+                                      alt={`${member?.name}'s avatar`}
                                       className="w-8 h-8 rounded-full"
                                     />
-                                    <span>{member.name}</span>
+                                    <span>{member?.name}</span>
                                   </div>
                                 </TableCell>
-                                <TableCell className="text-sm text-gray-500">{member.email}</TableCell>
-                                <TableCell>{member.country}</TableCell>
-                                <TableCell>{member.institution}</TableCell>
+                                <TableCell className="text-sm text-gray-500">{member?.email}</TableCell>
+                                <TableCell>{member?.country}</TableCell>
+                                <TableCell>{member?.institution}</TableCell>
                                 <TableCell>
                                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                                    {member.role}
+                                    {member?.role}
                                   </span>
                                 </TableCell>
                               </TableRow>
@@ -494,8 +490,8 @@ const ConferenceParticipantsPage = () => {
                               <div>
                                 <p className="text-sm text-gray-700">
                                   Showing <span className="font-medium">{indexOfFirstMember + 1}</span> to{' '}
-                                  <span className="font-medium">{Math.min(indexOfLastMember, filteredMembers.length)}</span> of{' '}
-                                  <span className="font-medium">{filteredMembers.length}</span> results
+                                  <span className="font-medium">{Math.min(indexOfLastMember, filteredMembers?.length)}</span> of{' '}
+                                  <span className="font-medium">{filteredMembers?.length}</span> results
                                 </p>
                               </div>
                               <div>
@@ -537,7 +533,7 @@ const ConferenceParticipantsPage = () => {
                   </CardContent>
                 </Card>
               ) : (
-                // Show message if not registered
+
                 <Card>
                   <CardContent className="p-6 text-center">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">

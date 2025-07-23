@@ -75,13 +75,13 @@ const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'spons
             {visibleItems.map((sponsor, index) => (
               <div key={index} className="relative aspect-square w-full min-w-[300px] rounded-lg overflow-hidden bg-muted">
                 <Image
-                  src={sponsor.logo}
-                  alt={sponsor.name}
+                  src={sponsor?.logo}
+                  alt={sponsor?.name}
                   fill
                   className="object-contain p-4"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center dark:bg-gray-800/90">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{sponsor.name}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{sponsor?.name}</p>
                 </div>
               </div>
             ))}
@@ -106,7 +106,7 @@ const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'spons
         )}
       </div>
       
-      {items.length > itemsPerPage && (
+      {items?.length > itemsPerPage && (
         <>
           <button 
             onClick={prevSlide}
@@ -183,23 +183,23 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             </div>
           )}
           <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium dark:bg-gray-800 dark:text-gray-200">
-            {conference.status}
+            {conferenceDetails?.status}
           </div>
         </div>
       
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {conference.title}
+              {conferenceDetails?.title}
             </h1>
             <p className="text-gray-700 text-sm dark:text-gray-300">
-              {conferenceDetails.registered_count || 0} people have registered for this conference
+              {conferenceDetails?.registered_count || 0} people have registered for this conference
             </p>
           </div>
           
           <div className="mb-4">
             <p className="text-lg sm:text-2xl text-gray-700 uppercase font-bold dark:text-gray-300">
-              {conference.theme}
+              {conference?.theme}
             </p>
           </div>
       
@@ -208,14 +208,14 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               <div>
                 <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">
-                  {conference.date}
+                  {conference?.date}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               <div>
-                <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">{conference.venue}</p>
+                <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">{conference?.venue}</p>
               </div>
             </div>
           </div>
@@ -315,19 +315,19 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                       <div key={index} className="bg-muted/50 p-4 rounded-lg border dark:border-gray-700">
                         <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                           <div>
-                            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm md:text-md">{item.activity}</h3>
-                            {item.facilitator && (
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm md:text-md">{item?.activity}</h3>
+                            {item?.facilitator && (
                               <p className="text-sm text-gray-700 mt-1 dark:text-gray-400">
-                                Facilitator: {item.facilitator}
+                                Facilitator: {item?.facilitator}
                               </p>
                             )}
                           </div>
                           <div className="sm:text-right">
                             <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                              {item.day}, {item.start} - {item.end}
+                              {item?.day}, {item?.start} - {item.end}
                             </p>
                             <p className="text-sm text-gray-700 mt-1 dark:text-gray-400">
-                              {item.venue}
+                              {item?.venue}
                             </p>
                           </div>
                         </div>
@@ -349,19 +349,19 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                         <div className="flex items-center gap-4">
                           <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-muted">
                             <Image
-                              src={speaker.picture || '/placeholder.jpg'}
-                              alt={speaker.name}
+                              src={speaker?.picture || '/placeholder.jpg'}
+                              alt={speaker?.name}
                               fill
                               className="object-cover"
                             />
                           </div>
                           <div>
-                            <h3 className="font-medium text-gray-900 dark:text-gray-100">{speaker.name}</h3>
+                            <h3 className="font-medium text-gray-900 dark:text-gray-100">{speaker?.name}</h3>
                             {speaker.portfolio && (
-                              <p className="text-sm text-gray-700 dark:text-gray-400">{speaker.portfolio}</p>
+                              <p className="text-sm text-gray-700 dark:text-gray-400">{speaker?.portfolio}</p>
                             )}
                             {speaker.title && (
-                              <p className="text-sm text-gray-700 dark:text-gray-400 mt-1">{speaker.title}</p>
+                              <p className="text-sm text-gray-700 dark:text-gray-400 mt-1">{speaker?.title}</p>
                             )}
                           </div>
                         </div>
@@ -390,7 +390,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                         className="h-60 relative rounded-lg overflow-hidden bg-muted"
                       >
                         <Image
-                          src={item.image}
+                          src={item?.image}
                           alt={`Meal ${index + 1}`}
                           fill
                           className="object-cover hover:scale-105 transition-transform"
@@ -458,8 +458,8 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
         <div className="h-48 w-full bg-muted relative overflow-hidden">
           {conference.flyer ? (
             <Image
-              src={conference.flyer}
-              alt={conference.title}
+              src={conference?.flyer}
+              alt={conference?.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -473,15 +473,15 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <h2 className="text-foreground text-gray-900 dark:text-gray-100 text-lg font-semibold line-clamp-2">
-            {conference.title}
+            {conference?.title}
           </h2>
         </div>
         <p className="text-gray-700 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-          {conference.theme}
+          {conference?.theme}
         </p>
         <div className="flex items-center text-gray-700 text-xs mb-4">
           <Calendar className="w-3 h-3 mr-1 text-gray-500 dark:text-gray-400" />
-          <p className="text-gray-700 dark:text-gray-400 text-sm line-clamp-2">{conference.date}</p>
+          <p className="text-gray-700 dark:text-gray-400 text-sm line-clamp-2">{conference?.date}</p>
         </div>
       </div>
       <div className="px-4 pb-4">
@@ -647,9 +647,9 @@ const ConferenceResources: React.FC = () => {
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    {selectedConference.title}
+                    {selectedConference?.title}
                   </h1>
-                  <p className="text-gray-600 dark:text-gray-300">{selectedConference.theme}</p>
+                  <p className="text-gray-600 dark:text-gray-300">{selectedConference?.theme}</p>
                 </div>
               </div>
 
@@ -698,7 +698,7 @@ const ConferenceResources: React.FC = () => {
                   Videos
                 </h2>
                 {conferenceDetails.videos?.length > 0 ? (
-                  <MediaCarousel items={conferenceDetails.videos} type="videos" />
+                  <MediaCarousel items={conferenceDetails?.videos} type="videos" />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-gray-500">
                     <FileText className="w-10 h-10 mb-2 text-indigo-400" />
@@ -738,9 +738,9 @@ const ConferenceResources: React.FC = () => {
                           )}
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                              <h3 className="font-medium text-gray-900 dark:text-white">{resource.caption}</h3>
-                              <p className="text-sm text-green-600 dark:text-green-400">{resource.resource_type}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{resource.date}</p>
+                              <h3 className="font-medium text-gray-900 dark:text-white">{resource?.caption}</h3>
+                              <p className="text-sm text-green-600 dark:text-green-400">{resource?.resource_type}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{resource?.date}</p>
                             </div>
                             <div className="flex flex-col gap-2">
                               <Button size="sm" variant="destructive" onClick={() => {/* TODO: implement delete */}}>
@@ -748,9 +748,9 @@ const ConferenceResources: React.FC = () => {
                               </Button>
                             </div>
                           </div>
-                          {!resource.resource_type?.toLowerCase().includes('video') && (
-                            <a 
-                              href={resource.file}
+                          {!resource?.resource_type?.toLowerCase().includes('video') && (
+                            <a
+                              href={resource?.file}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
@@ -826,7 +826,7 @@ const ConferenceResources: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {conferences.slice(1).map((conference) => (
                       <ConferenceCard
-                        key={conference.id}
+                        key={conference?.id}
                         conference={conference}
                         onViewDetails={handleViewDetails}
                       />

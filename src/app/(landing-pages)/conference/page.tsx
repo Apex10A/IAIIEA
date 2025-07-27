@@ -190,7 +190,6 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
       </h2>
       
       <div className="relative group">
-        {/* Main Image */}
         <div className="relative h-64 md:h-96 w-full max-w-4xl mx-auto rounded-lg overflow-hidden">
           <img
             src={images[currentIndex]}
@@ -200,8 +199,6 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
               e.currentTarget.src = "/placeholder.jpg";
             }}
           />
-          
-          {/* Navigation Arrows */}
           {images.length > 1 && (
             <>
               <button
@@ -221,8 +218,6 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
             </>
           ) }
         </div>
-        
-        {/* Thumbnail Navigation */}
         {images.length > 1 && (
           <div className="flex gap-2 mt-4 overflow-x-auto py-2 justify-center">
             {images.map((img, idx) => (
@@ -362,11 +357,11 @@ const PaymentPlanCard = ({
         </div>
       )}
       <div className={`p-6 relative ${isCurrentPlan ? 'pt-16' : ''}`}>
-        {isPopular && !isRegistered && !isCurrentPlan && (
+        {/* {isPopular && !isRegistered && !isCurrentPlan && (
           <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
             POPULAR
           </div>
-        )}
+        )} */}
         <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">{title}</h3>
         
         <div className="space-y-4">
@@ -382,7 +377,7 @@ const PaymentPlanCard = ({
           <div className="pt-2">
             <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
             <ul className="space-y-2 text-sm text-gray-700">
-              {features.map((feature, index) => (
+              {features?.map((feature, index) => (
                 <li key={index} className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                   <span>{feature}</span>
@@ -441,8 +436,6 @@ export default function ConferencePage() {
         if (!conferenceId) {
           throw new Error("No conference ID provided");
         }
-
-        // Fetch conference details
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
           {
@@ -502,7 +495,6 @@ export default function ConferencePage() {
 
     setPaymentProcessing(true);
     try {
-      // Initiate payment
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`,
         {
@@ -553,10 +545,8 @@ export default function ConferencePage() {
 
   const renderPaymentPlans = () => {
     if (!conference) return null;
-
-    // Check for different conference payment structures
     if (conference.payments.early_bird_registration) {
-      // Conference with early bird, normal, late registration structure
+
       return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
@@ -579,11 +569,11 @@ export default function ConferencePage() {
             attendanceType={attendanceType}
           />
 
-          {conference.payments.normal_registration && (
+          {conference?.payments?.normal_registration && (
             <PaymentPlanCard
               title="Normal"
-              priceUsd={conference.payments.normal_registration[attendanceType]?.usd || '0'}
-              priceNaira={conference.payments.normal_registration[attendanceType]?.naira || '0'}
+              priceUsd={conference?.payments?.normal_registration[attendanceType]?.usd || '0'}
+              priceNaira={conference?.payments?.normal_registration[attendanceType]?.naira || '0'}
               features={[
                 `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
                 'Conference materials',
@@ -600,19 +590,14 @@ export default function ConferencePage() {
             />
           )}
 
-          {conference.payments.late_registration && (
+          {conference?.payments?.late_registration && (
             <PaymentPlanCard
               title="Late"
-              priceUsd={conference.payments.late_registration[attendanceType]?.usd || '0'}
-              priceNaira={conference.payments.late_registration[attendanceType]?.naira || '0'}
-              features={[
-                `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
-                'Conference materials',
-                'Digital certificate',
-                'Late registration'
-              ]}
-              isCurrentPlan={conference.is_registered && conference.current_plan === 'late_registration'}
-              isRegistered={conference.is_registered}
+              priceUsd={conference?.payments?.late_registration[attendanceType]?.usd || '0'}
+              priceNaira={conference?.payments?.late_registration[attendanceType]?.naira || '0'}
+              features={conference?.payments?.late_registration?.package}
+              isCurrentPlan={conference?.is_registered && conference?.current_plan === 'late_registration'}
+              isRegistered={conference?.is_registered}
               onClick={() => {
                 setSelectedPlan('late_registration');
                 handleRegisterClick();
@@ -622,21 +607,17 @@ export default function ConferencePage() {
           )}
         </div>
       );
-    } else if (conference.payments.basic) {
-      // Conference with basic, standard, premium structure
+    } else if (conference?.payments?.basic) {
+
       return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
             title="Basic"
-            priceUsd={conference.payments.basic[attendanceType]?.usd || '0'}
-            priceNaira={conference.payments.basic[attendanceType]?.naira || '0'}
-            features={[
-              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
-              'Conference materials',
-              'Digital certificate'
-            ]}
-            isCurrentPlan={conference.is_registered && conference.current_plan === 'basic'}
-            isRegistered={conference.is_registered}
+            priceUsd={conference?.payments?.basic[attendanceType]?.usd || '0'}
+            priceNaira={conference?.payments?.basic[attendanceType]?.naira || '0'}
+            features={conference?.payments?.basic?.package}
+            isCurrentPlan={conference?.is_registered && conference?.current_plan === 'basic'}
+            isRegistered={conference?.is_registered}
             onClick={() => {
               setSelectedPlan('basic');
               handleRegisterClick();
@@ -644,17 +625,12 @@ export default function ConferencePage() {
             attendanceType={attendanceType}
           />
 
-          {conference.payments.standard && (
+          {conference?.payments?.standard && (
             <PaymentPlanCard
               title="Standard"
-              priceUsd={conference.payments.standard[attendanceType]?.usd || '0'}
-              priceNaira={conference.payments.standard[attendanceType]?.naira || '0'}
-              features={[
-                'Everything in Basic',
-                attendanceType === 'virtual' ? 'Enhanced virtual experience' : 'Physical attendance',
-                attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking',
-                attendanceType === 'physical' ? 'Printed materials' : 'Digital goodies'
-              ]}
+              priceUsd={conference?.payments?.standard[attendanceType]?.usd || '0'}
+              priceNaira={conference?.payments?.standard[attendanceType]?.naira || '0'}
+              features={conference?.payments?.standard?.package}
               isCurrentPlan={conference.is_registered && conference.current_plan === 'standard'}
               isRegistered={conference.is_registered}
               isPopular
@@ -666,19 +642,14 @@ export default function ConferencePage() {
             />
           )}
 
-          {conference.payments.premium && (
+          {conference?.payments?.premium && (
             <PaymentPlanCard
               title="Premium"
-              priceUsd={conference.payments.premium[attendanceType]?.usd || '0'}
-              priceNaira={conference.payments.premium[attendanceType]?.naira || '0'}
-              features={[
-                'Everything in Standard',
-                attendanceType === 'virtual' ? 'VIP virtual lounge' : 'VIP seating',
-                attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner',
-                'Exclusive gifts'
-              ]}
-              isCurrentPlan={conference.is_registered && conference.current_plan === 'premium'}
-              isRegistered={conference.is_registered}
+              priceUsd={conference?.payments?.premium[attendanceType]?.usd || '0'}
+              priceNaira={conference?.payments?.premium[attendanceType]?.naira || '0'}
+              features={conference?.payments?.premium?.package}
+              isCurrentPlan={conference?.is_registered && conference?.current_plan === 'premium'}
+              isRegistered={conference?.is_registered}
               onClick={() => {
                 setSelectedPlan('premium');
                 handleRegisterClick();
@@ -689,7 +660,7 @@ export default function ConferencePage() {
         </div>
       );
     } else {
-      // Fallback for other payment structures
+
       return (
         <div className="text-white">
           <p>Registration information will be available soon.</p>
@@ -729,7 +700,6 @@ export default function ConferencePage() {
 
   return (
     <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
-      {/* Header with Countdown and Button */}
       <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl mx-auto pt-8 md:pt-12 gap-6">
         <div className="w-full md:w-auto">
           {conferenceDate && <CountdownTimer targetDate={conferenceDate} />}
@@ -755,34 +725,33 @@ export default function ConferencePage() {
         )}
       </div>
 
-      {/* Hero Section */}
       <div className="mb-12 mt-8 max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-4 leading-tight text-center">
-          {conference.title}
+          {conference?.title}
         </h1>
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight text-center">
-          {conference.theme}
+          {conference?.theme}
         </h2>
         <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <Calendar className="w-5 h-5" />
-            <span>{conference.date}</span>
+            <span>{conference?.date}</span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <MapPin className="w-5 h-5" />
-            <span>{conference.venue}</span>
+            <span>{conference?.venue}</span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <span
               className={`px-2 py-1 text-xs rounded-full ${
-                conference.status === "Completed"
+                conference?.status === "Completed"
                   ? "bg-red-100 text-red-800"
-                  : conference.status === "Ongoing"
+                  : conference?.status === "Ongoing"
                   ? "bg-green-100 text-green-800"
                   : "bg-blue-100 text-blue-800"
               }`}
             >
-              {conference.status}
+              {conference?.status}
             </span>
           </div>
         </div>
@@ -803,7 +772,7 @@ export default function ConferencePage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {conference.sub_theme.map((theme, index) => (
+                  {conference?.sub_theme.map((theme, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                       <span className="leading-relaxed">{theme}</span>
@@ -819,7 +788,7 @@ export default function ConferencePage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {conference.work_shop.map((workshop, index) => (
+                  {conference?.work_shop.map((workshop, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                       <span className="leading-relaxed">{workshop}</span>
@@ -836,7 +805,7 @@ export default function ConferencePage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-4">
-                {conference.important_date.map((date, index) => (
+                {conference?.important_date.map((date, index) => (
                   <div
                     key={index}
                     className="flex items-start gap-3 bg-white/5 p-4 rounded-lg"
@@ -864,7 +833,7 @@ export default function ConferencePage() {
             <Button 
               className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold mt-6"
               onClick={downloadFlyer}
-              disabled={!conference.flyer}
+              disabled={!conference?.flyer}
             >
               <Download className="w-4 h-4 mr-2" />
               Download Flyer
@@ -872,18 +841,18 @@ export default function ConferencePage() {
           </div>
         </section>
 
-        <GalleryCarousel images={conference.gallery} />
+        <GalleryCarousel images={conference?.gallery} />
 
-        <VideoAdsSection videos={conference.videos} />
+        <VideoAdsSection videos={conference?.videos} />
 
-        <SponsorsSection sponsors={conference.sponsors} />
+        <SponsorsSection sponsors={conference?.sponsors} />
 
         <div className="my-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
             Conference Fees
           </h2>
 
-          {session && conference.is_registered && conference.current_plan && (
+          {session && conference?.is_registered && conference?.current_plan && (
             <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
               <div className="flex items-center gap-3">
                 <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />
@@ -933,22 +902,22 @@ export default function ConferencePage() {
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    {conference.payments.early_bird_registration && (
+                    {conference?.payments?.early_bird_registration && (
                       <SelectItem value="early_bird_registration">Early Bird</SelectItem>
                     )}
-                    {conference.payments.normal_registration && (
+                    {conference?.payments?.normal_registration && (
                       <SelectItem value="normal_registration">Normal</SelectItem>
                     )}
-                    {conference.payments.late_registration && (
+                    {conference?.payments?.late_registration && (
                       <SelectItem value="late_registration">Late</SelectItem>
                     )}
-                    {conference.payments.basic && (
+                    {conference?.payments?.basic && (
                       <SelectItem value="basic">Basic</SelectItem>
                     )}
-                    {conference.payments.standard && (
+                    {conference?.payments?.standard && (
                       <SelectItem value="standard">Standard</SelectItem>
                     )}
-                    {conference.payments.premium && (
+                    {conference?.payments?.premium && (
                       <SelectItem value="premium">Premium</SelectItem>
                     )}
                   </SelectContent>

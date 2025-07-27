@@ -19,7 +19,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-// TypeScript Interfaces
 interface PendingPayment {
   title: string;
   payment_id: string;
@@ -111,12 +110,12 @@ const PaymentPage: React.FC = () => {
     
     try {
       let amount = payment.amount;
-      const selectedPlan = selectedPlans[payment.payment_id];
+      const selectedPlan = selectedPlans[payment?.payment_id];
      
-      if (payment.sub_payments && typeof payment.sub_payments === 'object' &&
-          Object.keys(payment.sub_payments).length > 0 && selectedPlan) {
-        if (typeof payment.sub_payments !== 'undefined' && !Array.isArray(payment.sub_payments)) {
-          amount = payment.sub_payments[selectedPlan];
+      if (payment?.sub_payments && typeof payment?.sub_payments === 'object' &&
+          Object.keys(payment?.sub_payments).length > 0 && selectedPlan) {
+        if (typeof payment?.sub_payments !== 'undefined' && !Array.isArray(payment?.sub_payments)) {
+          amount = payment?.sub_payments[selectedPlan];
         }
       }
       
@@ -124,17 +123,17 @@ const PaymentPage: React.FC = () => {
      
       const config: FlutterwaveConfig = {
         public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || '',
-        tx_ref: `${payment.payment_id}-${Date.now()}`,
+        tx_ref: `${payment?.payment_id}-${Date.now()}`,
         amount: amount,
-        currency: payment.currency,
+        currency: payment?.currency,
         customer: {
-          email: userData.email || session.user.email || '',
-          name: userData.name || 'User',
-          phone_number: userData.phone || '0000000000',
+          email: userData?.email || session?.user?.email || '',
+          name: userData?.name || 'User',
+          phone_number: userData?.phone || '0000000000',
         },
         customizations: {
-          title: payment.title,
-          description: `IAIIEA ${payment.title} Payment`,
+          title: payment?.title,
+          description: `IAIIEA ${payment?.title} Payment`,
           logo: '/logo.png',
         },
         payment_options: 'bank_transfer',
@@ -145,19 +144,19 @@ const PaymentPage: React.FC = () => {
       handleFlutterPayment({
         callback: async (response: FlutterWaveResponse) => {
           await handlePaymentCallback(response, payment);
-          setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
+          setProcessingStates(prev => ({ ...prev, [payment?.payment_id]: false }));
         },
         onClose: () => {
           console.log('Payment modal closed');
-          setCanceledPaymentId(payment.payment_id);
+          setCanceledPaymentId(payment?.payment_id);
           setShowCancelDialog(true);
-          setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
+          setProcessingStates(prev => ({ ...prev, [payment?.payment_id]: false }));
         },
       });
     } catch (error) {
       console.error('Payment initiation error:', error);
       showToast.error('Payment initiation failed');
-      setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
+      setProcessingStates(prev => ({ ...prev, [payment?.payment_id]: false }));
     }
   };
   
@@ -175,9 +174,9 @@ const PaymentPage: React.FC = () => {
       const amountPaid = transaction.amount;
       let selectedPlan = '';
      
-      if (payment.sub_payments && typeof payment.sub_payments === 'object' &&
+      if (payment?.sub_payments && typeof payment?.sub_payments === 'object' &&
           Object.keys(payment.sub_payments).length > 0) {
-        selectedPlan = selectedPlans[payment.payment_id] || '';
+        selectedPlan = selectedPlans[payment?.payment_id] || '';
       }
       
       const confirmPayload = {
@@ -263,15 +262,15 @@ const PaymentPage: React.FC = () => {
                                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                                   <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                      <h3 className="text-lg font-semibold text-gray-900">{payment.title}</h3>
+                                      <h3 className="text-lg font-semibold text-gray-900">{payment?.title}</h3>
                                       <Badge variant="outline" className="text-xs">
-                                        {payment.currency}
+                                        {payment?.currency}
                                       </Badge>
                                     </div>
                                     <p className="text-2xl font-bold text-primary">
                                       {hasSubPayments && selectedPlans[payment.payment_id] 
-                                        ? formatAmount((payment.sub_payments as Record<string, number>)[selectedPlans[payment.payment_id]], payment.currency)
-                                        : formatAmount(payment.amount, payment.currency)
+                                        ? formatAmount((payment?.sub_payments as Record<string, number>)[selectedPlans[payment?.payment_id]], payment.currency)
+                                        : formatAmount(payment?.amount, payment.currency)
                                       }
                                     </p>
                                     <p className="text-sm text-gray-500">Payment ID: {payment.payment_id}</p>
@@ -281,18 +280,18 @@ const PaymentPage: React.FC = () => {
                                     {hasSubPayments && (
                                       <Select
                                         onValueChange={(value: string) => 
-                                          setSelectedPlans(prev => ({ ...prev, [payment.payment_id]: value }))
+                                          setSelectedPlans(prev => ({ ...prev, [payment?.payment_id]: value }))
                                         }
-                                        defaultValue={Object.keys(payment.sub_payments)[0]}
-                                        value={selectedPlans[payment.payment_id]}
+                                        defaultValue={Object.keys(payment?.sub_payments)[0]}
+                                        value={selectedPlans[payment?.payment_id]}
                                       >
                                         <SelectTrigger className="w-[200px]">
                                           <SelectValue placeholder="Select plan" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {Object.entries(payment.sub_payments).map(([planName, planAmount]) => (
+                                          {Object.entries(payment?.sub_payments).map(([planName, planAmount]) => (
                                             <SelectItem key={planName} value={planName}>
-                                              {planName} ({formatAmount(planAmount, payment.currency)})
+                                              {planName} ({formatAmount(planAmount, payment?.currency)})
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
@@ -317,7 +316,7 @@ const PaymentPage: React.FC = () => {
                                     <Button
                                       variant="destructive"
                                       onClick={() => {
-                                        setCanceledPaymentId(payment.payment_id);
+                                        setCanceledPaymentId(payment?.payment_id);
                                         setShowCancelDialog(true);
                                       }}
                                       className="w-full sm:w-auto"
@@ -360,7 +359,6 @@ const PaymentPage: React.FC = () => {
     );
   }
 
-  // ... (keep the rest of your existing code, including PaymentCard component)
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -398,13 +396,13 @@ const PaymentPage: React.FC = () => {
               Pending Payments
             </AlertTitle>
             <AlertDescription>
-              You have {pendingPayments.length} pending payment{pendingPayments.length > 1 ? 's' : ''} to complete.
+              You have {pendingPayments?.length} pending payment{pendingPayments?.length > 1 ? 's' : ''} to complete.
             </AlertDescription>
           </Alert>
           
           <div className="space-y-4">
-            {pendingPayments.map((payment) => (
-              <PaymentCard key={payment.payment_id} payment={payment} />
+            {pendingPayments?.map((payment) => (
+              <PaymentCard key={payment?.payment_id} payment={payment} />
             ))}
           </div>
         </>

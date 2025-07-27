@@ -708,7 +708,7 @@ export default function ConferencePage() {
         ) : (
           <Button
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
-            onClick={() => router.push('/auth/signin')}
+            onClick={() => router.push('/login')}
           >
             Sign in to Register
           </Button>

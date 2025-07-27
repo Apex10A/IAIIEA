@@ -10,6 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 
+
 # testing
 /coverage
 
@@ -31,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for commiting if needed)
 .env*
+.ADMIN_DASHBOARD_IMPROVEMENT_PLAN
+.PERFORMANCE_OPTIMIZATION
+.txt
 
 # vercel
 .vercel

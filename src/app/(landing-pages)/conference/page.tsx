@@ -788,16 +788,15 @@ export default function ConferencePage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="space-y-16 max-w-7xl mx-auto">
-        {/* Overview Section */}
+
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Overview
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Sub-themes */}
+
             <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
               <CardHeader>
                 <CardTitle className="text-[#D5B93C]">Sub-themes</CardTitle>
@@ -814,7 +813,6 @@ export default function ConferencePage() {
               </CardContent>
             </Card>
 
-            {/* Workshops */}
             <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
               <CardHeader>
                 <CardTitle className="text-[#D5B93C]">Workshops</CardTitle>
@@ -832,7 +830,6 @@ export default function ConferencePage() {
             </Card>
           </div>
 
-          {/* Important Dates */}
           <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors mt-8">
             <CardHeader>
               <CardTitle className="text-[#D5B93C]">Important Dates</CardTitle>
@@ -852,8 +849,6 @@ export default function ConferencePage() {
             </CardContent>
           </Card>
         </section>
-
-        {/* Call for Papers Section */}
         <section className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Call for papers 
@@ -877,22 +872,17 @@ export default function ConferencePage() {
           </div>
         </section>
 
-        {/* Gallery Section */}
         <GalleryCarousel images={conference.gallery} />
 
-        {/* Video Ads Section */}
         <VideoAdsSection videos={conference.videos} />
 
-        {/* Sponsors Section */}
         <SponsorsSection sponsors={conference.sponsors} />
 
-        {/* Conference Fees Section */}
         <div className="my-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
             Conference Fees
           </h2>
 
-          {/* Current Plan Indicator */}
           {session && conference.is_registered && conference.current_plan && (
             <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
               <div className="flex items-center gap-3">
@@ -909,7 +899,6 @@ export default function ConferencePage() {
             </div>
           )}
 
-          {/* Attendance Type Toggle */}
           <div className="flex justify-center mb-8">
             <div className="bg-white/10 p-1 rounded-full">
               <button 
@@ -931,7 +920,6 @@ export default function ConferencePage() {
         </div>
       </div>
 
-      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">

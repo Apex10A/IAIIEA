@@ -537,7 +537,7 @@ export default function ConferencePage() {
     
     const link = document.createElement('a');
     link.href = conference.flyer;
-    link.download = conference.flyer.split('/').pop() || 'conference_flyer.png';
+    link.download = conference?.flyer.split('/').pop() || 'conference_flyer.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -545,22 +545,17 @@ export default function ConferencePage() {
 
   const renderPaymentPlans = () => {
     if (!conference) return null;
-    if (conference.payments.early_bird_registration) {
+    if (conference?.payments?.early_bird_registration) {
 
       return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
             title="Early Bird"
-            priceUsd={conference.payments.early_bird_registration[attendanceType]?.usd || '0'}
-            priceNaira={conference.payments.early_bird_registration[attendanceType]?.naira || '0'}
-            features={[
-              `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
-              'Conference materials',
-              'Digital certificate',
-              'Early bird discount'
-            ]}
-            isCurrentPlan={conference.is_registered && conference.current_plan === 'early_bird_registration'}
-            isRegistered={conference.is_registered}
+            priceUsd={conference?.payments?.early_bird_registration[attendanceType]?.usd || '0'}
+            priceNaira={conference?.payments?.early_bird_registration[attendanceType]?.naira || '0'}
+            features={conference?.payments?.early_bird_registration?.package}
+            isCurrentPlan={conference?.is_registered && conference?.current_plan === 'early_bird_registration'}
+            isRegistered={conference?.is_registered}
             isPopular
             onClick={() => {
               setSelectedPlan('early_bird_registration');
@@ -574,14 +569,9 @@ export default function ConferencePage() {
               title="Normal"
               priceUsd={conference?.payments?.normal_registration[attendanceType]?.usd || '0'}
               priceNaira={conference?.payments?.normal_registration[attendanceType]?.naira || '0'}
-              features={[
-                `${attendanceType === 'virtual' ? 'Virtual' : 'Physical'} access to sessions`,
-                'Conference materials',
-                'Digital certificate',
-                'Standard registration'
-              ]}
-              isCurrentPlan={conference.is_registered && conference.current_plan === 'normal_registration'}
-              isRegistered={conference.is_registered}
+              features={conference?.payments?.normal_registration?.package}
+              isCurrentPlan={conference?.is_registered && conference?.current_plan === 'normal_registration'}
+              isRegistered={conference?.is_registered}
               onClick={() => {
                 setSelectedPlan('normal_registration');
                 handleRegisterClick();

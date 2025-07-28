@@ -408,7 +408,8 @@ const PaymentPlanCard = memo(({
               className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
               onClick={onClick}
             >
-              Register {title}
+               {/* {paymentProcessing ? "Processing..." : "Initiate payment"} */}
+             Initiate {title}
             </button>
           )}
         </div>
@@ -425,8 +426,7 @@ export default function ConferencePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [conferenceDate, setConferenceDate] = useState<Date | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("basic");
+
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
 
@@ -479,24 +479,29 @@ export default function ConferencePage() {
     loadConference();
   }, [loadConference]);
 
-  const handleRegisterClick = useCallback(async () => {
-    if (!conference) return;
+
+
+  const handlePaymentSubmit = useCallback(async (planType: string) => {
+    if (!conference || !session) {
+      showToast.error("Please sign in to register for the conference");
+      return;
+    }
 
     if (conference.status === "Completed") {
       showToast.error("You cannot register for a conference that has been completed");
       return;
     }
 
-    if (conference.is_registered) {
+    if (conference?.is_registered) {
+      showToast.info("You are already registered for this conference");
       router.push("/dashboard");
       return;
     }
 
-    setShowPaymentModal(true);
-  }, [conference, router]);
-
-  const handlePaymentSubmit = useCallback(async () => {
-    if (!conference || !session) return;
+    if (!planType) {
+      showToast.error("Please select a plan to register");
+      return;
+    }
 
     setPaymentProcessing(true);
     try {
@@ -506,11 +511,11 @@ export default function ConferencePage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.user.token}`,
+            Authorization: `Bearer ${session?.user?.token}`,
           },
           body: JSON.stringify({
             id: conference.id,
-            plan: selectedPlan,
+            plan: planType,
             type: attendanceType,
           }),
         }
@@ -527,7 +532,6 @@ export default function ConferencePage() {
         window.location.href = paymentData.data.link;
       } else {
         showToast.success("Payment initiated successfully");
-        setShowPaymentModal(false);
       }
     } catch (err) {
       console.error("Payment error:", err);
@@ -535,7 +539,7 @@ export default function ConferencePage() {
     } finally {
       setPaymentProcessing(false);
     }
-  }, [conference, session, selectedPlan, attendanceType]);
+  }, [conference, session, attendanceType, router]);
 
   const downloadFlyer = useCallback(() => {
     if (!conference?.flyer) return;
@@ -563,8 +567,7 @@ export default function ConferencePage() {
             isRegistered={conference?.is_registered}
             isPopular
             onClick={() => {
-              setSelectedPlan('early_bird_registration');
-              handleRegisterClick();
+              handlePaymentSubmit('early_bird_registration');
             }}
             attendanceType={attendanceType}
           />
@@ -578,8 +581,7 @@ export default function ConferencePage() {
               isCurrentPlan={conference?.is_registered && conference?.current_plan === 'normal_registration'}
               isRegistered={conference?.is_registered}
               onClick={() => {
-                setSelectedPlan('normal_registration');
-                handleRegisterClick();
+                handlePaymentSubmit('normal_registration');
               }}
               attendanceType={attendanceType}
             />
@@ -594,8 +596,7 @@ export default function ConferencePage() {
               isCurrentPlan={conference?.is_registered && conference?.current_plan === 'late_registration'}
               isRegistered={conference?.is_registered}
               onClick={() => {
-                setSelectedPlan('late_registration');
-                handleRegisterClick();
+                handlePaymentSubmit('late_registration');
               }}
               attendanceType={attendanceType}
             />
@@ -614,8 +615,7 @@ export default function ConferencePage() {
             isCurrentPlan={conference?.is_registered && conference?.current_plan === 'basic'}
             isRegistered={conference?.is_registered}
             onClick={() => {
-              setSelectedPlan('basic');
-              handleRegisterClick();
+              handlePaymentSubmit('basic');
             }}
             attendanceType={attendanceType}
           />
@@ -630,8 +630,7 @@ export default function ConferencePage() {
               isRegistered={conference.is_registered}
               isPopular
               onClick={() => {
-                setSelectedPlan('standard');
-                handleRegisterClick();
+                handlePaymentSubmit('standard');
               }}
               attendanceType={attendanceType}
             />
@@ -646,8 +645,7 @@ export default function ConferencePage() {
               isCurrentPlan={conference?.is_registered && conference?.current_plan === 'premium'}
               isRegistered={conference?.is_registered}
               onClick={() => {
-                setSelectedPlan('premium');
-                handleRegisterClick();
+                handlePaymentSubmit('premium');
               }}
               attendanceType={attendanceType}
             />
@@ -662,7 +660,7 @@ export default function ConferencePage() {
         </div>
       );
     }
-  }, [conference, attendanceType, handleRegisterClick, selectedPlan]);
+  }, [conference, attendanceType, handlePaymentSubmit]);
 
   if (loading) {
     return (
@@ -702,7 +700,17 @@ export default function ConferencePage() {
         {session ? (
           <Button
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
-            onClick={handleRegisterClick}
+            onClick={() => {
+              if (conference.is_registered) {
+                router.push("/dashboard");
+              } else {
+                // Scroll to the Conference Fees section
+                const feesSection = document.querySelector('#conference-fees');
+                if (feesSection) {
+                  feesSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }
+            }}
           >
             {conference.is_registered ? (
               "Go to Dashboard"
@@ -842,7 +850,7 @@ export default function ConferencePage() {
 
         <SponsorsSection sponsors={conference?.sponsors} />
 
-        <div className="my-12">
+        <div id="conference-fees" className="my-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
             Conference Fees
           </h2>
@@ -884,10 +892,10 @@ export default function ConferencePage() {
         </div>
       </div>
 
-      {showPaymentModal && (
+      {/* {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Select Payment Plan</h3>
+            <h3 className="text-xl font-bold mb-4">Select which type you want to initiate</h3>
 
             <div className="space-y-4">
               <div>
@@ -948,13 +956,13 @@ export default function ConferencePage() {
                   onClick={handlePaymentSubmit}
                   disabled={paymentProcessing}
                 >
-                  {paymentProcessing ? "Processing..." : "Proceed to Payment"}
+                  {paymentProcessing ? "Processing..." : "Initiate payment"}
                 </Button>
               </div>
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

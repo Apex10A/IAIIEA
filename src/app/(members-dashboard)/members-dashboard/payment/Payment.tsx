@@ -408,7 +408,6 @@ const PaymentPage: React.FC = () => {
         </>
       )}
       
-      {/* Cancel Payment Dialog */}
       <AlertDialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="bg-black/50 fixed inset-0 backdrop-blur-sm" />

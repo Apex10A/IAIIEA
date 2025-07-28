@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import "@/app/index.css";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -103,7 +103,7 @@ interface TimeLeft {
   seconds: number;
 }
 
-const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
+const CountdownTimer = memo(({ targetDate }: { targetDate: Date }) => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
     hours: 0,
@@ -111,24 +111,24 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
     seconds: 0,
   });
 
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const difference = targetDate.getTime() - new Date().getTime();
+  const calculateTimeLeft = useCallback(() => {
+    const difference = targetDate.getTime() - new Date().getTime();
 
-      if (difference <= 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-      }
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
 
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
-        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((difference % (1000 * 60)) / 1000),
-      };
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor(
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      ),
+      minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+      seconds: Math.floor((difference % (1000 * 60)) / 1000),
     };
+  }, [targetDate]);
 
+  useEffect(() => {
     setTimeLeft(calculateTimeLeft());
 
     const timer = setInterval(() => {
@@ -136,7 +136,7 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [calculateTimeLeft]);
 
   return (
     <div className="flex justify-center mb-6 md:mb-0">
@@ -157,10 +157,20 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
       </div>
     </div>
   );
-};
+});
 
-const GalleryCarousel = ({ images }: { images: string[] }) => {
+CountdownTimer.displayName = 'CountdownTimer';
+
+const GalleryCarousel = memo(({ images }: { images: string[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images?.length);
+  }, [images.length]);
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images?.length);
+  }, [images.length]);
 
   if (images.length === 0) {
     return (
@@ -174,14 +184,6 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
       </section>
     );
   }
-
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
 
   return (
     <section className="my-12">
@@ -199,7 +201,7 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
               e.currentTarget.src = "/placeholder.jpg";
             }}
           />
-          {images.length > 1 && (
+          {images?.length > 1 && (
             <>
               <button
                 onClick={goToPrevious}
@@ -218,7 +220,7 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
             </>
           ) }
         </div>
-        {images.length > 1 && (
+        {images?.length > 1 && (
           <div className="flex gap-2 mt-4 overflow-x-auto py-2 justify-center">
             {images.map((img, idx) => (
               <button
@@ -241,10 +243,11 @@ const GalleryCarousel = ({ images }: { images: string[] }) => {
       </div>
     </section>
   );
-};
+});
 
+GalleryCarousel.displayName = 'GalleryCarousel';
 
-const VideoAdsSection = ({ videos }: { videos: string[] }) => {
+const VideoAdsSection = memo(({ videos }: { videos: string[] }) => {
   if (videos.length === 0) return <section className="my-12">
   <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
    Video Ads
@@ -261,13 +264,13 @@ const VideoAdsSection = ({ videos }: { videos: string[] }) => {
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {videos.map((video, index) => (
+        {videos?.map((video, index) => (
           <div key={index} className="bg-white/5 rounded-lg overflow-hidden">
-            <div className="relative pt-[56.25%]"> {/* 16:9 aspect ratio */}
+            <div className="relative pt-[56.25%]">
               <video
                 controls
                 className="absolute top-0 left-0 w-full h-full object-cover"
-                poster="/video-poster.jpg"
+                poster="/placeholder.jpg"
               >
                 <source src={video} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -281,9 +284,9 @@ const VideoAdsSection = ({ videos }: { videos: string[] }) => {
       </div>
     </section>
   );
-};
+});
 
-const SponsorsSection = ({ sponsors }: { sponsors: Sponsor[] }) => {
+const SponsorsSection = memo(({ sponsors }: { sponsors: Sponsor[] }) => {
   if (sponsors.length === 0) return <section className="my-12">
   <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
    Sponsors
@@ -301,32 +304,32 @@ const SponsorsSection = ({ sponsors }: { sponsors: Sponsor[] }) => {
       </h2>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {sponsors.map((sponsor, index) => (
+        {sponsors?.map((sponsor, index) => (
           <div key={index} className="bg-white/5 rounded-lg p-6 flex items-center justify-center">
             <a 
-              href={sponsor.website || '#'} 
+              href={sponsor?.website || '#'} 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex flex-col items-center"
             >
               <img
-                src={sponsor.logo}
-                alt={sponsor.name}
+                src={sponsor?.logo || '/placeholder.jpg'}
+                alt={sponsor?.name}
                 className="h-20 object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.jpg";
-                }}
+                // onError={(e) => {
+                //   e.currentTarget.src = "/placeholder.jpg";
+                // }}
               />
-              <span className="text-white mt-2 text-center">{sponsor.name}</span>
+              <span className="text-white mt-2 text-center">{sponsor?.name}</span>
             </a>
           </div>
         ))}
       </div>
     </section>
   );
-};
+});
 
-const PaymentPlanCard = ({
+const PaymentPlanCard = memo(({
   title,
   priceUsd,
   priceNaira,
@@ -412,7 +415,7 @@ const PaymentPlanCard = ({
       </div>
     </div>
   );
-};
+});
 
 export default function ConferencePage() {
   const { data: session, status } = useSession();
@@ -427,54 +430,56 @@ export default function ConferencePage() {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
 
-  useEffect(() => {
-    const loadConference = async () => {
-      try {
-        setLoading(true);
-        const conferenceId = searchParams.get("id");
+  const conferenceId = useMemo(() => searchParams.get("id"), [searchParams]);
+  const authToken = useMemo(() => session?.user?.token, [session?.user?.token]);
 
-        if (!conferenceId) {
-          throw new Error("No conference ID provided");
-        }
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
-          {
-            headers: session?.user?.token
-              ? {
-                  Authorization: `Bearer ${session.user.token}`,
-                }
-              : {},
-          }
-        );
+  const loadConference = useCallback(async () => {
+    try {
+      setLoading(true);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch conference details");
-        }
-
-        const data = await response.json();
-        if (data.status === "success") {
-          setConference(data.data);
-          const { start_date, start_time } = data.data;
-          const dateTimeString = `${start_date}T${start_time}`;
-          setConferenceDate(new Date(dateTimeString));
-        } else {
-          throw new Error(data.message || "Failed to load conference details");
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to load conference details"
-        );
-      } finally {
-        setLoading(false);
+      if (!conferenceId) {
+        throw new Error("No conference ID provided");
       }
-    };
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${conferenceId}`,
+        {
+          headers: authToken
+            ? {
+                Authorization: `Bearer ${authToken}`,
+              }
+            : {},
+        }
+      );
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch conference details");
+      }
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setConference(data.data);
+        const { start_date, start_time } = data.data;
+        const dateTimeString = `${start_date}T${start_time}`;
+        setConferenceDate(new Date(dateTimeString));
+      } else {
+        throw new Error(data.message || "Failed to load conference details");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to load conference details"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [conferenceId, authToken]);
+
+  useEffect(() => {
     loadConference();
-  }, [session, searchParams]);
+  }, [loadConference]);
 
-  const handleRegisterClick = async () => {
+  const handleRegisterClick = useCallback(async () => {
     if (!conference) return;
 
     if (conference.status === "Completed") {
@@ -488,9 +493,9 @@ export default function ConferencePage() {
     }
 
     setShowPaymentModal(true);
-  };
+  }, [conference, router]);
 
-  const handlePaymentSubmit = async () => {
+  const handlePaymentSubmit = useCallback(async () => {
     if (!conference || !session) return;
 
     setPaymentProcessing(true);
@@ -530,9 +535,9 @@ export default function ConferencePage() {
     } finally {
       setPaymentProcessing(false);
     }
-  };
+  }, [conference, session, selectedPlan, attendanceType]);
 
-  const downloadFlyer = () => {
+  const downloadFlyer = useCallback(() => {
     if (!conference?.flyer) return;
     
     const link = document.createElement('a');
@@ -541,9 +546,9 @@ export default function ConferencePage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, [conference?.flyer]);
 
-  const renderPaymentPlans = () => {
+  const renderPaymentPlans = useMemo(() => {
     if (!conference) return null;
     if (conference?.payments?.early_bird_registration) {
 
@@ -657,7 +662,7 @@ export default function ConferencePage() {
         </div>
       );
     }
-  };
+  }, [conference, attendanceType, handleRegisterClick, selectedPlan]);
 
   if (loading) {
     return (
@@ -875,7 +880,7 @@ export default function ConferencePage() {
             </div>
           </div>
 
-          {renderPaymentPlans()}
+          {renderPaymentPlans}
         </div>
       </div>
 

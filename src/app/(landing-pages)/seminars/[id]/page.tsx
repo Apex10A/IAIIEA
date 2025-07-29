@@ -698,21 +698,21 @@ export default function SeminarPage() {
               seminar?.is_registered && seminar?.current_plan === 'premium' ? 
               'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
             } relative`}>
-              {seminar.is_registered && seminar.current_plan === 'premium' && (
+              {seminar?.is_registered && seminar?.current_plan === 'premium' && (
                 <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
                   ACTIVE ACCESS
                 </div>
               )}
-              <div className={`p-6 ${seminar.is_registered && seminar.current_plan === 'premium' ? 'pt-16' : ''}`}>
+              <div className={`p-6 ${seminar?.is_registered && seminar?.current_plan === 'premium' ? 'pt-16' : ''}`}>
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Premium Access</h3>
                 
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${seminar.payments.premium[attendanceType].usd}
+                      ${seminar?.payments?.premium[attendanceType]?.usd}
                     </p>
                     <p className="text-lg text-gray-700">
-                      {seminar.payments.premium[attendanceType].naira}
+                      {seminar?.payments?.premium[attendanceType]?.naira}
                     </p>
                   </div>
                   
@@ -731,7 +731,7 @@ export default function SeminarPage() {
                         <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                         <span>{attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner'}</span>
                       </li>
-                      {seminar.payments.premium.package?.map((item, i) => (
+                      {seminar?.payments?.premium?.package?.map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
                           <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
@@ -740,8 +740,8 @@ export default function SeminarPage() {
                     </ul>
                   </div>
                   
-                  {seminar.is_registered ? (
-                    seminar.current_plan === 'premium' ? (
+                  {seminar?.is_registered ? (
+                    seminar?.current_plan === 'premium' ? (
                       <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
                         <Check className="w-5 h-5" />
                         <span>Your Active Plan</span>
@@ -772,7 +772,6 @@ export default function SeminarPage() {
         </div>
       </div>
 
-      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">

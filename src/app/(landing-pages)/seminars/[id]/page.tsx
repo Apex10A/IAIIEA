@@ -466,9 +466,9 @@ export default function SeminarPage() {
             Speakers
           </h2>
 
-          {seminar.speakers?.length > 0 ? (
+          {seminar?.speakers?.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {seminar.speakers.map((speaker, index) => (
+              {seminar?.speakers?.map((speaker, index) => (
                 <Card
                   key={index}
                   className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors"
@@ -476,8 +476,8 @@ export default function SeminarPage() {
                   <CardContent className="p-0">
                     <div className="relative h-48 w-full">
                       <img
-                        src={speaker.picture}
-                        alt={speaker.name}
+                        src={speaker?.picture}
+                        alt={speaker?.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.src = "/placeholder.jpg";
@@ -485,12 +485,12 @@ export default function SeminarPage() {
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-1">{speaker.name}</h3>
+                      <h3 className="text-xl font-bold mb-1">{speaker?.name}</h3>
                       <p className="text-[#D5B93C] text-sm mb-2">
-                        {speaker.title}
+                        {speaker?.title}
                       </p>
                       <p className="text-white/70 text-sm">
-                        {speaker.portfolio}
+                        {speaker?.portfolio}
                       </p>
                     </div>
                   </CardContent>
@@ -504,13 +504,10 @@ export default function SeminarPage() {
           )}
         </section>
 
-        {/* Seminar Fees Section */}
         <div className="my-12">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
             Seminar Fees
           </h2>
-
-          {/* Current Plan Indicator */}
           {seminar?.is_registered && seminar?.current_plan && (
             <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
               <div className="flex items-center gap-3">
@@ -518,14 +515,13 @@ export default function SeminarPage() {
                 <div>
                   <p className="font-bold text-white">You're registered for:</p>
                   <p className="text-white">
-                    {seminar.current_plan.charAt(0).toUpperCase() + seminar.current_plan.slice(1)} Access ({attendanceType})
+                    {seminar?.current_plan.charAt(0).toUpperCase() + seminar?.current_plan?.slice(1)} Access ({attendanceType})
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Attendance Type Toggle */}
           <div className="flex justify-center mb-8">
             <div className="bg-white/10 p-1 rounded-full">
               <button 
@@ -544,7 +540,6 @@ export default function SeminarPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Basic Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
               seminar?.is_registered && seminar?.current_plan === 'basic' ? 
               'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
@@ -582,7 +577,7 @@ export default function SeminarPage() {
                         <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                         <span>Digital certificate</span>
                       </li>
-                      {seminar.payments.basic.package?.map((item, i) => (
+                      {seminar?.payments?.basic?.package?.map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
                           <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
@@ -590,9 +585,9 @@ export default function SeminarPage() {
                       ))}
                     </ul>
                   </div>
-                  
-                  {seminar.is_registered ? (
-                    seminar.current_plan === 'basic' ? (
+
+                  {seminar?.is_registered ? (
+                    seminar?.current_plan === 'basic' ? (
                       <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
                         <Check className="w-5 h-5" />
                         <span>Your Active Plan</span>
@@ -619,19 +614,17 @@ export default function SeminarPage() {
                 </div>
               </div>
             </div>
-
-            {/* Standard Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 transform md:-translate-y-2 ${
-              seminar.is_registered && seminar.current_plan === 'standard' ? 
+              seminar?.is_registered && seminar?.current_plan === 'standard' ? 
               'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]'
             } relative`}>
-              {seminar.is_registered && seminar.current_plan === 'standard' && (
+              {seminar?.is_registered && seminar?.current_plan === 'standard' && (
                 <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
                   ACTIVE ACCESS
                 </div>
               )}
-              <div className={`p-6 relative ${seminar.is_registered && seminar.current_plan === 'standard' ? 'pt-16' : ''}`}>
-                {!seminar.is_registered && (
+              <div className={`p-6 relative ${seminar?.is_registered && seminar?.current_plan === 'standard' ? 'pt-16' : ''}`}>
+                {!seminar?.is_registered && (
                   <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
                     POPULAR
                   </div>
@@ -641,10 +634,10 @@ export default function SeminarPage() {
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${seminar.payments.standard[attendanceType].usd}
+                      ${seminar?.payments?.standard[attendanceType]?.usd}
                     </p>
                     <p className="text-lg text-gray-700">
-                      {seminar.payments.standard[attendanceType].naira}
+                      {seminar?.payments?.standard[attendanceType]?.naira}
                     </p>
                   </div>
                   
@@ -672,8 +665,8 @@ export default function SeminarPage() {
                     </ul>
                   </div>
                   
-                  {seminar.is_registered ? (
-                    seminar.current_plan === 'standard' ? (
+                  {seminar?.is_registered ? (
+                    seminar?.current_plan === 'standard' ? (
                       <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
                         <Check className="w-5 h-5" />
                         <span>Your Active Plan</span>
@@ -701,9 +694,8 @@ export default function SeminarPage() {
               </div>
             </div>
 
-            {/* Premium Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
-              seminar.is_registered && seminar.current_plan === 'premium' ? 
+              seminar?.is_registered && seminar?.current_plan === 'premium' ? 
               'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
             } relative`}>
               {seminar.is_registered && seminar.current_plan === 'premium' && (

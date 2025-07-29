@@ -412,7 +412,6 @@ const PaymentPlanCard = memo(({
             <button 
               className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={async () => {
-                console.log("Button clicked, isLoading:", isLoading);
                 setLocalLoading(true);
                 try {
                   await onClick();
@@ -668,6 +667,7 @@ export default function ConferencePage() {
             priceNaira={conference?.payments?.basic[attendanceType]?.naira || '0'}
             features={conference?.payments?.basic?.package}
             isCurrentPlan={conference?.is_registered && conference?.current_plan === 'basic'}
+            paymentProcessing={paymentProcessing}
             isRegistered={conference?.is_registered}
             onClick={() => {
               handlePaymentSubmit('basic');
@@ -682,6 +682,7 @@ export default function ConferencePage() {
               priceNaira={conference?.payments?.standard[attendanceType]?.naira || '0'}
               features={conference?.payments?.standard?.package}
               isCurrentPlan={conference.is_registered && conference.current_plan === 'standard'}
+              paymentProcessing={paymentProcessing}
               isRegistered={conference.is_registered}
               isPopular
               onClick={() => {
@@ -698,6 +699,7 @@ export default function ConferencePage() {
               priceNaira={conference?.payments?.premium[attendanceType]?.naira || '0'}
               features={conference?.payments?.premium?.package}
               isCurrentPlan={conference?.is_registered && conference?.current_plan === 'premium'}
+              paymentProcessing={paymentProcessing}
               isRegistered={conference?.is_registered}
               onClick={() => {
                 handlePaymentSubmit('premium');
@@ -715,7 +717,7 @@ export default function ConferencePage() {
         </div>
       );
     }
-  }, [conference, attendanceType, handlePaymentSubmit]);
+  }, [conference, attendanceType, handlePaymentSubmit, paymentProcessing]);
 
   if (loading) {
     return (

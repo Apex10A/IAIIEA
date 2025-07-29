@@ -102,6 +102,15 @@ interface TimeLeft {
   minutes: number;
   seconds: number;
 }
+interface GalleryTpe {
+  title: string;
+  description: string;
+}
+// const gallery: GalleryType[]  {
+//   { title: "Gallery", description: "A collection of images from past conferences." },
+//   { title: "Videos", description: "Promotional videos and highlights from the conference." },
+//   { title: "Sponsors", description: "Our esteemed sponsors who support the conference." },
+// }
 
 const CountdownTimer = memo(({ targetDate }: { targetDate: Date }) => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
@@ -159,7 +168,7 @@ const CountdownTimer = memo(({ targetDate }: { targetDate: Date }) => {
   );
 });
 
-CountdownTimer.displayName = 'CountdownTimer';
+CountdownTimer.displayName = "CountdownTimer";
 
 const GalleryCarousel = memo(({ images }: { images: string[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -190,7 +199,7 @@ const GalleryCarousel = memo(({ images }: { images: string[] }) => {
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
         Gallery
       </h2>
-      
+
       <div className="relative group">
         <div className="relative h-64 md:h-96 w-full max-w-4xl mx-auto rounded-lg overflow-hidden">
           <img
@@ -218,7 +227,7 @@ const GalleryCarousel = memo(({ images }: { images: string[] }) => {
                 <ChevronRight className="w-6 h-6 text-white" />
               </button>
             </>
-          ) }
+          )}
         </div>
         {images?.length > 1 && (
           <div className="flex gap-2 mt-4 overflow-x-auto py-2 justify-center">
@@ -226,7 +235,11 @@ const GalleryCarousel = memo(({ images }: { images: string[] }) => {
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden transition-all ${idx === currentIndex ? 'ring-2 ring-[#D5B93C]' : 'opacity-70 hover:opacity-100'}`}
+                className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden transition-all ${
+                  idx === currentIndex
+                    ? "ring-2 ring-[#D5B93C]"
+                    : "opacity-70 hover:opacity-100"
+                }`}
               >
                 <img
                   src={img}
@@ -245,24 +258,27 @@ const GalleryCarousel = memo(({ images }: { images: string[] }) => {
   );
 });
 
-GalleryCarousel.displayName = 'GalleryCarousel';
+GalleryCarousel.displayName = "GalleryCarousel";
 
 const VideoAdsSection = memo(({ videos }: { videos: string[] }) => {
-  if (videos.length === 0) return <section className="my-12">
-  <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-   Video Ads
-  </h2>
-  <div className="bg-white/5 rounded-lg p-8 text-center">
-    <p className="text-white/70">No Video Ads available yet</p>
-  </div>
-</section>;
+  if (videos.length === 0)
+    return (
+      <section className="my-12">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+          Video Ads
+        </h2>
+        <div className="bg-white/5 rounded-lg p-8 text-center">
+          <p className="text-white/70">No Video Ads available yet</p>
+        </div>
+      </section>
+    );
 
   return (
     <section className="my-12">
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
         Video Ads
       </h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {videos?.map((video, index) => (
           <div key={index} className="bg-white/5 rounded-lg overflow-hidden">
@@ -277,7 +293,9 @@ const VideoAdsSection = memo(({ videos }: { videos: string[] }) => {
               </video>
             </div>
             <div className="p-4">
-              <h3 className="text-white font-medium">Promotional Video {index + 1}</h3>
+              <h3 className="text-white font-medium">
+                Promotional Video {index + 1}
+              </h3>
             </div>
           </div>
         ))}
@@ -287,40 +305,46 @@ const VideoAdsSection = memo(({ videos }: { videos: string[] }) => {
 });
 
 const SponsorsSection = memo(({ sponsors }: { sponsors: Sponsor[] }) => {
-  if (sponsors.length === 0) return <section className="my-12">
-  <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-   Sponsors
-  </h2>
-  <div className="bg-white/5 rounded-lg p-8 text-center">
-    <p className="text-white/70">No Sponsors available yet</p>
-  </div>
-</section>;
-;
-
+  if (sponsors.length === 0)
+    return (
+      <section className="my-12">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+          Sponsors
+        </h2>
+        <div className="bg-white/5 rounded-lg p-8 text-center">
+          <p className="text-white/70">No Sponsors available yet</p>
+        </div>
+      </section>
+    );
   return (
     <section className="my-12">
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
         Sponsors
       </h2>
-      
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {sponsors?.map((sponsor, index) => (
-          <div key={index} className="bg-white/5 rounded-lg p-6 flex items-center justify-center">
-            <a 
-              href={sponsor?.website || '#'} 
-              target="_blank" 
+          <div
+            key={index}
+            className="bg-white/5 rounded-lg p-6 flex items-center justify-center"
+          >
+            <a
+              href={sponsor?.website || "#"}
+              target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center"
             >
               <img
-                src={sponsor?.logo || '/placeholder.jpg'}
+                src={sponsor?.logo || "/placeholder.jpg"}
                 alt={sponsor?.name}
                 className="h-20 object-contain"
                 // onError={(e) => {
                 //   e.currentTarget.src = "/placeholder.jpg";
                 // }}
               />
-              <span className="text-white mt-2 text-center">{sponsor?.name}</span>
+              <span className="text-white mt-2 text-center">
+                {sponsor?.name}
+              </span>
             </a>
           </div>
         ))}
@@ -329,94 +353,133 @@ const SponsorsSection = memo(({ sponsors }: { sponsors: Sponsor[] }) => {
   );
 });
 
-const PaymentPlanCard = memo(({
-  title,
-  priceUsd,
-  priceNaira,
-  features,
-  isCurrentPlan,
-  isRegistered,
-  isPopular = false,
-  onClick,
-  attendanceType,
-}: {
-  title: string;
-  priceUsd: string;
-  priceNaira: string;
-  features: string[];
-  isCurrentPlan: boolean;
-  isRegistered: boolean;
-  isPopular?: boolean;
-  onClick: () => void;
-  attendanceType: 'virtual' | 'physical';
-}) => {
-  return (
-    <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
-      isCurrentPlan ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : isPopular ? 'border-[#D5B93C]' : 'border-[#D5B93C]/30'
-    } ${isPopular ? 'transform md:-translate-y-2' : ''} relative`}>
-      {isCurrentPlan && (
-        <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
-          ACTIVE ACCESS
-        </div>
-      )}
-      <div className={`p-6 relative ${isCurrentPlan ? 'pt-16' : ''}`}>
-        {/* {isPopular && !isRegistered && !isCurrentPlan && (
+const PaymentPlanCard = memo(
+  ({
+    title,
+    priceUsd,
+    priceNaira,
+    features,
+    isCurrentPlan,
+    paymentProcessing,
+    isRegistered,
+    isPopular = false,
+    onClick,
+    attendanceType,
+  }: {
+    title: string;
+    priceUsd: string;
+    priceNaira: string;
+    features: string[];
+    isCurrentPlan: boolean;
+    paymentProcessing?: boolean;
+    isRegistered: boolean;
+    isPopular?: boolean;
+    onClick: () => void;
+    attendanceType: "virtual" | "physical";
+  }) => {
+    // const [localLoading, setLocalLoading] = useState(false);
+    const isLoading = paymentProcessing;
+    return (
+      <div
+        className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+          isCurrentPlan
+            ? "border-[#D5B93C] ring-4 ring-[#D5B93C]/30"
+            : isPopular
+            ? "border-[#D5B93C]"
+            : "border-[#D5B93C]/30"
+        } ${isPopular ? "transform md:-translate-y-2" : ""} relative`}
+      >
+        {isCurrentPlan && (
+          <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+            ACTIVE ACCESS
+          </div>
+        )}
+        <div className={`p-6 relative ${isCurrentPlan ? "pt-16" : ""}`}>
+          {/* {isPopular && !isRegistered && !isCurrentPlan && (
           <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
             POPULAR
           </div>
         )} */}
-        <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">{title}</h3>
-        
-        <div className="space-y-4">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-[#0E1A3D]">
-              ${priceUsd}
-            </p>
-            <p className="text-lg text-gray-700">
-              {priceNaira}
-            </p>
-          </div>
-          
-          <div className="pt-2">
-            <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
-            <ul className="space-y-2 text-sm text-gray-700">
-              {features?.map((feature, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          {isRegistered ? (
-            isCurrentPlan ? (
-              <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
-                <Check className="w-5 h-5" />
-                <span>Your Active Plan</span>
-              </div>
+          <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">{title}</h3>
+
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-[#0E1A3D]">${priceUsd}</p>
+              <p className="text-lg text-gray-700">{priceNaira}</p>
+            </div>
+
+            <div className="pt-2">
+              <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+              <ul className="space-y-2 text-sm text-gray-700">
+                {features?.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {isRegistered ? (
+              isCurrentPlan ? (
+                <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                  <Check className="w-5 h-5" />
+                  <span>Your Active Plan</span>
+                </div>
+              ) : (
+                <button
+                  className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
+                  disabled
+                >
+                  Already Registered
+                </button>
+              )
             ) : (
-              <button 
-                className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
-                disabled
+              <button
+                className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={async () => {
+                 
+                 
+                  try {
+                    await onClick();
+                  } finally {
+             
+                  }
+                }}
+                disabled={isLoading}
               >
-                Already Registered
+                 {isLoading ? "Processing..." : `Initiate ${title}`}
+                {/* {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  {isLoading ? "Processing..." : `Initiate ${title}`}
+                )} */}
               </button>
-            )
-          ) : (
-            <button 
-              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-              onClick={onClick}
-            >
-               {/* {paymentProcessing ? "Processing..." : "Initiate payment"} */}
-             Initiate {title}
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default function ConferencePage() {
   const { data: session, status } = useSession();
@@ -428,7 +491,9 @@ export default function ConferencePage() {
   const [conferenceDate, setConferenceDate] = useState<Date | null>(null);
 
   const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
+  const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">(
+    "virtual"
+  );
 
   const conferenceId = useMemo(() => searchParams.get("id"), [searchParams]);
   const authToken = useMemo(() => session?.user?.token, [session?.user?.token]);
@@ -466,9 +531,7 @@ export default function ConferencePage() {
       }
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load conference details"
+        err instanceof Error ? err.message : "Failed to load conference details"
       );
     } finally {
       setLoading(false);
@@ -479,74 +542,95 @@ export default function ConferencePage() {
     loadConference();
   }, [loadConference]);
 
+  const handlePaymentSubmit = useCallback(
+    async (planType: string) => {
+      if (!conference || !session) {
+        showToast.error("Please sign in to register for the conference");
+        return;
+      }
 
+      if (conference.status === "Completed") {
+        showToast.error(
+          "You cannot register for a conference that has been completed"
+        );
+        return;
+      }
 
-  const handlePaymentSubmit = useCallback(async (planType: string) => {
-    if (!conference || !session) {
-      showToast.error("Please sign in to register for the conference");
-      return;
-    }
+      if (conference?.is_registered) {
+        showToast.info("You are already registered for this conference");
+        router.push("/dashboard");
+        return;
+      }
 
-    if (conference.status === "Completed") {
-      showToast.error("You cannot register for a conference that has been completed");
-      return;
-    }
+      if (!planType) {
+        showToast.error("Please select a plan to register");
+        return;
+      }
 
-    if (conference?.is_registered) {
-      showToast.info("You are already registered for this conference");
-      router.push("/dashboard");
-      return;
-    }
+      console.log("Setting paymentProcessing to true");
+      setPaymentProcessing(true);
 
-    if (!planType) {
-      showToast.error("Please select a plan to register");
-      return;
-    }
+      // Add a minimum loading time to show the loading state
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-    setPaymentProcessing(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.user?.token}`,
-          },
-          body: JSON.stringify({
-            id: conference.id,
-            plan: planType,
-            type: attendanceType,
-          }),
+      try {
+        console.log("Making API call...");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.user?.token}`,
+            },
+            body: JSON.stringify({
+              id: conference?.id,
+              plan: planType,
+              type: attendanceType,
+            }),
+          }
+        );
+
+        console.log("API response status:", response.status);
+
+        if (!response.ok) {
+          console.log("API call failed with status:", response.status);
+          throw new Error("Failed to initiate payment");
         }
-      );
 
-      if (!response.ok) {
-        throw new Error("Failed to initiate payment");
+        const paymentData = await response.json();
+        console.log("Payment data received:", paymentData);
+
+        if (paymentData?.status === "success" && paymentData?.data?.link) {
+          console.log("Redirecting to payment gateway...");
+          // Add a delay before redirect to show loading state
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          // Redirect to payment gateway
+          window.location.href = paymentData?.data?.link;
+        } else {
+          console.log("Payment initiated without redirect");
+          // Add a small delay to show loading state even for non-redirect success
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          showToast.success("Payment initiated successfully");
+        }
+      } catch (err) {
+        console.error("Payment error:", err);
+        showToast.error("Failed to initiate payment");
+      } finally {
+        console.log("Setting paymentProcessing to false");
+        setPaymentProcessing(false);
       }
-
-      const paymentData = await response.json();
-
-      if (paymentData.status === "success" && paymentData.data.link) {
-        // Redirect to payment gateway
-        window.location.href = paymentData.data.link;
-      } else {
-        showToast.success("Payment initiated successfully");
-      }
-    } catch (err) {
-      console.error("Payment error:", err);
-      showToast.error("Failed to initiate payment");
-    } finally {
-      setPaymentProcessing(false);
-    }
-  }, [conference, session, attendanceType, router]);
+    },
+    [conference, session, attendanceType, router]
+  );
 
   const downloadFlyer = useCallback(() => {
     if (!conference?.flyer) return;
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = conference.flyer;
-    link.download = conference?.flyer.split('/').pop() || 'conference_flyer.png';
+    link.download =
+      conference?.flyer.split("/").pop() || "conference_flyer.png";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -555,19 +639,28 @@ export default function ConferencePage() {
   const renderPaymentPlans = useMemo(() => {
     if (!conference) return null;
     if (conference?.payments?.early_bird_registration) {
-
       return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
             title="Early Bird"
-            priceUsd={conference?.payments?.early_bird_registration[attendanceType]?.usd || '0'}
-            priceNaira={conference?.payments?.early_bird_registration[attendanceType]?.naira || '0'}
+            priceUsd={
+              conference?.payments?.early_bird_registration[attendanceType]
+                ?.usd || "0"
+            }
+            priceNaira={
+              conference?.payments?.early_bird_registration[attendanceType]
+                ?.naira || "0"
+            }
             features={conference?.payments?.early_bird_registration?.package}
-            isCurrentPlan={conference?.is_registered && conference?.current_plan === 'early_bird_registration'}
+            isCurrentPlan={
+              conference?.is_registered &&
+              conference?.current_plan === "early_bird_registration"
+            }
+            paymentProcessing={paymentProcessing}
             isRegistered={conference?.is_registered}
             isPopular
             onClick={() => {
-              handlePaymentSubmit('early_bird_registration');
+              handlePaymentSubmit("early_bird_registration");
             }}
             attendanceType={attendanceType}
           />
@@ -575,13 +668,23 @@ export default function ConferencePage() {
           {conference?.payments?.normal_registration && (
             <PaymentPlanCard
               title="Normal"
-              priceUsd={conference?.payments?.normal_registration[attendanceType]?.usd || '0'}
-              priceNaira={conference?.payments?.normal_registration[attendanceType]?.naira || '0'}
+              priceUsd={
+                conference?.payments?.normal_registration[attendanceType]
+                  ?.usd || "0"
+              }
+              priceNaira={
+                conference?.payments?.normal_registration[attendanceType]
+                  ?.naira || "0"
+              }
               features={conference?.payments?.normal_registration?.package}
-              isCurrentPlan={conference?.is_registered && conference?.current_plan === 'normal_registration'}
+              isCurrentPlan={
+                conference?.is_registered &&
+                conference?.current_plan === "normal_registration"
+              }
+              paymentProcessing={paymentProcessing}
               isRegistered={conference?.is_registered}
               onClick={() => {
-                handlePaymentSubmit('normal_registration');
+                handlePaymentSubmit("normal_registration");
               }}
               attendanceType={attendanceType}
             />
@@ -590,13 +693,23 @@ export default function ConferencePage() {
           {conference?.payments?.late_registration && (
             <PaymentPlanCard
               title="Late"
-              priceUsd={conference?.payments?.late_registration[attendanceType]?.usd || '0'}
-              priceNaira={conference?.payments?.late_registration[attendanceType]?.naira || '0'}
+              priceUsd={
+                conference?.payments?.late_registration[attendanceType]?.usd ||
+                "0"
+              }
+              priceNaira={
+                conference?.payments?.late_registration[attendanceType]
+                  ?.naira || "0"
+              }
               features={conference?.payments?.late_registration?.package}
-              isCurrentPlan={conference?.is_registered && conference?.current_plan === 'late_registration'}
+              isCurrentPlan={
+                conference?.is_registered &&
+                conference?.current_plan === "late_registration"
+              }
+              paymentProcessing={paymentProcessing}
               isRegistered={conference?.is_registered}
               onClick={() => {
-                handlePaymentSubmit('late_registration');
+                handlePaymentSubmit("late_registration");
               }}
               attendanceType={attendanceType}
             />
@@ -604,18 +717,22 @@ export default function ConferencePage() {
         </div>
       );
     } else if (conference?.payments?.basic) {
-
       return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PaymentPlanCard
             title="Basic"
-            priceUsd={conference?.payments?.basic[attendanceType]?.usd || '0'}
-            priceNaira={conference?.payments?.basic[attendanceType]?.naira || '0'}
+            priceUsd={conference?.payments?.basic[attendanceType]?.usd || "0"}
+            priceNaira={
+              conference?.payments?.basic[attendanceType]?.naira || "0"
+            }
             features={conference?.payments?.basic?.package}
-            isCurrentPlan={conference?.is_registered && conference?.current_plan === 'basic'}
+            isCurrentPlan={
+              conference?.is_registered && conference?.current_plan === "basic"
+            }
+            paymentProcessing={paymentProcessing}
             isRegistered={conference?.is_registered}
             onClick={() => {
-              handlePaymentSubmit('basic');
+              handlePaymentSubmit("basic");
             }}
             attendanceType={attendanceType}
           />
@@ -623,14 +740,22 @@ export default function ConferencePage() {
           {conference?.payments?.standard && (
             <PaymentPlanCard
               title="Standard"
-              priceUsd={conference?.payments?.standard[attendanceType]?.usd || '0'}
-              priceNaira={conference?.payments?.standard[attendanceType]?.naira || '0'}
+              priceUsd={
+                conference?.payments?.standard[attendanceType]?.usd || "0"
+              }
+              priceNaira={
+                conference?.payments?.standard[attendanceType]?.naira || "0"
+              }
               features={conference?.payments?.standard?.package}
-              isCurrentPlan={conference.is_registered && conference.current_plan === 'standard'}
+              isCurrentPlan={
+                conference.is_registered &&
+                conference.current_plan === "standard"
+              }
+              paymentProcessing={paymentProcessing}
               isRegistered={conference.is_registered}
               isPopular
               onClick={() => {
-                handlePaymentSubmit('standard');
+                handlePaymentSubmit("standard");
               }}
               attendanceType={attendanceType}
             />
@@ -639,13 +764,21 @@ export default function ConferencePage() {
           {conference?.payments?.premium && (
             <PaymentPlanCard
               title="Premium"
-              priceUsd={conference?.payments?.premium[attendanceType]?.usd || '0'}
-              priceNaira={conference?.payments?.premium[attendanceType]?.naira || '0'}
+              priceUsd={
+                conference?.payments?.premium[attendanceType]?.usd || "0"
+              }
+              priceNaira={
+                conference?.payments?.premium[attendanceType]?.naira || "0"
+              }
               features={conference?.payments?.premium?.package}
-              isCurrentPlan={conference?.is_registered && conference?.current_plan === 'premium'}
+              isCurrentPlan={
+                conference?.is_registered &&
+                conference?.current_plan === "premium"
+              }
+              paymentProcessing={paymentProcessing}
               isRegistered={conference?.is_registered}
               onClick={() => {
-                handlePaymentSubmit('premium');
+                handlePaymentSubmit("premium");
               }}
               attendanceType={attendanceType}
             />
@@ -653,7 +786,6 @@ export default function ConferencePage() {
         </div>
       );
     } else {
-
       return (
         <div className="text-white">
           <p>Registration information will be available soon.</p>
@@ -705,23 +837,19 @@ export default function ConferencePage() {
                 router.push("/dashboard");
               } else {
                 // Scroll to the Conference Fees section
-                const feesSection = document.querySelector('#conference-fees');
+                const feesSection = document.querySelector("#conference-fees");
                 if (feesSection) {
-                  feesSection.scrollIntoView({ behavior: 'smooth' });
+                  feesSection.scrollIntoView({ behavior: "smooth" });
                 }
               }
             }}
           >
-            {conference.is_registered ? (
-              "Go to Dashboard"
-            ) : (
-              "Register Now"
-            )}
+            {conference.is_registered ? "Go to Dashboard" : "Register Now"}
           </Button>
         ) : (
           <Button
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
-            onClick={() => router.push('/login')}
+            onClick={() => router.push("/login")}
           >
             Sign in to Register
           </Button>
@@ -761,14 +889,12 @@ export default function ConferencePage() {
       </div>
 
       <div className="space-y-16 max-w-7xl mx-auto">
-
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Overview
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
               <CardHeader>
                 <CardTitle className="text-[#D5B93C]">Sub-themes</CardTitle>
@@ -823,17 +949,24 @@ export default function ConferencePage() {
         </section>
         <section className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-            Call for papers 
+            Call for papers
           </h2>
           <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 md:p-8">
             <p className="text-white text-base md:text-lg leading-relaxed">
-              We invite submissions for IAIIEA conference 2024. We seek innovative
-              research and insights on a topic which aligns with the conference
-              theme. Please <a href="https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1" className='underline font-bold text-[#D5B93C]'>submit</a> your abstract by [deadline] to
-              iaiiea2024@iaiiea.org. The paper should, specifically, address
-              issues outlined in the associated sub-themes.
+              We invite submissions for IAIIEA conference 2024. We seek
+              innovative research and insights on a topic which aligns with the
+              conference theme. Please{" "}
+              <a
+                href="https://journal.iaiiea.org/jiea/login?source=%2Fjiea%2Fissue%2Fview%2F1"
+                className="underline font-bold text-[#D5B93C]"
+              >
+                submit
+              </a>{" "}
+              your abstract by [deadline] to iaiiea2024@iaiiea.org. The paper
+              should, specifically, address issues outlined in the associated
+              sub-themes.
             </p>
-            <Button 
+            <Button
               className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold mt-6"
               onClick={downloadFlyer}
               disabled={!conference?.flyer}
@@ -862,9 +995,13 @@ export default function ConferencePage() {
                 <div>
                   <p className="font-bold text-white">You're registered for:</p>
                   <p className="text-white">
-                    {conference.current_plan.split('_').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                    ).join(' ')} Access ({attendanceType})
+                    {conference.current_plan
+                      .split("_")
+                      .map(
+                        (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                      )
+                      .join(" ")}{" "}
+                    Access ({attendanceType})
                   </p>
                 </div>
               </div>
@@ -873,15 +1010,23 @@ export default function ConferencePage() {
 
           <div className="flex justify-center mb-8">
             <div className="bg-white/10 p-1 rounded-full">
-              <button 
-                className={`px-4 py-2 rounded-full ${attendanceType === 'virtual' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
-                onClick={() => setAttendanceType('virtual')}
+              <button
+                className={`px-4 py-2 rounded-full ${
+                  attendanceType === "virtual"
+                    ? "bg-[#D5B93C] text-[#0E1A3D]"
+                    : "text-white"
+                } font-medium`}
+                onClick={() => setAttendanceType("virtual")}
               >
                 Virtual
               </button>
-              <button 
-                className={`px-4 py-2 rounded-full ${attendanceType === 'physical' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
-                onClick={() => setAttendanceType('physical')}
+              <button
+                className={`px-4 py-2 rounded-full ${
+                  attendanceType === "physical"
+                    ? "bg-[#D5B93C] text-[#0E1A3D]"
+                    : "text-white"
+                } font-medium`}
+                onClick={() => setAttendanceType("physical")}
               >
                 Physical
               </button>

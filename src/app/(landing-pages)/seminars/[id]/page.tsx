@@ -153,7 +153,7 @@ const Carousel = ({
   return (
     <div className="relative group">
       <div className="flex items-center justify-center">
-        {showArrows && items.length > 1 && (
+        {showArrows && items?.length > 1 && (
           <>
             <button
               onClick={goToPrevious}
@@ -511,7 +511,7 @@ export default function SeminarPage() {
           </h2>
 
           {/* Current Plan Indicator */}
-          {seminar.is_registered && seminar.current_plan && (
+          {seminar?.is_registered && seminar?.current_plan && (
             <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
               <div className="flex items-center gap-3">
                 <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />
@@ -546,24 +546,24 @@ export default function SeminarPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Basic Access */}
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
-              seminar.is_registered && seminar.current_plan === 'basic' ? 
+              seminar?.is_registered && seminar?.current_plan === 'basic' ? 
               'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
             } relative`}>
-              {seminar.is_registered && seminar.current_plan === 'basic' && (
+              {seminar?.is_registered && seminar?.current_plan === 'basic' && (
                 <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
                   ACTIVE ACCESS
                 </div>
               )}
-              <div className={`p-6 ${seminar.is_registered && seminar.current_plan === 'basic' ? 'pt-16' : ''}`}>
+              <div className={`p-6 ${seminar?.is_registered && seminar?.current_plan === 'basic' ? 'pt-16' : ''}`}>
                 <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
                 
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${seminar.payments.basic[attendanceType].usd}
+                      ${seminar?.payments?.basic[attendanceType]?.usd}
                     </p>
                     <p className="text-lg text-gray-700">
-                      {seminar.payments.basic[attendanceType].naira}
+                      {seminar?.payments?.basic[attendanceType]?.naira}
                     </p>
                   </div>
                   

@@ -335,6 +335,7 @@ const PaymentPlanCard = memo(({
   priceNaira,
   features,
   isCurrentPlan,
+  paymentProcessing,
   isRegistered,
   isPopular = false,
   onClick,
@@ -345,11 +346,15 @@ const PaymentPlanCard = memo(({
   priceNaira: string;
   features: string[];
   isCurrentPlan: boolean;
+  paymentProcessing?: boolean;
   isRegistered: boolean;
   isPopular?: boolean;
   onClick: () => void;
   attendanceType: 'virtual' | 'physical';
 }) => {
+  const [localLoading, setLocalLoading] = useState(false);
+  const isLoading = paymentProcessing || localLoading;
+
   return (
     <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
       isCurrentPlan ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : isPopular ? 'border-[#D5B93C]' : 'border-[#D5B93C]/30'
@@ -405,11 +410,41 @@ const PaymentPlanCard = memo(({
             )
           ) : (
             <button 
-              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
-              onClick={onClick}
+              className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={async () => {
+                console.log("Button clicked, isLoading:", isLoading);
+                setLocalLoading(true);
+                try {
+                  await onClick();
+                } finally {
+                  setLocalLoading(false);
+                }
+              }}
+              disabled={isLoading}
             >
-               {/* {paymentProcessing ? "Processing..." : "Initiate payment"} */}
-             Initiate {title}
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                `Initiate ${title}`
+              )}
             </button>
           )}
         </div>
@@ -503,8 +538,14 @@ export default function ConferencePage() {
       return;
     }
 
+    console.log("Setting paymentProcessing to true");
     setPaymentProcessing(true);
+
+    // Add a minimum loading time to show the loading state
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     try {
+      console.log("Making API call...");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/conference/initiate_pay/`,
         {
@@ -521,22 +562,33 @@ export default function ConferencePage() {
         }
       );
 
+      console.log("API response status:", response.status);
+
       if (!response.ok) {
+        console.log("API call failed with status:", response.status);
         throw new Error("Failed to initiate payment");
       }
 
       const paymentData = await response.json();
+      console.log("Payment data received:", paymentData);
 
-      if (paymentData.status === "success" && paymentData.data.link) {
+      if (paymentData?.status === "success" && paymentData?.data?.link) {
+        console.log("Redirecting to payment gateway...");
+        // Add a delay before redirect to show loading state
+        await new Promise(resolve => setTimeout(resolve, 500));
         // Redirect to payment gateway
-        window.location.href = paymentData.data.link;
+        window.location.href = paymentData?.data?.link;
       } else {
+        console.log("Payment initiated without redirect");
+        // Add a small delay to show loading state even for non-redirect success
+        await new Promise(resolve => setTimeout(resolve, 300));
         showToast.success("Payment initiated successfully");
       }
     } catch (err) {
       console.error("Payment error:", err);
       showToast.error("Failed to initiate payment");
     } finally {
+      console.log("Setting paymentProcessing to false");
       setPaymentProcessing(false);
     }
   }, [conference, session, attendanceType, router]);
@@ -564,6 +616,7 @@ export default function ConferencePage() {
             priceNaira={conference?.payments?.early_bird_registration[attendanceType]?.naira || '0'}
             features={conference?.payments?.early_bird_registration?.package}
             isCurrentPlan={conference?.is_registered && conference?.current_plan === 'early_bird_registration'}
+            paymentProcessing={paymentProcessing}
             isRegistered={conference?.is_registered}
             isPopular
             onClick={() => {
@@ -579,6 +632,7 @@ export default function ConferencePage() {
               priceNaira={conference?.payments?.normal_registration[attendanceType]?.naira || '0'}
               features={conference?.payments?.normal_registration?.package}
               isCurrentPlan={conference?.is_registered && conference?.current_plan === 'normal_registration'}
+              paymentProcessing={paymentProcessing}
               isRegistered={conference?.is_registered}
               onClick={() => {
                 handlePaymentSubmit('normal_registration');
@@ -594,6 +648,7 @@ export default function ConferencePage() {
               priceNaira={conference?.payments?.late_registration[attendanceType]?.naira || '0'}
               features={conference?.payments?.late_registration?.package}
               isCurrentPlan={conference?.is_registered && conference?.current_plan === 'late_registration'}
+              paymentProcessing={paymentProcessing}
               isRegistered={conference?.is_registered}
               onClick={() => {
                 handlePaymentSubmit('late_registration');

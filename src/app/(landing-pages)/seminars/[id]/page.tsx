@@ -33,8 +33,8 @@ interface PaymentTier {
 }
 
 interface RegistrationType {
-  virtual: PaymentTier;
-  physical: PaymentTier;
+  virtual?: PaymentTier;
+  physical?: PaymentTier;
   package?: string[];
 }
 
@@ -51,6 +51,53 @@ interface Speaker {
   portfolio: string;
   picture: string;
 }
+
+
+// {
+//     "status": "success",
+//     "message": "Operation successful",
+//     "data": {
+//         "id": 206,
+//         "is_registered": false,
+//         "title": "jjsh",
+//         "theme": "dddg",
+//         "venue": "vdvd",
+//         "date": "January 20, 2025 To February 03, 2026",
+//         "start_date": "2025-01-20",
+//         "start_time": "02:02:00",
+//         "sub_theme": null,
+//         "work_shop": null,
+//         "speakers": [
+//             {
+//                 "name": 0,
+//                 "title": 0,
+//                 "portfolio": "Keynote Speaker",
+//                 "picture": "https:\/\/iaiiea.org\/speakers\/0"
+//             }
+//         ],
+//         "mode": "Physical",
+//         "is_free": "free",
+//         "payments": {
+//             "virtual": {
+//                 "usd": 0,
+//                 "naira": 0
+//             },
+//             "physical": {
+//                 "usd": 0,
+//                 "naira": 0
+//             }
+//         },
+//         "resources": [
+//             {
+//                 "resource_id": 24,
+//                 "resource_type": "PDF",
+//                 "caption": "contract",
+//                 "date": "2025-02-03",
+//                 "file": "https:\/\/iaiiea.org\/Resources\/685be28323696Contract Agreement - Praise Afolabi.pdf"
+//             }
+//         ]
+//     }
+// }
 
 interface SeminarDetails {
   id: number;
@@ -176,14 +223,14 @@ const Carousel = ({
         <div className="flex justify-center items-center gap-4 my-4 overflow-hidden w-full">
           {items.length > 0 ? (
             <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden">
-              <img
-                src={items[currentIndex] || "/placeholder.jpg"}
+              {/* <img
+                src={items[currentIndex]}
                 alt={`Item ${currentIndex + 1}`}
                 className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.jpg";
                 }}
-              />
+              /> */}
             </div>
           ) : (
             <div className="text-white opacity-70 py-12">
@@ -475,14 +522,14 @@ export default function SeminarPage() {
                 >
                   <CardContent className="p-0">
                     <div className="relative h-48 w-full">
-                      <img
+                      {/* <img
                         src={speaker?.picture}
                         alt={speaker?.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.src = "/placeholder.jpg";
                         }}
-                      />
+                      /> */}
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold mb-1">{speaker?.name}</h3>

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
+import  AddSeminarModal  from "./AddSeminarModal";
 import { 
   Conference, 
   ConferenceDetails, 
@@ -171,8 +172,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
         <div className="relative h-64 sm:h-[400px] bg-muted">
           {conferenceDetails?.flyer ? (
             <Image
-              src={conferenceDetails.flyer}
-              alt={conference.title}
+              src={conferenceDetails?.flyer}
+              alt={conference?.title}
               fill
               className="object-cover"
               priority
@@ -183,14 +184,14 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             </div>
           )}
           <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium dark:bg-gray-800 dark:text-gray-200">
-            {conference.status}
+            {conference?.status}
           </div>
         </div>
       
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <h1 className="text-xl sm:text-2xl font-bold text-foreground dark:text-gray-100">
-              {conference.title}
+              {conference?.title}
             </h1>
             <p className="text-muted-foreground text-sm dark:text-gray-300">
               {conferenceDetails?.registered_count || 0} people have registered for this conference
@@ -199,7 +200,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
           
           <div className="mb-4">
             <p className="text-lg sm:text-2xl text-muted-foreground uppercase font-bold dark:text-gray-300">
-              {conference.theme}
+              {conference?.theme}
             </p>
           </div>
       
@@ -945,7 +946,8 @@ const TrainingResources: React.FC = () => {
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Training Seminars</h1>
                   <p className="text-gray-600 dark:text-gray-300">Manage and view all your training seminars</p>
                 </div>
-                <AddFileModal onSuccess={fetchSeminars} />
+                {/* <AddFileModal onSuccess={fetchSeminars} /> */}
+                <AddSeminarModal onSuccess={fetchSeminars} />
               </div>
             </div>
 

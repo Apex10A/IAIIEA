@@ -28,8 +28,8 @@ import { showToast } from "@/utils/toast";
 import '@/app/index.css';
 
 interface PaymentTier {
-  usd: string;
-  naira: string;
+  usd: string | number;
+  naira: string | number;
 }
 
 interface RegistrationType {
@@ -38,66 +38,22 @@ interface RegistrationType {
   package?: string[];
 }
 
+// Support both payment structures
 interface SeminarPayments {
-  basic: RegistrationType;
-  standard: RegistrationType;
-  premium: RegistrationType;
-  [key: string]: RegistrationType;
+  basic?: RegistrationType;
+  standard?: RegistrationType;
+  premium?: RegistrationType;
+  virtual?: PaymentTier;  // For free seminars
+  physical?: PaymentTier; // For free seminars
+  [key: string]: RegistrationType | PaymentTier | undefined;
 }
 
 interface Speaker {
-  name: string;
-  title: string;
+  name: string | number;
+  title: string | number;
   portfolio: string;
   picture: string;
 }
-
-
-// {
-//     "status": "success",
-//     "message": "Operation successful",
-//     "data": {
-//         "id": 206,
-//         "is_registered": false,
-//         "title": "jjsh",
-//         "theme": "dddg",
-//         "venue": "vdvd",
-//         "date": "January 20, 2025 To February 03, 2026",
-//         "start_date": "2025-01-20",
-//         "start_time": "02:02:00",
-//         "sub_theme": null,
-//         "work_shop": null,
-//         "speakers": [
-//             {
-//                 "name": 0,
-//                 "title": 0,
-//                 "portfolio": "Keynote Speaker",
-//                 "picture": "https:\/\/iaiiea.org\/speakers\/0"
-//             }
-//         ],
-//         "mode": "Physical",
-//         "is_free": "free",
-//         "payments": {
-//             "virtual": {
-//                 "usd": 0,
-//                 "naira": 0
-//             },
-//             "physical": {
-//                 "usd": 0,
-//                 "naira": 0
-//             }
-//         },
-//         "resources": [
-//             {
-//                 "resource_id": 24,
-//                 "resource_type": "PDF",
-//                 "caption": "contract",
-//                 "date": "2025-02-03",
-//                 "file": "https:\/\/iaiiea.org\/Resources\/685be28323696Contract Agreement - Praise Afolabi.pdf"
-//             }
-//         ]
-//     }
-// }
 
 interface SeminarDetails {
   id: number;
@@ -115,7 +71,162 @@ interface SeminarDetails {
   payments: SeminarPayments;
   status: string;
   resources: any[];
+  is_free?: string;
+  mode?: string;
 }
+
+
+const getPaymentInfo = (payments: SeminarPayments, plan: string, attendanceType: 'virtual' | 'physical') => {
+  if (payments[plan] && typeof payments[plan] === 'object' && 'virtual' in payments[plan]) {
+    const planPayments = payments[plan] as RegistrationType;
+    return planPayments[attendanceType];
+  }
+  
+  // Check if it's the old structure with direct virtual/physical
+  if (plan === 'basic' && payments.virtual && payments.physical) {
+    return payments[attendanceType] as PaymentTier;
+  }
+  
+  return null;
+};
+
+// Helper function to check if seminar has paid plans
+const hasPaidPlans = (payments: SeminarPayments) => {
+  return !!(payments.basic || payments.standard || payments.premium);
+};
+
+// Placeholder image data URL (1x1 transparent pixel)
+const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='200' y='150' text-anchor='middle' dy='0.3em' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3ENo Image Available%3C/text%3E%3C/svg%3E";
+
+// Dummy data for testing different scenarios
+const getDummyData = (type: 'free' | 'paid' | 'error'): any => {
+  if (type === 'error') {
+    return null;
+  }
+
+  const baseData = {
+    id: type === 'free' ? 206 : 204,
+    is_registered: false,
+    current_plan: null,
+    title: type === 'free' ? "Free Digital Marketing Workshop" : "Advanced Investment Strategies Seminar 2025",
+    theme: type === 'free' ? "Mastering Social Media Marketing" : "Building Wealth Through Smart Investments",
+    venue: type === 'free' ? "Virtual Conference Room" : "Lagos Business Hub, Victoria Island",
+    date: "March 15, 2025 To March 17, 2025",
+    start_date: "2025-03-15",
+    start_time: "10:00:00",
+    sub_theme: type === 'free' ? [
+      "Understanding Social Media Algorithms",
+      "Content Creation Strategies",
+      "Building Brand Awareness Online"
+    ] : [
+      "Portfolio Diversification Techniques",
+      "Risk Management in Volatile Markets",
+      "Emerging Investment Opportunities",
+      "Tax-Efficient Investment Strategies"
+    ],
+    work_shop: type === 'free' ? [
+      "Hands-on Instagram Marketing",
+      "Facebook Ads Workshop",
+      "LinkedIn for Business Growth"
+    ] : [
+      "Stock Analysis Workshop",
+      "Real Estate Investment Planning",
+      "Cryptocurrency Investment Basics"
+    ],
+    speakers: [
+      {
+        name: type === 'free' ? "Sarah Johnson" : "Dr. Michael Chen",
+        title: type === 'free' ? "Digital Marketing Expert" : "Investment Strategist",
+        portfolio: type === 'free' ? "Social Media Consultant with 10+ years experience" : "Former Goldman Sachs Analyst, Author of 'Smart Investing'",
+        picture: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face"
+      },
+      {
+        name: type === 'free' ? "Alex Rodriguez" : "Jennifer Williams",
+        title: type === 'free' ? "Content Creator" : "Portfolio Manager",
+        portfolio: type === 'free' ? "YouTube Creator with 2M+ subscribers" : "Managing Director at Wealth Management Firm",
+        picture: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
+      },
+      {
+        name: type === 'free' ? "Maria Garcia" : "Robert Thompson",
+        title: type === 'free' ? "Brand Strategist" : "Financial Advisor",
+        portfolio: type === 'free' ? "Brand consultant for Fortune 500 companies" : "Certified Financial Planner with 15+ years experience",
+        picture: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face"
+      }
+    ],
+    mode: type === 'free' ? "Virtual" : "Hybrid",
+    is_free: type === 'free' ? "free" : "paid",
+    status: "Upcoming",
+    resources: [
+      {
+        resource_id: 1,
+        resource_type: "PDF",
+        caption: type === 'free' ? "Social Media Marketing Guide" : "Investment Planning Handbook",
+        date: "2025-03-10",
+        file: "https://example.com/sample.pdf"
+      },
+      {
+        resource_id: 2,
+        resource_type: "Video",
+        caption: type === 'free' ? "Getting Started with Digital Marketing" : "Market Analysis Techniques",
+        date: "2025-03-12",
+        file: "https://example.com/sample-video.mp4"
+      },
+      {
+        resource_id: 3,
+        resource_type: "Docx",
+        caption: type === 'free' ? "Content Calendar Template" : "Investment Portfolio Template",
+        date: "2025-03-14",
+        file: "https://example.com/template.docx"
+      }
+    ]
+  };
+
+  if (type === 'free') {
+    return {
+      ...baseData,
+      payments: {
+        virtual: { usd: 0, naira: 0 },
+        physical: { usd: 0, naira: 0 }
+      }
+    };
+  } else {
+    return {
+      ...baseData,
+      payments: {
+        basic: {
+          virtual: { usd: "99", naira: "150000" },
+          physical: { usd: "149", naira: "225000" },
+          package: [
+            "Digital seminar materials",
+            "Certificate of completion",
+            "Access to recorded sessions"
+          ]
+        },
+        standard: {
+          virtual: { usd: "199", naira: "300000" },
+          physical: { usd: "299", naira: "450000" },
+          package: [
+            "Everything in Basic",
+            "1-on-1 consultation session",
+            "Premium resource pack",
+            "Networking session access"
+          ]
+        },
+        premium: {
+          virtual: { usd: "399", naira: "600000" },
+          physical: { usd: "599", naira: "900000" },
+          package: [
+            "Everything in Standard",
+            "VIP networking dinner",
+            "Personal investment review",
+            "6-month follow-up support",
+            "Exclusive masterclass access"
+          ]
+        }
+      }
+    };
+  }
+};
 
 interface TimeLeft {
   days: number;
@@ -222,15 +333,21 @@ const Carousel = ({
 
         <div className="flex justify-center items-center gap-4 my-4 overflow-hidden w-full">
           {items.length > 0 ? (
-            <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden">
-              {/* <img
-                src={items[currentIndex]}
-                alt={`Item ${currentIndex + 1}`}
-                className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.jpg";
-                }}
-              /> */}
+            <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden bg-gradient-to-br from-[#D5B93C]/20 to-[#0E1A3D]/20 flex items-center justify-center">
+              {items[currentIndex] ? (
+                <img
+                  src={items[currentIndex]}
+                  alt={`Item ${currentIndex + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className="flex items-center justify-center w-full h-full text-white/50" style={{ display: items[currentIndex] ? 'none' : 'flex' }}>
+                <Book className="w-16 h-16" />
+              </div>
             </div>
           ) : (
             <div className="text-white opacity-70 py-12">
@@ -281,30 +398,62 @@ export default function SeminarPage() {
           throw new Error("No seminar ID provided");
         }
 
-        // Fetch seminar details
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${seminarId}`,
-          {
-            headers: session?.user?.token
-              ? {
-                  Authorization: `Bearer ${session.user.token}`,
-                }
-              : {},
+        // TESTING MODE - Toggle this for testing different scenarios
+        const TESTING_MODE = true; // Set to false to use real API
+        
+        if (TESTING_MODE) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Test different scenarios based on seminar ID
+          let dummyType: 'free' | 'paid' | 'error' = 'free';
+          
+          if (seminarId === 'free' || seminarId === '206') {
+            dummyType = 'free';
+          } else if (seminarId === 'paid' || seminarId === '204') {
+            dummyType = 'paid';
+          } else if (seminarId === 'error') {
+            dummyType = 'error';
+          } else {
+            // Default to paid for other IDs
+            dummyType = 'paid';
           }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch seminar details");
-        }
-
-        const data = await response.json();
-        if (data.status === "success") {
-          setSeminar(data.data);
-          const { start_date, start_time } = data.data;
-          const dateTimeString = `${start_date}T${start_time}`;
-          setSeminarDate(new Date(dateTimeString));
+          
+          const dummyData = getDummyData(dummyType);
+          
+          if (dummyData) {
+            setSeminar(dummyData);
+            const { start_date, start_time } = dummyData;
+            const dateTimeString = `${start_date}T${start_time}`;
+            setSeminarDate(new Date(dateTimeString));
+          } else {
+            throw new Error("Seminar not found (testing error scenario)");
+          }
         } else {
-          throw new Error(data.message || "Failed to load seminar details");
+          // Real API call
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/landing/seminar_details/${seminarId}`,
+            {
+              headers: session?.user?.token
+                ? {
+                    Authorization: `Bearer ${session.user.token}`,
+                  }
+                : {},
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch seminar details");
+          }
+
+          const data = await response.json();
+          if (data.status === "success") {
+            setSeminar(data.data);
+            const { start_date, start_time } = data.data;
+            const dateTimeString = `${start_date}T${start_time}`;
+            setSeminarDate(new Date(dateTimeString));
+          } else {
+            throw new Error(data.message || "Failed to load seminar details");
+          }
         }
       } catch (err) {
         setError(
@@ -328,6 +477,51 @@ export default function SeminarPage() {
       return;
     }
 
+    // For free seminars, register directly without payment modal
+    if (seminar.is_free === "free" && !hasPaidPlans(seminar.payments)) {
+      if (!session) {
+        showToast.error("Please login to register");
+        return;
+      }
+
+      try {
+        setPaymentProcessing(true);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/seminar/register_free/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+            body: JSON.stringify({
+              id: seminar.id,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to register for free seminar");
+        }
+
+        const data = await response.json();
+        if (data.status === "success") {
+          showToast.success("Successfully registered for free seminar!");
+          // Reload seminar data to update registration status
+          window.location.reload();
+        } else {
+          throw new Error(data.message || "Failed to register");
+        }
+      } catch (err) {
+        console.error("Registration error:", err);
+        showToast.error("Failed to register for seminar");
+      } finally {
+        setPaymentProcessing(false);
+      }
+      return;
+    }
+
+    // For paid seminars, show payment modal
     setShowPaymentModal(true);
   };
 
@@ -521,20 +715,26 @@ export default function SeminarPage() {
                   className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors"
                 >
                   <CardContent className="p-0">
-                    <div className="relative h-48 w-full">
-                      {/* <img
-                        src={speaker?.picture}
-                        alt={speaker?.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src = "/placeholder.jpg";
-                        }}
-                      /> */}
+                    <div className="relative h-48 w-full bg-gradient-to-br from-[#D5B93C]/20 to-[#0E1A3D]/20 flex items-center justify-center">
+                      {speaker?.picture && speaker.picture !== "https://iaiiea.org/speakers/0" ? (
+                        <img
+                          src={speaker.picture}
+                          alt={String(speaker?.name)}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className="flex items-center justify-center w-full h-full" style={{ display: speaker?.picture && speaker.picture !== "https://iaiiea.org/speakers/0" ? 'none' : 'flex' }}>
+                        <User className="w-16 h-16 text-[#D5B93C]/50" />
+                      </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-1">{speaker?.name}</h3>
+                      <h3 className="text-xl font-bold mb-1">{String(speaker?.name || 'Speaker')}</h3>
                       <p className="text-[#D5B93C] text-sm mb-2">
-                        {speaker?.title}
+                        {String(speaker?.title || '')}
                       </p>
                       <p className="text-white/70 text-sm">
                         {speaker?.portfolio}
@@ -551,40 +751,72 @@ export default function SeminarPage() {
           )}
         </section>
 
-        <div className="my-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
-            Seminar Fees
-          </h2>
-          {seminar?.is_registered && seminar?.current_plan && (
-            <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />
-                <div>
-                  <p className="font-bold text-white">You're registered for:</p>
-                  <p className="text-white">
-                    {seminar?.current_plan.charAt(0).toUpperCase() + seminar?.current_plan?.slice(1)} Access ({attendanceType})
-                  </p>
-                </div>
+        {/* Free Seminar Registration Section */}
+        {seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments) && (
+          <section className="my-12">
+            <div className="text-center">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+                Free Registration
+              </h2>
+              <div className="bg-white/5 backdrop-blur-sm border border-[#D5B93C]/30 rounded-lg p-8 max-w-md mx-auto">
+                <div className="text-6xl font-bold text-[#D5B93C] mb-4">FREE</div>
+                <p className="text-white/80 mb-6">This seminar is completely free to attend!</p>
+                
+                {seminar?.is_registered ? (
+                  <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md text-center flex items-center justify-center gap-2">
+                    <Check className="w-5 h-5" />
+                    <span>You're Registered!</span>
+                  </div>
+                ) : (
+                  <Button
+                    className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md"
+                    onClick={handleRegisterClick}
+                    disabled={paymentProcessing}
+                  >
+                    {paymentProcessing ? "Registering..." : "Register for Free"}
+                  </Button>
+                )}
               </div>
             </div>
-          )}
+          </section>
+        )}
 
-          <div className="flex justify-center mb-8">
-            <div className="bg-white/10 p-1 rounded-full">
-              <button 
-                className={`px-4 py-2 rounded-full ${attendanceType === 'virtual' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
-                onClick={() => setAttendanceType('virtual')}
-              >
-                Virtual
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-full ${attendanceType === 'physical' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
-                onClick={() => setAttendanceType('physical')}
-              >
-                Physical
-              </button>
+        {/* Seminar Fees Section - Only show if it's not a free seminar or has paid plans */}
+        {(seminar?.is_free !== "free" || hasPaidPlans(seminar?.payments)) && (
+          <div className="my-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
+              Seminar Fees
+            </h2>
+            {seminar?.is_registered && seminar?.current_plan && (
+              <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-white">You're registered for:</p>
+                    <p className="text-white">
+                      {seminar?.current_plan.charAt(0).toUpperCase() + seminar?.current_plan?.slice(1)} Access ({attendanceType})
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-center mb-8">
+              <div className="bg-white/10 p-1 rounded-full">
+                <button 
+                  className={`px-4 py-2 rounded-full ${attendanceType === 'virtual' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
+                  onClick={() => setAttendanceType('virtual')}
+                >
+                  Virtual
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-full ${attendanceType === 'physical' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
+                  onClick={() => setAttendanceType('physical')}
+                >
+                  Physical
+                </button>
+              </div>
             </div>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
@@ -601,12 +833,21 @@ export default function SeminarPage() {
                 
                 <div className="space-y-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${seminar?.payments?.basic[attendanceType]?.usd}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {seminar?.payments?.basic[attendanceType]?.naira}
-                    </p>
+                    {(() => {
+                      const paymentInfo = getPaymentInfo(seminar?.payments, 'basic', attendanceType);
+                      return paymentInfo ? (
+                        <>
+                          <p className="text-3xl font-bold text-[#0E1A3D]">
+                            ${paymentInfo.usd}
+                          </p>
+                          <p className="text-lg text-gray-700">
+                            ₦{paymentInfo.naira}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
+                      );
+                    })()}
                   </div>
                   
                   <div className="pt-2">
@@ -624,12 +865,15 @@ export default function SeminarPage() {
                         <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                         <span>Digital certificate</span>
                       </li>
-                      {seminar?.payments?.basic?.package?.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
+                      {(() => {
+                        const basicPlan = seminar?.payments?.basic as RegistrationType;
+                        return basicPlan?.package?.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ));
+                      })()}
                     </ul>
                   </div>
 
@@ -680,12 +924,21 @@ export default function SeminarPage() {
                 
                 <div className="space-y-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${seminar?.payments?.standard[attendanceType]?.usd}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {seminar?.payments?.standard[attendanceType]?.naira}
-                    </p>
+                    {(() => {
+                      const paymentInfo = getPaymentInfo(seminar?.payments, 'standard', attendanceType);
+                      return paymentInfo ? (
+                        <>
+                          <p className="text-3xl font-bold text-[#0E1A3D]">
+                            ${paymentInfo.usd}
+                          </p>
+                          <p className="text-lg text-gray-700">
+                            ₦{paymentInfo.naira}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
+                      );
+                    })()}
                   </div>
                   
                   <div className="pt-2">
@@ -703,12 +956,15 @@ export default function SeminarPage() {
                         <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                         <span>{attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking'}</span>
                       </li>
-                      {seminar.payments.standard.package?.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
+                      {(() => {
+                        const standardPlan = seminar?.payments?.standard as RegistrationType;
+                        return standardPlan?.package?.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ));
+                      })()}
                     </ul>
                   </div>
                   
@@ -755,12 +1011,21 @@ export default function SeminarPage() {
                 
                 <div className="space-y-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-[#0E1A3D]">
-                      ${seminar?.payments?.premium[attendanceType]?.usd}
-                    </p>
-                    <p className="text-lg text-gray-700">
-                      {seminar?.payments?.premium[attendanceType]?.naira}
-                    </p>
+                    {(() => {
+                      const paymentInfo = getPaymentInfo(seminar?.payments, 'premium', attendanceType);
+                      return paymentInfo ? (
+                        <>
+                          <p className="text-3xl font-bold text-[#0E1A3D]">
+                            ${paymentInfo.usd}
+                          </p>
+                          <p className="text-lg text-gray-700">
+                            ₦{paymentInfo.naira}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
+                      );
+                    })()}
                   </div>
                   
                   <div className="pt-2">
@@ -778,12 +1043,15 @@ export default function SeminarPage() {
                         <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                         <span>{attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner'}</span>
                       </li>
-                      {seminar?.payments?.premium?.package?.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
+                      {(() => {
+                        const premiumPlan = seminar?.payments?.premium as RegistrationType;
+                        return premiumPlan?.package?.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ));
+                      })()}
                     </ul>
                   </div>
                   
@@ -816,7 +1084,81 @@ export default function SeminarPage() {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        )}
+
+        {/* Resources Section */}
+        {seminar?.resources && seminar.resources.length > 0 && (
+          <section className="my-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+              Resources & Materials
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {seminar.resources.map((resource, index) => (
+                <Card
+                  key={resource.resource_id || index}
+                  className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        {resource.resource_type === 'PDF' && (
+                          <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        {resource.resource_type === 'Video' && (
+                          <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        {resource.resource_type === 'Docx' && (
+                          <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                        {!['PDF', 'Video', 'Docx'].includes(resource.resource_type) && (
+                          <div className="w-12 h-12 bg-gray-500/20 rounded-lg flex items-center justify-center">
+                            <Download className="w-6 h-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-white mb-1 truncate">
+                          {resource.caption}
+                        </h3>
+                        <p className="text-sm text-white/60 mb-2">
+                          {resource.resource_type} • {resource.date}
+                        </p>
+                        
+                        <Button
+                          size="sm"
+                          className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] text-xs"
+                          onClick={() => {
+                            if (resource.file) {
+                              window.open(resource.file, '_blank');
+                            }
+                          }}
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       {showPaymentModal && (
@@ -876,5 +1218,6 @@ export default function SeminarPage() {
         </div>
       )}
     </div>
+    
   );
 }

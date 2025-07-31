@@ -513,7 +513,6 @@ export default function SeminarPage() {
           throw new Error(data.message || "Failed to register");
         }
       } catch (err) {
-        console.error("Registration error:", err);
         showToast.error("Failed to register for seminar");
       } finally {
         setPaymentProcessing(false);
@@ -561,7 +560,6 @@ export default function SeminarPage() {
         setShowPaymentModal(false);
       }
     } catch (err) {
-      console.error("Payment error:", err);
       showToast.error("Failed to initiate payment");
     } finally {
       setPaymentProcessing(false);

@@ -399,7 +399,7 @@ export default function SeminarPage() {
         }
 
         // TESTING MODE - Toggle this for testing different scenarios
-        const TESTING_MODE = true; // Set to false to use real API
+        const TESTING_MODE = false; // Set to false to use real API
         
         if (TESTING_MODE) {
           await new Promise(resolve => setTimeout(resolve, 1000));

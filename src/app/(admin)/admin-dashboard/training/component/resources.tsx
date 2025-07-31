@@ -89,9 +89,9 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
       </CardContent>
       
       <div className="flex items-center gap-2 px-4">
-        {getFileIcon(resource.resource_type as ResourceType)}
+        {getFileIcon(resource?.resource_type as ResourceType)}
         <span className="font-semibold truncate max-w-[200px]">
-          <h1 className='text-md md:text-lg'>{resource.caption}</h1>
+          <h1 className='text-md md:text-lg'>{resource?.caption}</h1>
         </span>
       </div>
 
@@ -100,11 +100,11 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
           <div className="flex gap-2">
             <button className="text-black bg-gray-100 rounded-md flex gap-2 px-4 py-2">
               <Download className="w-5 h-5" />
-              <span className='text-sm'>Download {resource.resource_type?.toLowerCase()}</span>
+              <span className='text-sm'>Download {resource?.resource_type?.toLowerCase()}</span>
             </button>
           </div>
           
-          {onDelete && resource.resource_id.toString() && (
+          {onDelete && resource?.resource_id.toString() && (
             <AlertDialog.Root>
               <AlertDialog.Trigger asChild>
                 <button className="text-left px-4 py-2 bg-gray-100 rounded-md flex items-center space-x-2">
@@ -116,10 +116,10 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
                 <AlertDialog.Overlay className="bg-black/50 fixed inset-0" />
                 <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[500px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-6 shadow-lg">
                   <AlertDialog.Title className="text-lg font-semibold">
-                    Delete {resource.resource_type?.toLowerCase()}
+                    Delete {resource?.resource_type?.toLowerCase()}
                   </AlertDialog.Title>
                   <AlertDialog.Description className="mt-3 mb-5 text-sm text-gray-600">
-                    Are you sure you want to delete this {resource.resource_type?.toLowerCase()}? This action cannot be undone.
+                    Are you sure you want to delete this {resource?.resource_type?.toLowerCase()}? This action cannot be undone.
                   </AlertDialog.Description>
                   <div className="flex justify-end gap-4">
                     <AlertDialog.Cancel asChild>
@@ -129,7 +129,7 @@ const ResourceCard: React.FC<{ resource: Resource; onDelete?: (id: string) => Pr
                     </AlertDialog.Cancel>
                     <AlertDialog.Action asChild>
                       <button 
-                        onClick={() => onDelete(resource.resource_id.toString())}
+                        onClick={() => onDelete(resource?.resource_id.toString())}
                         className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
                       >
                         Delete
@@ -196,7 +196,7 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
             {mediaResources.length > 0 ? (
               mediaResources.map((resource) => (
                 <ResourceCard 
-                  key={resource.resource_id.toString()} 
+                  key={resource?.resource_id.toString()} 
                   resource={resource} 
                   onDelete={onDelete}
                 />
@@ -211,10 +211,10 @@ export const ResourcesPage: React.FC<ResourcesPageProps> = ({
 
         <TabsContent value="documents">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {documentResources.length > 0 ? (
-              documentResources.map((resource) => (
+            {documentResources?.length > 0 ? (
+              documentResources?.map((resource) => (
                 <ResourceCard 
-                  key={resource.resource_id.toString()} 
+                  key={resource?.resource_id.toString()} 
                   resource={resource} 
                   onDelete={onDelete}
                 />

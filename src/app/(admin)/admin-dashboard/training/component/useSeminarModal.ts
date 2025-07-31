@@ -23,14 +23,14 @@ export const useSeminarModal = (onSuccess: () => void) => {
 
   const [step2Data, setStep2Data] = useState<Step2Data>({
     token: '',
-    basic_naira: 0,
-    basic_usd: 0,
+    basic_naira: '',
+    basic_usd: '',
     basic_package: [],
-    premium_naira: 0,
-    premium_usd: 0,
+    premium_naira: '',
+    premium_usd: '',
     premium_package: [],
-    standard_naira: 0,
-    standard_usd: 0,
+    standard_naira: '',
+    standard_usd: '',
     standard_package: [],
     speakers: []
   });
@@ -81,13 +81,24 @@ export const useSeminarModal = (onSuccess: () => void) => {
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert string values to numbers for API submission
+      const submissionData = {
+        ...step2Data,
+        basic_naira: step2Data.basic_naira === '' ? 0 : Number(step2Data.basic_naira),
+        basic_usd: step2Data.basic_usd === '' ? 0 : Number(step2Data.basic_usd),
+        premium_naira: step2Data.premium_naira === '' ? 0 : Number(step2Data.premium_naira),
+        premium_usd: step2Data.premium_usd === '' ? 0 : Number(step2Data.premium_usd),
+        standard_naira: step2Data.standard_naira === '' ? 0 : Number(step2Data.standard_naira),
+        standard_usd: step2Data.standard_usd === '' ? 0 : Number(step2Data.standard_usd),
+      };
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_seminar/2`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(step2Data),
+        body: JSON.stringify(submissionData),
       });
 
       const data = await response.json();
@@ -117,14 +128,14 @@ export const useSeminarModal = (onSuccess: () => void) => {
     });
     setStep2Data({
       token: '',
-      basic_naira: 0,
-      basic_usd: 0,
+      basic_naira: '',
+      basic_usd: '',
       basic_package: [],
-      premium_naira: 0,
-      premium_usd: 0,
+      premium_naira: '',
+      premium_usd: '',
       premium_package: [],
-      standard_naira: 0,
-      standard_usd: 0,
+      standard_naira: '',
+      standard_usd: '',
       standard_package: [],
       speakers: []
     });

@@ -45,10 +45,8 @@ export const useSeminarModal = (onSuccess: () => void) => {
       const data = await response.json();
       if (data.status === "success") {
         setAvailableSpeakers(data.data);
-        console.log('Speakers fetched:', data.data);
       }
     } catch (error) {
-      console.error('Error fetching speakers:', error);
       showToast.error('Failed to fetch speakers');
     }
   };
@@ -68,7 +66,6 @@ export const useSeminarModal = (onSuccess: () => void) => {
       const data = await response.json();
       if (data.status === "success" && data.data?.token) {
         setStep1Token(data.data.token);
-        console.log('Step 1 token:', data.data.token);
         setStep2Data(prev => ({ ...prev, token: data.data.token }));
         setStep(2);
         showToast.success('Step 1 completed successfully');
@@ -77,7 +74,6 @@ export const useSeminarModal = (onSuccess: () => void) => {
         throw new Error(data.message || 'Failed to create seminar');
       }
     } catch (error) {
-      console.error('Error creating seminar:', error);
       showToast.error('Failed to create seminar');
     }
   };
@@ -100,10 +96,9 @@ export const useSeminarModal = (onSuccess: () => void) => {
         onSuccess();
         resetForm();
       } else {
-        throw new Error(data.message || 'Failed to complete seminar creation');
+        throw new Error(data?.message || 'Failed to complete seminar creation');
       }
     } catch (error) {
-      console.error('Error completing seminar creation:', error);
       showToast.error('Failed to complete seminar creation');
     }
   };

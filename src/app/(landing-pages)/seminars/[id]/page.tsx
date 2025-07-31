@@ -95,6 +95,40 @@ const hasPaidPlans = (payments: SeminarPayments) => {
   return !!(payments.basic || payments.standard || payments.premium);
 };
 
+// Helper function to validate image URLs
+const isValidImageUrl = (url: string | undefined | null): boolean => {
+  if (!url || typeof url !== 'string') return false;
+  
+  const trimmedUrl = url.trim();
+  if (trimmedUrl === '') return false;
+  
+  // List of known invalid URLs
+  const invalidUrls = [
+    'https://iaiiea.org/speakers/',
+    'https://iaiiea.org/speakers/0',
+    'https://iaiiea.org/speakers',
+    '/placeholder.jpg',
+    'placeholder.jpg'
+  ];
+  
+  if (invalidUrls.includes(trimmedUrl)) return false;
+  
+  // Check if URL ends with just a slash (directory)
+  if (trimmedUrl.endsWith('/')) return false;
+  
+  // Check if URL has a file extension
+  const hasFileExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(trimmedUrl);
+  if (!hasFileExtension) return false;
+  
+  // Check if it's a proper URL
+  try {
+    new URL(trimmedUrl);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Placeholder image data URL (1x1 transparent pixel)
 const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f3f4f6'/%3E%3Ctext x='200' y='150' text-anchor='middle' dy='0.3em' font-family='Arial, sans-serif' font-size='16' fill='%236b7280'%3ENo Image Available%3C/text%3E%3C/svg%3E";
 
@@ -334,18 +368,34 @@ const Carousel = ({
         <div className="flex justify-center items-center gap-4 my-4 overflow-hidden w-full">
           {items.length > 0 ? (
             <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden bg-gradient-to-br from-[#D5B93C]/20 to-[#0E1A3D]/20 flex items-center justify-center">
-              {items[currentIndex] ? (
-                <img
-                  src={items[currentIndex]}
-                  alt={`Item ${currentIndex + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div className="flex items-center justify-center w-full h-full text-white/50" style={{ display: items[currentIndex] ? 'none' : 'flex' }}>
+              {(() => {
+                const currentItem = items[currentIndex];
+                const hasValidImage = isValidImageUrl(currentItem);
+                
+                if (hasValidImage) {
+                  return (
+                    <img
+                      src={currentItem}
+                      alt={`Item ${currentIndex + 1}`}
+                      className="w-full h-full object-cover transition-transform duration-500 ease-in-out"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.parentElement?.querySelector('.carousel-fallback');
+                        if (fallback) {
+                          (fallback as HTMLElement).style.display = 'flex';
+                        }
+                      }}
+                    />
+                  );
+                }
+                return null;
+              })()}
+              <div 
+                className="carousel-fallback flex items-center justify-center w-full h-full text-white/50" 
+                style={{ 
+                  display: isValidImageUrl(items[currentIndex]) ? 'none' : 'flex'
+                }}
+              >
                 <Book className="w-16 h-16" />
               </div>
             </div>
@@ -714,18 +764,41 @@ export default function SeminarPage() {
                 >
                   <CardContent className="p-0">
                     <div className="relative h-48 w-full bg-gradient-to-br from-[#D5B93C]/20 to-[#0E1A3D]/20 flex items-center justify-center">
-                      {speaker?.picture && speaker.picture !== "https://iaiiea.org/speakers/0" ? (
-                        <img
-                          src={speaker.picture}
-                          alt={String(speaker?.name)}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div className="flex items-center justify-center w-full h-full" style={{ display: speaker?.picture && speaker.picture !== "https://iaiiea.org/speakers/0" ? 'none' : 'flex' }}>
+                      {(() => {
+                        const pictureUrl = speaker?.picture;
+                        const hasValidImage = isValidImageUrl(pictureUrl);
+                        
+                        console.log('Speaker:', speaker?.name, 'Picture URL:', pictureUrl, 'Valid:', hasValidImage);
+                        
+                        if (hasValidImage) {
+                          return (
+                            <div>
+                              
+                            </div>
+                            // <img
+                            //   src={pictureUrl}
+                            //   alt={String(speaker?.name)}
+                            //   className="w-full h-full object-cover"
+                            //   onError={(e) => {
+                            //     console.log('Image failed to load:', pictureUrl);
+                            //     // Hide the image and show the fallback
+                            //     e.currentTarget.style.display = 'none';
+                            //     const fallback = e.currentTarget.parentElement?.querySelector('.speaker-fallback');
+                            //     if (fallback) {
+                            //       (fallback as HTMLElement).style.display = 'flex';
+                            //     }
+                            //   }}
+                            // />
+                          );
+                        }
+                        return null;
+                      })()}
+                      <div 
+                        className="speaker-fallback flex items-center justify-center w-full h-full"
+                        style={{ 
+                          display: isValidImageUrl(speaker?.picture) ? 'none' : 'flex'
+                        }}
+                      >
                         <User className="w-16 h-16 text-[#D5B93C]/50" />
                       </div>
                     </div>

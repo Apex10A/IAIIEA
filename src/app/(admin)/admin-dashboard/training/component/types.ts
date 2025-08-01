@@ -1,6 +1,11 @@
+// Seminar creation types
 export interface Speaker {
   speaker_id: number;
   occupation: string;
+  name?: string;
+  picture?: string;
+  portfolio?: string;
+  title?: string;
 }
 
 export interface AvailableSpeaker {
@@ -62,4 +67,74 @@ export interface PackageSectionProps {
   data: Step2Data;
   onDataChange: (data: Step2Data) => void;
   onPackageChange: (type: 'basic' | 'premium' | 'standard', value: string) => void;
+}
+
+// Seminar display types
+export interface Seminar {
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: string;
+  flyer?: string;
+  start_date?: string;
+  start_time?: string;
+  speakers?: Speaker[];
+  payments?: Payment[];
+}
+
+export interface SeminarDetails {
+  start_date: string;
+  start_time: string;
+  speakers: Speaker[];
+  resources: Resource[];
+  payments: Payment[];
+  is_registered?: boolean;
+  registered_count?: number;
+}
+
+export interface Resource {
+  resource_id: number | string;
+  resource_type: string | null;
+  caption: string;
+  date: string;
+  file: string;
+  resource?: File[];
+  created_at?: string;
+}
+
+export interface Payment {
+  id: number;
+  name: string;
+  amount_naira: number;
+  amount_usd: number;
+  features: string[];
+}
+
+export interface SeminarDetailsProps {
+  seminar: Seminar;
+  seminarDetails: SeminarDetails | null;
+  loading: boolean;
+  onBack: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  handleDeleteSeminar: (id: number) => Promise<void>;
+  onViewResources?: (seminar: Seminar) => void;
+}
+
+export interface SeminarCardProps {
+  seminar: Seminar;
+  onViewDetails: (seminar: Seminar) => void;
+}
+
+export interface SeminarListProps {
+  seminars: Seminar[];
+  onViewDetails: (seminar: Seminar) => void;
+  selectedSeminar: Seminar | null;
+}
+
+export interface AddResourceModalProps {
+  seminarId: number;
+  onSuccess: () => void;
 }

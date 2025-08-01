@@ -1,8 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
-import Events from '@/app/(admin)/admin-dashboard/conferences/component/events'
-import TrainingResources from './component/TrainingResources';
+import TrainingResourcesNew from './component/TrainingResourcesNew';
 import Resources from '@/app/(admin)/admin-dashboard/training/component/resourcesPage'
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
 
@@ -14,7 +13,7 @@ const Page = () => {
       case 'Create Conference Events':
         return (
           <div className="bg-white dark:bg-transparent">
-            <TrainingResources/>
+            <TrainingResourcesNew />
           </div>
         );
       case 'Create Conference Resources':
@@ -30,7 +29,7 @@ const Page = () => {
 
   return (
     <div className='bg-gray-50 dark:bg-transparent min-h-screen'>
-      
+      {/* Uncomment this if you want to use the section selector */}
       {/* <div>
         <ButtonProp
           options={['Create Conference Events', 'Create Conference Resources']}
@@ -39,8 +38,7 @@ const Page = () => {
         />
       </div> */}
 
-      <div className=''>
-        {/* Render the content based on the selected section */}
+      <div>
         {renderContent()}
       </div>
     </div>

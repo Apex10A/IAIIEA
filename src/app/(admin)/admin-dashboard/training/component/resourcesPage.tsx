@@ -59,7 +59,7 @@ const Page = () => {
             setUploadProgress(percentCompleted);
           }
         },
-        timeout: 300000 // 5-minute timeout
+        timeout: 300000 
       });
 
       toast.success('Resource upload complete');

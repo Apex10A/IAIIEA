@@ -568,7 +568,6 @@ export default function SeminarPage() {
       return;
     }
 
-    // For paid seminars, show payment modal
     setShowPaymentModal(true);
   };
 
@@ -577,7 +576,6 @@ export default function SeminarPage() {
 
     setPaymentProcessing(true);
     try {
-      // Initiate payment
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`,
         {
@@ -645,7 +643,6 @@ export default function SeminarPage() {
 
   return (
     <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
-      {/* Header with Countdown and Button */}
       <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-7xl mx-auto pt-8 md:pt-12 gap-6">
         <div className="w-full md:w-auto">
           {seminarDate && <CountdownTimer targetDate={seminarDate} />}
@@ -654,51 +651,46 @@ export default function SeminarPage() {
           className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
           onClick={handleRegisterClick}
         >
-          {seminar.is_registered ? (
+          {seminar?.is_registered ? (
             "Go to Dashboard"
           ) : (
             "Register Now"
           )}
         </Button>
       </div>
-
-      {/* Hero Section */}
       <div className="mb-12 mt-8 max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-4 leading-tight text-center">
-          {seminar.title}
+          {seminar?.title}
         </h1>
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight text-center">
-          {seminar.theme}
+          {seminar?.theme}
         </h2>
         <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <Calendar className="w-5 h-5" />
-            <span>{seminar.date}</span>
+            <span>{seminar?.date}</span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <MapPin className="w-5 h-5" />
-            <span>{seminar.venue}</span>
+            <span>{seminar?.venue}</span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <span
               className={`px-2 py-1 text-xs rounded-full ${
-                seminar.status === "Completed"
+                seminar?.status === "Completed"
                   ? "bg-red-100 text-red-800"
-                  : seminar.status === "Ongoing"
+                  : seminar?.status === "Ongoing"
                   ? "bg-green-100 text-green-800"
                   : "bg-blue-100 text-blue-800"
               }`}
             >
-              {seminar.status}
+              {seminar?.status}
             </span>
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="space-y-16 max-w-7xl mx-auto">
-        {/* Overview Section */}
-        {seminar.sub_theme && seminar.sub_theme.length > 0 && (
+        {seminar?.sub_theme && seminar?.sub_theme?.length > 0 && (
           <section>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
               Overview
@@ -710,7 +702,7 @@ export default function SeminarPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {seminar.sub_theme.map((theme, index) => (
+                  {seminar?.sub_theme.map((theme, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                       <span className="leading-relaxed">{theme}</span>
@@ -722,8 +714,7 @@ export default function SeminarPage() {
           </section>
         )}
 
-        {/* Workshops */}
-        {seminar.work_shop && seminar.work_shop.length > 0 && (
+        {seminar?.work_shop && seminar?.work_shop?.length > 0 && (
           <section>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
               Workshops
@@ -735,7 +726,7 @@ export default function SeminarPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {seminar.work_shop.map((workshop, index) => (
+                  {seminar?.work_shop?.map((workshop, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
                       <span className="leading-relaxed">{workshop}</span>
@@ -746,8 +737,6 @@ export default function SeminarPage() {
             </Card>
           </section>
         )}
-
-        {/* Speakers Section */}
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Speakers
@@ -998,10 +987,10 @@ export default function SeminarPage() {
                       return paymentInfo ? (
                         <>
                           <p className="text-3xl font-bold text-[#0E1A3D]">
-                            ${paymentInfo.usd}
+                            ${paymentInfo?.usd}
                           </p>
                           <p className="text-lg text-gray-700">
-                            ₦{paymentInfo.naira}
+                            ₦{paymentInfo?.naira}
                           </p>
                         </>
                       ) : (
@@ -1085,10 +1074,10 @@ export default function SeminarPage() {
                       return paymentInfo ? (
                         <>
                           <p className="text-3xl font-bold text-[#0E1A3D]">
-                            ${paymentInfo.usd}
+                            ${paymentInfo?.usd}
                           </p>
                           <p className="text-lg text-gray-700">
-                            ₦{paymentInfo.naira}
+                            ₦{paymentInfo?.naira}
                           </p>
                         </>
                       ) : (

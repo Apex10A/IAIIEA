@@ -527,7 +527,6 @@ export default function SeminarPage() {
       return;
     }
 
-    // For free seminars, register directly without payment modal
     if (seminar.is_free === "free" && !hasPaidPlans(seminar.payments)) {
       if (!session) {
         showToast.error("Please login to register");
@@ -557,7 +556,6 @@ export default function SeminarPage() {
         const data = await response.json();
         if (data.status === "success") {
           showToast.success("Successfully registered for free seminar!");
-          // Reload seminar data to update registration status
           window.location.reload();
         } else {
           throw new Error(data.message || "Failed to register");

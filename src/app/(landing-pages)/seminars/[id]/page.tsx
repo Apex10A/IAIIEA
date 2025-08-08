@@ -103,15 +103,15 @@ const isValidImageUrl = (url: string | undefined | null): boolean => {
   if (trimmedUrl === '') return false;
   
   // List of known invalid URLs
-  const invalidUrls = [
-    'https://iaiiea.org/speakers/',
-    'https://iaiiea.org/speakers/0',
-    'https://iaiiea.org/speakers',
-    '/placeholder.jpg',
-    'placeholder.jpg'
-  ];
+  // const invalidUrls = [
+  //   'https://iaiiea.org/speakers/',
+  //   'https://iaiiea.org/speakers/0',
+  //   'https://iaiiea.org/speakers',
+  //   '/placeholder.jpg',
+  //   'placeholder.jpg'
+  // ];
   
-  if (invalidUrls.includes(trimmedUrl)) return false;
+  // if (invalidUrls.includes(trimmedUrl)) return false;
   
   // Check if URL ends with just a slash (directory)
   if (trimmedUrl.endsWith('/')) return false;
@@ -522,12 +522,12 @@ export default function SeminarPage() {
   const handleRegisterClick = async () => {
     if (!seminar) return;
 
-    if (seminar.is_registered) {
+    if (seminar?.is_registered) {
       router.push("/dashboard");
       return;
     }
 
-    if (seminar.is_free === "free" && !hasPaidPlans(seminar.payments)) {
+    if (seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments)) {
       if (!session) {
         showToast.error("Please login to register");
         return;
@@ -582,7 +582,7 @@ export default function SeminarPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.user.token}`,
+            Authorization: `Bearer ${session?.user?.token}`,
           },
           body: JSON.stringify({
             id: seminar.id,
@@ -591,10 +591,10 @@ export default function SeminarPage() {
           }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to initiate payment");
-      }
+      const data = await response.json();
+      // if (!response.ok) {
+      //   throw new Error(data.message || "Failed to initiate payment");
+      // }
 
       const paymentData = await response.json();
 
@@ -647,16 +647,19 @@ export default function SeminarPage() {
         <div className="w-full md:w-auto">
           {seminarDate && <CountdownTimer targetDate={seminarDate} />}
         </div>
-        <Button
-          className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
-          onClick={handleRegisterClick}
-        >
-          {seminar?.is_registered ? (
-            "Go to Dashboard"
-          ) : (
-            "Register Now"
-          )}
-        </Button>
+        {/* Hide register button for free seminars since there's no endpoint */}
+        {!(seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments)) && (
+          <Button
+            className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+            onClick={handleRegisterClick}
+          >
+            {seminar?.is_registered ? (
+              "Go to Dashboard"
+            ) : (
+              "Register Now"
+            )}
+          </Button>
+        )}
       </div>
       <div className="mb-12 mt-8 max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D5B93C] mb-4 leading-tight text-center">
@@ -755,8 +758,6 @@ export default function SeminarPage() {
                         const pictureUrl = speaker?.picture;
                         const hasValidImage = isValidImageUrl(pictureUrl);
                         
-                        console.log('Speaker:', speaker?.name, 'Picture URL:', pictureUrl, 'Valid:', hasValidImage);
-                        
                         if (hasValidImage) {
                           return (
                             <div>
@@ -809,12 +810,11 @@ export default function SeminarPage() {
           )}
         </section>
 
-        {/* Free Seminar Registration Section */}
         {seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments) && (
           <section className="my-12">
             <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-                Free Registration
+                Free Seminar
               </h2>
               <div className="bg-white/5 backdrop-blur-sm border border-[#D5B93C]/30 rounded-lg p-8 max-w-md mx-auto">
                 <div className="text-6xl font-bold text-[#D5B93C] mb-4">FREE</div>
@@ -826,21 +826,17 @@ export default function SeminarPage() {
                     <span>You're Registered!</span>
                   </div>
                 ) : (
-                  <Button
-                    className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md"
-                    onClick={handleRegisterClick}
-                    disabled={paymentProcessing}
-                  >
-                    {paymentProcessing ? "Registering..." : "Register for Free"}
-                  </Button>
+                  <div className="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-md text-center">
+                    {/* Registration Coming Soon */}
+                  </div>
                 )}
               </div>
             </div>
           </section>
         )}
 
-        {/* Seminar Fees Section - Only show if it's not a free seminar or has paid plans */}
-        {(seminar?.is_free !== "free" || hasPaidPlans(seminar?.payments)) && (
+        {/* Seminar Fees Section - Only show for paid seminars */}
+        {seminar?.is_free !== "free" && (
           <div className="my-12">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
               Seminar Fees

@@ -21,10 +21,10 @@ const Footer = () => {
   useEffect(() => {
     const fetchWebData = async () => {
       try {
-        const response = await fetch('https://iaiiea.org/api/sandbox/landing/web_data');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/web-data`);
         if (!response.ok) throw new Error('Failed to fetch web data');
         const result = await response.json();
-        setWebData(result.data);
+        setWebData(result?.data);
       } catch (error) {
         showToast.error('Failed to load footer data');
       } finally {
@@ -52,13 +52,12 @@ const Footer = () => {
     <footer className="bg-[#0B142F] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Company Info Section */}
           <div className="space-y-6">
             <Link href="/" className="block">
               {webData?.logo2 && (
                 <Image
-                  src={webData.logo2}
-                  alt={webData.short_name}
+                  src={webData?.logo2}
+                  alt={webData?.short_name}
                   width={200}
                   height={80}
                   className="w-auto h-20"
@@ -79,36 +78,33 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Useful Links Section */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold">Useful Links</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
                 {usefulLinks.map((link) => (
                   <Link
-                    key={link.title}
-                    href={link.href}
+                    key={link?.title}
+                    href={link?.href}
                     className="block text-sm text-gray-300 hover:text-white transition-colors"
                   >
-                    {link.title}
+                    {link?.title}
                   </Link>
                 ))}
               </div>
               <div className="space-y-3">
                 {additionalLinks.map((link) => (
                   <Link
-                    key={link.title}
-                    href={link.href}
+                    key={link?.title}
+                    href={link?.href}
                     className="block text-sm text-gray-300 hover:text-white transition-colors"
                   >
-                    {link.title}
+                    {link?.title}
                   </Link>
                 ))}
               </div>
             </div>
           </div>
-
-          {/* Newsletter Section */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold">Stay Updated</h3>
             <p className="text-sm text-gray-300">
@@ -130,7 +126,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-gray-700">
           <p className="text-center text-sm text-gray-300">
             © {new Date().getFullYear()} {webData?.short_name}. All rights reserved.

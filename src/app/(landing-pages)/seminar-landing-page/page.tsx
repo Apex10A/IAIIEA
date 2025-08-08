@@ -164,7 +164,7 @@ const SeminarLandingPage = () => {
         </section>
       )}
 
-      {seminarDetails?.is_free === "paid" && !hasPaidPlans(seminarDetails?.payments) && (
+      {seminarDetails?.is_free === "free" && (
         <section className="py-20 px-4 md:px-8 lg:px-16">
           <div className="max-w-7xl mx-auto">
             <div className="text-center">
@@ -183,7 +183,8 @@ const SeminarLandingPage = () => {
         </section>
       )}
 
-      {(seminarDetails?.is_free !== "paid" || hasPaidPlans(seminarDetails?.payments)) && seminarDetails?.payments && Object.keys(seminarDetails?.payments)?.length > 0 && (
+      {/* Registration Packages Section - Only show for paid seminars */}
+      {seminarDetails?.is_free !== "free" && seminarDetails?.payments && Object.keys(seminarDetails?.payments)?.length > 0 && (
         <section className="py-20 px-4 md:px-8 lg:px-16">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-12 pb-2 border-b border-[#D5B93C] inline-block">

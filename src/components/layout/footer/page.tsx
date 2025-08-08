@@ -21,7 +21,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchWebData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/web-data`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/web_data`); 
         if (!response.ok) throw new Error('Failed to fetch web data');
         const result = await response.json();
         setWebData(result?.data);
@@ -38,14 +38,14 @@ const Footer = () => {
   const usefulLinks = [
     { title: 'Home', href: '/' },
     { title: 'About Us', href: '/about' },
-    { title: 'Services', href: '/services' },
-    { title: 'Contact', href: '/contact' },
+    // { title: 'Services', href: '/services' },
+    // { title: 'Contact', href: '/contact' },
   ];
 
   const additionalLinks = [
     { title: 'Privacy Policy', href: '/privacy-policy' },
-    { title: 'Terms of Service', href: '/terms' },
-    { title: 'FAQ', href: '/faq' },
+    // { title: 'Terms of Service', href: '/terms' },
+    // { title: 'FAQ', href: '/faq' },
   ];
 
   return (

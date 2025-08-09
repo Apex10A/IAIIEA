@@ -8,27 +8,9 @@ const Step2Form: React.FC<Step2FormProps> = ({
   data,
   onDataChange,
   onSubmit,
-  availableSpeakers
+  availableSpeakers,
+  mode
 }) => {
-  const handlePackageChange = (
-    type: 'basic' | 'premium' | 'standard',
-    value: string
-  ) => {
-    const packageKey = `${type}_package` as keyof typeof data;
-    const currentPackages = data[packageKey] as string[];
-    
-    if (currentPackages.includes(value)) {
-      onDataChange({
-        ...data,
-        [packageKey]: currentPackages.filter(item => item !== value)
-      });
-    } else {
-      onDataChange({
-        ...data,
-        [packageKey]: [...currentPackages, value]
-      });
-    }
-  };
 
   const addSpeaker = () => {
     onDataChange({
@@ -53,28 +35,47 @@ const Step2Form: React.FC<Step2FormProps> = ({
     });
   };
 
+  const getModeDisplayName = (mode: string) => {
+    switch (mode) {
+      case 'Physical': return 'Physical Only';
+      case 'Virtual': return 'Virtual Only';
+      case 'Virtual_Physical': return 'Hybrid (Virtual & Physical)';
+      default: return mode;
+    }
+  };
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <PackageSection
-        type="basic"
-        data={data}
-        onDataChange={onDataChange}
-        onPackageChange={handlePackageChange}
-      />
+      {/* Mode indicator */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+        <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+          Seminar Mode: {getModeDisplayName(mode)}
+        </h3>
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+          {mode === 'Virtual_Physical' 
+            ? 'Set fees for both virtual and physical attendance options.'
+            : `Set fees for ${mode.toLowerCase()} attendance.`
+          }
+        </p>
+      </div>
 
-      <PackageSection
-        type="standard"
-        data={data}
-        onDataChange={onDataChange}
-        onPackageChange={handlePackageChange}
-      />
+      {/* Conditionally render fee sections based on mode */}
+      {(mode === 'Physical' || mode === 'Virtual_Physical') && (
+        <PackageSection
+          type="physical"
+          data={data}
+          onDataChange={onDataChange}
+        />
+      )}
 
-      <PackageSection
-        type="premium"
-        data={data}
-        onDataChange={onDataChange}
-        onPackageChange={handlePackageChange}
-      />
+      {(mode === 'Virtual' || mode === 'Virtual_Physical') && (
+        <PackageSection
+          type="virtual"
+          data={data}
+          onDataChange={onDataChange}
+        />
+      )}
+      
       <SpeakersSection
         speakers={data?.speakers}
         availableSpeakers={availableSpeakers}

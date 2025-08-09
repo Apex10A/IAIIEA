@@ -78,13 +78,16 @@ const TrainingResourcesNew: React.FC = () => {
   const handleDeleteSeminar = async (seminarId: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_seminar/${seminarId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_seminar`,
         {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${bearerToken}`,
             "Content-Type": "application/json"
           },
+          body: JSON.stringify({
+            id: seminarId
+          })
         }
       )
       

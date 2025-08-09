@@ -43,7 +43,6 @@ const TrainingResourcesNew: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error("Error fetching seminars:", error);
       showToast.error("Failed to load seminars");
     } finally {
       setLoading(false);
@@ -70,7 +69,6 @@ const TrainingResourcesNew: React.FC = () => {
       const data = await response.json();
       setSeminarDetails(data.data);
     } catch (error) {
-      console.error("Error fetching seminar details:", error);
       showToast.error("Failed to load seminar details");
     } finally {
       setDetailsLoading(false);
@@ -79,9 +77,6 @@ const TrainingResourcesNew: React.FC = () => {
 
   const handleDeleteSeminar = async (seminarId: number) => {
     try {
-      console.log("Deleting seminar with ID:", seminarId);
-      console.log("Bearer token:", bearerToken);
-      
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_seminar/${seminarId}`,
         {
@@ -91,13 +86,10 @@ const TrainingResourcesNew: React.FC = () => {
             "Content-Type": "application/json"
           },
         }
-      );
-  
-      console.log("Delete response status:", response.status);
+      )
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Delete error data:", errorData);
         throw new Error(`Failed to delete seminar: ${response.status}`);
       }
   
@@ -109,7 +101,6 @@ const TrainingResourcesNew: React.FC = () => {
         setSelectedSeminar(null);
       }
     } catch (error) {
-      console.error("Error deleting seminar:", error);
       showToast.error("Failed to delete seminar");
     }
   };

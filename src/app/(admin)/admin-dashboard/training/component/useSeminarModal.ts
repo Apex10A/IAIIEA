@@ -23,15 +23,10 @@ export const useSeminarModal = (onSuccess: () => void) => {
 
   const [step2Data, setStep2Data] = useState<Step2Data>({
     token: '',
-    basic_naira: '',
-    basic_usd: '',
-    basic_package: [],
-    premium_naira: '',
-    premium_usd: '',
-    premium_package: [],
-    standard_naira: '',
-    standard_usd: '',
-    standard_package: [],
+    physical_fee_naira: '',
+    physical_fee_usd: '',
+    virtual_fee_naira: '',
+    virtual_fee_usd: '',
     speakers: []
   });
 
@@ -84,12 +79,10 @@ export const useSeminarModal = (onSuccess: () => void) => {
       // Convert string values to numbers for API submission
       const submissionData = {
         ...step2Data,
-        basic_naira: step2Data.basic_naira === '' ? 0 : Number(step2Data.basic_naira),
-        basic_usd: step2Data.basic_usd === '' ? 0 : Number(step2Data.basic_usd),
-        premium_naira: step2Data.premium_naira === '' ? 0 : Number(step2Data.premium_naira),
-        premium_usd: step2Data.premium_usd === '' ? 0 : Number(step2Data.premium_usd),
-        standard_naira: step2Data.standard_naira === '' ? 0 : Number(step2Data.standard_naira),
-        standard_usd: step2Data.standard_usd === '' ? 0 : Number(step2Data.standard_usd),
+        physical_fee_naira: step2Data.physical_fee_naira === '' ? 0 : Number(step2Data.physical_fee_naira),
+        physical_fee_usd: step2Data.physical_fee_usd === '' ? 0 : Number(step2Data.physical_fee_usd),
+        virtual_fee_naira: step2Data.virtual_fee_naira === '' ? 0 : Number(step2Data.virtual_fee_naira),
+        virtual_fee_usd: step2Data.virtual_fee_usd === '' ? 0 : Number(step2Data.virtual_fee_usd),
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_seminar/2`, {
@@ -128,15 +121,10 @@ export const useSeminarModal = (onSuccess: () => void) => {
     });
     setStep2Data({
       token: '',
-      basic_naira: '',
-      basic_usd: '',
-      basic_package: [],
-      premium_naira: '',
-      premium_usd: '',
-      premium_package: [],
-      standard_naira: '',
-      standard_usd: '',
-      standard_package: [],
+      physical_fee_naira: '',
+      physical_fee_usd: '',
+      virtual_fee_naira: '',
+      virtual_fee_usd: '',
       speakers: []
     });
   };

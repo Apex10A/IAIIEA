@@ -56,6 +56,7 @@ const CreateSeminarModal: React.FC<CreateSeminarModalProps> = ({ onSuccess }) =>
                   onDataChange={setStep2Data}
                   onSubmit={handleStep2Submit}
                   availableSpeakers={availableSpeakers}
+                  mode={step1Data.mode}
                 />
               )}
             </div>

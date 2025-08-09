@@ -38,14 +38,19 @@ interface RegistrationType {
   package?: string[];
 }
 
-// Support both payment structures
+// Updated payment structure to match new backend
 interface SeminarPayments {
+  physical_fee_naira?: number | string;
+  physical_fee_usd?: number | string;
+  virtual_fee_naira?: number | string;
+  virtual_fee_usd?: number | string;
+  // Legacy support for old structure (can be removed later)
   basic?: RegistrationType;
   standard?: RegistrationType;
   premium?: RegistrationType;
   virtual?: PaymentTier;  // For free seminars
   physical?: PaymentTier; // For free seminars
-  [key: string]: RegistrationType | PaymentTier | undefined;
+  [key: string]: RegistrationType | PaymentTier | number | string | undefined;
 }
 
 interface Speaker {
@@ -77,6 +82,23 @@ interface SeminarDetails {
 
 
 const getPaymentInfo = (payments: SeminarPayments, plan: string, attendanceType: 'virtual' | 'physical') => {
+  // New structure - direct fee fields
+  if (payments.physical_fee_naira !== undefined || payments.virtual_fee_naira !== undefined) {
+    if (attendanceType === 'physical' && payments.physical_fee_naira !== undefined) {
+      return {
+        naira: payments.physical_fee_naira,
+        usd: payments.physical_fee_usd || 0
+      };
+    }
+    if (attendanceType === 'virtual' && payments.virtual_fee_naira !== undefined) {
+      return {
+        naira: payments.virtual_fee_naira,
+        usd: payments.virtual_fee_usd || 0
+      };
+    }
+  }
+  
+  // Legacy structure support
   if (payments[plan] && typeof payments[plan] === 'object' && 'virtual' in payments[plan]) {
     const planPayments = payments[plan] as RegistrationType;
     return planPayments[attendanceType];
@@ -92,7 +114,18 @@ const getPaymentInfo = (payments: SeminarPayments, plan: string, attendanceType:
 
 // Helper function to check if seminar has paid plans
 const hasPaidPlans = (payments: SeminarPayments) => {
-  return !!(payments.basic || payments.standard || payments.premium);
+  // Check new structure
+  const hasNewStructureFees = !!(
+    (payments.physical_fee_naira && Number(payments.physical_fee_naira) > 0) ||
+    (payments.physical_fee_usd && Number(payments.physical_fee_usd) > 0) ||
+    (payments.virtual_fee_naira && Number(payments.virtual_fee_naira) > 0) ||
+    (payments.virtual_fee_usd && Number(payments.virtual_fee_usd) > 0)
+  );
+  
+  // Check legacy structure
+  const hasLegacyPlans = !!(payments.basic || payments.standard || payments.premium);
+  
+  return hasNewStructureFees || hasLegacyPlans;
 };
 
 // Helper function to validate image URLs
@@ -219,14 +252,22 @@ const getDummyData = (type: 'free' | 'paid' | 'error'): any => {
     return {
       ...baseData,
       payments: {
-        virtual: { usd: 0, naira: 0 },
-        physical: { usd: 0, naira: 0 }
+        virtual_fee_naira: 0,
+        virtual_fee_usd: 0,
+        physical_fee_naira: 0,
+        physical_fee_usd: 0
       }
     };
   } else {
     return {
       ...baseData,
       payments: {
+        // New structure
+        virtual_fee_naira: 150000,
+        virtual_fee_usd: 99,
+        physical_fee_naira: 225000,
+        physical_fee_usd: 149,
+        // Legacy structure for backward compatibility
         basic: {
           virtual: { usd: "99", naira: "150000" },
           physical: { usd: "149", naira: "225000" },
@@ -434,7 +475,7 @@ export default function SeminarPage() {
   const [error, setError] = useState<string | null>(null);
   const [seminarDate, setSeminarDate] = useState<Date | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("basic");
+  const [selectedPlan, setSelectedPlan] = useState("basic"); // Keep for legacy support
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
 
@@ -449,7 +490,7 @@ export default function SeminarPage() {
         }
 
         // TESTING MODE - Toggle this for testing different scenarios
-        const TESTING_MODE = false; // Set to false to use real API
+        const TESTING_MODE = true; // Set to false to use real API
         
         if (TESTING_MODE) {
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -576,34 +617,70 @@ export default function SeminarPage() {
 
     setPaymentProcessing(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.user?.token}`,
-          },
-          body: JSON.stringify({
-            id: seminar.id,
-            plan: selectedPlan,
-            type: attendanceType,
-          }),
+      // Check if it's a free seminar
+      const fee = attendanceType === 'virtual' 
+        ? { naira: seminar?.payments?.virtual_fee_naira || 0, usd: seminar?.payments?.virtual_fee_usd || 0 }
+        : { naira: seminar?.payments?.physical_fee_naira || 0, usd: seminar?.payments?.physical_fee_usd || 0 };
+      
+      const isFree = Number(fee.usd) === 0 && Number(fee.naira) === 0;
+
+      if (isFree) {
+        // Handle free registration
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/seminar/register_free/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.user.token}`,
+            },
+            body: JSON.stringify({
+              id: seminar.id,
+              type: attendanceType,
+            }),
+          }
+        );
+
+        const data = await response.json();
+        if (data.status === "success") {
+          showToast.success("Successfully registered for seminar!");
+          setShowPaymentModal(false);
+          window.location.reload();
+        } else {
+          throw new Error(data.message || "Failed to register");
         }
-      );
-
-      const paymentData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(paymentData.message || "Failed to initiate payment");
-      }
-
-      if (paymentData.status === "success" && paymentData.data.link) {
-        // Redirect to payment gateway
-        window.location.href = paymentData.data.link;
       } else {
-        showToast.success("Payment initiated successfully");
-        setShowPaymentModal(false);
+        // Handle paid registration
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.user?.token}`,
+            },
+            body: JSON.stringify({
+              id: seminar.id,
+              type: attendanceType,
+              // Keep legacy support for now
+              plan: selectedPlan,
+            }),
+          }
+        );
+
+        const paymentData = await response.json();
+
+        if (!response.ok) {
+          throw new Error(paymentData.message || "Failed to initiate payment");
+        }
+
+        if (paymentData.status === "success" && paymentData.data.link) {
+          // Redirect to payment gateway
+          window.location.href = paymentData.data.link;
+        } else {
+          showToast.success("Payment initiated successfully");
+          setShowPaymentModal(false);
+        }
       }
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to process payment";
@@ -885,38 +962,218 @@ export default function SeminarPage() {
                 </p>
               </div>
             )}
-            {seminar?.is_registered && seminar?.current_plan && (
+            {seminar?.is_registered && (
               <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
                 <div className="flex items-center gap-3">
                   <Check className="w-5 h-5 text-[#D5B93C] flex-shrink-0" />
                   <div>
-                    <p className="font-bold text-white">You're registered for:</p>
-                    <p className="text-white">
-                      {seminar?.current_plan.charAt(0).toUpperCase() + seminar?.current_plan?.slice(1)} Access ({attendanceType})
-                    </p>
+                    <p className="font-bold text-white">You're registered for this seminar!</p>
+                    <p className="text-white">Access to all seminar content and materials</p>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-center mb-8">
-              <div className="bg-white/10 p-1 rounded-full">
-                <button 
-                  className={`px-4 py-2 rounded-full ${attendanceType === 'virtual' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
-                  onClick={() => setAttendanceType('virtual')}
-                >
-                  Virtual
-                </button>
-                <button 
-                  className={`px-4 py-2 rounded-full ${attendanceType === 'physical' ? 'bg-[#D5B93C] text-[#0E1A3D]' : 'text-white'} font-medium`}
-                  onClick={() => setAttendanceType('physical')}
-                >
-                  Physical
-                </button>
-              </div>
-            </div>
+            {/* New pricing structure based on seminar mode */}
+            {(() => {
+              const hasVirtualFee = seminar?.payments?.virtual_fee_naira !== undefined || seminar?.payments?.virtual_fee_usd !== undefined;
+              const hasPhysicalFee = seminar?.payments?.physical_fee_naira !== undefined || seminar?.payments?.physical_fee_usd !== undefined;
+              const virtualFee = {
+                naira: seminar?.payments?.virtual_fee_naira || 0,
+                usd: seminar?.payments?.virtual_fee_usd || 0
+              };
+              const physicalFee = {
+                naira: seminar?.payments?.physical_fee_naira || 0,
+                usd: seminar?.payments?.physical_fee_usd || 0
+              };
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              // If using new structure, show virtual/physical cards
+              if (hasVirtualFee || hasPhysicalFee) {
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                    {/* Virtual Attendance Card */}
+                    {(hasVirtualFee || seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical') && (
+                      <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+                        seminar?.is_registered ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
+                      } relative`}>
+                        {seminar?.is_registered && (
+                          <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+                            REGISTERED
+                          </div>
+                        )}
+                        <div className={`p-6 ${seminar?.is_registered ? 'pt-16' : ''}`}>
+                          <h3 className="text-xl font-bold text-[#0E1A3D] mb-4 flex items-center gap-2">
+                            <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                            </svg>
+                            Virtual Attendance
+                          </h3>
+                          
+                          <div className="space-y-4">
+                            <div className="text-center">
+                              {Number(virtualFee.usd) > 0 || Number(virtualFee.naira) > 0 ? (
+                                <>
+                                  <p className="text-3xl font-bold text-[#0E1A3D]">
+                                    ${virtualFee.usd}
+                                  </p>
+                                  <p className="text-lg text-gray-700">
+                                    ₦{Number(virtualFee.naira).toLocaleString()}
+                                  </p>
+                                </>
+                              ) : (
+                                <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
+                              )}
+                            </div>
+                            
+                            <div className="pt-2">
+                              <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+                              <ul className="space-y-2 text-sm text-gray-700">
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Live virtual access to all sessions</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Digital seminar materials</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Certificate of attendance</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Access to recorded sessions</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Virtual networking opportunities</span>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {seminar?.is_registered ? (
+                              <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                                <Check className="w-5 h-5" />
+                                <span>Registered</span>
+                              </div>
+                            ) : (
+                              <button 
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+                                onClick={() => {
+                                  setAttendanceType('virtual');
+                                  handleRegisterClick();
+                                }}
+                              >
+                                {Number(virtualFee.usd) > 0 || Number(virtualFee.naira) > 0 
+                                  ? "Register Virtual" 
+                                  : "Join Virtual (Free)"
+                                }
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Physical Attendance Card */}
+                    {(hasPhysicalFee || seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && (
+                      <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
+                        seminar?.is_registered ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]'
+                      } relative ${seminar?.mode === 'Virtual_Physical' ? '' : 'md:transform md:-translate-y-2'}`}>
+                        {seminar?.is_registered && (
+                          <div className="absolute top-0 left-0 right-0 bg-[#D5B93C] text-[#0E1A3D] py-2 text-center font-bold">
+                            REGISTERED
+                          </div>
+                        )}
+                        <div className={`p-6 relative ${seminar?.is_registered ? 'pt-16' : ''}`}>
+                          {!seminar?.is_registered && seminar?.mode === 'Virtual_Physical' && (
+                            <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
+                              PREMIUM
+                            </div>
+                          )}
+                          <h3 className="text-xl font-bold text-[#0E1A3D] mb-4 flex items-center gap-2">
+                            <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                            </svg>
+                            Physical Attendance
+                          </h3>
+                          
+                          <div className="space-y-4">
+                            <div className="text-center">
+                              {Number(physicalFee.usd) > 0 || Number(physicalFee.naira) > 0 ? (
+                                <>
+                                  <p className="text-3xl font-bold text-[#0E1A3D]">
+                                    ${physicalFee.usd}
+                                  </p>
+                                  <p className="text-lg text-gray-700">
+                                    ₦{Number(physicalFee.naira).toLocaleString()}
+                                  </p>
+                                </>
+                              ) : (
+                                <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
+                              )}
+                            </div>
+                            
+                            <div className="pt-2">
+                              <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
+                              <ul className="space-y-2 text-sm text-gray-700">
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>In-person attendance at venue</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Physical seminar materials</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Certificate of attendance</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Lunch & refreshments</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>In-person networking opportunities</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                                  <span>Direct interaction with speakers</span>
+                                </li>
+                              </ul>
+                            </div>
+
+                            {seminar?.is_registered ? (
+                              <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
+                                <Check className="w-5 h-5" />
+                                <span>Registered</span>
+                              </div>
+                            ) : (
+                              <button 
+                                className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
+                                onClick={() => {
+                                  setAttendanceType('physical');
+                                  handleRegisterClick();
+                                }}
+                              >
+                                {Number(physicalFee.usd) > 0 || Number(physicalFee.naira) > 0 
+                                  ? "Register Physical" 
+                                  : "Join Physical (Free)"
+                                }
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // Fallback to legacy structure
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
               seminar?.is_registered && seminar?.current_plan === 'basic' ? 
               'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
@@ -1182,8 +1439,9 @@ export default function SeminarPage() {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1264,37 +1522,28 @@ export default function SeminarPage() {
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Select Payment Plan</h3>
+            <h3 className="text-xl font-bold mb-4">Confirm Registration</h3>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Plan</label>
-                <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Attendance Type</label>
-                <Select 
-                  value={attendanceType} 
-                  onValueChange={(value: "virtual" | "physical") => setAttendanceType(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select attendance type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="virtual">Virtual</SelectItem>
-                    <SelectItem value="physical">Physical</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Registration Details:</h4>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p><strong>Seminar:</strong> {seminar?.title}</p>
+                  <p><strong>Attendance:</strong> {attendanceType === 'virtual' ? 'Virtual' : 'Physical'}</p>
+                  {(() => {
+                    const fee = attendanceType === 'virtual' 
+                      ? { naira: seminar?.payments?.virtual_fee_naira || 0, usd: seminar?.payments?.virtual_fee_usd || 0 }
+                      : { naira: seminar?.payments?.physical_fee_naira || 0, usd: seminar?.payments?.physical_fee_usd || 0 };
+                    
+                    return (
+                      <p><strong>Fee:</strong> {
+                        Number(fee.usd) > 0 || Number(fee.naira) > 0 
+                          ? `$${fee.usd} / ₦${Number(fee.naira).toLocaleString()}`
+                          : 'Free'
+                      }</p>
+                    );
+                  })()}
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 mt-6">
@@ -1310,7 +1559,7 @@ export default function SeminarPage() {
                   onClick={handlePaymentSubmit}
                   disabled={paymentProcessing}
                 >
-                  {paymentProcessing ? "Processing..." : "Proceed to Payment"}
+                  {paymentProcessing ? "Processing..." : "Confirm Registration"}
                 </Button>
               </div>
             </div>

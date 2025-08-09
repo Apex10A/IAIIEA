@@ -25,15 +25,10 @@ export interface Step1Data {
 
 export interface Step2Data {
   token: string;
-  basic_naira: number | string;
-  basic_usd: number | string;
-  basic_package: string[];
-  premium_naira: number | string;
-  premium_usd: number | string;
-  premium_package: string[];
-  standard_naira: number | string;
-  standard_usd: number | string;
-  standard_package: string[];
+  physical_fee_naira: number | string;
+  physical_fee_usd: number | string;
+  virtual_fee_naira: number | string;
+  virtual_fee_usd: number | string;
   speakers: Speaker[];
 }
 
@@ -52,6 +47,7 @@ export interface Step2FormProps {
   onDataChange: (data: Step2Data) => void;
   onSubmit: (e: React.FormEvent) => void;
   availableSpeakers: AvailableSpeaker[];
+  mode: string;
 }
 
 export interface SpeakersSectionProps {
@@ -63,10 +59,9 @@ export interface SpeakersSectionProps {
 }
 
 export interface PackageSectionProps {
-  type: 'basic' | 'standard' | 'premium';
+  type: 'physical' | 'virtual';
   data: Step2Data;
   onDataChange: (data: Step2Data) => void;
-  onPackageChange: (type: 'basic' | 'premium' | 'standard', value: string) => void;
 }
 
 // Seminar display types

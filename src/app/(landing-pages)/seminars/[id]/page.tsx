@@ -591,12 +591,12 @@ export default function SeminarPage() {
           }),
         }
       );
-      const data = await response.json();
-      // if (!response.ok) {
-      //   throw new Error(data.message || "Failed to initiate payment");
-      // }
 
       const paymentData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(paymentData.message || "Failed to initiate payment");
+      }
 
       if (paymentData.status === "success" && paymentData.data.link) {
         // Redirect to payment gateway
@@ -605,8 +605,10 @@ export default function SeminarPage() {
         showToast.success("Payment initiated successfully");
         setShowPaymentModal(false);
       }
-    } catch (err) {
-      showToast.error("Failed to initiate payment");
+    } catch (err: any) {
+      const errorMessage = err?.message || "Failed to process payment";
+      console.log("Payment error:", errorMessage);
+      showToast.error(errorMessage);
     } finally {
       setPaymentProcessing(false);
     }
@@ -647,8 +649,8 @@ export default function SeminarPage() {
         <div className="w-full md:w-auto">
           {seminarDate && <CountdownTimer targetDate={seminarDate} />}
         </div>
-        {/* Hide register button for free seminars since there's no endpoint */}
-        {!(seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments)) && (
+        {/* Show register button based on seminar type */}
+        {seminar?.is_free !== "free" && (
           <Button
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
             onClick={handleRegisterClick}
@@ -659,6 +661,18 @@ export default function SeminarPage() {
               "Register Now"
             )}
           </Button>
+        )}
+        {seminar?.is_free === "free" && (
+          <div className="w-full md:w-auto text-center">
+            <div className="bg-green-500/20 border border-green-500/30 rounded-lg px-6 py-3">
+              <div className="text-green-400 font-bold text-lg">
+                ✨ FREE SEMINAR ✨
+              </div>
+              <div className="text-white/80 text-sm mt-1">
+                No registration required - Join us for free!
+              </div>
+            </div>
+          </div>
         )}
       </div>
       <div className="mb-12 mt-8 max-w-7xl mx-auto">
@@ -810,37 +824,67 @@ export default function SeminarPage() {
           )}
         </section>
 
-        {seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments) && (
+        {seminar?.is_free === "free" && (
           <section className="my-12">
             <div className="text-center">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
-                Free Seminar
+                {hasPaidPlans(seminar?.payments) ? "Free Access Available" : "Free Seminar"}
               </h2>
-              <div className="bg-white/5 backdrop-blur-sm border border-[#D5B93C]/30 rounded-lg p-8 max-w-md mx-auto">
-                <div className="text-6xl font-bold text-[#D5B93C] mb-4">FREE</div>
-                <p className="text-white/80 mb-6">This seminar is completely free to attend!</p>
-                
-                {seminar?.is_registered ? (
-                  <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md text-center flex items-center justify-center gap-2">
-                    <Check className="w-5 h-5" />
-                    <span>You're Registered!</span>
+              <div className="bg-gradient-to-br from-green-500/20 to-[#D5B93C]/20 backdrop-blur-sm border border-green-500/30 rounded-lg p-8 max-w-2xl mx-auto">
+                <div className="text-5xl font-bold text-green-400 mb-4">100% FREE</div>
+                <div className="text-white/90 mb-6 space-y-2">
+                  <p className="text-lg font-medium">This seminar includes free access to:</p>
+                  <div className="grid md:grid-cols-2 gap-2 mt-4">
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Check className="w-5 h-5 text-green-400" />
+                      <span>All seminar sessions</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Check className="w-5 h-5 text-green-400" />
+                      <span>Digital materials</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Check className="w-5 h-5 text-green-400" />
+                      <span>Certificate of attendance</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Check className="w-5 h-5 text-green-400" />
+                      <span>Access to recordings</span>
+                    </div>
                   </div>
-                ) : (
-                  <div className="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-md text-center">
-                    {/* Registration Coming Soon */}
+                </div>
+                
+                {hasPaidPlans(seminar?.payments) && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
+                    <p className="text-yellow-300 text-sm font-medium">
+                      💡 Optional paid upgrades available below for additional perks
+                    </p>
                   </div>
                 )}
+
+                <div className="bg-green-500/20 text-green-300 font-bold py-3 px-4 rounded-md text-center flex items-center justify-center gap-2">
+                  <Check className="w-5 h-5" />
+                  <span>Free Access - No Payment Required!</span>
+                </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* Seminar Fees Section - Only show for paid seminars */}
-        {seminar?.is_free !== "free" && (
+        {/* Seminar Fees Section - Show for paid seminars or free seminars with paid upgrades */}
+        {(seminar?.is_free !== "free" || hasPaidPlans(seminar?.payments)) && (
           <div className="my-12">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
-              Seminar Fees
+              {seminar?.is_free === "free" ? "Optional Premium Upgrades" : "Seminar Fees"}
             </h2>
+            {seminar?.is_free === "free" && (
+              <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-blue-300 text-center">
+                  🎉 <strong>Remember:</strong> This seminar is completely FREE to attend! 
+                  The options below are optional premium upgrades for additional perks.
+                </p>
+              </div>
+            )}
             {seminar?.is_registered && seminar?.current_plan && (
               <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
                 <div className="flex items-center gap-3">
@@ -883,7 +927,9 @@ export default function SeminarPage() {
                 </div>
               )}
               <div className={`p-6 ${seminar?.is_registered && seminar?.current_plan === 'basic' ? 'pt-16' : ''}`}>
-                <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">Basic Access</h3>
+                <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">
+                  {seminar?.is_free === "free" ? "Basic Premium Add-ons" : "Basic Access"}
+                </h3>
                 
                 <div className="space-y-4">
                   <div className="text-center">
@@ -953,7 +999,7 @@ export default function SeminarPage() {
                         handleRegisterClick();
                       }}
                     >
-                      Register Basic
+{seminar?.is_free === "free" ? "Upgrade to Basic" : "Register Basic"}
                     </button>
                   )}
                 </div>
@@ -1044,7 +1090,7 @@ export default function SeminarPage() {
                         handleRegisterClick();
                       }}
                     >
-                      Register Standard
+{seminar?.is_free === "free" ? "Upgrade to Standard" : "Register Standard"}
                     </button>
                   )}
                 </div>
@@ -1131,7 +1177,7 @@ export default function SeminarPage() {
                         handleRegisterClick();
                       }}
                     >
-                      Register Premium
+{seminar?.is_free === "free" ? "Upgrade to Premium" : "Register Premium"}
                     </button>
                   )}
                 </div>

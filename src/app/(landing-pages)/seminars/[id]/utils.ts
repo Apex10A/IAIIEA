@@ -33,6 +33,8 @@ export const getPaymentInfo = (payments: SeminarPayments, plan: string, attendan
 
 // Helper function to check if seminar has paid plans
 export const hasPaidPlans = (payments: SeminarPayments) => {
+  if (!payments) return false;
+  
   // Check new structure
   const hasNewStructureFees = !!(
     (payments.physical_fee_naira && Number(payments.physical_fee_naira) > 0) ||
@@ -44,7 +46,13 @@ export const hasPaidPlans = (payments: SeminarPayments) => {
   // Check legacy structure
   const hasLegacyPlans = !!(payments.basic || payments.standard || payments.premium);
   
-  return hasNewStructureFees || hasLegacyPlans;
+  // Check direct virtual/physical structure (like your data)
+  const hasDirectPayments = !!(
+    (payments.virtual && (Number(payments.virtual.usd) > 0 || Number(payments.virtual.naira) > 0)) ||
+    (payments.physical && (Number(payments.physical.usd) > 0 || Number(payments.physical.naira) > 0))
+  );
+  
+  return hasNewStructureFees || hasLegacyPlans || hasDirectPayments;
 };
 
 // Helper function to validate image URLs

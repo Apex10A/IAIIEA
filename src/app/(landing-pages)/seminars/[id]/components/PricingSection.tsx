@@ -20,7 +20,8 @@ export const PricingSection = ({
   onPlanSelect,
   onAttendanceTypeChange,
 }: PricingSectionProps) => {
-  if (seminar?.is_free !== "free" && !hasPaidPlans(seminar?.payments)) {
+  // Always show pricing section - let the content determine what to display
+  if (!seminar) {
     return null;
   }
 
@@ -53,23 +54,45 @@ export const PricingSection = ({
 
       {/* Pricing structure based on seminar mode */}
       {(() => {
+        // Check for new structure (virtual_fee_naira, physical_fee_naira)
         const hasVirtualFee = seminar?.payments?.virtual_fee_naira !== undefined || seminar?.payments?.virtual_fee_usd !== undefined;
         const hasPhysicalFee = seminar?.payments?.physical_fee_naira !== undefined || seminar?.payments?.physical_fee_usd !== undefined;
-        const virtualFee = {
+        
+        // Check for direct virtual/physical structure (like your data)
+        const hasDirectVirtual = seminar?.payments?.virtual !== undefined;
+        const hasDirectPhysical = seminar?.payments?.physical !== undefined;
+        
+        const virtualFee = hasVirtualFee ? {
           naira: seminar?.payments?.virtual_fee_naira || 0,
           usd: seminar?.payments?.virtual_fee_usd || 0
-        };
-        const physicalFee = {
+        } : hasDirectVirtual ? {
+          naira: seminar?.payments?.virtual?.naira || 0,
+          usd: seminar?.payments?.virtual?.usd || 0
+        } : { naira: 0, usd: 0 };
+        
+        const physicalFee = hasPhysicalFee ? {
           naira: seminar?.payments?.physical_fee_naira || 0,
           usd: seminar?.payments?.physical_fee_usd || 0
-        };
+        } : hasDirectPhysical ? {
+          naira: seminar?.payments?.physical?.naira || 0,
+          usd: seminar?.payments?.physical?.usd || 0
+        } : { naira: 0, usd: 0 };
 
-        // If using new structure, show virtual/physical cards
-        if (hasVirtualFee || hasPhysicalFee) {
+        // If using new structure or direct virtual/physical structure, show virtual/physical cards
+        if (hasVirtualFee || hasPhysicalFee || hasDirectVirtual || hasDirectPhysical) {
+          const showVirtual = (seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical') && 
+                             ((hasVirtualFee || hasDirectVirtual) && (Number(virtualFee.usd) > 0 || Number(virtualFee.naira) > 0));
+          const showPhysical = (seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && 
+                              ((hasPhysicalFee || hasDirectPhysical) && (Number(physicalFee.usd) > 0 || Number(physicalFee.naira) > 0));
+          
+          // For free seminars, show based on mode regardless of fee amount
+          const showVirtualForFree = seminar?.is_free === 'free' && (seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical');
+          const showPhysicalForFree = seminar?.is_free === 'free' && (seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical');
+          
           return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Virtual Attendance Card */}
-              {(hasVirtualFee || seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical') && (
+              {(showVirtual || showVirtualForFree) && (
                 <VirtualAttendanceCard
                   seminar={seminar}
                   virtualFee={virtualFee}
@@ -81,10 +104,41 @@ export const PricingSection = ({
               )}
 
               {/* Physical Attendance Card */}
-              {(hasPhysicalFee || seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && (
+              {(showPhysical || showPhysicalForFree) && (
                 <PhysicalAttendanceCard
                   seminar={seminar}
                   physicalFee={physicalFee}
+                  onRegisterClick={() => {
+                    onAttendanceTypeChange('physical');
+                    onRegisterClick();
+                  }}
+                />
+              )}
+            </div>
+          );
+        }
+
+        // If no payment structure is found but seminar has a mode, show basic cards (only for free seminars)
+        if (seminar?.mode && seminar?.is_free === 'free') {
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Virtual Attendance Card */}
+              {(seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical') && (
+                <VirtualAttendanceCard
+                  seminar={seminar}
+                  virtualFee={{ naira: 0, usd: 0 }}
+                  onRegisterClick={() => {
+                    onAttendanceTypeChange('virtual');
+                    onRegisterClick();
+                  }}
+                />
+              )}
+
+              {/* Physical Attendance Card */}
+              {(seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && (
+                <PhysicalAttendanceCard
+                  seminar={seminar}
+                  physicalFee={{ naira: 0, usd: 0 }}
                   onRegisterClick={() => {
                     onAttendanceTypeChange('physical');
                     onRegisterClick();

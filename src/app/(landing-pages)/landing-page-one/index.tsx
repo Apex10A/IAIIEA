@@ -315,8 +315,8 @@ const LandingPage: React.FC = () => {
               <div className="text-[#D5B93C] mb-4">
                 <FaGraduationCap size={40} />
               </div>
-              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Mission</h3>
-              <p className="text-[#0B142F]/80">
+              <h3 className="text-xl font-bold text-[#0B142F] mb-3">Our Mission</h3>
+              <p className="text-base text-[#0B142F]/80">
                 To advance innovative system that enhances quality assessment in terms of intellectual competence and the zeal to add value to our world.
               </p>
             </motion.div>
@@ -328,8 +328,8 @@ const LandingPage: React.FC = () => {
               <div className="text-[#D5B93C] mb-4">
                 <FaUsers size={40} />
               </div>
-              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Vision</h3>
-              <p className="text-[#0B142F]/80">
+              <h3 className="text-xl font-bold text-[#0B142F] mb-3">Our Vision</h3>
+              <p className="text-base text-[#0B142F]/80">
                 IAIIEA has its vision to be a pace-setter and a world-class association for innovative educational assessment.
               </p>
             </motion.div>
@@ -341,8 +341,8 @@ const LandingPage: React.FC = () => {
               <div className="text-[#D5B93C] mb-4">
                 <FaChalkboardTeacher size={40} />
               </div>
-              <h3 className="text-2xl font-bold text-[#0B142F] mb-3">Our Motto</h3>
-              <p className="text-[#0B142F]/80">
+              <h3 className="text-xl font-bold text-[#0B142F] mb-3">Our Motto</h3>
+              <p className="text-base text-[#0B142F]/80">
                 Innovation for excellence
               </p>
             </motion.div>
@@ -359,8 +359,8 @@ const LandingPage: React.FC = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Publications</h2>
-            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">Our Publications</h2>
+            <p className="text-lg text-[#0B142F]/80 max-w-3xl mx-auto">
               Explore our academic contributions to educational assessment
             </p>
           </motion.div>
@@ -386,10 +386,10 @@ const LandingPage: React.FC = () => {
                 <div className="p-6">
                   <div className="flex items-center mb-4">
                     <FaBookOpen className="text-[#D5B93C] mr-2" size={24} />
-                    <h3 className="text-xl font-bold text-[#0B142F]">PUBLICATIONS</h3>
+                    <h3 className="text-lg font-bold text-[#0B142F]">PUBLICATIONS</h3>
                   </div>
-                  <h4 className="text-lg font-semibold text-[#0B142F] mb-2">{pub?.title}</h4>
-                  <p className="text-[#0B142F]/80 mb-4">{pub?.volume}</p>
+                  <h4 className="text-base font-semibold text-[#0B142F] mb-2">{pub?.title}</h4>
+                  <p className="text-sm text-[#0B142F]/80 mb-4">{pub?.volume}</p>
                   <Link 
                     href={pub.link} 
                     target="_blank"
@@ -414,8 +414,8 @@ const LandingPage: React.FC = () => {
             variants={fadeIn}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0B142F] mb-4">Our Events</h2>
-            <p className="text-xl text-[#0B142F]/80 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">Our Events</h2>
+            <p className="text-lg text-[#0B142F]/80 max-w-3xl mx-auto">
               Join our premier events designed to advance educational assessment practices worldwide
             </p>
           </motion.div>

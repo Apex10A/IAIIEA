@@ -219,16 +219,16 @@ const LandingPage: React.FC = () => {
               viewport={{ once: true }}
               variants={fadeIn}
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0B142F] mb-6 leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0B142F] mb-6 leading-tight">
                 The International Association for Innovations in Educational Assessment (IAIIEA)
               </h1>
  
               <div className="mb-8">
-                <h2 className="text-3xl font-bold text-[#0B142F] mb-4">Our Journey So Far</h2>
-                <p className="text-lg text-[#0B142F]/80 mb-4">
+                <h2 className="text-2xl font-bold text-[#0B142F] mb-4">Our Journey So Far</h2>
+                <p className="text-base text-[#0B142F]/80 mb-4">
                   The International Association for Innovations in Educational Assessment (IAIIEA) was established on 9th October, 2018. That was when the Association was registered with the Federal Republic of Nigeria via the Corporate Affairs Commission (CAC) Abuja, Nigeria.
                 </p>
-                <p className="text-lg text-[#0B142F]/80 mb-6">
+                <p className="text-base text-[#0B142F]/80 mb-6">
                   The Association came into limelight on 24th November, 2018 when the maiden conference was held in Abuja, the capital city of Nigeria, West Africa. It was indeed an academic conference. The conference took place at the Public Service Institute of Nigeria along Kubwa Express Road, Abuja.
                 </p>
                 <Link href="/about" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
@@ -237,12 +237,12 @@ const LandingPage: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-[#0B142F] mb-4">Our Aims</h2>
+                <h2 className="text-xl font-bold text-[#0B142F] mb-4">Our Aims</h2>
                 <div className="flex items-start gap-4">
-                  <div className="text-[#D5B93C] mt-1">
+                  <div className="text-[#28230e] mt-1">
                     <FaGraduationCap size={24} />
                   </div>
-                  <p className="text-lg text-[#0B142F]/80">
+                  <p className="text-base text-[#0B142F]/80">
                     Developing innovations in educational assessment at all levels
                   </p>
                 </div>
@@ -250,7 +250,7 @@ const LandingPage: React.FC = () => {
                   <div className="text-[#D5B93C] mt-1">
                     <FaUsers size={24} />
                   </div>
-                  <p className="text-lg text-[#0B142F]/80">
+                  <p className="text-base text-[#0B142F]/80">
                     Promoting educational assessment innovations for national and international cohesion
                   </p>
                 </div>
@@ -258,7 +258,7 @@ const LandingPage: React.FC = () => {
                   <div className="text-[#D5B93C] mt-1">
                     <FaChalkboardTeacher size={24} />
                   </div>
-                  <p className="text-lg text-[#0B142F]/80">
+                  <p className="text-base text-[#0B142F]/80">
                     Providing intensive capacity building for researchers, students, teachers, and other educational stakeholders
                   </p>
                 </div>
@@ -282,7 +282,7 @@ const LandingPage: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0E1A3D] to-transparent opacity-70"></div>
                 <div className="absolute bottom-0 left-0 p-6 text-white">
-                  <h3 className="text-xl font-bold">Our Dedicated Team</h3>
+                  <h3 className="text-lg font-bold">Our Dedicated Team</h3>
                   <p>Committed to advancing educational assessment worldwide</p>
                 </div>
               </div>

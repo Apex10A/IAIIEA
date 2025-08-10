@@ -237,6 +237,7 @@ const LandingPage: React.FC = () => {
               </div>
 
               <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-[#0B142F] mb-4">Our Aims</h2>
                 <div className="flex items-start gap-4">
                   <div className="text-[#D5B93C] mt-1">
                     <FaGraduationCap size={24} />

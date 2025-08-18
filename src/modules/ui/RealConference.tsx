@@ -150,13 +150,13 @@ const SeminarCards = () => {
   return (
     <div className="container mx-auto px-4">
       <div className="flex justify-between items-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F]">
+        <h2 className="text-xl md:text-3xl font-bold text-[#0B142F]">
           Our Conferences
         </h2>
         {seminars.length > 3 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className="text-[#203A87] hover:text-[#152a61] font-medium flex items-center gap-2 transition-colors"
+            className="text-[#203A87] hover:text-[#152a61] font-medium flex items-center gap-2 text-sm transition-colors"
           >
             {showAll ? 'Show Less' : 'See All'}
             <FiBookOpen className="w-4 h-4" />

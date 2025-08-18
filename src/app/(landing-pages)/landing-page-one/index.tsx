@@ -69,7 +69,7 @@ const LandingPage: React.FC = () => {
         }
         setIncomingEvents([...incomingConferences, ...incomingSeminars]);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        // console.error("Error fetching events:", error);
       } finally {
         setLoading(false);
       }
@@ -133,35 +133,35 @@ const LandingPage: React.FC = () => {
                         className="text-center space-y-6 md:space-y-8"
                       >
                         <div className="flex items-center justify-center gap-4">
-                          <span className="inline-block px-4 py-2 bg-[#D5B93C] text-white text-xs md:text-base font-semibold rounded-full shadow-lg">
+                          <span className="inline-block px-4 py-2 bg-[#D5B93C] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
                             {event?.status}
                           </span>
-                          <span className="inline-block px-4 py-2 bg-[#0B142F] text-white text-xs md:text-base font-semibold rounded-full shadow-lg">
+                          <span className="inline-block px-4 py-2 bg-[#0B142F] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
                             {event?.type === 'conference' ? 'Conference' : 'Seminar'}
                           </span>
                         </div>
-                        <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                           {event?.title}
                         </h1>
-                        <p className="text-base sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-medium">
+                        <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-medium">
                           {event?.theme}
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-white/90">
                           <div className="flex items-center gap-3">
                             <FaUsers className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="font-medium text-sm md:text-lg">{event?.venue}</span>
+                            <span className="font-medium text-base md:text-lg">{event?.venue}</span>
                           </div>
                           <div className="hidden sm:block text-2xl text-white/50">•</div>
                           <div className="flex items-center gap-3">
                             <FaCalendar className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="font-medium text-sm md:text-lg">{event?.date}</span>
+                            <span className="font-medium text-base md:text-lg">{event?.date}</span>
                           </div>
                         </div>
                         <div className="pt-8 relative z-50">
                           <Link
                             // href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
                             href={'/register'}
-                            className="relative inline-flex items-center md:mr-4 px-6 md:px-8 py-3 md:py-4 bg-[#D5B93C] text-white text-base md:text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                            className="relative inline-flex items-center md:mr-4 px-6 md:px-8 py-3 md:py-4 bg-[#D5B93C] text-white text-base md:text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer mb-4 md:mb-0"
                           >
                            How to Join <FaArrowRight className="ml-3 w-5 h-5" />
                           </Link>

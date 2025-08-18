@@ -934,15 +934,19 @@ export default function ConferencePage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-4">
-                {conference?.important_date.map((date, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 bg-white/5 p-4 rounded-lg"
-                  >
-                    <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
-                    <span className="text-lg">{date}</span>
-                  </div>
-                ))}
+                {conference?.important_date.map((date, index) => {
+                  // Clean up the date string by removing any leading numbers and spaces
+                  const cleanDate = date.replace(/^\d+\s+\d+\s+\d+\s+/, '').trim();
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 bg-white/5 p-4 rounded-lg"
+                    >
+                      <Check className="w-5 h-5 text-[#D5B93C] mt-0.5 flex-shrink-0" />
+                      <span className="text-lg">{cleanDate}</span>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

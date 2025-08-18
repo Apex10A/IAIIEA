@@ -154,7 +154,7 @@ const Header = () => {
         <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
       </div>
       <Link
-        href="/profile"
+        href="/members-dashboard"
         className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <FiSettings className="mr-3 text-gray-400" />

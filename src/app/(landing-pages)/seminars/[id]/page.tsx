@@ -346,7 +346,7 @@ export default function SeminarPage() {
         />
         <SpeakersSection speakers={seminar?.speakers || []} />
 
-        {seminar && <FreeSeminarSection seminar={seminar} />}
+        {/* {seminar && <FreeSeminarSection seminar={seminar} />} */}
 
         {seminar && (
           <PricingSection

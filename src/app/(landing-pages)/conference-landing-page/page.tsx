@@ -185,12 +185,16 @@ const ConferenceLandingPage = () => {
         <div className="container mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Important Dates</h2>
           <div className="max-w-3xl mx-auto space-y-4">
-            {conferenceDetails.important_date.map((date, index) => (
-              <div key={index} className="flex items-center p-4 bg-gray-50 rounded-lg">
-                <Calendar className="w-6 h-6 mr-4 text-[#D5B93C]" />
-                <span>{date}</span>
-              </div>
-            ))}
+            {conferenceDetails.important_date.map((date, index) => {
+              // Clean up the date string by removing any leading numbers and spaces
+              const cleanDate = date.replace(/^\d+\s+\d+\s+\d+\s+/, '').trim();
+              return (
+                <div key={index} className="flex items-center p-4 bg-gray-50 rounded-lg">
+                  <Calendar className="w-6 h-6 mr-4 text-[#D5B93C]" />
+                  <span>{cleanDate}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

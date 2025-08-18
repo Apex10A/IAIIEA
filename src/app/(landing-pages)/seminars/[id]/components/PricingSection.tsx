@@ -20,25 +20,21 @@ export const PricingSection = ({
   onPlanSelect,
   onAttendanceTypeChange,
 }: PricingSectionProps) => {
-  // Always show pricing section - let the content determine what to display
+  // Don't show pricing section for free seminars
   if (!seminar) {
+    return null;
+  }
+
+  // Hide entire pricing section if seminar is free
+  if (seminar?.is_free === "free") {
     return null;
   }
 
   return (
     <div className="my-12">
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
-        {seminar?.is_free === "free" ? "Optional Premium Upgrades" : "Seminar Fees"}
+        Seminar Fees
       </h2>
-      
-      {seminar?.is_free === "free" && (
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-          <p className="text-blue-300 text-center">
-            🎉 <strong>Remember:</strong> This seminar is completely FREE to attend! 
-            The options below are optional premium upgrades for additional perks.
-          </p>
-        </div>
-      )}
       
       {seminar?.is_registered && (
         <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
@@ -85,14 +81,10 @@ export const PricingSection = ({
           const showPhysical = (seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && 
                               ((hasPhysicalFee || hasDirectPhysical) && (Number(physicalFee.usd) > 0 || Number(physicalFee.naira) > 0));
           
-          // For free seminars, show based on mode regardless of fee amount
-          const showVirtualForFree = seminar?.is_free === 'free' && (seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical');
-          const showPhysicalForFree = seminar?.is_free === 'free' && (seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical');
-          
           return (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Virtual Attendance Card */}
-              {(showVirtual || showVirtualForFree) && (
+              {showVirtual && (
                 <VirtualAttendanceCard
                   seminar={seminar}
                   virtualFee={virtualFee}
@@ -104,41 +96,10 @@ export const PricingSection = ({
               )}
 
               {/* Physical Attendance Card */}
-              {(showPhysical || showPhysicalForFree) && (
+              {showPhysical && (
                 <PhysicalAttendanceCard
                   seminar={seminar}
                   physicalFee={physicalFee}
-                  onRegisterClick={() => {
-                    onAttendanceTypeChange('physical');
-                    onRegisterClick();
-                  }}
-                />
-              )}
-            </div>
-          );
-        }
-
-        // If no payment structure is found but seminar has a mode, show basic cards (only for free seminars)
-        if (seminar?.mode && seminar?.is_free === 'free') {
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {/* Virtual Attendance Card */}
-              {(seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical') && (
-                <VirtualAttendanceCard
-                  seminar={seminar}
-                  virtualFee={{ naira: 0, usd: 0 }}
-                  onRegisterClick={() => {
-                    onAttendanceTypeChange('virtual');
-                    onRegisterClick();
-                  }}
-                />
-              )}
-
-              {/* Physical Attendance Card */}
-              {(seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && (
-                <PhysicalAttendanceCard
-                  seminar={seminar}
-                  physicalFee={{ naira: 0, usd: 0 }}
                   onRegisterClick={() => {
                     onAttendanceTypeChange('physical');
                     onRegisterClick();

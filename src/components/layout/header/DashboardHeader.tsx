@@ -122,7 +122,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </Link>
             </div>
 
-            {/* Right section - Profile dropdown */}
             <div className="relative ml-4 flex items-center">
               <ThemeToggle />
               <div 

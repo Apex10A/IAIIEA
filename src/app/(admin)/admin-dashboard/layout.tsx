@@ -64,7 +64,6 @@ const DashboardLayout = memo(({
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gray-50 flex">
-        {/* Sidebar */}
         <Sidebar 
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose}
@@ -72,12 +71,10 @@ const DashboardLayout = memo(({
           onNavigate={handleNavigate}
           onCollapse={handleSidebarCollapse}
         />
-
-        {/* Main Content */}
+=
         <div className={`flex-1 flex flex-col transition-all duration-300 ${
           isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-80'
         }`}>
-          {/* Header */}
           <DashboardHeader 
             isSidebarOpen={isSidebarOpen} 
             toggleSidebar={toggleSidebar} 

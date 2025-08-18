@@ -514,7 +514,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
         </div>
         <Calendar events={calendarEvents} />
       </div>
-  <div className="mb-8">
+  {/* <div className="mb-8">
     <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Link href="/incoming-events" className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow text-left">
@@ -530,7 +530,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
         <p className="text-sm text-gray-600">Manage your account information</p>
       </button>
     </div>
-  </div> 
+  </div>  */}
     </div>
   );
 };

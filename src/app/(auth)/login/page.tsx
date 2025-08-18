@@ -51,7 +51,7 @@ export default function LoginPage() {
       // Successful login
       router.push("/members-dashboard");
     } catch (err) {
-      console.error("Login error:", err);
+      // console.error("Login error:", err);
       setError("An unexpected error occurred");
       showToast.error('An unexpected error occurred');
     } finally {

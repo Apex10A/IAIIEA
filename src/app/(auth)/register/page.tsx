@@ -40,7 +40,10 @@ const RegisterSchema = z.object({
   l_name: z.string().min(1, "Last name is required"),
   type: z.enum(["Individual", "Institution"]),
   profession: z.enum(["professor", "postgraduate", "lecturer_i", "lecturer_ii", "undergraduate"]),
-  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  phone: z.string()
+    .min(1, "Phone number is required")
+    .regex(/^\+[1-9]\d{1,14}$/, "Phone number must include country code (e.g., +234 810-123-3211)")
+    .min(10, "Phone number must be at least 10 digits including country code"),
   email: z.string().email("Invalid email address"),
   // password: z.string()
   //   .min(8, "Password must be at least 8 characters")
@@ -123,7 +126,7 @@ export default function RegisterPage() {
       router.push("/login")
       
     } catch (err: any) {
-      console.error("Registration error:", err)
+      // console.error("Registration error:", err)
       // Show error toast
       showToast.error(err.message || "Failed to register. Please try again.")
     } finally {
@@ -321,13 +324,15 @@ export default function RegisterPage() {
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder="phone number e.g +234 810-123-3211"
-                        pattern="[0-9]*" 
+                        placeholder="Include country code e.g +234 810-123-3211"
                         required
                         {...field}
                         disabled={isLoading}
                       />
                     </FormControl>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Please include your country code (e.g., +234 for Nigeria, +1 for USA)
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -475,8 +480,7 @@ export default function RegisterPage() {
               />
               {/* Phone, Email, Postal Address, Country, etc. */}
              </div>
-              
-              {/* Privacy Policy Checkbox */}
+            
               <div className="flex items-start space-x-2 mb-4">
                 <div className="flex items-center h-5">
                   <input
@@ -499,8 +503,8 @@ export default function RegisterPage() {
               <div className="flex flex-col w-full">
               <Button
                 type="submit"
-                className="w-full bg-[#203A87] text-white py-4 hover:bg-[#152a61]"
-                disabled={isLoading}
+                className="w-full bg-[#203A87] text-white py-4 hover:bg-[#152a61] disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={isLoading || !agreeToPrivacy}
               >
                 {isLoading ? (
                   <LoadingSpinner className="w-4 h-4" />

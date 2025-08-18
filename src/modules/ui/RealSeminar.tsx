@@ -95,7 +95,7 @@ const SeminarCards = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-12 text-center">
+        <h2 className="text-xl md:text-3xl font-bold text-[#0B142F] mb-12 text-center">
           Our Seminars
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -158,7 +158,7 @@ const SeminarCards = () => {
         {seminars.length > 3 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className="text-[#203A87] hover:text-[#152a61] font-medium flex items-center gap-2 transition-colors"
+            className="text-[#203A87] hover:text-[#152a61] text-sm font-medium flex items-center gap-2 transition-colors"
           >
             {showAll ? 'Show Less' : 'See All'}
             <FiBookOpen className="w-4 h-4" />
@@ -169,7 +169,7 @@ const SeminarCards = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {(showAll ? seminars : seminars.slice(0, 3)).map((seminar, index) => (
           <motion.div
-            key={seminar.id}
+            key={seminar?.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -180,16 +180,16 @@ const SeminarCards = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
               <Image
                 src={'/Meeting.png'}
-                alt={seminar.title}
+                alt={seminar?.title}
                 width={600}
                 height={400}
                 className="w-full h-[250px] object-cover"
               />
               <div className="absolute bottom-4 left-4 z-20">
-                <span className={`${getStatusColor(seminar.status).bg} ${
-                  getStatusColor(seminar.status).text
+                <span className={`${getStatusColor(seminar?.status).bg} ${
+                  getStatusColor(seminar?.status).text
                 } text-xs font-semibold px-3 py-1 rounded-full`}>
-                  {seminar.status}
+                  {seminar?.status}
                 </span>
               </div>
             </div>
@@ -197,7 +197,7 @@ const SeminarCards = () => {
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold text-[#0B142F] line-clamp-2">
-                  {seminar.title}
+                  {seminar?.title}
                 </h3>
                 {/* <span className="bg-[#203A87]/10 text-[#203A87] text-sm font-semibold px-2 py-1 rounded">
                   {seminar.title.split(' ')[1]}
@@ -205,22 +205,22 @@ const SeminarCards = () => {
               </div>
 
               <p className="text-[#0B142F] mb-5 line-clamp-2">
-                {seminar.theme}
+                {seminar?.theme}
               </p>
 
               <div className="space-y-3 mb-6">
                 <div className="flex items-center text-sm text-gray-600">
                   <FiCalendar className="mr-2 text-[#203A87]" />
-                  <span>{formatDate(seminar.date)}</span>
+                  <span>{formatDate(seminar?.date)}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <FiMapPin className="mr-2 text-[#203A87]" />
-                  <span className="line-clamp-1">{seminar.venue}</span>
+                  <span className="line-clamp-1">{seminar?.venue}</span>
                 </div>
               </div>
 
               <button 
-                onClick={() => handleReadSeminar(seminar.id)}
+                onClick={() => handleReadSeminar(seminar?.id)}
                 className="w-full bg-[#203A87] hover:bg-[#152a61] text-white font-medium py-3 rounded-lg transition-colors duration-300 flex items-center justify-center"
               >
                 <FiBookOpen className="mr-2" />

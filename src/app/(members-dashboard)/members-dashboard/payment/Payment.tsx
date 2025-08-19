@@ -1,31 +1,15 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useFlutterwave } from 'flutterwave-react-v3';
 import { showToast } from '@/utils/toast';
 import type { FlutterwaveConfig, FlutterWaveResponse } from 'flutterwave-react-v3/dist/types';
-import { Card, CardContent } from '@/components/ui/card';
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Trash2 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
-interface PendingPayment {
-  title: string;
-  payment_id: string;
-  amount: number;
-  currency: string;
-  sub_payments: Record<string, number> | [];
-}
+import PaymentCard from './PaymentCard';
+import LoadingSkeleton from './LoadingSkeleton';
+import CancelPaymentDialog from './CancelPaymentDialog';
+import type { PendingPayment } from './types';
 
 interface ApiResponse<T> {
   status: string;
@@ -39,7 +23,6 @@ interface UserData {
   name?: string;
   phone?: string;
 }
-
 
 const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -61,6 +44,12 @@ const PaymentPage: React.FC = () => {
           'Authorization': `Bearer ${bearerToken}`
         }
       });
+
+      if (response.status === 401 || response.status === 403) {
+        await signOut({ callbackUrl: '/login' });
+        return;
+      }
+
       const responseData = await response.json();
       
       if (responseData.status === "success" && Array.isArray(responseData.data)) {
@@ -194,12 +183,18 @@ const PaymentPage: React.FC = () => {
         },
         body: JSON.stringify(confirmPayload)
       });
+
+      if (response.status === 401 || response.status === 403) {
+        await signOut({ callbackUrl: '/login' });
+        return;
+      }
       
       const result = await response.json();
       
       if (result.status === 'success') {
         showToast.success('Payment completed successfully!');
         await fetchPendingPayments();
+        try { router.refresh(); } catch {}
       } else {
         showToast.error(result.message || 'Payment confirmation failed');
       }
@@ -222,6 +217,11 @@ const PaymentPage: React.FC = () => {
         },
         body: JSON.stringify({ payment_id: canceledPaymentId }),
       });
+
+      if (response.status === 401 || response.status === 403) {
+        await signOut({ callbackUrl: '/login' });
+        return;
+      }
 
       const result = await response.json();
 
@@ -249,103 +249,8 @@ const PaymentPage: React.FC = () => {
       : `${currency} ${amount.toLocaleString()}`;
   };
 
-  const PaymentCard: React.FC<{
-    payment: PendingPayment;
-  }> = ({ payment }) => {
-    const isProcessing = processingStates[payment.payment_id];
-    const hasSubPayments = payment.sub_payments && 
-                          typeof payment.sub_payments === 'object' && 
-                          Object.keys(payment.sub_payments).length > 0;
-                          return (
-                            <Card className="mb-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                              <CardContent className="p-6">
-                                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <h3 className="text-lg font-semibold text-gray-900">{payment?.title}</h3>
-                                      <Badge variant="outline" className="text-xs">
-                                        {payment?.currency}
-                                      </Badge>
-                                    </div>
-                                    <p className="text-2xl font-bold text-primary">
-                                      {hasSubPayments && selectedPlans[payment.payment_id] 
-                                        ? formatAmount((payment?.sub_payments as Record<string, number>)[selectedPlans[payment?.payment_id]], payment.currency)
-                                        : formatAmount(payment?.amount, payment.currency)
-                                      }
-                                    </p>
-                                    <p className="text-sm text-gray-500">Payment ID: {payment.payment_id}</p>
-                                  </div>
-                                  
-                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                                    {hasSubPayments && (
-                                      <Select
-                                        onValueChange={(value: string) => 
-                                          setSelectedPlans(prev => ({ ...prev, [payment?.payment_id]: value }))
-                                        }
-                                        defaultValue={Object.keys(payment?.sub_payments)[0]}
-                                        value={selectedPlans[payment?.payment_id]}
-                                      >
-                                        <SelectTrigger className="w-[200px]">
-                                          <SelectValue placeholder="Select plan" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {Object.entries(payment?.sub_payments).map(([planName, planAmount]) => (
-                                            <SelectItem key={planName} value={planName}>
-                                              {planName} ({formatAmount(planAmount, payment?.currency)})
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    )}
-                                    
-                                    <Button
-                                      onClick={() => initiatePayment(payment)}
-                                      disabled={isProcessing}
-                                      className="w-full sm:w-auto"
-                                    >
-                                      {isProcessing ? (
-                                        <span className="flex items-center gap-2">
-                                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                          </svg>
-                                          Processing...
-                                        </span>
-                                      ) : 'Make Payment'}
-                                    </Button>
-                                    <Button
-                                      variant="destructive"
-                                      onClick={() => {
-                                        setCanceledPaymentId(payment?.payment_id);
-                                        setShowCancelDialog(true);
-                                      }}
-                                      className="w-full sm:w-auto"
-                                    >
-                                      Cancel Payment
-                                    </Button>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          );
-                        };
-                          
-  const LoadingSkeleton = () => (
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-        <Card key={i} className="p-6">
-          <div className="space-y-4">
-            <div className="h-6 bg-gray-100 rounded w-3/4 animate-pulse"></div>
-            <div className="h-8 bg-gray-100 rounded w-1/4 animate-pulse"></div>
-            <div className="flex gap-4">
-              <div className="h-10 bg-gray-100 rounded w-48 animate-pulse"></div>
-              <div className="h-10 bg-gray-100 rounded w-32 animate-pulse"></div>
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
+
+
 
   if (status === "loading" || loading) {
     return (
@@ -387,14 +292,7 @@ const PaymentPage: React.FC = () => {
       ) : (
         <>
           <Alert className="mb-6">
-            <AlertTitle className="flex items-center gap-2">
-              {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg> */}
-              Pending Payments
-            </AlertTitle>
+            <AlertTitle className="flex items-center gap-2">Pending Payments</AlertTitle>
             <AlertDescription>
               You have {pendingPayments?.length} pending payment{pendingPayments?.length > 1 ? 's' : ''} to complete.
             </AlertDescription>
@@ -402,49 +300,26 @@ const PaymentPage: React.FC = () => {
           
           <div className="space-y-4">
             {pendingPayments?.map((payment) => (
-              <PaymentCard key={payment?.payment_id} payment={payment} />
+              <PaymentCard
+                key={payment?.payment_id}
+                payment={payment}
+                isProcessing={!!processingStates[payment.payment_id]}
+                selectedPlan={selectedPlans[payment.payment_id]}
+                onPlanChange={(value) => setSelectedPlans(prev => ({ ...prev, [payment.payment_id]: value }))}
+                onMakePayment={() => initiatePayment(payment)}
+                onCancelClick={() => { setCanceledPaymentId(payment?.payment_id); setShowCancelDialog(true); }}
+                formatAmount={formatAmount}
+              />
             ))}
           </div>
         </>
       )}
       
-      <AlertDialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialog.Portal>
-          <AlertDialog.Overlay className="bg-black/50 fixed inset-0 backdrop-blur-sm" />
-          <AlertDialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg focus:outline-none">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-red-100 text-red-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="15" y1="9" x2="9" y2="15"></line>
-                  <line x1="9" y1="9" x2="15" y2="15"></line>
-                </svg>
-              </div>
-              <AlertDialog.Title className="text-lg font-semibold text-gray-900">
-                Cancel Payment
-              </AlertDialog.Title>
-            </div>
-            <AlertDialog.Description className="text-gray-600 mb-6">
-              Are you sure you want to cancel this payment? You can make the payment later from your dashboard.
-            </AlertDialog.Description>
-            <div className="flex justify-end gap-3">
-              <AlertDialog.Cancel asChild>
-                <Button variant="outline">
-                  Continue Payment
-                </Button>
-              </AlertDialog.Cancel>
-              <AlertDialog.Action asChild>
-                <Button 
-                  variant="destructive"
-                  onClick={handleCancelConfirm}
-                >
-                  Cancel Payment
-                </Button>
-              </AlertDialog.Action>
-            </div>
-          </AlertDialog.Content>
-        </AlertDialog.Portal>
-      </AlertDialog.Root>
+      <CancelPaymentDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        onConfirm={handleCancelConfirm}
+      />
     </div>
   );
 };

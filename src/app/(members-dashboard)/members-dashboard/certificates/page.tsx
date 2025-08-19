@@ -230,7 +230,7 @@ const CertificatesPage = () => {
          
           }}
         >
-          <div className="relative w-full h-[300px]">
+          {/* <div className="relative w-full h-[300px]">
             <Image
               src={BlueBg}
               alt="Blue Background"
@@ -249,10 +249,10 @@ const CertificatesPage = () => {
               className="absolute left-1/2 top-[200px] z-[3] object-contain"
               style={{ transform: "translateX(-50%)" }}
             />
-          </div>
+          </div> */}
           {/* Certificate Content */}
           <div className="relative z-10 w-full flex flex-col items-center px-8 py-6 mt-8">
-            <div className="absolute -top-[270px] text-center">
+            {/* <div className="absolute -top-[270px] text-center">
               <h1><span className="cert text-7xl text-white tracking-widest mb-2">CERTIFICATE OF</span></h1>
               <h1 className="text-4xl text-[#e5c029] tracking-[5px] mem font-[500]">MEMBERSHIP</h1>
             </div>
@@ -289,11 +289,11 @@ const CertificatesPage = () => {
             </div>
             <div className="absolute bottom-10 left-0 w-full text-center text-[12px] text-[#888] tracking-wider">
               {displayData.validityText}
-            </div>
+            </div> */}
             {/* <div className="absolute bottom-0 left-0 w-full">
               <BottomBorder />
             </div> */}
-            <Image
+            {/* <Image
               src={FingerPrint}
               alt="Gold Seal"
             
@@ -305,7 +305,7 @@ const CertificatesPage = () => {
                 zIndex: 3,
                 objectFit: "contain",
               }}
-            />
+            /> */}
           </div>
         </div>
       </div>

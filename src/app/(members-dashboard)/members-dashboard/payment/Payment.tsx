@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import PaymentCard from './PaymentCard';
 import LoadingSkeleton from './LoadingSkeleton';
 import CancelPaymentDialog from './CancelPaymentDialog';
+import SuccessPaymentDialog from './SuccessPaymentDialog';
 import type { PendingPayment } from './types';
 
 interface ApiResponse<T> {
@@ -31,6 +32,8 @@ const PaymentPage: React.FC = () => {
   const [selectedPlans, setSelectedPlans] = useState<Record<string, string>>({});
   const [canceledPaymentId, setCanceledPaymentId] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successInfo, setSuccessInfo] = useState<{ title: string; formattedAmount: string } | null>(null);
   
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -192,9 +195,12 @@ const PaymentPage: React.FC = () => {
       const result = await response.json();
       
       if (result.status === 'success') {
-        showToast.success('Payment completed successfully!');
-        await fetchPendingPayments();
-        try { router.refresh(); } catch {}
+        // Prepare success modal details
+        const paidAmount = amountPaid ?? payment.amount;
+        const currency = payment.currency;
+        const formattedAmount = formatAmount(paidAmount, currency);
+        setSuccessInfo({ title: payment.title, formattedAmount });
+        setShowSuccessDialog(true);
       } else {
         showToast.error(result.message || 'Payment confirmation failed');
       }
@@ -323,6 +329,22 @@ const PaymentPage: React.FC = () => {
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
         onConfirm={handleCancelConfirm}
+      />
+
+      {/* Success Modal shown after successful payment confirmation */}
+      <SuccessPaymentDialog
+        open={showSuccessDialog}
+        onOpenChange={(open) => {
+          setShowSuccessDialog(open);
+          if (!open) {
+            // On close: refresh pending payments and page
+            fetchPendingPayments();
+            try { router.refresh(); } catch {}
+            setSuccessInfo(null);
+          }
+        }}
+        title={successInfo?.title || ''}
+        formattedAmount={successInfo?.formattedAmount || ''}
       />
     </div>
   );

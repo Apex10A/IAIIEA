@@ -160,7 +160,7 @@ export default function RegisterPage() {
           )}
 
           <Form {...form}>
-            <form className=" " onSubmit={form.handleSubmit(onSubmit)}>
+            <form className="[&_input]:border-neutral-200/50 dark:[&_input]:border-neutral-800/60" onSubmit={form.handleSubmit(onSubmit)}>
               {/* First Name */}
              <div className="grid gap-4 md:grid-cols-2 mb-5">
              <FormField

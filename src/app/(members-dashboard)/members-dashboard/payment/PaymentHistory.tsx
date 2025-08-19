@@ -14,13 +14,7 @@ import { Input } from '@/modules/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/ui/select';
 import { Button } from '@/modules/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
-} from '@/modules/ui/dialog';
+
 import { Badge } from '@/modules/ui/badge';
 import { Calendar, Search, Filter, X } from 'lucide-react';
 
@@ -69,8 +63,6 @@ const PaymentHistory: React.FC = () => {
   const [paymentTypes, setPaymentTypes] = useState<string[]>([]);
   
   // Selection and details state
-  const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentDetail | null>(null);
-
   // Memoized pagination logic
   const paginatedPayments = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -309,19 +301,19 @@ const PaymentHistory: React.FC = () => {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="bg-white">
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-gray-50">
                 <TableHead>Title</TableHead>
                 <TableHead>Payment ID</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedPayments.map((payment) => (
-                <TableRow key={payment.payment_id}>
+                <TableRow key={payment.payment_id} className="bg-white hover:bg-gray-50">
                   <TableCell className="font-medium">{payment.title}</TableCell>
                   <TableCell className="font-mono text-sm">{payment.payment_id}</TableCell>
                   <TableCell>
@@ -332,19 +324,15 @@ const PaymentHistory: React.FC = () => {
                   <TableCell className="text-right font-medium">
                     {formatCurrency(payment.amount, payment.currency)}
                   </TableCell>
-                  <TableCell>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => setSelectedPaymentDetail(payment)}
-                    >
-                      View Details
-                    </Button>
+                  <TableCell className="text-sm text-gray-600">
+                    {/* If you have a date in the data, replace with that field */}
+                    {/* Example: new Date(payment.created_at).toLocaleDateString() */}
+                    —
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-            <TableFooter>
+            <TableFooter className="bg-white">
               <TableRow>
                 <TableCell colSpan={5} className="text-center">
                   <div className="flex justify-center items-center space-x-2 mt-4">
@@ -373,57 +361,7 @@ const PaymentHistory: React.FC = () => {
         </div>
       )}
 
-      {/* Payment Details Dialog */}
-      <Dialog open={!!selectedPaymentDetail} onOpenChange={() => setSelectedPaymentDetail(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Payment Details</DialogTitle>
-          </DialogHeader>
-          {selectedPaymentDetail && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Title</p>
-                  <p className="mt-1">{selectedPaymentDetail.title}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Type</p>
-                  <Badge className={`mt-1 ${getStatusColor(selectedPaymentDetail.title)}`}>
-                    {selectedPaymentDetail.title}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Amount</p>
-                  <p className="mt-1 font-medium">
-                    {formatCurrency(selectedPaymentDetail.amount, selectedPaymentDetail.currency)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Payment ID</p>
-                  <p className="mt-1 font-mono text-sm">{selectedPaymentDetail.payment_id}</p>
-                </div>
-              </div>
-              {selectedPaymentDetail.sub_payments && 
-               typeof selectedPaymentDetail.sub_payments === 'object' && 
-               Object.keys(selectedPaymentDetail.sub_payments).length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-2">Sub Payments</p>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    {Object.entries(selectedPaymentDetail.sub_payments).map(([plan, amount]) => (
-                      <div key={plan} className="flex justify-between items-center py-2 border-b last:border-0">
-                        <span className="font-medium">{plan}</span>
-                        <span className="text-gray-600">
-                          {formatCurrency(amount, selectedPaymentDetail.currency)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 };

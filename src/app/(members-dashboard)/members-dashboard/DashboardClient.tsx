@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import axios from 'axios';
 import { ThemeProvider } from '@/components/theme-provider';
 import { redirect } from 'next/navigation';
 import "@/app/index.css"
@@ -66,7 +67,34 @@ export default function DashboardClient() {
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    // Global axios interceptor for 401/403 → sign out
+    const interceptorId = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+          try { await signOut({ callbackUrl: '/login' }); } catch {}
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Global fetch wrapper: patch window.fetch to sign out on 401/403
+    const originalFetch = window.fetch;
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const res = await originalFetch(input, init);
+      if (res.status === 401 || res.status === 403) {
+        try { await signOut({ callbackUrl: '/login' }); } catch {}
+      }
+      return res;
+    };
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      axios.interceptors.response.eject(interceptorId);
+      window.fetch = originalFetch;
+    };
   }, []);
 
   const toggleSidebar = () => {

@@ -299,18 +299,22 @@ const PaymentPage: React.FC = () => {
           </Alert>
           
           <div className="space-y-4">
-            {pendingPayments?.map((payment) => (
-              <PaymentCard
-                key={payment?.payment_id}
-                payment={payment}
-                isProcessing={!!processingStates[payment.payment_id]}
-                selectedPlan={selectedPlans[payment.payment_id]}
-                onPlanChange={(value) => setSelectedPlans(prev => ({ ...prev, [payment.payment_id]: value }))}
-                onMakePayment={() => initiatePayment(payment)}
-                onCancelClick={() => { setCanceledPaymentId(payment?.payment_id); setShowCancelDialog(true); }}
-                formatAmount={formatAmount}
-              />
-            ))}
+            {pendingPayments?.map((payment) => {
+              const isMembership = payment?.title?.toLowerCase?.().includes('membership');
+              return (
+                <PaymentCard
+                  key={payment?.payment_id}
+                  payment={payment}
+                  isProcessing={!!processingStates[payment.payment_id]}
+                  selectedPlan={selectedPlans[payment.payment_id]}
+                  onPlanChange={(value) => setSelectedPlans(prev => ({ ...prev, [payment.payment_id]: value }))}
+                  onMakePayment={() => initiatePayment(payment)}
+                  onCancelClick={() => { setCanceledPaymentId(payment?.payment_id); setShowCancelDialog(true); }}
+                  formatAmount={formatAmount}
+                  canCancel={!isMembership}
+                />
+              );
+            })}
           </div>
         </>
       )}

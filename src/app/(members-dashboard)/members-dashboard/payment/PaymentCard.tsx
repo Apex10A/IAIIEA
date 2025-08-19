@@ -20,6 +20,8 @@ export interface PaymentCardProps {
   onMakePayment: () => void;
   onCancelClick: () => void;
   formatAmount: (amount: number, currency: string) => string;
+  // If false, hide the cancel button (e.g., for membership payments)
+  canCancel?: boolean;
 }
 
 const PaymentCard: React.FC<PaymentCardProps> = ({
@@ -30,6 +32,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
   onMakePayment,
   onCancelClick,
   formatAmount,
+  canCancel,
 }) => {
   const hasSubPayments =
     payment.sub_payments &&
@@ -107,9 +110,11 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                 "Make Payment"
               )}
             </Button>
-            <Button variant="destructive" onClick={onCancelClick} className="w-full sm:w-auto">
-              Cancel Payment
-            </Button>
+            {(canCancel !== false) && (
+              <Button variant="destructive" onClick={onCancelClick} className="w-full sm:w-auto">
+                Cancel Payment
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

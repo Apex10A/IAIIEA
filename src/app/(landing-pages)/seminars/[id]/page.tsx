@@ -120,123 +120,57 @@ export default function SeminarPage() {
     if (!seminar) return;
 
     if (seminar?.is_registered) {
-      router.push("/dashboard");
+      router.push("/members-dashboard");
       return;
     }
 
-    if (seminar?.is_free === "free" && !hasPaidPlans(seminar?.payments)) {
-      if (!session) {
-        showToast.error("Please login to register");
-        return;
-      }
-
-      try {
-        setPaymentProcessing(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/seminar/register_free/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.user.token}`,
-            },
-            body: JSON.stringify({
-              id: seminar.id,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to register for free seminar");
-        }
-
-        const data = await response.json();
-        if (data.status === "success") {
-          showToast.success("Successfully registered for free seminar!");
-          window.location.reload();
-        } else {
-          throw new Error(data.message || "Failed to register");
-        }
-      } catch (err) {
-        showToast.error("Failed to register for seminar");
-      } finally {
-        setPaymentProcessing(false);
-      }
-      return;
-    }
-
+    // Always show the confirmation modal and initiate via backend
     setShowPaymentModal(true);
   };
 
   const handlePaymentSubmit = async () => {
-    if (!seminar || !session) return;
+    if (!seminar) return;
+    if (!session) {
+      showToast.error("Please login to continue");
+      return;
+    }
 
     setPaymentProcessing(true);
     try {
-      // Check if it's a free seminar
-      const fee = attendanceType === 'virtual' 
-        ? { naira: seminar?.payments?.virtual_fee_naira || 0, usd: seminar?.payments?.virtual_fee_usd || 0 }
-        : { naira: seminar?.payments?.physical_fee_naira || 0, usd: seminar?.payments?.physical_fee_usd || 0 };
-      
-      const isFree = Number(fee.usd) === 0 && Number(fee.naira) === 0;
-
-      if (isFree) {
-        // Handle free registration
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/seminar/register_free/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.user.token}`,
-            },
-            body: JSON.stringify({
-              id: seminar.id,
-              type: attendanceType,
-            }),
-          }
-        );
-
-        const data = await response.json();
-        if (data.status === "success") {
-          showToast.success("Successfully registered for seminar!");
-          setShowPaymentModal(false);
-          window.location.reload();
-        } else {
-          throw new Error(data.message || "Failed to register");
+      // Unified initiate flow for both free and paid seminars
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.user.token}`,
+          },
+          body: JSON.stringify({
+            id: seminar.id,
+            mode: attendanceType, // "physical" | "virtual"
+          }),
         }
+      );
+
+      const paymentData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(paymentData?.message || "Failed to initiate payment");
+      }
+
+      // For paid seminars, backend returns a payment link; for free, it completes immediately
+      if (paymentData?.status === "success") {
+        const link = paymentData?.data?.link;
+        if (link) {
+          window.location.href = link;
+          return;
+        }
+        showToast.success("Registration completed");
+        setShowPaymentModal(false);
+        window.location.reload();
       } else {
-        // Handle paid registration
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/seminar/initiate_pay/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
-            },
-            body: JSON.stringify({
-              id: seminar.id,
-              type: attendanceType,
-              // Keep legacy support for now
-              plan: selectedPlan,
-            }),
-          }
-        );
-
-        const paymentData = await response.json();
-
-        if (!response.ok) {
-          throw new Error(paymentData.message || "Failed to initiate payment");
-        }
-
-        if (paymentData.status === "success" && paymentData.data.link) {
-          // Redirect to payment gateway
-          window.location.href = paymentData.data.link;
-        } else {
-          showToast.success("Payment initiated successfully");
-          setShowPaymentModal(false);
-        }
+        throw new Error(paymentData?.message || "Unable to initiate payment");
       }
     } catch (err: any) {
       const errorMessage = err?.message || "Failed to process payment";
@@ -297,13 +231,31 @@ export default function SeminarPage() {
         )}
         {seminar?.is_free === "free" && (
           <div className="w-full md:w-auto text-center">
-            <div className="bg-green-500/20 border border-green-500/30 rounded-lg px-6 py-3">
+            <div className="bg-green-500/20 border border-green-500/30 rounded-lg px-6 py-3 mb-3">
               <div className="text-green-400 font-bold text-lg">
                 ✨ FREE SEMINAR ✨
               </div>
               <div className="text-white/80 text-sm mt-1">
-                No registration required - Join us for free!
+                Join instantly for free. Choose your mode below.
               </div>
+            </div>
+            <div className="flex gap-3 justify-center">
+              { (seminar?.mode === 'Virtual' || seminar?.mode === 'Virtual_Physical') && (
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                  onClick={() => { setAttendanceType('virtual'); handleRegisterClick(); }}
+                >
+                  {seminar?.is_registered ? 'Go to Dashboard' : 'Join Virtual'}
+                </Button>
+              )}
+              { (seminar?.mode === 'Physical' || seminar?.mode === 'Virtual_Physical') && (
+                <Button
+                  className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+                  onClick={() => { setAttendanceType('physical'); handleRegisterClick(); }}
+                >
+                  {seminar?.is_registered ? 'Go to Dashboard' : 'Join Physical'}
+                </Button>
+              )}
             </div>
           </div>
         )}

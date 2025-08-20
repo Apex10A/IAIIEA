@@ -261,7 +261,11 @@ const Page = () => {
                   <TableRow 
                     key={member.user_id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors "
-                    onClick={() => router.push(`/admin-dashboard/membership/${member.user_id}`)}
+                    onClick={(e) => {
+                      const target = (e.target as HTMLElement);
+                      if (target.closest('button, input, a, [data-row-action]')) return;
+                      router.push(`/admin-dashboard/membership/${member.user_id}`)
+                    }}
                   >
                     <TableCell className="w-[50px]" onClick={(e) => e.stopPropagation()}>
                       <input 
@@ -291,7 +295,7 @@ const Page = () => {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" data-row-action onClick={(e) => e.stopPropagation()}>
                         
                         <AlertDialog.Root>
                           <AlertDialog.Trigger asChild>
@@ -313,13 +317,13 @@ const Page = () => {
                               </AlertDialog.Description>
                               <div className="mt-6 flex justify-end gap-4">
                                 <AlertDialog.Cancel asChild>
-                                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 text-white rounded-lg hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+                                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg ">
                                     Cancel
                                   </button>
                                 </AlertDialog.Cancel>
                                 <AlertDialog.Action asChild>
                                   <button
-                                    onClick={() => handleDelete(member.user_id)}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(member.user_id); }}
                                     className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
                                   >
                                     Delete

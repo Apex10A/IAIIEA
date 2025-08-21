@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
@@ -579,152 +579,174 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Back */}
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+        className="inline-flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 px-3 py-1.5 rounded-md text-gray-700 text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to seminars
       </button>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="relative h-64 bg-gray-100">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl">
+        <div className="relative h-64 sm:h-80">
           {conferenceDetails?.flyer ? (
             <Image
               src={conferenceDetails.flyer}
               alt={conference.title}
               fill
               className="object-cover"
+              priority
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <FileText className="w-16 h-16" />
-            </div>
+            <div className="h-full w-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600" />
           )}
-          <div className="absolute bottom-4 left-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
-            {conference.status}
+
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.15),rgba(0,0,0,0.6))]" />
+
+          {/* Hero content */}
+          <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 text-white">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium">
+                {conference.status}
+              </span>
+              {conferenceDetails?.is_registered && (
+                <span className="bg-emerald-400/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium">
+                  Registered
+                </span>
+              )}
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
+              {conference.title}
+            </h1>
+            <p className="text-white/90 mt-1 font-medium">{conference.theme}</p>
+
+            <div className="mt-3 flex flex-wrap gap-3 text-sm">
+              <span className="inline-flex items-center gap-2 bg-white/15 px-3 py-1 rounded-full">
+                <Calendar className="w-4 h-4" />
+                {formatDate(conference.date)}
+              </span>
+              <span className="inline-flex items-center gap-2 bg-white/15 px-3 py-1 rounded-full">
+                <MapPin className="w-4 h-4" />
+                {conference.venue}
+              </span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                onClick={() => onViewResources(conference)}
+                className="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-md text-sm font-semibold"
+              >
+                View all resources
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
+      {/* Info sections */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {conference.title}
-          </h1>
-          <p className="text-lg text-blue-600 font-medium mb-4">
-            {conference.theme}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-500 mt-0.5" />
-              <div>
-                <p className="text-sm text-gray-500">Date</p>
-                <p className="font-medium">
-                  {formatDate(conference.date)}
-                </p>
+          {/* Description */}
+          <div className="border-b border-gray-200 pb-4">
+            <button
+              onClick={() => toggleSection("description")}
+              className="flex justify-between items-center w-full text-left font-semibold text-gray-900"
+            >
+              <span>Description</span>
+              {expandedSection === "description" ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+            {expandedSection === "description" && (
+              <div className="mt-2 text-gray-700 leading-relaxed">
+                {conference.description || "No description available"}
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
-              <div>
-                <p className="text-sm text-gray-500">Venue</p>
-                <p className="font-medium">{conference.venue}</p>
-              </div>
-            </div>
+            )}
           </div>
 
-          <div className="space-y-4">
-            <div className="border-b border-gray-200 pb-4">
+          {/* Sub-themes */}
+          {conferenceDetails?.sub_theme?.length > 0 && (
+            <div className="border-b border-gray-200 py-4">
               <button
-                onClick={() => toggleSection("description")}
-                className="flex justify-between items-center w-full text-left font-medium text-gray-900"
+                onClick={() => toggleSection("subThemes")}
+                className="flex justify-between items-center w-full text-left font-semibold text-gray-900"
               >
-                <span>Description</span>
-                {expandedSection === "description" ? (
+                <span>Sub-themes</span>
+                {expandedSection === "subThemes" ? (
                   <ChevronUp className="w-5 h-5" />
                 ) : (
                   <ChevronDown className="w-5 h-5" />
                 )}
               </button>
-              {expandedSection === "description" && (
-                <div className="mt-2 text-gray-600">
-                  {conference.description || "No description available"}
-                </div>
+              {expandedSection === "subThemes" && (
+                <ul className="mt-3 grid sm:grid-cols-2 gap-2">
+                  {conferenceDetails.sub_theme.map((theme, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{theme}</span>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
+          )}
 
-            {conferenceDetails?.sub_theme && conferenceDetails.sub_theme.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("subThemes")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Sub Themes</span>
-                  {expandedSection === "subThemes" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "subThemes" && (
-                  <ul className="mt-2 space-y-2">
-                    {conferenceDetails.sub_theme.map((theme, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{theme}</span>
-                      </li>
-                    ))}
-                  </ul>
+          {/* Workshops */}
+          {conferenceDetails?.work_shop?.length > 0 && (
+            <div className="border-b border-gray-200 py-4">
+              <button
+                onClick={() => toggleSection("workshops")}
+                className="flex justify-between items-center w-full text-left font-semibold text-gray-900"
+              >
+                <span>Workshops</span>
+                {expandedSection === "workshops" ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
                 )}
-              </div>
-            )}
+              </button>
+              {expandedSection === "workshops" && (
+                <ul className="mt-3 grid sm:grid-cols-2 gap-2">
+                  {conferenceDetails.work_shop.map((workshop, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{workshop}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
-            {conferenceDetails?.work_shop && conferenceDetails.work_shop.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("workshops")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Workshops</span>
-                  {expandedSection === "workshops" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "workshops" && (
-                  <ul className="mt-2 space-y-2">
-                    {conferenceDetails.work_shop.map((workshop, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{workshop}</span>
-                      </li>
-                    ))}
-                  </ul>
+          {/* Schedule */}
+          {conferenceDetails?.schedule?.length > 0 && (
+            <div className="py-4">
+              <button
+                onClick={() => toggleSection("schedule")}
+                className="flex justify-between items-center w-full text-left font-semibold text-gray-900"
+              >
+                <span>Schedule</span>
+                {expandedSection === "schedule" ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
                 )}
-              </div>
-            )}
-
-            {conferenceDetails?.schedule && conferenceDetails.schedule.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("schedule")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Schedule</span>
-                  {expandedSection === "schedule" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "schedule" && (
-                  <div className="mt-4 space-y-4">
-                    {conferenceDetails.schedule.map((item, index) => (
-                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex justify-between items-start">
+              </button>
+              {expandedSection === "schedule" && (
+                <div className="mt-4 space-y-4">
+                  {conferenceDetails.schedule.map((item, i) => (
+                    <div key={i} className="relative pl-4">
+                      <div className="absolute left-0 top-2 w-2 h-2 rounded-full bg-blue-600" />
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                        <div className="flex justify-between items-start gap-4">
                           <div>
-                            <h3 className="font-medium">{item.activity}</h3>
+                            <h3 className="font-medium text-gray-900">{item.activity}</h3>
                             {item.facilitator && (
                               <p className="text-sm text-gray-600 mt-1">
                                 Facilitator: {item.facilitator}
@@ -732,75 +754,31 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                             )}
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium">
+                            <p className="text-sm font-medium text-gray-900">
                               {item.day}, {item.start} - {item.end}
                             </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {item.venue}
-                            </p>
+                            <p className="text-sm text-gray-600 mt-1">{item.venue}</p>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* {conferenceDetails?.payments && (
-              <div className="border-b border-gray-200 pb-4">
-                <button
-                  onClick={() => toggleSection("payments")}
-                  className="flex justify-between items-center w-full text-left font-medium text-gray-900"
-                >
-                  <span>Payment Information</span>
-                  {expandedSection === "payments" ? (
-                    <ChevronUp className="w-5 h-5" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5" />
-                  )}
-                </button>
-                {expandedSection === "payments" && (
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(conferenceDetails.payments).map(
-                      ([category, types], index) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-medium text-sm mb-2 capitalize">
-                            {category.replace(/_/g, " ")}
-                          </h3>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Virtual:</span>
-                              <span>
-                                ${types.virtual.usd} / NGN {types.virtual.naira}
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span>Physical:</span>
-                              <span>
-                                ${types.physical.usd} / NGN {types.physical.naira}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-            )} */}
-          </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Gallery */}
+      <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Gallery</h2>
-        {conferenceDetails?.gallery && conferenceDetails.gallery.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {conferenceDetails?.gallery?.length ? (
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
             {conferenceDetails.gallery.map((imageUrl, index) => (
               <div
                 key={index}
-                className="relative h-40 rounded-lg overflow-hidden bg-gray-100"
+                className="relative h-40 w-60 min-w-[15rem] rounded-lg overflow-hidden bg-gray-100 snap-start"
               >
                 <Image
                   src={imageUrl}
@@ -816,7 +794,44 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Videos */}
+      {conferenceDetails?.videos?.length ? (
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Videos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {conferenceDetails.videos.map((v, i) => (
+              <div key={i}>
+                <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                  {v.url?.toLowerCase().endsWith(".mp4") ? (
+                    <video src={v.url} className="w-full h-full object-cover" controls />
+                  ) : (
+                    <a
+                      href={v.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center h-full text-blue-600 hover:text-blue-800 gap-2"
+                    >
+                      <Play className="w-6 h-6" />
+                      Watch video
+                    </a>
+                  )}
+                </div>
+                {(v.title || v.description) && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-gray-900">{v.title}</p>
+                    {v.description && (
+                      <p className="text-xs text-gray-600 mt-0.5">{v.description}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Resources */}
+      <div className="bg-white rounded-xl shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Resources</h2>
           <button
@@ -826,14 +841,10 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
             View all resources <ExternalLink className="w-4 h-4" />
           </button>
         </div>
-        {conferenceDetails?.resources && conferenceDetails.resources.length > 0 ? (
+        {conferenceDetails?.resources?.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {conferenceDetails.resources.slice(0, 4).map((resource) => (
-              <ResourceCard
-                key={resource.resource_id}
-                resource={resource}
-                // onDelete={() => {}}
-              />
+              <ResourceCard key={resource.resource_id} resource={resource} />
             ))}
           </div>
         ) : (
@@ -841,31 +852,34 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
         )}
       </div>
 
-      {/* Past Seminars Section */}
+      {/* Past Seminars */}
       <div className="space-y-4 mt-8">
         <h2 className="text-2xl font-bold text-gray-900">Past Seminars</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {conferences
             .filter((c: Conference) => c.id !== conference.id)
-            .map((pastConference: Conference) => (
-              <div key={pastConference.id} className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white">
+            .map((past: Conference) => (
+              <div
+                key={past.id}
+                className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden bg-white"
+              >
                 <div className="relative group">
                   <div className="absolute z-20 bottom-5 left-5">
                     <span
                       className={`px-3 py-1 rounded-full font-medium text-xs transition-colors duration-300 ${
-                        pastConference?.status === "Completed"
-                          ? "bg-amber-100 text-amber-800"
+                        past?.status === "Completed"
+                          ? "bg-emerald-100 text-emerald-800"
                           : "bg-blue-100 text-blue-800"
                       }`}
                     >
-                      {pastConference?.status}
+                      {past?.status}
                     </span>
                   </div>
                   <div className="h-48 w-full bg-gray-100 relative overflow-hidden">
-                    {pastConference.flyer ? (
+                    {past.flyer ? (
                       <Image
-                        src={pastConference.flyer}
-                        alt={pastConference.title}
+                        src={past.flyer}
+                        alt={past.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
@@ -879,20 +893,18 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <h2 className="text-gray-900 text-lg font-semibold line-clamp-2">
-                      {pastConference.title}
+                      {past.title}
                     </h2>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {pastConference.theme}
-                  </p>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{past.theme}</p>
                   <div className="flex items-center text-gray-500 text-xs mb-4">
                     <Calendar className="w-3 h-3 mr-1" />
-                    <span>{formatDate(pastConference.date)}</span>
+                    <span>{formatDate(past.date)}</span>
                   </div>
                 </div>
                 <div className="px-4 pb-4">
                   <button
-                    onClick={() => onViewDetails(pastConference)}
+                    onClick={() => onViewDetails(past)}
                     className="w-full bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
                   >
                     View Details
@@ -918,6 +930,7 @@ const ConferenceResources: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: mainSession } = useSession() as { data: Session | null };
   const bearerToken = mainSession?.user?.token || mainSession?.user?.userData?.token;
+  const topRef = useRef<HTMLDivElement>(null);
 
   const fetchConferences = async () => {
     try {
@@ -1022,11 +1035,20 @@ const ConferenceResources: React.FC = () => {
   const handleViewDetails = (conference: Conference) => {
     setSelectedConference(conference);
     setViewMode("details");
+    // Smooth scroll to top/content anchor so user sees details immediately
+    requestAnimationFrame(() => {
+      const el = topRef.current || document.body;
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   const handleViewResources = (conference: Conference) => {
     setSelectedConference(conference);
     setViewMode("resources");
+    requestAnimationFrame(() => {
+      const el = topRef.current || document.body;
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
 
   const handleBackToDashboard = () => {
@@ -1067,7 +1089,7 @@ const ConferenceResources: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div ref={topRef} className="container mx-auto px-4 py-8">
       {viewMode === "resources" && selectedConference ? (
         <div className="space-y-6">
           <div className="flex justify-between items-center">

@@ -112,7 +112,7 @@ const navigationItems: NavItem[] = [
       { id: "participants", name: 'Participants', requiredPortal: 'conference', icon: MembersIcon },
       { id: "conferences", name: 'Conferences', requiredPortal: 'conference', icon: ResourcesIcon },
       { id: "conf-announcements", name: 'Announcements', requiredPortal: 'conference', icon: AnnouncementIcon },
-       { id: "conf-certifications", name: 'Certification', requiredPortal: 'conference', icon: ResourcesIcon },
+      //  { id: "conf-certifications", name: 'Certification', requiredPortal: 'conference', icon: ResourcesIcon },
     ]
   },
   { 
@@ -124,7 +124,7 @@ const navigationItems: NavItem[] = [
       { id: "seminar-participants", name: 'Seminar Participants', requiredPortal: 'seminar', icon: MembersIcon },
       { id: "seminar-resources", name: 'Seminars', requiredPortal: 'seminar', icon: ResourcesIcon },
       { id: "seminar-announcements", name: 'Announcements', requiredPortal: 'seminar', icon: AnnouncementIcon },
-       { id: "seminar-certifications", name: 'Certifications', requiredPortal: 'seminar', icon: AnnouncementIcon },
+      //  { id: "seminar-certifications", name: 'Certification', requiredPortal: 'seminar', icon: AnnouncementIcon },
     ]
   },
   { 

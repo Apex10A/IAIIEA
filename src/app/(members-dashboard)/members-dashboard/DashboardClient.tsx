@@ -116,7 +116,7 @@ export default function DashboardClient() {
       'Conference Announcements': <ConfAnnouncement />,
       // 'Seminars': <SeminarResources />,
       'Seminar Participants': <SeminarParticipants />,
-      'Seminar Announcements': <SeminarAnnouncements />,
+      'Announcements': <SeminarAnnouncements />,
       'Participants': <Participants />,
       'Seminars': <SeminarsWebinars />,
       'Conferences': <Conferences />,

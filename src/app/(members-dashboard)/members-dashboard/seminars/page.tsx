@@ -51,6 +51,13 @@ interface Conference {
   resources: Resource[];
 }
 
+interface Speaker {
+  name: string;
+  title: string;
+  portfolio?: string;
+  picture: string;
+}
+
 interface ConferenceDetails {
   id: number;
   is_registered: boolean;
@@ -60,11 +67,13 @@ interface ConferenceDetails {
   date: string;
   start_date: string;
   start_time: string;
-  sub_theme: string[];
-  work_shop: string[];
-  important_date: string[];
-  flyer: string;
-  gallery: string[];
+  mode?: string; // e.g., "Virtual" or "Physical"
+  is_free?: string | boolean; // "free" | "paid" or boolean
+  sub_theme: string[] | null;
+  work_shop: string[] | null;
+  important_date?: string[];
+  flyer?: string;
+  gallery?: string[];
   resources: {
     resource_id: number;
     resource_type: string | null;
@@ -72,17 +81,18 @@ interface ConferenceDetails {
     date: string;
     file: string;
   }[];
-  videos: {
+  videos?: {
     title?: string;
     description?: string;
     url: string;
   }[];
-  meals: {
+  speakers?: Speaker[];
+  meals?: {
     meal_id: number;
     name: string;
     image: string;
   }[];
-  schedule: {
+  schedule?: {
     schedule_id: number;
     day: string;
     activity: string;
@@ -92,78 +102,7 @@ interface ConferenceDetails {
     venue: string;
     posted: string;
   }[];
-  payments: {
-    early_bird_registration: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    normal_registration: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    late_registration: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    tour: {
-      virtual: {
-        usd: number | string;
-        naira: number | string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    annual_dues: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    vetting_fee: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-    publication_fee: {
-      virtual: {
-        usd: string;
-        naira: string;
-      };
-      physical: {
-        usd: string;
-        naira: string;
-      };
-    };
-  };
+  payments?: any; // structure varies across endpoints; not rendered here
 }
 
 interface ConferenceCardProps {
@@ -617,6 +556,20 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                   Registered
                 </span>
               )}
+              {conferenceDetails?.mode && (
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium">
+                  Mode: {conferenceDetails.mode}
+                </span>
+              )}
+              {typeof conferenceDetails?.is_free !== 'undefined' && (
+                <span className={`backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium ${
+                  (conferenceDetails.is_free === true || conferenceDetails.is_free === 'free')
+                    ? 'bg-emerald-400/20'
+                    : 'bg-white/20'
+                }`}>
+                  {(conferenceDetails.is_free === true || conferenceDetails.is_free === 'free') ? 'Free' : 'Paid'}
+                </span>
+              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
               {conference.title}
@@ -698,7 +651,7 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
           )}
 
           {/* Workshops */}
-          {conferenceDetails?.work_shop?.length > 0 && (
+          {conferenceDetails?.work_shop?.length ? (
             <div className="border-b border-gray-200 py-4">
               <button
                 onClick={() => toggleSection("workshops")}
@@ -722,7 +675,48 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                 </ul>
               )}
             </div>
-          )}
+          ) : null}
+
+          {/* Speakers */}
+          {conferenceDetails?.speakers?.length ? (
+            <div className="border-b border-gray-200 py-4">
+              <button
+                onClick={() => toggleSection("speakers")}
+                className="flex justify-between items-center w-full text-left font-semibold text-gray-900"
+              >
+                <span>Speakers</span>
+                {expandedSection === "speakers" ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </button>
+              {expandedSection === "speakers" && (
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {conferenceDetails.speakers.map((spk, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
+                      <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                        {spk.picture ? (
+                          <Image src={spk.picture} alt={spk.name} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <FileText className="w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{spk.name}</p>
+                        {spk.portfolio && (
+                          <p className="text-xs text-gray-600 truncate">{spk.portfolio}</p>
+                        )}
+                        <p className="text-xs text-gray-500 truncate">{spk.title}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {/* Schedule */}
           {conferenceDetails?.schedule?.length > 0 && (

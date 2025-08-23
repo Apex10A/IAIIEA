@@ -158,7 +158,7 @@ const VirtualAttendanceCard = ({ seminar, virtualFee, onRegisterClick }: any) =>
           )}
         </div>
         
-        <div className="pt-2">
+        {/* <div className="pt-2">
           <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
@@ -182,7 +182,7 @@ const VirtualAttendanceCard = ({ seminar, virtualFee, onRegisterClick }: any) =>
               <span>Virtual networking opportunities</span>
             </li>
           </ul>
-        </div>
+        </div> */}
 
         {seminar?.is_registered ? (
           <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
@@ -243,7 +243,7 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
           )}
         </div>
         
-        <div className="pt-2">
+        {/* <div className="pt-2">
           <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
@@ -271,7 +271,7 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
               <span>Direct interaction with speakers</span>
             </li>
           </ul>
-        </div>
+        </div> */}
 
         {seminar?.is_registered ? (
           <div className="w-full bg-[#D5B93C] text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 text-center flex items-center justify-center gap-2">
@@ -377,7 +377,7 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
           <div className="pt-2">
             <h4 className="font-medium text-[#0E1A3D] mb-2">Includes:</h4>
             <ul className="space-y-2 text-sm text-gray-700">
-              {plan === 'basic' && (
+              {/* {plan === 'basic' && (
                 <>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
@@ -392,8 +392,8 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
                     <span>Digital certificate</span>
                   </li>
                 </>
-              )}
-              {plan === 'standard' && (
+              )} */}
+              {/* {plan === 'standard' && (
                 <>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
@@ -408,8 +408,8 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
                     <span>{attendanceType === 'physical' ? 'Lunch & refreshments' : 'Exclusive virtual networking'}</span>
                   </li>
                 </>
-              )}
-              {plan === 'premium' && (
+              )} */}
+              {/* {plan === 'premium' && (
                 <>
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />
@@ -424,7 +424,7 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
                     <span>{attendanceType === 'virtual' ? 'One-on-one speaker sessions' : 'Networking dinner'}</span>
                   </li>
                 </>
-              )}
+              )} */}
               {planData?.package?.map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <Check className="w-4 h-4 text-[#D5B93C] mt-0.5 flex-shrink-0" />

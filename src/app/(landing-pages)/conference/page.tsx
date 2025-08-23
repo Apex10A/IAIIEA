@@ -966,7 +966,12 @@ export default function ConferencePage() {
               >
                 submit
               </a>{" "}
-              your abstract by [deadline] to iaiiea2024@iaiiea.org. The paper
+              your abstract by {(() => {
+                const dates = conference?.important_date || [];
+                const item = dates.find((d) => /Full Paper Documentation/i.test(d));
+                const match = item?.match(/\b\d{4}-\d{2}-\d{2}\b/);
+                return match?.[0] || "TBA";
+              })()} to iaiiea2024@iaiiea.org. The paper
               should, specifically, address issues outlined in the associated
               sub-themes.
             </p>

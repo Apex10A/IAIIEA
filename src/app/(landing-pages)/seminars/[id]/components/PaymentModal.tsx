@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { SeminarDetails } from "../types";
+import { getPaymentInfo } from "../utils";
 
 interface PaymentModalProps {
   show: boolean;
@@ -9,6 +10,8 @@ interface PaymentModalProps {
   seminar: SeminarDetails | null;
   attendanceType: "virtual" | "physical";
   paymentProcessing: boolean;
+  // Optional: selected plan for legacy tiers
+  selectedPlan?: string;
 }
 
 export const PaymentModal = ({
@@ -18,6 +21,7 @@ export const PaymentModal = ({
   seminar,
   attendanceType,
   paymentProcessing,
+  selectedPlan = "basic",
 }: PaymentModalProps) => {
   if (!show) return null;
 
@@ -33,14 +37,16 @@ export const PaymentModal = ({
               <p><strong>Seminar:</strong> {seminar?.title}</p>
               <p><strong>Attendance:</strong> {attendanceType === 'virtual' ? 'Virtual' : 'Physical'}</p>
               {(() => {
-                const fee = attendanceType === 'virtual' 
-                  ? { naira: seminar?.payments?.virtual_fee_naira || 0, usd: seminar?.payments?.virtual_fee_usd || 0 }
-                  : { naira: seminar?.payments?.physical_fee_naira || 0, usd: seminar?.payments?.physical_fee_usd || 0 };
-                
+                // Use shared helper to correctly resolve fees across new/legacy structures
+                const info = seminar?.payments
+                  ? getPaymentInfo(seminar.payments, selectedPlan, attendanceType)
+                  : null;
+                const naira = info ? Number((info as any).naira || 0) : 0;
+                const usd = info ? Number((info as any).usd || 0) : 0;
                 return (
                   <p><strong>Fee:</strong> {
-                    Number(fee.usd) > 0 || Number(fee.naira) > 0 
-                      ? `$${fee.usd} / ₦${Number(fee.naira).toLocaleString()}`
+                    usd > 0 || naira > 0
+                      ? `$${usd} / ₦${naira.toLocaleString()}`
                       : 'Free'
                   }</p>
                 );

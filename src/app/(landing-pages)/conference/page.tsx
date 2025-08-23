@@ -957,7 +957,7 @@ export default function ConferencePage() {
           </h2>
           <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 md:p-8">
             <p className="text-white text-base md:text-lg leading-relaxed">
-              We invite submissions for IAIIEA conference 2024. We seek
+              We invite submissions for {conference?.title}. We seek
               innovative research and insights on a topic which aligns with the
               conference theme. Please{" "}
               <a

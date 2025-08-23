@@ -48,7 +48,7 @@ const NewsPage = () => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/list_news`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/list_news`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }

@@ -162,13 +162,25 @@ export default function SeminarPage() {
       // For paid seminars, backend returns a payment link; for free, it completes immediately
       if (paymentData?.status === "success") {
         const link = paymentData?.data?.link;
+
+        // Show guidance based on type
+        if (seminar.is_free === 'free') {
+          showToast.success("Registration completed. You're in!");
+        } else {
+          showToast.info("Registration initiated. Go to Dashboard → Payments to complete your payment under Pending Payments.");
+        }
+
         if (link) {
+          // If backend returns a link (rare case), still redirect
           window.location.href = link;
           return;
         }
-        showToast.success("Registration completed");
+
         setShowPaymentModal(false);
-        window.location.reload();
+        // Optionally refresh to reflect is_registered for free seminars
+        if (seminar.is_free === 'free') {
+          window.location.reload();
+        }
       } else {
         throw new Error(paymentData?.message || "Unable to initiate payment");
       }

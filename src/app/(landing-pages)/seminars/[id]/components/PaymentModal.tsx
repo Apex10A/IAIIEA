@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { SeminarDetails } from "../types";
-import { getPaymentInfo } from "../utils";
+import { getPaymentInfo, hasPaidPlans } from "../utils";
 
 interface PaymentModalProps {
   show: boolean;
@@ -28,7 +28,20 @@ export const PaymentModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold mb-4">Confirm Registration</h3>
+        <h3 className="text-xl font-bold mb-2">Confirm Registration</h3>
+        {seminar && (
+          <div className="mb-4 text-sm">
+            {seminar.is_free === 'free' ? (
+              <div className="p-3 rounded-md bg-green-50 text-green-700 border border-green-200">
+                This seminar is free. On confirming, you will be registered immediately.
+              </div>
+            ) : (
+              <div className="p-3 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                This is a paid seminar. Confirming will <strong>initiate</strong> your registration only. To complete payment, go to your Dashboard → Payments and pay under <em>Pending Payments</em>.
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="bg-gray-50 p-4 rounded-lg">

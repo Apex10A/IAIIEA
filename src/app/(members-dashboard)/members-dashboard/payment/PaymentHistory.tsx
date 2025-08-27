@@ -222,14 +222,14 @@ const PaymentHistory: React.FC = () => {
             className="pl-10"
           />
         </div>
-        <Button
+        {/* <Button
           variant="outline"
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-2"
         >
           <Filter className="h-4 w-4" />
           {showFilters ? 'Hide Filters' : 'Show Filters'}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Filters Panel */}
@@ -308,7 +308,7 @@ const PaymentHistory: React.FC = () => {
                 <TableHead>Payment ID</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Date</TableHead>
+                {/* <TableHead>Date</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -324,11 +324,7 @@ const PaymentHistory: React.FC = () => {
                   <TableCell className="text-right font-medium">
                     {formatCurrency(payment.amount, payment.currency)}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-600">
-                    {/* If you have a date in the data, replace with that field */}
-                    {/* Example: new Date(payment.created_at).toLocaleDateString() */}
-                    —
-                  </TableCell>
+                 
                 </TableRow>
               ))}
             </TableBody>

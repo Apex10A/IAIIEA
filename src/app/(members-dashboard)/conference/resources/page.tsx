@@ -21,7 +21,8 @@ import {
   Plus,
   Pencil,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Check
 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
@@ -34,22 +35,23 @@ import { ResourceCard, AddResourceModal } from "./components";
 
 // Carousel component for galleries, sponsors, and videos
 const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'sponsors' | 'videos' }) => {
+  const safeItems = Array.isArray(items) ? items : [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerPage = type === 'videos' ? 1 : 3;
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => 
-      prevIndex + itemsPerPage >= items.length ? 0 : prevIndex + 1
+      prevIndex + itemsPerPage >= safeItems.length ? 0 : prevIndex + 1
     );
   };
 
   const prevSlide = () => {
     setCurrentIndex((prevIndex) => 
-      prevIndex - 1 < 0 ? Math.max(0, items.length - itemsPerPage) : prevIndex - 1
+      prevIndex - 1 < 0 ? Math.max(0, safeItems.length - itemsPerPage) : prevIndex - 1
     );
   };
 
-  const visibleItems = items.slice(currentIndex, currentIndex + itemsPerPage);
+  const visibleItems = safeItems.slice(currentIndex, currentIndex + itemsPerPage);
 
   return (
     <div className="relative">
@@ -71,41 +73,51 @@ const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'spons
         
         {type === 'sponsors' && (
           <div className="flex gap-4 transition-transform duration-300">
-            {visibleItems.map((sponsor, index) => (
-              <div key={index} className="relative aspect-square w-full min-w-[300px] rounded-lg overflow-hidden bg-muted">
-                <Image
-                  src={sponsor.logo}
-                  alt={sponsor.name}
-                  fill
-                  className="object-contain p-4"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-background/90 p-2 text-center dark:bg-gray-800/90">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{sponsor.name}</p>
+            {visibleItems.map((item, index) => {
+              const src = typeof item === 'string' ? item : (item?.logo ?? item?.url ?? '');
+              const alt = typeof item === 'string' ? 'Sponsor logo' : (item?.name ?? 'Sponsor');
+              return (
+                <div key={index} className="relative aspect-square w-full min-w-[300px] rounded-lg overflow-hidden bg-muted">
+                  {src ? (
+                    <Image
+                      src={src}
+                      alt={alt}
+                      fill
+                      className="object-contain p-6 grayscale hover:grayscale-0 transition"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground dark:text-gray-400">
+                      <FileText className="w-10 h-10" />
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         
         {type === 'videos' && visibleItems[0] && (
           <div className="w-full aspect-video rounded-lg overflow-hidden bg-muted">
-            {visibleItems[0].type === 'video' ? (
-              <video
-                src={visibleItems[0].url}
-                className="w-full h-full object-cover"
-                controls
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                <FileText className="w-12 h-12 text-gray-500 dark:text-gray-400" />
-                <p className="text-gray-700 dark:text-gray-400">Video not available</p>
-              </div>
-            )}
+            {(() => {
+              const v = visibleItems[0];
+              const src = typeof v === 'string' ? v : (v?.url ?? v?.video ?? '');
+              if (!src) {
+                return (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                    <FileText className="w-12 h-12 text-gray-500 dark:text-gray-400" />
+                    <p className="text-gray-700 dark:text-gray-400">Video not available</p>
+                  </div>
+                );
+              }
+              return (
+                <video src={src} className="w-full h-full object-cover" controls />
+              );
+            })()}
           </div>
         )}
       </div>
       
-      {items.length > itemsPerPage && (
+      {safeItems.length > itemsPerPage && (
         <>
           <button 
             onClick={prevSlide}
@@ -357,7 +369,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                     </Button>
                   </div>
                 </div>
-                {conferenceDetails?.schedule?.length > 0 ? (
+                {Array.isArray(conferenceDetails?.schedule) && conferenceDetails.schedule.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {conferenceDetails.schedule.map((item, index) => (
                       <div key={index} className="bg-muted/50 p-4 rounded-lg border dark:border-gray-700">
@@ -395,7 +407,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 <p className="text-gray-700 dark:text-gray-400 text-sm mb-3">
                   These are the list of food currently available for the day. Select any food of your choice
                 </p>
-                {meals?.length > 0 ? (
+                {Array.isArray(meals) && meals.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {meals.map((meal: Meal) => (
                       <div
@@ -552,10 +564,19 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
 
 // Add interface for Meal
 interface Meal {
-  id: number;
+  id: number; // normalized from meal_id
   image: string;
-  meal: string;
+  meal: string; // normalized from name
 }
+
+const normalizeMeals = (raw: any[]): Meal[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((m: any) => ({
+    id: m?.id ?? m?.meal_id ?? m?.mealId,
+    image: m?.image ?? m?.url ?? '',
+    meal: m?.meal ?? m?.name ?? 'Meal',
+  })).filter((m) => m.id != null);
+};
 
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
@@ -565,10 +586,11 @@ const ConferenceResources: React.FC = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "details" | "resources">("list");
   const { data: session } = useSession();
-  const [bearerToken] = useState(session?.user?.token || session?.user?.userData?.token);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [selectedMealId, setSelectedMealId] = useState<number | null>(null);
   const [isSelectingMeal, setIsSelectingMeal] = useState(false);
+
+  const getToken = () => session?.user?.token || session?.user?.userData?.token || "";
 
   const fetchConferences = async () => {
     try {
@@ -588,9 +610,11 @@ const ConferenceResources: React.FC = () => {
         setConferences(sortedConferences);
         
         if (sortedConferences.length > 0) {
-          const incomingConference = sortedConferences[0];
-          setSelectedConference(incomingConference);
-          fetchConferenceDetails(incomingConference.id);
+          // Prefer the most relevant: Incoming > Ongoing > Completed
+          const pickByStatus = (status: string) => sortedConferences.find(c => (c.status || '').toLowerCase() === status);
+          const preferred = pickByStatus('incoming') || pickByStatus('ongoing') || sortedConferences[0];
+          setSelectedConference(preferred);
+          fetchConferenceDetails(preferred.id);
           setViewMode("details");
         }
       }
@@ -609,17 +633,30 @@ const ConferenceResources: React.FC = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/landing/event_details/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${bearerToken}`,
+            Authorization: `Bearer ${getToken()}`,
           },
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch conference details");
+      const data = await response.json();
+      if (!response.ok || data.status !== 'success') {
+        throw new Error(data?.message || "Failed to fetch conference details");
       }
 
-      const data = await response.json();
-      setConferenceDetails(data.data);
+      const raw = data.data || {};
+      // Normalize media payloads to arrays
+      const normalized: ConferenceDetails = {
+        ...raw,
+        is_registered: !!raw.is_registered,
+        gallery: Array.isArray(raw.gallery) ? raw.gallery : (Array.isArray(raw?.media?.gallery) ? raw.media.gallery : []),
+        sponsors: Array.isArray(raw.sponsors) ? raw.sponsors : (Array.isArray(raw?.media?.sponsors) ? raw.media.sponsors : []),
+        videos: Array.isArray(raw.videos) ? raw.videos : (Array.isArray(raw?.media?.videos) ? raw.media.videos : []),
+        resources: Array.isArray(raw.resources) ? raw.resources : [],
+        speakers: Array.isArray(raw.speakers) ? raw.speakers : [],
+        schedule: Array.isArray(raw.schedule) ? raw.schedule : [],
+        meals: Array.isArray(raw.meals) ? raw.meals : [],
+      };
+      setConferenceDetails(normalized);
     } catch (error) {
       console.error("Error fetching conference details:", error);
       showToast.error("Failed to load conference details");
@@ -665,7 +702,12 @@ const ConferenceResources: React.FC = () => {
 
   const handleViewResources = (conference: Conference) => {
     setSelectedConference(conference);
-    setViewMode("resources");
+    // Ensure we have details before rendering resources, to decide access by is_registered
+    if (!conferenceDetails || conferenceDetails.id !== conference.id) {
+      fetchConferenceDetails(conference.id).then(() => setViewMode("resources"));
+    } else {
+      setViewMode("resources");
+    }
   };
 
   const handleBackToList = () => {
@@ -684,14 +726,16 @@ const ConferenceResources: React.FC = () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/list_meal`, {
         headers: {
-          'Authorization': `Bearer ${bearerToken}`,
+          'Authorization': `Bearer ${getToken()}`,
           'Content-Type': 'application/json'
         }
       });
 
       const data = await response.json();
       if (data.status === 'success') {
-        setMeals(data.data);
+        setMeals(normalizeMeals(data.data));
+      } else {
+        setMeals([]);
       }
     } catch (error) {
       console.error('Error fetching meals:', error);
@@ -705,7 +749,7 @@ const ConferenceResources: React.FC = () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/SelectMeal`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${bearerToken}`,
+          'Authorization': `Bearer ${getToken()}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ meal_id: mealId })
@@ -715,6 +759,8 @@ const ConferenceResources: React.FC = () => {
       if (data.status === 'success') {
         setSelectedMealId(mealId);
         showToast.success('Meal selected successfully');
+      } else {
+        showToast.error(data?.message || 'Failed to select meal');
       }
     } catch (error) {
       console.error('Error selecting meal:', error);
@@ -725,11 +771,12 @@ const ConferenceResources: React.FC = () => {
   };
 
   useEffect(() => {
-    if (bearerToken) {
+    const token = getToken();
+    if (token) {
       fetchConferences();
       fetchMeals();
     }
-  }, [bearerToken]);
+  }, [session]);
 
   if (loading) {
     return (
@@ -848,6 +895,15 @@ const ConferenceResources: React.FC = () => {
               </div>
             </div>
 
+            {conferenceDetails?.registered_plan && (
+              <div className="mb-4">
+                <span className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs">
+                  <Check className="w-3 h-3" />
+                  {Object.keys(conferenceDetails.registered_plan)[0]} — ${Object.values(conferenceDetails.registered_plan)[0]}
+                </span>
+              </div>
+            )}
+
             {/* Show warning if not registered for conference */}
             {!conferenceDetails.is_registered && (
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6 rounded">
@@ -872,7 +928,7 @@ const ConferenceResources: React.FC = () => {
                 {/* Gallery Section */}
                 <div className="mb-8">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Gallery</h2>
-                  {conferenceDetails.gallery?.length > 0 ? (
+                  {Array.isArray(conferenceDetails.gallery) && conferenceDetails.gallery.length > 0 ? (
                     <MediaCarousel items={conferenceDetails.gallery} type="gallery" />
                   ) : (
                     <p className="text-gray-700 dark:text-gray-400 text-center py-8">No gallery images available</p>
@@ -882,12 +938,9 @@ const ConferenceResources: React.FC = () => {
                 {/* Sponsors Section */}
                 <div className="mb-8">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Sponsors</h2>
-                  {conferenceDetails.sponsors?.length > 0 ? (
+                  {Array.isArray(conferenceDetails.sponsors) && conferenceDetails.sponsors.length > 0 ? (
                     <MediaCarousel 
-                      items={conferenceDetails.sponsors.map(sponsor => ({
-                        logo: sponsor.logo,
-                        name: sponsor.name
-                      }))} 
+                      items={conferenceDetails.sponsors as any[]}
                       type="sponsors" 
                     />
                   ) : (
@@ -898,8 +951,8 @@ const ConferenceResources: React.FC = () => {
                 {/* Videos Section */}
                 <div className="mb-8">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Videos</h2>
-                  {conferenceDetails.videos?.length > 0 ? (
-                    <MediaCarousel items={conferenceDetails.videos} type="videos" />
+                  {Array.isArray(conferenceDetails.videos) && conferenceDetails.videos.length > 0 ? (
+                    <MediaCarousel items={conferenceDetails.videos as any[]} type="videos" />
                   ) : (
                     <p className="text-gray-700 dark:text-gray-400 text-center py-8">No videos available</p>
                   )}
@@ -908,7 +961,7 @@ const ConferenceResources: React.FC = () => {
                 {/* Resources Section */}
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Documents</h2>
-                  {conferenceDetails.resources?.length > 0 ? (
+                  {Array.isArray(conferenceDetails.resources) && conferenceDetails.resources.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {conferenceDetails.resources.map((resource) => (
                         <ResourceCard

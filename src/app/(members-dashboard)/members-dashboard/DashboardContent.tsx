@@ -57,7 +57,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
         const token = session?.user?.token;
         
         if (!token) {
-          console.log('Session data:', session); 
+          // console.log('Session data:', session); 
           throw new Error("No authentication token found. Please log in again.");
         }
         const headers = {
@@ -74,11 +74,11 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           }
           
           const confData = await confResponse.json();
-          console.log('Initial conferences data:', confData);
+          // console.log('Initial conferences data:', confData);
           
           if (confData.status === 'success') {
             const incomingConfs = confData.data.filter((event: Event) => event.status === 'Incoming');
-            console.log('Filtered incoming conferences:', incomingConfs);
+            // console.log('Filtered incoming conferences:', incomingConfs);
             setConferences(incomingConfs);
             for (const conf of incomingConfs) {
               try {
@@ -87,12 +87,12 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                   { headers }
                 );
                 if (!detailsResponse.ok) {
-                  console.error(`Failed to fetch details for conference ${conf.id}:`, detailsResponse.status);
+                  // console.error(`Failed to fetch details for conference ${conf.id}:`, detailsResponse.status);
                   continue;
                 }
                 
                 const detailsData = await detailsResponse.json();
-                console.log(`Detailed data for conference ${conf.id}:`, detailsData);
+                // console.log(`Detailed data for conference ${conf.id}:`, detailsData);
 
                 if (detailsData.status === 'success') {
                   setConferences(prev => prev.map(existingConf => 
@@ -107,12 +107,12 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                   ));
                 }
               } catch (error) {
-                console.error(`Error fetching details for conference ${conf.id}:`, error);
+                // console.error(`Error fetching details for conference ${conf.id}:`, error);
               }
             }
           }
         } catch (confError) {
-          console.error("Error fetching conferences:", confError);
+          // console.error("Error fetching conferences:", confError);
           setLocalError(confError instanceof Error ? 
             `Failed to load conferences: ${confError.message}` : 
             "Failed to load conferences: Network error"
@@ -138,7 +138,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                   { headers }
                 );
                 if (!detailsResponse.ok) {
-                  console.error(`Failed to fetch details for seminar ${sem.id}:`, detailsResponse.status);
+                  // console.error(`Failed to fetch details for seminar ${sem.id}:`, detailsResponse.status);
                   continue;
                 }
 
@@ -153,12 +153,12 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                   ));
                 }
               } catch (error) {
-                console.error(`Error fetching details for seminar ${sem.id}:`, error);
+                // console.error(`Error fetching details for seminar ${sem.id}:`, error);
               }
             }
           }
         } catch (semError) {
-          console.error("Error fetching seminars:", semError);
+          // console.error("Error fetching seminars:", semError);
         }
         try {
           const year = new Date().getFullYear();
@@ -179,12 +179,12 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
             }
           }
         } catch (calError) {
-          console.error("Error fetching calendar events:", calError);
+          // console.error("Error fetching calendar events:", calError);
         }
 
         setIsLoading(false);
       } catch (err) {
-        console.error("Main error in fetchData:", err);
+        // console.error("Main error in fetchData:", err);
         setLocalError(err instanceof Error ? err.message : "Failed to load dashboard data");
         setIsLoading(false);
       }
@@ -206,7 +206,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
           });
           
           const data = await response.json();
-          console.log(`Registration status for ${type} ${event.id}:`, data);
+          // console.log(`Registration status for ${type} ${event.id}:`, data);
           
           if (data.status === 'success') {
             if (type === 'conference') {
@@ -218,7 +218,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                     registered_plan: data.data.registered_plan
                   } : conf
                 );
-                console.log('Updated conferences:', updated);
+                // console.log('Updated conferences:', updated);
                 return updated;
               });
             } else {
@@ -230,13 +230,13 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                     registered_plan: data.data.registered_plan
                   } : sem
                 );
-                console.log('Updated seminars:', updated);
+                // console.log('Updated seminars:', updated);
                 return updated;
               });
             }
           }
         } catch (err) {
-          console.error(`Error checking registration for ${type} ${event.id}:`, err);
+          // console.error(`Error checking registration for ${type} ${event.id}:`, err);
         } finally {
           setLoadingStatus(prev => ({ ...prev, [event.id]: false }));
         }
@@ -321,12 +321,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
 
   return (
     <div className="md:p-6 bg-[#F9FAFF]">
-      {/* Header */}
       <div className="bg-gradient-to-r from-[#203a87] to-indigo-700 text-white rounded-lg px-5 py-4 mb-6 shadow-sm">
         <h1 className="text-lg md:text-xl font-medium">Dashboard Overview</h1>
       </div>
       
-      {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           Welcome back, {user?.name || 'User'} 👋
@@ -365,43 +363,43 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Conferences</h3>
               <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                {conferences.length} upcoming
+                {conferences?.length} upcoming
               </span>
             </div>
-            
-            {conferences.length > 0 ? (
+
+            {conferences?.length > 0 ? (
               <div className="space-y-4">
                 {conferences.map((conf) => (
-                  <div key={conf.id} className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div key={conf?.id} className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-medium text-gray-900">{conf.title}</h4>
+                        <h4 className="font-medium text-gray-900">{conf?.title}</h4>
                         <p className="text-sm text-gray-500 mt-1">
-                          {formatEventDate(conf.start_date, conf.start_time)}
+                          {formatEventDate(conf?.start_date, conf?.start_time)}
                         </p>
                       </div>
-                      {loadingStatus[conf.id] ? (
+                      {loadingStatus[conf?.id] ? (
                         <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                       ) : (
                         <div className="flex flex-col items-end gap-1">
-                          <span className={`text-xs px-2 py-1 rounded-full ${conf.is_registered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                            {conf.is_registered ? 'Registered' : 'Not Registered'}
+                          <span className={`text-xs px-2 py-1 rounded-full ${conf?.is_registered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {conf?.is_registered ? 'Registered' : 'Not Registered'}
                           </span>
-                          {conf.is_registered && conf.registered_plan && (
+                          {conf?.is_registered && conf?.registered_plan && (
                             <span className="text-xs text-gray-600">
-                              {Object.keys(conf.registered_plan)[0]}
+                              {Object.keys(conf?.registered_plan)[0]}
                             </span>
                           )}
                         </div>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">{conf.theme}</p>
-                    <div className="mt-3 flex justify-between items-center">
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">{conf?.theme}</p>
+                    {/* <div className="mt-3 flex justify-between items-center">
                       <span className="text-xs text-gray-500">{conf.venue}</span>
                       <button className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center">
                         View details <ChevronRight className="w-3 h-3 ml-1" />
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>
@@ -417,7 +415,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Seminars</h3>
               <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
-                {seminars.length} upcoming
+                {seminars?.length} upcoming
               </span>
             </div>
             
@@ -427,26 +425,26 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({ user, error 
                   <div key={seminar.id} className="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-medium text-gray-900">{seminar.title}</h4>
+                        <h4 className="font-medium text-gray-900">{seminar?.title}</h4>
                         <p className="text-sm text-gray-500 mt-1">
-                          {formatEventDate(seminar.start_date, seminar.start_time)}
+                          {formatEventDate(seminar?.start_date, seminar?.start_time)}
                         </p>
                       </div>
-                      {loadingStatus[seminar.id] ? (
+                      {loadingStatus[seminar?.id] ? (
                         <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
                       ) : (
-                        <span className={`text-xs px-2 py-1 rounded-full ${seminar.is_registered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                          {seminar.is_registered ? 'Registered' : 'Not Registered'}
+                        <span className={`text-xs px-2 py-1 rounded-full ${seminar?.is_registered ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                          {seminar?.is_registered ? 'Registered' : 'Not Registered'}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">{seminar.theme}</p>
-                    <div className="mt-3 flex justify-between items-center">
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">{seminar?.theme}</p>
+                    {/* <div className="mt-3 flex justify-between items-center">
                       <span className="text-xs text-gray-500">{seminar.venue}</span>
                       <button className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center">
                         View details <ChevronRight className="w-3 h-3 ml-1" />
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>

@@ -17,7 +17,7 @@ const Page = () => {
   useEffect(() => {
     const fetchGalleryData = async () => {
       try {
-        const response = await fetch('https://iaiiea.org/api/sandbox/landing/gallery');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/gallery`);
         const data = await response.json();
 
         if (response.ok && data.status === 'success') {

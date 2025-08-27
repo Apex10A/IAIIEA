@@ -34,12 +34,23 @@ const GalleryContent = () => {
     const fetchGallery = async () => {
       try {
         const response = await fetch(
-          `https://iaiiea.org/api/sandbox/landing/gallery/${year}`
+          `${process.env.NEXT_PUBLIC_API_URL}/landing/gallery/${year}`
         );
         const data = await response.json();
 
         if (response.ok && data.status === "success") {
-          setImages(data.data);
+          const payload = data.data;
+          const list = Array.isArray(payload)
+            ? payload
+            : Array.isArray(payload?.images)
+            ? payload.images
+            : Array.isArray(payload?.gallery)
+            ? payload.gallery
+            : [];
+          if (!Array.isArray(list)) {
+            console.warn('Unexpected gallery payload shape:', payload);
+          }
+          setImages(list);
         } else {
           throw new Error(data.message || "Failed to fetch gallery images");
         }
@@ -70,9 +81,9 @@ const GalleryContent = () => {
       {/* Images Grid */}
       {!loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((image) => (
+          {Array.isArray(images) && images.map((image) => (
             <div
-              key={image.gallery_id}
+              key={image.gallery_id ?? `${image.image}-${image.date}`}
               className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg"
             >
               <Image

@@ -10,7 +10,7 @@ const ComingSoon: React.FC = () => {
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Certificates</h1>
-        <p className="text-gray-600 mt-2">Manage and download your IAIIEA membershi certificates.</p>
+        <p className="text-gray-600 mt-2">Manage and download your IAIIEA membership certificates.</p>
       </div>
 
       {/* Coming Soon Card */}

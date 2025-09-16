@@ -77,8 +77,8 @@ const Header = () => {
   const dropdownContent = {
     members: [
       { 
-        title: "How to join", 
-        description: "Discover how to become a valued member", 
+        title: "Register", 
+        description: "Become a member to unlock exclusive benefits", 
         link: "/register", 
         image: "/Head.png",
         icon: <FiUser className="text-[#D5B93C] mr-2" />

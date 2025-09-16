@@ -181,9 +181,9 @@ const ConferenceParticipantsPage = () => {
   useEffect(() => {
     const filtered = members.filter(
       (member) =>
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.role.toLowerCase().includes(searchTerm.toLowerCase())
+        (member.name && typeof member.name === 'string' && member.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (member.email && typeof member.email === 'string' && member.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (member.role && typeof member.role === 'string' && member.role.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredMembers(filtered);
     setCurrentPage(1);

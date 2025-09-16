@@ -71,6 +71,7 @@ export const PaymentModal = ({
             <Button
               variant="outline"
               onClick={onClose}
+              className="bg-white hover:bg-gray-200"
               disabled={paymentProcessing}
             >
               Cancel

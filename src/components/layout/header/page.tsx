@@ -84,9 +84,9 @@ const Header = () => {
         icon: <FiUser className="text-[#D5B93C] mr-2" />
       },
       { 
-        title: "Login", 
+        title: "How to Join", 
         description: "Access exclusive educational events and resources", 
-        link: "/login", 
+        link: "/how-to-join", 
         image: "/HeadTwo.png",
         icon: <FiSettings className="text-[#D5B93C] mr-2" />
       }

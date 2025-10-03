@@ -234,7 +234,7 @@ const NewsPage = () => {
   );
 
   return (
-    <div className='flex flex-col lg:flex-row gap-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24 ]'>
+    <div className='flex flex-col lg:flex-row gap-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24 bg-white'>
       {/* Main content */}
       <div className='lg:w-[70%] w-full bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6'>
         <div className="flex justify-between items-center mb-10">

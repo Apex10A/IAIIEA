@@ -302,7 +302,7 @@ const ConferenceParticipantsPage = () => {
                             {conference?.year}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                        <p className="text-gray-900 text-sm mb-4 line-clamp-2">
                           {conference?.theme}
                         </p>
                         <div className="flex items-center justify-between text-sm text-gray-500 mb-4">

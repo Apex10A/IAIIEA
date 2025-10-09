@@ -41,17 +41,17 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         />
         
         {/* Modal container */}
-        <div className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all w-full max-w-2xl">
+        <div className="relative transform overflow-hidden rounded-lg bg-white  text-left shadow-xl transition-all w-full max-w-2xl">
           {/* Modal header */}
           <div className="flex items-center justify-between p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900 ">
               {title}
             </h3>
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-gray-500 hover:text-gray-700 "
             >
               <X className="h-5 w-5" />
             </Button>

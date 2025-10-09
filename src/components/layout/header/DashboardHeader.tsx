@@ -123,7 +123,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </div>
 
             <div className="relative ml-4 flex items-center">
-              <ThemeToggle />
+              {/* <ThemeToggle /> */}
               <div 
                 onClick={toggleDropdown}
                 className={`

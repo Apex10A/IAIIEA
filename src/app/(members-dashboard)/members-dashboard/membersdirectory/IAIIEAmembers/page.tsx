@@ -251,7 +251,7 @@ const Page = () => {
   // Show warning and hide content if registration is incomplete
   if (session?.user?.userData?.registration === "incomplete") {
     return (
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 rounded">
+      <div className="bg-yellow-50 border-l-4 border-yellow-40 p-4 rounded">
         <div className="flex">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -259,7 +259,7 @@ const Page = () => {
             </svg>
           </div>
           <div className="ml-3">
-            <p className="text-sm text-yellow-700 dark:text-yellow-300">
+            <p className="text-sm text-yellow-700 ">
               Your registration is incomplete. Please complete your registration to access all features.
             </p>
           </div>

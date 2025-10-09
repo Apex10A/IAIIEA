@@ -105,7 +105,7 @@ const Footer = () => {
               </div>
             </div>
           </div>
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
             <h3 className="text-lg font-semibold">Stay Updated</h3>
             <p className="text-sm text-gray-300">
               Subscribe to our newsletter for the latest updates and news.
@@ -123,7 +123,7 @@ const Footer = () => {
                 Subscribe
               </button>
             </form>
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-700">

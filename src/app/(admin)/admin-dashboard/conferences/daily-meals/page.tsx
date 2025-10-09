@@ -414,7 +414,7 @@ const ConferenceMeals = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50   space-y-6">
         <div className="flex justify-between items-center flex-col sm:flex-row gap-4">
           <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -424,7 +424,7 @@ const ConferenceMeals = () => {
         </div>
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(3)].map((_, i) => (
-            <Card key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-gray-700">
+            <Card key={i} className="bg-white  rounded-xl shadow-lg border border-blue-100 ">
               <AspectRatio.Root ratio={16 / 9}>
                 <div className="w-full h-full bg-gray-200 animate-pulse" />
               </AspectRatio.Root>
@@ -444,10 +444,10 @@ const ConferenceMeals = () => {
 
   if (error) {
     return (
-      <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-red-100 dark:border-red-700">
+      <Card className="bg-white  rounded-xl shadow-lg border border-red-100 ">
         <CardContent className="p-6 text-center">
           <div className="text-red-500 mb-4">{error}</div>
-          <Button onClick={fetchConferences} variant="outline" className="bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40">
+          <Button onClick={fetchConferences} variant="outline" className="bg-red-50 hover:bg-red-100  ">
             Retry
           </Button>
         </CardContent>
@@ -456,14 +456,14 @@ const ConferenceMeals = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50   space-y-6">
       <div className="flex justify-between items-center flex-col sm:flex-row gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-800  flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             Conference Meals
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-300">Manage meals for your conferences</p>
+          <p className="text-sm text-gray-500 ">Manage meals for your conferences</p>
         </div>
         
         <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -498,7 +498,7 @@ const ConferenceMeals = () => {
       {isFetchingMeals ? (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(3)].map((_, i) => (
-            <Card key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-gray-700">
+            <Card key={i} className="bg-white  rounded-xl shadow-lg border border-blue-100 ">
               <AspectRatio.Root ratio={16 / 9}>
                 <div className="w-full h-full bg-gray-200 animate-pulse" />
               </AspectRatio.Root>
@@ -515,13 +515,13 @@ const ConferenceMeals = () => {
       ) : selectedConferenceId ? (
         <>
           {meals.length === 0 ? (
-            <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-green-100 dark:border-green-700">
+            <Card className="bg-white  rounded-xl shadow-lg border border-green-100 ">
               <CardContent className="p-8 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20 mb-4">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-50  mb-4">
                   <ImageIcon className="h-6 w-6 text-green-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No meals yet</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-300 mb-4">Get started by adding a new meal</p>
+                <h3 className="text-lg font-medium text-gray-900  mb-1">No meals yet</h3>
+                <p className="text-sm text-gray-500  mb-4">Get started by adding a new meal</p>
                 <MealsModal 
                   onMealAdded={(id) => {
                     fetchMeals(id);
@@ -534,9 +534,9 @@ const ConferenceMeals = () => {
           ) : (
             <div className="grid gap-6 grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {meals.map((meal) => (
-                <Card key={meal.meal_id} className="overflow-hidden hover:shadow-xl transition-shadow bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-green-200 dark:border-green-700">
+                <Card key={meal.meal_id} className="overflow-hidden hover:shadow-xl transition-shadow bg-gradient-to-br from-green-50 to-emerald-50   rounded-xl border border-green-200 ">
                   <AspectRatio.Root ratio={16 / 9}>
-                    <div className="w-full h-full bg-green-100 dark:bg-gray-800 relative overflow-hidden">
+                    <div className="w-full h-full bg-green-100  relative overflow-hidden">
                       {meal.image ? (
                         <img
                           src={meal.image}
@@ -556,8 +556,8 @@ const ConferenceMeals = () => {
                     </div>
                   </AspectRatio.Root>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">{meal.name}</h3>
-                    <Badge variant="outline" className="text-xs text-green-700 dark:text-green-300 border-green-200 dark:border-green-600 bg-green-50 dark:bg-green-900/20">
+                    <h3 className="font-semibold text-lg text-gray-900  mb-2">{meal.name}</h3>
+                    <Badge variant="outline" className="text-xs text-green-700  border-green-200  bg-green-50 ">
                       Meal ID: {meal.meal_id}
                     </Badge>
                   </CardContent>
@@ -565,7 +565,7 @@ const ConferenceMeals = () => {
                     <Button 
                       variant="secondary"
                       size="sm"
-                      className="gap-1 mr-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800"
+                      className="gap-1 mr-2 bg-blue-50  text-blue-700  hover:bg-blue-100 "
                       onClick={() => openEditModal(meal)}
                     >
                       Edit
@@ -621,13 +621,13 @@ const ConferenceMeals = () => {
           )}
         </>
       ) : (
-        <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-blue-100 dark:border-blue-700">
+        <Card className="bg-white  rounded-xl shadow-lg border border-blue-100 ">
           <CardContent className="p-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 mb-4">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50  mb-4">
               <ChevronDown className="h-6 w-6 text-blue-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">Select a conference</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Choose a conference to view its meals</p>
+            <h3 className="text-lg font-medium text-gray-900  mb-1">Select a conference</h3>
+            <p className="text-sm text-gray-500 ">Choose a conference to view its meals</p>
           </CardContent>
         </Card>
       )}

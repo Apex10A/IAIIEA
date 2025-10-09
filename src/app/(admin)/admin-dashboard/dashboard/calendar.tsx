@@ -192,21 +192,21 @@ const Calendar = () => {
           key={dayData.day}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className={`p-2 border border-gray-200 dark:border-gray-700 min-h-[80px] sm:min-h-[100px] hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors ${
-            isCurrentDay ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700' : ''
+          className={`p-2 border border-gray-200  min-h-[80px] sm:min-h-[100px] hover:bg-gray-50  cursor-pointer transition-colors ${
+            isCurrentDay ? 'bg-blue-50  border-blue-200 ' : ''
           }`}
         >
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-start">
               <span className={`text-sm font-medium ${
-                isCurrentDay ? 'text-blue-600 dark:text-blue-300 font-bold' : 'text-gray-600 dark:text-gray-300'
+                isCurrentDay ? 'text-blue-600  font-bold' : 'text-gray-600 '
               }`}>
                 {dayNumber}
               </span>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                className="opacity-0 group-hover:opacity-100 p-1 h-6 w-6 text-gray-600  hover:text-gray-900 "
                 onClick={() => {
                   const dateStr = `${currentYear}-${(currentMonthIndex + 1).toString().padStart(2, '0')}-${dayNumber.toString().padStart(2, '0')}`;
                   setEventDetails(prev => ({ ...prev, date: dateStr }));
@@ -223,10 +223,10 @@ const Calendar = () => {
                   initial={{ scale: 0.9 }}
                   animate={{ scale: 1 }}
                   className={`text-xs p-1 rounded truncate ${
-                    event.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200' :
-                    event.color === 'red' ? 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' :
-                    event.color === 'green' ? 'bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-800 text-green-800 dark:text-green-200' : 
-                    'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
+                    event.color === 'blue' ? 'bg-blue-100  hover:bg-blue-200  text-blue-800 ' :
+                    event.color === 'red' ? 'bg-red-100  hover:bg-red-200  text-red-800 ' :
+                    event.color === 'green' ? 'bg-green-100 hover:bg-green-200 text-green-800' : 
+                    'bg-gray-100  hover:bg-gray-200  text-gray-800 '
                   } cursor-pointer transition-colors`}
                   title={`${event.activity} - ${event.location}`}
                   onClick={() => openViewModal(event)}
@@ -534,10 +534,10 @@ const Calendar = () => {
                   </div>
                   
                   <div className="flex items-start">
-                    <Info className="h-5 w-5 md:h-6 md:w-6 mt-0.5 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                    <Info className="h-5 w-5 md:h-6 md:w-6 mt-0.5 mr-2 text-gray-500  flex-shrink-0" />
                     <div>
-                      <p className="text-sm md:text-base font-medium text-gray-500 dark:text-gray-400">Description</p>
-                      <p className="text-sm md:text-base text-gray-800 dark:text-gray-200 whitespace-pre-line">{selectedEvent.description || 'No description provided'}</p>
+                      <p className="text-sm md:text-base font-medium text-gray-500 ">Description</p>
+                      <p className="text-sm md:text-base text-gray-800  whitespace-pre-line">{selectedEvent.description || 'No description provided'}</p>
                     </div>
                   </div>
                 </div>
@@ -546,7 +546,7 @@ const Calendar = () => {
               <div className="flex justify-end">
                 <Button 
                   onClick={() => setIsViewModalOpen(false)}
-                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white dark:bg-blue-700 dark:hover:bg-blue-800 text-sm md:text-base"
+                  className="bg-[#0E1A3D] hover:bg-[#152a61] text-white  text-sm md:text-base"
                 >
                   Close
                 </Button>

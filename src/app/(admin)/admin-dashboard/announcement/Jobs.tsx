@@ -210,11 +210,11 @@ const Jobs = () => {
   };
 
   return (
-    <div className='container mx-auto px-4 py-8 dark:bg-gray-900'>
+    <div className='container mx-auto px-4 py-8'>
       <div className='flex justify-between items-center mb-8'>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Job Opportunities</h1>
-          <p className="text-gray-500 dark:text-gray-400">{jobs.length} available positions</p>
+          <h1 className="text-2xl font-bold text-gray-900">Job Opportunities</h1>
+          <p className="text-gray-500">{jobs.length} available positions</p>
         </div>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
@@ -222,16 +222,16 @@ const Jobs = () => {
               <PlusIcon className='mr-2 h-4 w-4' /> Post New Job
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+          <DialogContent className="sm:max-w-[600px] bg-white border border-gray-200">
             <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-gray-100">Create Job Opportunity</DialogTitle>
-              <DialogDescription className="text-gray-500 dark:text-gray-400">
+              <DialogTitle className="text-gray-900">Create Job Opportunity</DialogTitle>
+              <DialogDescription className="text-gray-500">
                 Fill in the details for the new job posting
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateJob} className='space-y-4'>
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-gray-700 dark:text-gray-300">Job Title *</Label>
+                <Label htmlFor="title" className="text-gray-700">Job Title *</Label>
                 <Input 
                   id="title"
                   value={currentJob.title}
@@ -239,12 +239,12 @@ const Jobs = () => {
                     ...currentJob, 
                     title: e.target.value
                   })}
-                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
+                  className="bg-white border-gray-200 text-gray-900"
                   required 
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-gray-700 dark:text-gray-300">Job Description *</Label>
+                <Label htmlFor="description" className="text-gray-700">Job Description *</Label>
                 <Textarea 
                   id="description"
                   value={currentJob.description}
@@ -252,7 +252,7 @@ const Jobs = () => {
                     ...currentJob, 
                     description: e.target.value
                   })}
-                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
+                  className="bg-white border-gray-200 text-gray-900"
                   rows={5}
                   required 
                 />

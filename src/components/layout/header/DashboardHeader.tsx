@@ -181,14 +181,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         </p>
                       </div>
                       
-                      <Link 
+                      {/* <Link 
                         href="/members-dashboard/settings" 
                         className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={closeDropdown}
                       >
                         <Settings size={16} className="mr-3 text-gray-500" />
                         Account Settings
-                      </Link>
+                      </Link> */}
                       
                       <button
                         onClick={handleLogout}

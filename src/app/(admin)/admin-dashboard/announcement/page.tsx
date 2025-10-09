@@ -28,10 +28,10 @@ const Page = () => {
   };
 
   return (
-    <div className='p-6 dark:bg-gray-900 min-h-screen'>
-      <div className='bg-gray-100 dark:bg-gray-800 px-5 py-4 mb-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'>
-        <h1 className='text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100'>OPPORTUNITIES</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+    <div className='p-6 min-h-screen'>
+      <div className='bg-gray-100  px-5 py-4 mb-6 rounded-lg border border-gray-200  shadow-sm'>
+        <h1 className='text-xl md:text-2xl font-semibold text-gray-800 '>OPPORTUNITIES</h1>
+        <p className="text-sm text-gray-500  mt-1">
           Manage announcements and job opportunities
         </p>
       </div>

@@ -304,7 +304,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                   <h2 className="text-md md:text-xl font-bold text-gray-900 ">Conference Schedules</h2>
                   <div className='flex flex-col sm:flex-row gap-2'>
-                    <Button variant='outline' className="bg-primary text-white hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                    <Button variant='outline' className="bg-primary text-gray-900 hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                       Upload Conference Proceedings
                     </Button>
                   </div>

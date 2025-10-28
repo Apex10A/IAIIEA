@@ -361,7 +361,6 @@ const SeminarParticipantsPage = () => {
                     </div>
                   </div>
 
-                  {/* Registration Status Message */}
                   {seminarDetails && !seminarDetails.is_registered && (
                     <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
                       <div className="flex">
@@ -381,7 +380,6 @@ const SeminarParticipantsPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Participants Table - Only show if registered */}
               {seminarDetails?.is_registered ? (
                 <Card>
                   <CardContent className="p-6">

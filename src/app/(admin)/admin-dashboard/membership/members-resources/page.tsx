@@ -75,7 +75,7 @@ const Page = () => {
 
   const handleDelete = async (resourceId: string) => {
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_member_resource/${resourceId}`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource/${resourceId}`, {
         headers: {
           'Authorization': `Bearer ${bearerToken}`
         }

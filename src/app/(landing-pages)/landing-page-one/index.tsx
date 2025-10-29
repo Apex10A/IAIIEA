@@ -37,6 +37,63 @@ interface EventDetails {
   }>;
 }
 
+const journeyMilestones = [
+  {
+    year: '2018',
+    title: 'Maiden edition of the association’s annual conference',
+    description: 'Theme: "Trends in Educational Assessment"',
+    image: '/AboutOne.jpg',
+  },
+  {
+    year: '2019',
+    title: 'First international conference held',
+    description: 'Created a platform for dialogue on innovations in assessment.',
+    image: '/AboutTwo.jpg',
+  },
+  {
+    year: '2020',
+    title: 'Introduction of webinar and virtual participation at conferences',
+    description: 'Theme: "Redesigning Educational Assessment for the 21st Century"',
+    image: '/2020/2020Pic.png',
+  },
+  {
+    year: '2021',
+    title: 'Introduced both virtual and onsite participation at the annual conference',
+    description: 'Theme: "Assessment for the New Normal Times"',
+    image: '/2021.png',
+  },
+  {
+    year: '2022',
+    title: 'Expanded reach beyond Africa to Asia and other continents',
+    description: 'Strengthened global collaborations and partnerships.',
+    image: '/2022.png',
+  },
+  {
+    year: '2023',
+    title: 'Launched the book on Big Data at Anchor University, Lagos',
+    description: 'Organised a teachers’ conference to share insights and best practices.',
+    image: '/2023.png',
+  },
+  {
+    year: '2024',
+    title: 'Collaborated with UBEC for the annual conference',
+    description: 'Theme: "Transforming Learning and Assessment Through Application of Big Data and Artificial Intelligence"',
+    image: '/2024.png',
+  },
+  {
+    year: '2025',
+    title: 'Organised workshops in three geopolitical zones of Nigeria',
+    description: 'Annual conference theme: "Assessment in the Age of Artificial Intelligence"',
+    image: '/Meeting.png',
+  },
+];
+
+const impactHighlights = [
+  'Provided professional development opportunities for educators and innovators',
+  'Fostered collaboration between academia, industry, and policy makers',
+  'Inspired a new generation of researchers and students to embrace innovation in education',
+];
+
 const LandingPage: React.FC = () => {
   const [conferences, setConferences] = useState<Event[]>([]);
   const [seminars, setSeminars] = useState<Event[]>([]);
@@ -346,6 +403,73 @@ const LandingPage: React.FC = () => {
                 Innovation for excellence
               </p>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+        <div className="container mx-auto space-y-12">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="max-w-4xl mx-auto text-center space-y-6"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F]">Our Journey So Far</h2>
+            <p className="text-base md:text-lg text-[#0B142F]/80">
+              Since its establishment on October 9, 2018, the International Association for Innovations in Educational Assessment has remained committed to advancing innovation, learning, and assessment across education and professional practice.
+            </p>
+            <p className="text-base md:text-lg text-[#0B142F]/80">
+              What started out as a vision among a few educators and researchers has expanded into a thriving network of people and organisations with a shared goal: to change how learning is assessed, valued, and enhanced.
+            </p>
+            <h3 className="text-2xl font-bold text-[#0B142F]">Key Milestones</h3>
+          </motion.div>
+          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+            {journeyMilestones.map((milestone) => (
+              <motion.div
+                key={milestone.year}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeIn}
+                className="bg-[#F8F9FC] rounded-xl shadow-lg overflow-hidden"
+              >
+                <div className="relative h-56">
+                  <Image
+                    src={milestone.image}
+                    alt={`${milestone.year} milestone`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                  />
+                </div>
+                <div className="p-6 space-y-3">
+                  <span className="inline-flex items-center justify-center px-3 py-1 bg-[#D5B93C]/20 text-[#0B142F] text-sm font-semibold rounded-full">
+                    {milestone.year}
+                  </span>
+                  <h4 className="text-lg font-bold text-[#0B142F] leading-snug">{milestone.title}</h4>
+                  <p className="text-sm text-[#0B142F]/80">{milestone.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+            className="bg-[#F8F9FC] rounded-2xl p-10"
+          >
+            <h3 className="text-2xl font-bold text-[#0B142F] mb-4">Our Impact</h3>
+            <p className="text-base text-[#0B142F]/80">Over the years, we have:</p>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              {impactHighlights.map((impact) => (
+                <div key={impact} className="bg-white rounded-xl shadow-md p-6 h-full flex">
+                  <p className="text-base text-[#0B142F]/80">{impact}</p>
+                </div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>

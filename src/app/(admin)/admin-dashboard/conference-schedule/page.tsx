@@ -197,7 +197,7 @@ const ConferenceSchedule = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Conference Schedules</h1>
           <p className="text-sm text-gray-500 mt-1">
-            View schedules for upcoming and past conferences
+            View schedules for upcoming and past conference
           </p>
         </div>
     <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded}>

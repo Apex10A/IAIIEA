@@ -7,6 +7,7 @@ import { showToast } from '@/utils/toast';
 
 interface ConferenceScheduleModalProps {
   onScheduleAdded: () => void;
+  defaultEventId?: string;
 }
 
 interface ScheduleDetails {
@@ -28,9 +29,9 @@ interface Conference {
   status: string;
 }
 
-const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onScheduleAdded }) => {
+const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onScheduleAdded, defaultEventId }) => {
   const [scheduleDetails, setScheduleDetails] = useState<ScheduleDetails>({
-    event_id: "",
+    event_id: defaultEventId || "",
     day: "",
     start: "",
     end: "",
@@ -38,6 +39,12 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
     venue: "",
     facilitator: "",
   });
+
+  useEffect(() => {
+    if (defaultEventId) {
+      setScheduleDetails(prev => ({ ...prev, event_id: defaultEventId }));
+    }
+  }, [defaultEventId]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingConferences, setIsFetchingConferences] = useState(false);
@@ -71,12 +78,21 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
       const result = await response.json();
       if (result.status === "success") {
         setConferences(result.data);
-        // Set default selection to the first conference if available
-        if (result.data.length > 0) {
+        // Set default selection to the first conference if available and no defaultEventId
+        if (result.data.length > 0 && !defaultEventId) {
           setScheduleDetails(prev => ({
             ...prev,
             event_id: result.data[0].id.toString()
           }));
+        } else if (defaultEventId) {
+            // Pre-fill venue if defaultEventId matches a conference
+            const selectedConference = result.data.find((conf: any) => conf.id.toString() === defaultEventId);
+            if (selectedConference) {
+                setScheduleDetails(prev => ({
+                    ...prev,
+                    venue: selectedConference.venue
+                }));
+            }
         }
       } else {
         throw new Error(result.message || "Failed to fetch conferences");
@@ -119,11 +135,11 @@ const ConferenceScheduleModal: React.FC<ConferenceScheduleModalProps> = ({ onSch
   };
 
   const resetForm = () => {
-    // If conferences exist, set the default event_id to the first one
-    const defaultEventId = conferences.length > 0 ? conferences[0].id.toString() : "";
+    // If defaultEventId is provided, use it, otherwise use the first conference if it exists
+    const defaultId = defaultEventId || (conferences.length > 0 ? conferences[0].id.toString() : "");
     
     setScheduleDetails({
-      event_id: defaultEventId,
+      event_id: defaultId,
       day: "",
       start: "",
       end: "",

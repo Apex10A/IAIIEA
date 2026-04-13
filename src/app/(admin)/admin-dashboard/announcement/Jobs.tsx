@@ -210,16 +210,16 @@ const Jobs = () => {
   };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <div className='flex justify-between items-center mb-8'>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Job Opportunities</h1>
-          <p className="text-gray-500">{jobs.length} available positions</p>
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-100">
+          {jobs.length} Available Positions
         </div>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white">
-              <PlusIcon className='mr-2 h-4 w-4' /> Post New Job
+            <Button className="bg-primary hover:bg-primary/90 text-white shadow-sm flex items-center gap-2">
+              <PlusIcon className='h-4 w-4' /> 
+              <span>Post New Job</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] bg-white border border-gray-200">
@@ -314,32 +314,34 @@ const Jobs = () => {
                   />
                 </div>
               )}
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{job.title}</CardTitle>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Posted on {new Date(job.date).toLocaleDateString()} at {job.time}
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl font-bold text-gray-900 line-clamp-1">{job.title}</CardTitle>
+                <div className="text-xs text-gray-500 font-medium">
+                  {new Date(job.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} • {job.time}
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
                   {job.description}
                 </p>
-                <div className="flex justify-between items-center">
-                  {job.link && (
+                <div className="flex justify-between items-center pt-2 border-t">
+                  {job.link ? (
                     <a 
                       href={job.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-primary hover:text-primary/90 font-medium"
+                      className="text-primary hover:underline text-sm font-semibold"
                     >
-                      Apply Now
+                      View Details
                     </a>
+                  ) : (
+                    <span className="text-gray-400 text-xs italic">No link provided</span>
                   )}
-                  <div className="flex space-x-2">
+                  <div className="flex gap-1">
                     <Button 
-                      variant="outline" 
-                      size="icon"
-                      className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+                      variant="ghost" 
+                      size="sm"
+                      className="h-8 w-8 p-0 text-gray-500 hover:text-primary"
                       onClick={() => {
                         setCurrentJob(job);
                         setIsEditModalOpen(true);
@@ -348,9 +350,9 @@ const Jobs = () => {
                       <EditIcon className="h-4 w-4" />
                     </Button>
                     <Button 
-                      variant="destructive" 
-                      size="icon"
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      variant="ghost" 
+                      size="sm"
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
                       onClick={() => {
                         setJobToDelete(job.id);
                         setDeleteDialogOpen(true);

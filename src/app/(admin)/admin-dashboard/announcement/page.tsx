@@ -28,15 +28,14 @@ const Page = () => {
   };
 
   return (
-    <div className='p-6 min-h-screen'>
-      <div className='bg-gray-100  px-5 py-4 mb-6 rounded-lg border border-gray-200  shadow-sm'>
-        <h1 className='text-xl md:text-2xl font-semibold text-gray-800 '>OPPORTUNITIES</h1>
-        <p className="text-sm text-gray-500  mt-1">
-          Manage announcements and job opportunities
-        </p>
-      </div>
-      
-      <div className="mb-6">
+    <div className='p-4 md:p-6 space-y-6'>
+      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white px-5 py-4 rounded-lg border border-gray-200 shadow-sm'>
+        <div>
+          <h1 className='text-xl md:text-2xl font-bold text-gray-900'>OPPORTUNITIES</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage announcements and job opportunities
+          </p>
+        </div>
         <ButtonProp
           options={['Announcement', 'Job Opportunity']}
           selectedSection={selectedSection}
@@ -44,7 +43,7 @@ const Page = () => {
         />
       </div>
 
-      <div className='py-6'>
+      <div className='min-h-[400px]'>
         {renderContent()}
       </div>
     </div>

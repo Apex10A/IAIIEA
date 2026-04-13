@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight, FaBookOpen, FaCalendar } from 'react-icons/fa';
 import RealConference from "@/modules/ui/RealConference";
 import RealSeminar from "@/modules/ui/RealSeminar";
+import HeroSection from './HeroSection';
+import EventsSection from './EventsSection';
 import Sponsors from './sponsors'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
@@ -147,209 +149,99 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="bg-white">
+      <HeroSection incomingEvents={incomingEvents} />
 
-      <section className="relative h-screen w-full overflow-hidden">
-        <Swiper
-          modules={[Autoplay, Pagination, Navigation, EffectFade]}
-          effect="fade"
-          spaceBetween={0}
-          slidesPerView={1}
-          autoplay={{
-            delay: 5000,
-            disableOnInteraction: false,
-          }}
-          pagination={{
-            clickable: true,
-            bulletClass: 'swiper-pagination-bullet !bg-white/50 !opacity-100',
-            bulletActiveClass: 'swiper-pagination-bullet-active !bg-white',
-          }}
-          navigation={{
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          }}
-          className="h-full w-full [&_.swiper-button-next]:!text-white [&_.swiper-button-prev]:!text-white [&_.swiper-pagination]:!bottom-12"
-        >
-          {incomingEvents.map((event) => (
-            <SwiperSlide key={event?.id} className="h-full w-full">
-              <div className="relative h-full w-full">
-                <Image
-                  src={event?.flyer || (event?.type === 'conference' ? '/DSA.JPG' : '/DSA2.JPG')}
-                  alt={event?.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/40"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="container mx-auto px-4 md:px-8">
-                    <div className="max-w-4xl mx-auto">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="text-center space-y-6 md:space-y-8"
-                      >
-                        <div className="flex items-center justify-center gap-4">
-                          <span className="inline-block px-4 py-2 bg-[#D5B93C] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
-                            {event?.status}
-                          </span>
-                          <span className="inline-block px-4 py-2 bg-[#0B142F] text-white text-sm md:text-base font-semibold rounded-full shadow-lg">
-                            {event?.type === 'conference' ? 'Conference' : 'Seminar'}
-                          </span>
-                        </div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                          {event?.title}
-                        </h1>
-                        <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-medium">
-                          {event?.theme}
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-white/90">
-                          <div className="flex items-center gap-3">
-                            <FaUsers className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="font-medium text-base md:text-lg">{event?.venue}</span>
-                          </div>
-                          <div className="hidden sm:block text-2xl text-white/50">•</div>
-                          <div className="flex items-center gap-3">
-                            <FaCalendar className="w-5 h-5 md:w-6 md:h-6" />
-                            <span className="font-medium text-base md:text-lg">{event?.date}</span>
-                          </div>
-                        </div>
-                        <div className="pt-8 relative z-50">
-                          <Link
-                            // href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
-                            href={'/register'}
-                            className="relative inline-flex items-center md:mr-4 px-6 md:px-8 py-3 md:py-4 bg-[#D5B93C] text-white text-base md:text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer mb-4 md:mb-0"
-                          >
-                           How to Join <FaArrowRight className="ml-3 w-5 h-5" />
-                          </Link>
-                          <Link
-                            // href={`/${event.type === 'conference' ? 'conference' : 'seminar'}/${event.id}`}
-                            href={'/about'}
-                            className="relative inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-transparent border border-[#D5B93C] text-white text-base md:text-lg font-semibold rounded-lg hover:bg-[#C4A93C] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
-                          >
-                           About IAIIEA <FaArrowRight className="ml-3 w-5 h-5" />
-                          </Link>
-                        </div>
-                      </motion.div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-40">
-          <motion.div
-            animate={{
-              y: [0, 10, 0],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
-          >
-            <motion.div
-              animate={{
-                y: [0, 15, 0],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-              className="w-1 h-3 bg-white/50 rounded-full mt-2"
-            />
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+      {/* About IAIIEA - Experience & Journey */}
+      <section className="py-24 px-4 md:px-8 lg:px-14 bg-white overflow-hidden">
         <div className="container mx-auto">
-          <div className="flex flex-col lg:flex-row gap-12 items-center">
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
             <motion.div 
-              className="lg:w-1/2"
+              className="lg:w-1/2 relative"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
             >
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#0B142F] mb-6 leading-tight">
-                The International Association for Innovations in Educational Assessment (IAIIEA)
-              </h1>
+              <div className="inline-block px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-bold uppercase tracking-widest mb-6">
+                Established 2018
+              </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#0B142F] mb-8 leading-[1.1]">
+                Leading Global <span className="text-blue-600 underline decoration-[#D5B93C] decoration-2 underline-offset-4">Innovations</span> in Assessment
+              </h2>
  
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-[#0B142F] mb-4">Our Journey So Far</h2>
-                <p className="text-base text-[#0B142F]/80 mb-4">
-                  The International Association for Innovations in Educational Assessment (IAIIEA) was established on 9th October, 2018. That was when the Association was registered with the Federal Republic of Nigeria via the Corporate Affairs Commission (CAC) Abuja, Nigeria.
+              <div className="space-y-6 mb-10 text-gray-600 text-lg leading-relaxed">
+                <p>
+                  The International Association for Innovations in Educational Assessment (IAIIEA) was registered with the Federal Republic of Nigeria via the CAC Abuja on 9th October, 2018.
                 </p>
-                <p className="text-base text-[#0B142F]/80 mb-6">
-                  The Association came into limelight on 24th November, 2018 when the maiden conference was held in Abuja, the capital city of Nigeria, West Africa. It was indeed an academic conference. The conference took place at the Public Service Institute of Nigeria along Kubwa Express Road, Abuja.
+                <p>
+                  We came into the limelight on 24th November, 2018, hosting our maiden conference at the Public Service Institute of Nigeria, marking the beginning of a new era in academic excellence.
                 </p>
-                <Link href="/about" className="inline-flex items-center px-6 py-3 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors">
-                  Read More <FaArrowRight className="ml-2" />
-                </Link>
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-[#0B142F] mb-4">Our Aims</h2>
-                <div className="flex items-start gap-4">
-                  <div className="text-[#D5B93C] mt-1">
-                    <FaSchool size={24} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all border border-transparent hover:border-blue-100 group">
+                  <div className="w-12 h-12 shrink-0 rounded-xl bg-blue-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    <FaSchool size={20} />
                   </div>
-                  <p className="text-base text-[#0B142F]/80">
-                    Developing innovations in educational assessment at all levels
-                  </p>
+                  <div>
+                    <h4 className="font-bold text-[#0B142F] mb-1">Global Standard</h4>
+                    <p className="text-sm">Developing assessment innovations at all educational levels.</p>
+                  </div>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="text-[#D5B93C] mt-1">
-                    <FaUsers size={24} />
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-xl transition-all border border-transparent hover:border-blue-100 group">
+                  <div className="w-12 h-12 shrink-0 rounded-xl bg-[#D5B93C] flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                    <FaUsers size={20} />
                   </div>
-                  <p className="text-base text-[#0B142F]/80">
-                    Promoting educational assessment innovations for national and international cohesion
-                  </p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="text-[#D5B93C] mt-1">
-                    <FaChalkboardTeacher size={24} />
+                  <div>
+                    <h4 className="font-bold text-[#0B142F] mb-1">Cohesion</h4>
+                    <p className="text-sm">Promoting international unity through educational assessment.</p>
                   </div>
-                  <p className="text-base text-[#0B142F]/80">
-                    Providing intensive capacity building for researchers, students, teachers, and other educational stakeholders
-                  </p>
                 </div>
               </div>
+
+              <Link href="/about" className="inline-flex items-center px-8 py-4 bg-[#0B142F] text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-200">
+                Full Story <FaArrowRight className="ml-3" />
+              </Link>
             </motion.div>
 
             <motion.div 
-              className="lg:w-1/2"
+              className="lg:w-1/2 relative"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
             >
-              <div className="relative rounded-xl overflow-hidden shadow-2xl">
+              <div className="relative z-10 rounded-[3rem] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.15)]">
                 <Image 
                   src='/AboutOne.jpg'
                   alt='IAIIEA Team Members'
                   width={800}
-                  height={600}
-                  className="w-full h-auto object-cover"
+                  height={900}
+                  className="w-full h-auto object-cover scale-105 hover:scale-100 transition-transform duration-1000"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1A3D] to-transparent opacity-70"></div>
-                <div className="absolute bottom-0 left-0 p-6 text-white">
-                  <h3 className="text-lg font-bold">Our Dedicated Team</h3>
-                  <p>Committed to advancing educational assessment worldwide</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B142F] via-transparent to-transparent opacity-60"></div>
+              </div>
+              
+              {/* Floating Experience Badge */}
+              <div className="absolute -bottom-10 -left-10 z-20 bg-[#D5B93C] p-8 rounded-[2rem] shadow-2xl hidden md:block animate-bounce-slow">
+                <div className="text-center text-[#0B142F]">
+                  <div className="text-5xl font-black mb-1">7+</div>
+                  <div className="text-sm font-bold uppercase tracking-widest">Years of<br/>Excellence</div>
                 </div>
               </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl -z-10 animate-pulse"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full border-2 border-dashed border-gray-200 rounded-[3rem] translate-x-6 translate-y-6 -z-10"></div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-[#F8F9FC]">
-        <div className="container mx-auto px-4 md:px-8 lg:px-14">
+      {/* Mission, Vision & Motto - Core Values */}
+      <section className="py-24 bg-[#0B142F] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-600/5 skew-x-12 transform origin-top"></div>
+        <div className="container mx-auto px-4 md:px-8 lg:px-14 relative z-10">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -358,101 +250,142 @@ const LandingPage: React.FC = () => {
               hidden: { opacity: 0 },
               visible: {
                 opacity: 1,
-                transition: {
-                  staggerChildren: 0.2
-                }
+                transition: { staggerChildren: 0.2 }
               }
             }}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid md:grid-cols-3 gap-8 lg:gap-12"
           >
-            <motion.div 
-              variants={fadeIn}
-              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="text-[#D5B93C] mb-4">
-                <FaGraduationCap size={40} />
-              </div>
-              <h3 className="text-xl font-bold text-[#0B142F] mb-3">Our Mission</h3>
-              <p className="text-base text-[#0B142F]/80">
-                To advance innovative system that enhances quality assessment in terms of intellectual competence and the zeal to add value to our world.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              variants={fadeIn}
-              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="text-[#D5B93C] mb-4">
-                <FaUsers size={40} />
-              </div>
-              <h3 className="text-xl font-bold text-[#0B142F] mb-3">Our Vision</h3>
-              <p className="text-base text-[#0B142F]/80">
-                IAIIEA has its vision to be a pace-setter and a world-class association for innovative educational assessment.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              variants={fadeIn}
-              className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-            >
-              <div className="text-[#D5B93C] mb-4">
-                <FaChalkboardTeacher size={40} />
-              </div>
-              <h3 className="text-xl font-bold text-[#0B142F] mb-3">Our Motto</h3>
-              <p className="text-base text-[#0B142F]/80">
-                Innovation for excellence
-              </p>
-            </motion.div>
+            {[
+              { 
+                icon: <FaGraduationCap size={44} />, 
+                title: "Our Mission", 
+                desc: "To advance innovative systems that enhance quality assessment, fostering intellectual competence and global value.",
+                color: "bg-blue-600"
+              },
+              { 
+                icon: <FaUsers size={44} />, 
+                title: "Our Vision", 
+                desc: "To be the premier, world-class pace-setter for innovative educational assessment across all academic frontiers.",
+                color: "bg-[#D5B93C]"
+              },
+              { 
+                icon: <FaChalkboardTeacher size={44} />, 
+                title: "Our Motto", 
+                desc: "Innovation for Excellence — the core driving force behind every initiative we undertake since our inception.",
+                color: "bg-emerald-500"
+              }
+            ].map((item, idx) => (
+              <motion.div 
+                key={idx}
+                variants={fadeIn}
+                className="group relative bg-white/5 backdrop-blur-md p-10 rounded-[2.5rem] border border-white/10 hover:border-white/20 transition-all duration-500 hover:-translate-y-4"
+              >
+                <div className={`w-20 h-20 rounded-2xl ${item.color} flex items-center justify-center text-white mb-8 shadow-2xl transform group-hover:rotate-12 transition-transform`}>
+                  {item.icon}
+                </div>
+                <h3 className="text-2xl font-black text-white mb-4 tracking-tight">{item.title}</h3>
+                <p className="text-white/60 text-lg leading-relaxed">
+                  {item.desc}
+                </p>
+                <div className="mt-8 w-12 h-1.5 rounded-full bg-white/10 group-hover:w-full group-hover:bg-gradient-to-r from-transparent via-white/20 to-transparent transition-all duration-700"></div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
-      <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
-        <div className="container mx-auto space-y-12">
+      <section className="relative py-24 px-4 md:px-8 lg:px-14 overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F8F9FC] via-white to-[#F8F9FC] z-0"></div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] z-0 pointer-events-none" 
+             style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }}></div>
+        
+        {/* Animated Orbs */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#D5B93C]/10 rounded-full blur-3xl animate-pulse z-0"></div>
+        <div className="absolute top-1/2 -right-24 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-700 z-0"></div>
+
+        <div className="container mx-auto relative z-10 space-y-16">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="max-w-4xl mx-auto text-center space-y-6"
+            className="max-w-3xl mx-auto text-center space-y-4 mb-20"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F]">Our Journey So Far</h2>
-            <p className="text-base md:text-lg text-[#0B142F]/80">
-              Since its establishment on October 9, 2018, the International Association for Innovations in Educational Assessment has remained committed to advancing innovation, learning, and assessment across education and professional practice.
+            <div className="inline-block px-4 py-1.5 bg-[#D5B93C]/10 text-[#D5B93C] rounded-full text-sm font-bold uppercase tracking-widest mb-2">
+              Our Legacy
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black text-[#0B142F] tracking-tight">
+              Key <span className="text-[#D5B93C]">Milestones</span>
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              A timeline of our commitment to transforming educational assessment and fostering global excellence since 2018.
             </p>
-            <p className="text-base md:text-lg text-[#0B142F]/80">
-              What started out as a vision among a few educators and researchers has expanded into a thriving network of people and organisations with a shared goal: to change how learning is assessed, valued, and enhanced.
-            </p>
-            <h3 className="text-2xl font-bold text-[#0B142F]">Key Milestones</h3>
           </motion.div>
-          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-            {journeyMilestones.map((milestone) => (
-              <motion.div
-                key={milestone.year}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
-                className="bg-[#F8F9FC] rounded-xl shadow-lg overflow-hidden"
-              >
-                <div className="relative h-56">
-                  <Image
-                    src={milestone.image}
-                    alt={`${milestone.year} milestone`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                  />
+
+          <div className="relative">
+            {/* Timeline Line - Desktop Only */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-[#D5B93C]/20 via-[#D5B93C] to-[#D5B93C]/20 hidden lg:block rounded-full"></div>
+            
+            <div className="space-y-20 lg:space-y-32">
+              {journeyMilestones.map((milestone, index) => (
+                <div key={milestone?.year} className="relative">
+                  <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className={`flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-0 ${
+                      index % 2 === 0 ? 'lg:flex-row-reverse' : ''
+                    }`}
+                  >
+                    {/* Content Card */}
+                    <div className="w-full lg:w-[46%]">
+                      <div className="bg-white/80 backdrop-blur-md p-8 md:p-12 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-gray-100 hover:border-[#D5B93C]/40 transition-all duration-500 group relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#D5B93C]/5 rounded-bl-full -mr-10 -mt-10 group-hover:bg-[#D5B93C]/10 transition-colors"></div>
+                        
+                        <div className="flex items-center gap-5 mb-8">
+                          <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D5B93C] to-[#C4A93C] text-white shadow-lg shadow-[#D5B93C]/30 transform group-hover:rotate-6 transition-transform">
+                            <FaCalendar size={28} />
+                          </div>
+                          <span className="text-4xl md:text-5xl font-black text-[#0B142F] tracking-tighter">
+                            {milestone?.year}
+                          </span>
+                        </div>
+                        <h4 className="text-2xl md:text-3xl font-extrabold text-[#0B142F] mb-5 leading-tight group-hover:text-[#D5B93C] transition-colors">
+                          {milestone?.title}
+                        </h4>
+                        <p className="text-lg text-gray-600 leading-relaxed font-medium">
+                          {milestone?.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Timeline Center Dot - Desktop Only */}
+                    <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full bg-white border-4 border-[#D5B93C] z-10 items-center justify-center shadow-[0_0_30px_rgba(213,185,60,0.4)] group">
+                      <div className="w-4 h-4 rounded-full bg-[#D5B93C] group-hover:scale-150 transition-transform"></div>
+                    </div>
+
+                    {/* Image Column */}
+                    <div className="w-full lg:w-[46%]">
+                      <div className="relative h-72 md:h-[450px] rounded-[2.5rem] overflow-hidden shadow-2xl group cursor-pointer">
+                        <Image
+                          src={milestone?.image}
+                          alt={`${milestone?.year} milestone`}
+                          fill
+                          className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0B142F] via-[#0B142F]/20 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500"></div>
+                        <div className="absolute bottom-10 left-10 right-10 text-white transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                           <div className="text-sm font-black text-[#D5B93C] mb-2 uppercase tracking-[0.2em]">Legacy {milestone?.year}</div>
+                           <div className="text-2xl md:text-3xl font-bold leading-tight">{milestone?.title}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-                <div className="p-6 space-y-3">
-                  <span className="inline-flex items-center justify-center px-3 py-1 bg-[#D5B93C]/20 text-[#0B142F] text-sm font-semibold rounded-full">
-                    {milestone.year}
-                  </span>
-                  <h4 className="text-lg font-bold text-[#0B142F] leading-snug">{milestone.title}</h4>
-                  <p className="text-sm text-[#0B142F]/80">{milestone.description}</p>
-                </div>
-              </motion.div>
-            ))}
+              ))}
+            </div>
           </div>
           <motion.div
             initial="hidden"
@@ -474,22 +407,29 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-       <section className="py-20 px-4 md:px-8 lg:px-14 bg-white">
+      {/* Publications Section */}
+      <section className="py-24 px-4 md:px-8 lg:px-14 bg-white relative overflow-hidden">
         <div className="container mx-auto">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="text-center mb-16"
+            className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">Our Publications</h2>
-            <p className="text-lg text-[#0B142F]/80 max-w-3xl mx-auto">
-              Explore our academic contributions to educational assessment
-            </p>
+            <div className="max-w-2xl">
+              <div className="text-[#D5B93C] font-bold uppercase tracking-[0.3em] text-sm mb-4">Academic Excellence</div>
+              <h2 className="text-4xl md:text-5xl font-black text-[#0B142F] tracking-tight">Our <span className="text-blue-600">Publications</span></h2>
+              <p className="text-lg text-gray-600 mt-4 leading-relaxed">
+                Explore our peer-reviewed journals and contributions to the global discourse on educational assessment and innovation.
+              </p>
+            </div>
+            <Link href="https://journal.iaiiea.org" target="_blank" className="inline-flex items-center text-blue-600 font-bold group">
+              View All Journals <FaArrowRight className="ml-2 group-hover:translate-x-2 transition-transform" />
+            </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {publications.map((pub) => (
               <motion.div
                 key={pub?.id}
@@ -497,30 +437,40 @@ const LandingPage: React.FC = () => {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeIn}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                className="group bg-gray-50 rounded-[2.5rem] overflow-hidden hover:bg-white hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-500 border border-transparent hover:border-blue-100"
               >
-                <div className="relative h-64">
+                <div className="relative h-80 overflow-hidden">
                   <Image
                     src={pub?.image}
                     alt={pub?.title}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center mb-4">
-                    <FaBookOpen className="text-[#D5B93C] mr-2" size={24} />
-                    <h3 className="text-lg font-bold text-[#0B142F]">PUBLICATIONS</h3>
+                  <div className="absolute inset-0 bg-[#0B142F]/10 group-hover:bg-transparent transition-colors"></div>
+                  <div className="absolute top-6 left-6">
+                    <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-black text-[#0B142F] shadow-xl">
+                      NEW ISSUE
+                    </div>
                   </div>
-                  <h4 className="text-base font-semibold text-[#0B142F] mb-2">{pub?.title}</h4>
-                  <p className="text-sm text-[#0B142F]/80 mb-4">{pub?.volume}</p>
+                </div>
+                <div className="p-8 md:p-10">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4">
+                      <FaBookOpen size={18} />
+                    </div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Scientific Journal</span>
+                  </div>
+                  <h4 className="text-xl font-bold text-[#0B142F] mb-3 leading-tight group-hover:text-blue-600 transition-colors">
+                    {pub?.title}
+                  </h4>
+                  <p className="text-sm text-gray-500 mb-8 font-medium italic">{pub?.volume}</p>
                   <Link 
                     href={pub.link} 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white rounded-lg hover:bg-[#C4A93C] transition-colors"
+                    className="flex items-center justify-center w-full py-4 bg-white border-2 border-gray-100 text-[#0B142F] font-bold rounded-2xl group-hover:bg-[#0B142F] group-hover:text-white group-hover:border-[#0B142F] transition-all duration-300 shadow-sm"
                   >
-                    View Publication <FaArrowRight className="ml-2" />
+                    Read Journal <FaArrowRight className="ml-2 text-blue-500 group-hover:text-white" />
                   </Link>
                 </div>
               </motion.div>
@@ -529,50 +479,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-20 px-4 md:px-8 lg:px-14 bg-[#E9EBF3]">
-        <div className="container mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0B142F] mb-4">Our Events</h2>
-            <p className="text-lg text-[#0B142F]/80 max-w-3xl mx-auto">
-              Join our premier events designed to advance educational assessment practices worldwide
-            </p>
-          </motion.div>
-
-          <div className="space-y-12">
-            <div>
-              <div className="flex justify-between items-center mb-8">
-                {/* <h3 className="text-2xl font-bold text-[#0B142F]">Conferences</h3> */}
-                {/* <Link 
-                  href="/conferences"
-                  className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors"
-                >
-                  See All Conferences <FaArrowRight className="ml-2 w-4 h-4" />
-                </Link> */}
-              </div>
-              <RealConference />
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-8">
-                {/* <h3 className="text-2xl font-bold text-[#0B142F]">Seminars</h3> */}
-                {/* <Link 
-                  href="/seminars"
-                  className="inline-flex items-center px-4 py-2 bg-[#D5B93C] text-white font-medium rounded-lg hover:bg-[#C4A93C] transition-colors"
-                >
-                  See All Seminars <FaArrowRight className="ml-2 w-4 h-4" />
-                </Link> */}
-              </div>
-              <RealSeminar />
-            </div>
-          </div>
-        </div>
-      </section>
+      <EventsSection events={incomingEvents} />
     </div>
   )
 }

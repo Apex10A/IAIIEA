@@ -415,21 +415,17 @@ const AnnouncementsPage = () => {
     : announcements.filter(a => a.viewer === activeViewer);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header and Create Button */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
-          <p className="text-gray-500">
-            {filteredAnnouncements.length} announcements for {activeViewer}
-          </p>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-purple-50 text-purple-700 px-4 py-2 rounded-full text-sm font-medium border border-purple-100">
+          {filteredAnnouncements.length} Announcements for {activeViewer}
         </div>
         
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90">
-              <PlusIcon className="mr-2 h-4 w-4 text-[#000]" />
-              <span className='text-[#000]'>New Announcement</span>
+            <Button className="bg-primary hover:bg-primary/90 text-white shadow-sm flex items-center gap-2">
+              <PlusIcon className="h-4 w-4" />
+              <span>New Announcement</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
@@ -669,32 +665,64 @@ const AnnouncementsPage = () => {
             return (
               <Card 
                 key={announcement.id}
-                className={`transition-all duration-200 overflow-hidden 
+                className={`transition-all duration-200 overflow-hidden border-l-4 
                   ${viewerColor.border} ${isExpanded ? 'shadow-md' : 'hover:shadow-sm'}`}
               >
                 <div 
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-accent/50"
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => toggleExpand(announcement.id)}
                 >
-                  <div className="flex items-center gap-3">
-                    {isExpanded ? (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    )}
-                    <h3 className="font-medium">{announcement.title}</h3>
+                  <div className="flex items-center gap-4">
+                    <div className={`p-1 rounded-full ${isExpanded ? 'bg-primary/10' : ''}`}>
+                      {isExpanded ? (
+                        <ChevronDown className="h-5 w-5 text-primary" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{announcement.title}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className={`${viewerColor.text} ${viewerColor.bg} border-none text-[10px] px-2 py-0`}>
+                          {announcement.viewer ? 
+                            (announcement.viewer.charAt(0).toUpperCase() + announcement.viewer.slice(1)) : 
+                            'All'}
+                        </Badge>
+                        <span className="text-[11px] text-gray-400">
+                          {formatDateDisplay(announcement.date)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={viewerColor.text}>
-                      {announcement.viewer ? 
-                        (announcement.viewer.charAt(0).toUpperCase() + announcement.viewer.slice(1)) : 
-                        'All'}
-                      {announcement.linked_title && ` (${announcement.linked_title})`}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {formatDateDisplay(announcement.date)} at {announcement.time}
-                    </span>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-gray-500 hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentAnnouncement({
+                          ...announcement,
+                          images: announcement.images || []
+                        });
+                        setIsEditModalOpen(true);
+                      }}
+                    >
+                      <EditIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAnnouncementToDelete(announcement.id);
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
                 
@@ -743,37 +771,6 @@ const AnnouncementsPage = () => {
                         </Button>
                       )}
                     </CardContent>
-                    
-                    <CardFooter className="flex justify-end gap-2 border-t p-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentAnnouncement({
-                            ...announcement,
-                            images: announcement.images || []
-                          });
-                          setIsEditModalOpen(true);
-                        }}
-                      >
-                        <EditIcon className="mr-2 h-4 w-4" />
-                        Edit
-                      </Button>
-                      
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAnnouncementToDelete(announcement.id);
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </Button>
-                    </CardFooter>
                   </div>
                 )}
               </Card>
@@ -1019,7 +1016,7 @@ const AnnouncementsPage = () => {
           </div>
         </div>
       </div>
-      <DialogTitle className="text-center text-[#203a87] text-2xl mt-4 font-semibold">
+      <DialogTitle className="text-center text-primary text-2xl mt-4 font-semibold">
         Success!
       </DialogTitle>
     </DialogHeader>
@@ -1028,7 +1025,7 @@ const AnnouncementsPage = () => {
       <p className="text-lg font-medium text-gray-800">{successMessage}</p>
       {currentAnnouncement.viewer && (
         <p className="text-gray-600">
-          Announcement for <span className="font-semibold text-[#203a87] capitalize">{currentAnnouncement.viewer}</span> was created successfully.
+          Announcement for <span className="font-semibold text-primary capitalize">{currentAnnouncement.viewer}</span> was created successfully.
         </p>
       )}
     </div>
@@ -1036,7 +1033,7 @@ const AnnouncementsPage = () => {
     <DialogFooter className="flex justify-center pb-4">
       <Button 
         onClick={() => setIsSuccessModalOpen(false)}
-        className="px-8 bg-[#203a87] hover:bg-[#1a2f6d] text-white transition-all duration-300 hover:shadow-md"
+        className="px-8 bg-primary hover:bg-primary/90 text-white transition-all duration-300 hover:shadow-md"
       >
         Close
       </Button>

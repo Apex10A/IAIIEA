@@ -47,11 +47,14 @@ const NewsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
+      const headers: HeadersInit = {};
+      if (bearerToken) {
+        headers.Authorization = `Bearer ${bearerToken}`;
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/list_news`, {
-        headers: {
-          'Authorization': `Bearer ${bearerToken}`
-        }
+        headers,
       });
       
       if (!response.ok) {
@@ -59,13 +62,11 @@ const NewsPage = () => {
       }
       
       const result = await response.json();
-      if (result.status === 'success' && result.data) {
+      if (result.status === 'success' && Array.isArray(result.data)) {
         setNews(result.data);
-        if (result.data.length > 0) {
-          setSelectedNews(result.data[0]);
-        }
+        setSelectedNews(result.data.length > 0 ? result.data[0] : null);
       } else {
-        throw new Error('No news data available');
+        throw new Error(result.message || 'No news data available');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -75,9 +76,7 @@ const NewsPage = () => {
   };
 
   useEffect(() => {
-    if (bearerToken) {
-      fetchNews();
-    }
+    fetchNews();
   }, [bearerToken]);
 
   const formatDate = (dateString: string) => {
@@ -235,7 +234,6 @@ const NewsPage = () => {
 
   return (
     <div className='flex flex-col lg:flex-row gap-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24 bg-white'>
-      Main content
       <div className='lg:w-[70%] w-full bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6'>
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">News & Updates</h1>

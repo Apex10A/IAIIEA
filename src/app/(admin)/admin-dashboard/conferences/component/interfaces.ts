@@ -23,6 +23,7 @@ export interface Conference {
 export interface ConferenceDetails extends Conference {
   description?: string;
   agenda?: string;
+  registered_count?: number;
   is_registered: boolean;
   start_date: string;
   start_time: string;

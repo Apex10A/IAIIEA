@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import AddFileModal from "./AddFileModal";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
@@ -488,12 +489,41 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
 const ConferenceResources: React.FC = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
   const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<"list" | "details" | "resources">("list");
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const conferenceIdParam = searchParams.get("id");
+  const conferenceId = conferenceIdParam ? Number.parseInt(conferenceIdParam, 10) : null;
+  const viewParam = searchParams.get("view");
+  const viewMode =
+    conferenceId && !Number.isNaN(conferenceId)
+      ? viewParam === "resources"
+        ? "resources"
+        : "details"
+      : "list";
+
+  const selectedConference = useMemo(() => {
+    if (!conferenceId || Number.isNaN(conferenceId)) return null;
+    return conferences.find((conference) => conference.id === conferenceId) ?? null;
+  }, [conferenceId, conferences]);
+
+  const setConferenceUrl = (id: number, view: "details" | "resources" = "details") => {
+    const params = new URLSearchParams();
+    params.set("id", String(id));
+    if (view === "resources") {
+      params.set("view", "resources");
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearConferenceUrl = () => {
+    router.replace(pathname);
+  };
 
   const fetchConferences = async () => {
     try {
@@ -564,10 +594,9 @@ const ConferenceResources: React.FC = () => {
   
       await fetchConferences();
       showToast.success("Conference deleted successfully");
-      
-      if (selectedConference?.id === conferenceId) {
-        setViewMode("list");
-        setSelectedConference(null);
+
+      if (conferenceId !== null && conferenceId === Number.parseInt(conferenceIdParam ?? "", 10)) {
+        clearConferenceUrl();
         setConferenceDetails(null);
       }
     } catch (error) {
@@ -577,31 +606,56 @@ const ConferenceResources: React.FC = () => {
   };
 
   const handleViewDetails = (conference: Conference) => {
-    setSelectedConference(conference);
-    setViewMode("details");
-    fetchConferenceDetails(conference.id);
+    setConferenceUrl(conference.id, "details");
   };
 
   const handleViewResources = (conference: Conference) => {
-    setSelectedConference(conference);
-    setViewMode("resources");
-    fetchConferenceDetails(conference.id);
+    setConferenceUrl(conference.id, "resources");
   };
 
   const handleBackToList = () => {
-    setViewMode("list");
-    setSelectedConference(null);
     setConferenceDetails(null);
+    clearConferenceUrl();
   };
 
   useEffect(() => {
     fetchConferences();
   }, []);
 
+  useEffect(() => {
+    if (!conferenceId || Number.isNaN(conferenceId)) {
+      setConferenceDetails(null);
+      return;
+    }
+
+    fetchConferenceDetails(conferenceId);
+  }, [conferenceId, bearerToken]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50  ">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  const hasInvalidConferenceId =
+    conferenceId !== null &&
+    !Number.isNaN(conferenceId) &&
+    !selectedConference;
+
+  if (hasInvalidConferenceId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-8 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Conference not found</h2>
+            <p className="text-gray-600 mb-6">
+              No conference matches id {conferenceId}. It may have been removed.
+            </p>
+            <Button onClick={handleBackToList}>Back to conferences</Button>
+          </div>
+        </div>
       </div>
     );
   }

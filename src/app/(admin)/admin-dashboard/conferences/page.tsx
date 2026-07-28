@@ -1,10 +1,17 @@
 "use client"
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import ButtonProp from '@/app/(members-dashboard)/members-dashboard/notification/button';
 import Events from '@/app/(admin)/admin-dashboard/conferences/component/events'
 import ConferenceResources from './component/ConferenceResources';
 import Resources from '@/app/(admin)/admin-dashboard/conferences/component/ResourcesPage'
 import { SectionType } from '@/app/(members-dashboard)/members-dashboard/notification/buttonTs';
+import { Loader2 } from 'lucide-react';
+
+const ConferenceResourcesFallback = () => (
+  <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+  </div>
+);
 
 const Page = () => {
   const [selectedSection, setSelectedSection] = useState<SectionType>('Create Conference Events');
@@ -14,7 +21,9 @@ const Page = () => {
       case 'Create Conference Events':
         return (
           <div>
-            <ConferenceResources/>
+            <Suspense fallback={<ConferenceResourcesFallback />}>
+              <ConferenceResources/>
+            </Suspense>
           </div>
         );
       case 'Create Conference Resources':

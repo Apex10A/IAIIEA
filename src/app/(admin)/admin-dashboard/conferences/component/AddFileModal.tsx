@@ -270,7 +270,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     return Object.keys(errors).length === 0;
   };
 
-  const validateStep2 = () => {
+  const validatePricing = () => {
     const errors: Record<string, string> = {};
     const requiredFees: Array<{ key: keyof FormData; label: string }> = [
       { key: 'basic_naira', label: 'Basic Naira price' },
@@ -290,10 +290,34 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
 
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
-      setStep2Tab('pricing');
-      showToast.error('Please fill in all package prices before creating the conference');
+      showToast.error('Please fill in all package prices to continue');
     }
     return Object.keys(errors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    if (!validatePricing()) {
+      setStep2Tab('pricing');
+      return false;
+    }
+    return true;
+  };
+
+  const handleStep2Back = () => {
+    if (step2Tab === 'speakers') {
+      setStep2Tab('media');
+      return;
+    }
+    if (step2Tab === 'media') {
+      setStep2Tab('pricing');
+      return;
+    }
+    setCurrentStep(1);
+  };
+
+  const handleContinueFromPricing = () => {
+    if (!validatePricing()) return;
+    setStep2Tab('media');
   };
 
   const fetchSpeakers = async () => {
@@ -1255,39 +1279,71 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
               </Card>
               )}
 
-              <div className="flex justify-between gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep(1)}
-                  className='text-[#000]'
-                >
-                  Back
-                </Button>
-                <Button
-                  onClick={handleStepTwoSubmit}
-                  disabled={isLoading}
-                  className='bg-[#203a87] hover:bg-[#1a2f6d]'
-                >
-                  {isLoading ? 'Creating Conference...' : 'Create Conference'}
-                </Button>
-              </div>
             </div>
           )}
             </div>
 
-            <div className="border-t border-gray-200 p-4 sm:p-6 flex justify-end gap-3">
-              {currentStep === 1 && (
+            <div className="border-t border-gray-200 p-4 sm:p-6 flex justify-between gap-3">
+              {currentStep === 1 ? (
                 <>
-                  <Button variant="outline" onClick={() => setOpen(false)} className="text-gray-900">
-                    Save & close
-                  </Button>
+                  <div />
+                  <div className="flex gap-3">
+                    <Button type="button" variant="outline" onClick={() => setOpen(false)} className="text-gray-900">
+                      Save & close
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleStepOneSubmit}
+                      disabled={isLoading}
+                      className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                    >
+                      {isLoading ? 'Processing...' : 'Next Step'}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
                   <Button
-                    onClick={handleStepOneSubmit}
-                    disabled={isLoading}
-                    className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                    type="button"
+                    variant="outline"
+                    onClick={handleStep2Back}
+                    className="text-gray-900"
                   >
-                    {isLoading ? 'Processing...' : 'Next Step'}
+                    Back
                   </Button>
+                  <div className="flex gap-3">
+                    <Button type="button" variant="outline" onClick={() => setOpen(false)} className="text-gray-900">
+                      Save & close
+                    </Button>
+                    {step2Tab === 'pricing' && (
+                      <Button
+                        type="button"
+                        onClick={handleContinueFromPricing}
+                        className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                      >
+                        Continue to Media
+                      </Button>
+                    )}
+                    {step2Tab === 'media' && (
+                      <Button
+                        type="button"
+                        onClick={() => setStep2Tab('speakers')}
+                        className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                      >
+                        Continue to Speakers
+                      </Button>
+                    )}
+                    {step2Tab === 'speakers' && (
+                      <Button
+                        type="button"
+                        onClick={handleStepTwoSubmit}
+                        disabled={isLoading}
+                        className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                      >
+                        {isLoading ? 'Creating Conference...' : 'Create Conference'}
+                      </Button>
+                    )}
+                  </div>
                 </>
               )}
             </div>

@@ -489,7 +489,7 @@ export const ConferenceCard: React.FC<ConferenceCardProps> = ({
           onClick={() => onViewDetails(conference)}
           className="w-full bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors"
         >
-          View Details
+          Manage
         </button>
       </div>
     </div>
@@ -522,12 +522,6 @@ const ConferenceResources: React.FC = () => {
           }
         );
         setConferences(sortedConferences);
-        
-        if (sortedConferences.length > 0) {
-          const latestConference = sortedConferences[0];
-          setSelectedConference(latestConference);
-          fetchConferenceDetails(latestConference.id);
-        }
       }
     } catch (error) {
       console.error("Error fetching conferences:", error);
@@ -585,6 +579,7 @@ const ConferenceResources: React.FC = () => {
       if (selectedConference?.id === conferenceId) {
         setViewMode("list");
         setSelectedConference(null);
+        setConferenceDetails(null);
       }
     } catch (error) {
       console.error("Error deleting conference:", error);
@@ -601,14 +596,13 @@ const ConferenceResources: React.FC = () => {
   const handleViewResources = (conference: Conference) => {
     setSelectedConference(conference);
     setViewMode("resources");
+    fetchConferenceDetails(conference.id);
   };
 
   const handleBackToList = () => {
     setViewMode("list");
-    if (conferences.length > 0) {
-      setSelectedConference(conferences[0]);
-      fetchConferenceDetails(conferences[0].id);
-    }
+    setSelectedConference(null);
+    setConferenceDetails(null);
   };
 
   useEffect(() => {
@@ -623,7 +617,15 @@ const ConferenceResources: React.FC = () => {
     );
   }
 
-  if (viewMode === "resources" && selectedConference && conferenceDetails) {
+  if (viewMode === "resources" && selectedConference) {
+    if (detailsLoading || !conferenceDetails) {
+      return (
+        <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50  ">
         <div className="container mx-auto px-4 py-8">
@@ -791,50 +793,42 @@ const ConferenceResources: React.FC = () => {
           />
         ) : (
           <div className="space-y-8">
-            {/* Header Section with Add Button */}
-            <div className="bg-white  rounded-xl shadow-lg border border-blue-100  p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900  mb-2">Conferences</h1>
-                  <p className="text-gray-600 ">Manage and view all your conferences</p>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Conferences</h1>
+                  <p className="text-gray-600">
+                    Select a conference to view details and manage resources.
+                  </p>
                 </div>
                 <AddFileModal onSuccess={fetchConferences} />
               </div>
             </div>
 
-            {selectedConference && conferenceDetails && (
-              <div className="space-y-4">
-                <ConferenceDetailsView
-                  conference={selectedConference}
-                  conferenceDetails={conferenceDetails}
-                  loading={detailsLoading}
-                  onBack={handleBackToList}
-                  onViewResources={handleViewResources}
-                  onEdit={() => fetchConferenceDetails(selectedConference.id)}
-                  onDelete={() => handleDeleteConference(selectedConference.id)}
-                />
-              </div>
-            )}
-
-            {conferences.length > 1 && (
-              <div className="space-y-6">
-                <div className="bg-white  rounded-xl p-6 border border-gray-200  shadow-lg">
-                  <h2 className="text-xl font-bold text-gray-900  mb-6 flex items-center gap-3">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    Past Conferences
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {conferences.slice(1).map((conference) => (
-                      <ConferenceCard
-                        key={conference?.id}
-                        conference={conference}
-                        onViewDetails={handleViewDetails}
-                      />
-                    ))}
-                  </div>
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                All Conferences
+                <span className="text-sm font-normal text-gray-500">
+                  ({conferences.length})
+                </span>
+              </h2>
+              {conferences.length === 0 ? (
+                <p className="text-center text-gray-500 py-12">
+                  No conferences yet. Use &quot;Add New Conference&quot; to create one.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {conferences.map((conference) => (
+                    <ConferenceCard
+                      key={conference.id}
+                      conference={conference}
+                      onViewDetails={handleViewDetails}
+                    />
+                  ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -14,11 +14,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText } from 'lucide-react';
+import { FileText, CalendarDays, Users, UtensilsCrossed, FolderOpen, CheckCircle2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import Link from "next/link";
 
 const AGENDA_PLACEHOLDER = `9:00–10:00 → Opening Prayer
 10:00–11:00 → Keynote Speech
@@ -166,6 +167,8 @@ const hasDraftContent = (form: SerializableFormData) =>
 
 const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   const [open, setOpen] = useState(false);
+  const [modalView, setModalView] = useState<'form' | 'success'>('form');
+  const [createdConferenceTitle, setCreatedConferenceTitle] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
   const [step2Tab, setStep2Tab] = useState<'pricing' | 'media' | 'speakers'>('pricing');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -249,8 +252,24 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
 
   const discardDraft = () => {
     resetForm(true);
+    setModalView('form');
+    setCreatedConferenceTitle('');
     setOpen(false);
     showToast.success('Draft discarded');
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setModalView('form');
+      setCreatedConferenceTitle('');
+    }
+  };
+
+  const closeSuccessView = () => {
+    setModalView('form');
+    setCreatedConferenceTitle('');
+    setOpen(false);
   };
 
   const validateStep1 = () => {
@@ -542,9 +561,11 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
       
       const data = await response.json();
       if (data.status === "success") {
+        const createdTitle = formData.title.trim();
         showToast.success('Conference created successfully');
         resetForm(true);
-        setOpen(false);
+        setCreatedConferenceTitle(createdTitle);
+        setModalView('success');
         onSuccess?.();
       } else {
         showToast.error(data.message || 'Failed to create conference');
@@ -558,7 +579,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>
         <Button className="bg-[#203a87]  hover:bg-[#1a2f6d] text-white text-sm">
           Add New Conference
@@ -571,23 +592,93 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
               <div>
                 <Dialog.Title className="text-xl font-bold text-gray-900">
-                  Create Conference
+                  {modalView === 'success' ? 'Conference created' : 'Create Conference'}
                 </Dialog.Title>
-                <p className="text-sm text-gray-500 mt-1">
-                  Step {currentStep} of 2 — {currentStep === 1 ? 'Basic details' : 'Pricing, media & speakers'}
-                </p>
+                {modalView === 'form' && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Step {currentStep} of 2 — {currentStep === 1 ? 'Basic details' : 'Pricing, media & speakers'}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`h-2 w-8 rounded-full ${currentStep >= 1 ? 'bg-[#203a87]' : 'bg-gray-200'}`} />
-                <span className={`h-2 w-8 rounded-full ${currentStep >= 2 ? 'bg-[#203a87]' : 'bg-gray-200'}`} />
-              </div>
+              {modalView === 'form' && (
+                <div className="flex items-center gap-2">
+                  <span className={`h-2 w-8 rounded-full ${currentStep >= 1 ? 'bg-[#203a87]' : 'bg-gray-200'}`} />
+                  <span className={`h-2 w-8 rounded-full ${currentStep >= 2 ? 'bg-[#203a87]' : 'bg-gray-200'}`} />
+                </div>
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <Dialog.Title className="sr-only">
-            {currentStep === 1 ? 'Create Conference - Basic Details' : 'Create Conference - Additional Details'}
+            {modalView === 'success'
+              ? 'Conference created successfully'
+              : currentStep === 1
+                ? 'Create Conference - Basic Details'
+                : 'Create Conference - Additional Details'}
           </Dialog.Title>
 
+          {modalView === 'success' ? (
+            <div className="space-y-6 py-2">
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+                  <CheckCircle2 className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {createdConferenceTitle || 'Your conference'} is ready
+                </h3>
+                <p className="mt-2 max-w-md text-sm text-gray-600">
+                  Basic setup is complete. Use these next steps to finish preparing the event.
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <p className="mb-3 text-sm font-medium text-gray-900">Recommended next steps</p>
+                <ul className="space-y-2">
+                  <li>
+                    <Link
+                      href="/admin-dashboard/conferences/conference-schedule"
+                      onClick={closeSuccessView}
+                      className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
+                    >
+                      <CalendarDays className="h-4 w-4 shrink-0 text-[#203a87]" />
+                      Add conference schedule
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin-dashboard/conferences/participants"
+                      onClick={closeSuccessView}
+                      className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
+                    >
+                      <Users className="h-4 w-4 shrink-0 text-[#203a87]" />
+                      Review participants
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin-dashboard/conferences/daily-meals"
+                      onClick={closeSuccessView}
+                      className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
+                    >
+                      <UtensilsCrossed className="h-4 w-4 shrink-0 text-[#203a87]" />
+                      Set up daily meals
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={closeSuccessView}
+                      className="flex w-full items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-left text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
+                    >
+                      <FolderOpen className="h-4 w-4 shrink-0 text-[#203a87]" />
+                      Manage resources from the conferences list
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <>
           {draftRestored && (
             <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               Draft restored. Text fields are saved automatically — re-upload images/videos if you refreshed the page.
@@ -1281,10 +1372,23 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
 
             </div>
           )}
+            </>
+          )}
             </div>
 
             <div className="border-t border-gray-200 p-4 sm:p-6 flex justify-between gap-3">
-              {currentStep === 1 ? (
+              {modalView === 'success' ? (
+                <>
+                  <div />
+                  <Button
+                    type="button"
+                    onClick={closeSuccessView}
+                    className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                  >
+                    Done
+                  </Button>
+                </>
+              ) : currentStep === 1 ? (
                 <>
                   <div />
                   <div className="flex gap-3">

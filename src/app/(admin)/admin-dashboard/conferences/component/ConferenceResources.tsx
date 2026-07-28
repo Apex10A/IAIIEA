@@ -802,11 +802,28 @@ const ConferenceResources: React.FC = () => {
                   ({conferences.length})
                 </span>
               </h2>
-              {conferences.length === 0 ? (
-                <p className="text-center text-gray-500 py-12">
-                  No conferences yet. Use &quot;Add New Conference&quot; to create one.
+            {conferences.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                  <Calendar className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No conferences yet
+                </h3>
+                <p className="text-gray-600 max-w-md mb-8">
+                  Create your first conference to manage schedules, participants, meals, and resources from one place.
                 </p>
-              ) : (
+                <AddFileModal onSuccess={fetchConferences} />
+                <div className="mt-10 w-full max-w-sm rounded-lg border border-dashed border-gray-200 bg-gray-50 p-5 text-left">
+                  <p className="text-sm font-medium text-gray-900 mb-3">Getting started</p>
+                  <ol className="space-y-2 text-sm text-gray-600 list-decimal list-inside">
+                    <li>Add title, theme, description, and agenda</li>
+                    <li>Set pricing and upload flyer or gallery media</li>
+                    <li>Assign speakers, then finish setup from the detail page</li>
+                  </ol>
+                </div>
+              </div>
+            ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {conferences.map((conference) => (
                     <ConferenceCard

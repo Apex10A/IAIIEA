@@ -17,7 +17,12 @@ import { Label } from "@/components/ui/label";
 import { FileText, Pencil } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+
+const AGENDA_PLACEHOLDER = `9:00–10:00 → Opening Prayer
+10:00–11:00 → Keynote Speech
+11:00–12:00 → Panel Discussion`;
 
 interface FileWithPreview {
   file: File;
@@ -31,6 +36,8 @@ interface FormData {
   title: string;
   theme: string;
   venue: string;
+  description: string;
+  agenda: string;
   start: string;
   end: string;
   subthemes_input: string[];
@@ -70,6 +77,8 @@ interface ConferenceDetails {
   title: string;
   theme: string;
   venue: string;
+  description?: string;
+  agenda?: string;
   date: string;
   start_date: string;
   start_time: string;
@@ -164,6 +173,8 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     title: '',
     theme: '',
     venue: '',
+    description: '',
+    agenda: '',
     start: '',
     end: '',
     subthemes_input: [],
@@ -213,6 +224,8 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
       title: details.title,
       theme: details.theme,
       venue: details.venue,
+      description: details.description || '',
+      agenda: details.agenda || '',
       start: `${details.start_date}T${details.start_time}`,
       end: `${details.start_date}T${details.start_time}`,
       subthemes_input: details.sub_theme || [],
@@ -430,6 +443,8 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     formDataToSend.append('title', formData.title);
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('agenda', formData.agenda);
     
     // Format dates
     const startDateTime = new Date(formData.start);
@@ -652,6 +667,32 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
                         onChange={(e) => handleInputChange('end', e.target.value)}
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Brief overview of the conference..."
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-agenda">Agenda</Label>
+                    <Textarea
+                      id="edit-agenda"
+                      value={formData.agenda}
+                      onChange={(e) => handleInputChange('agenda', e.target.value)}
+                      placeholder={AGENDA_PLACEHOLDER}
+                      rows={6}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-xs text-gray-500">
+                      One item per line. Format: <span className="font-mono">9:00–10:00 → Opening Prayer</span>
+                    </p>
                   </div>
                 </CardContent>
               </Card>

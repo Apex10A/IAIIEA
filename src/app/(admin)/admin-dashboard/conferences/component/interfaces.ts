@@ -13,12 +13,16 @@ export interface Conference {
   theme: string;
   venue: string;
   date: string;
+  description?: string;
+  agenda?: string;
   status: string;
   flyer: string;
 }
 
 // Detailed conference from /landing/event_details/{id}
 export interface ConferenceDetails extends Conference {
+  description?: string;
+  agenda?: string;
   is_registered: boolean;
   start_date: string;
   start_time: string;

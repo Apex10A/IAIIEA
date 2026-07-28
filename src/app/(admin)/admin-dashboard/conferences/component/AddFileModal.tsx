@@ -17,7 +17,16 @@ import { Label } from "@/components/ui/label";
 import { FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+
+const AGENDA_PLACEHOLDER = `9:00–10:00 → Opening Prayer
+10:00–11:00 → Keynote Speech
+11:00–12:00 → Panel Discussion`;
+
+interface AddConferenceModalProps {
+  onSuccess?: () => void;
+}
 
 interface FileWithPreview {
   file: File;
@@ -31,6 +40,8 @@ interface FormData {
   title: string;
   theme: string;
   venue: string;
+  description: string;
+  agenda: string;
   start: string;
   end: string;
   subthemes_input: string[];
@@ -68,8 +79,11 @@ const ROLES = [
   "Guest Speaker"
 ];
 
-const AddConferenceModal = () => {
+const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
+  const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [step2Tab, setStep2Tab] = useState<'media' | 'pricing' | 'speakers'>('media');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [token, setToken] = useState<string>('');
   const [availableSpeakers, setAvailableSpeakers] = useState<Speaker[]>([]);
   const [selectedSpeakers, setSelectedSpeakers] = useState<FormData['selectedSpeakers']>([]); 
@@ -81,6 +95,8 @@ const AddConferenceModal = () => {
     title: '',
     theme: '',
     venue: '',
+    description: '',
+    agenda: '',
     start: '',
     end: '',
     subthemes_input: [''],
@@ -103,9 +119,10 @@ const AddConferenceModal = () => {
   });
 
   useEffect(() => {
-    fetchSpeakers();
+    if (open) {
+      fetchSpeakers();
+    }
     return () => {
-      // Clean up object URLs when component unmounts
       ['flyer', 'gallery', 'sponsors', 'videos'].forEach(field => {
         const files = formData[field as keyof FormData];
         if (Array.isArray(files)) {
@@ -115,7 +132,57 @@ const AddConferenceModal = () => {
         }
       });
     };
-  }, []);
+  }, [open]);
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      theme: '',
+      venue: '',
+      description: '',
+      agenda: '',
+      start: '',
+      end: '',
+      subthemes_input: [''],
+      workshops_input: [''],
+      important_date: [''],
+      flyer: null,
+      gallery: [],
+      sponsors: [],
+      videos: [],
+      basic_naira: '',
+      basic_usd: '',
+      basic_package: [],
+      premium_naira: '',
+      premium_usd: '',
+      premium_package: [],
+      standard_naira: '',
+      standard_usd: '',
+      standard_package: [],
+      selectedSpeakers: []
+    });
+    setSelectedSpeakers([]);
+    setCurrentStep(1);
+    setStep2Tab('media');
+    setFieldErrors({});
+    setToken('');
+    sessionStorage.removeItem('createConferenceToken');
+  };
+
+  const validateStep1 = () => {
+    const errors: Record<string, string> = {};
+    if (!formData.title.trim()) errors.title = 'Title is required';
+    if (!formData.theme.trim()) errors.theme = 'Theme is required';
+    if (!formData.venue.trim()) errors.venue = 'Venue is required';
+    if (!formData.start) errors.start = 'Start date is required';
+    if (!formData.end) errors.end = 'End date is required';
+    if (formData.start && formData.end && new Date(formData.end) < new Date(formData.start)) {
+      errors.end = 'End must be after start';
+    }
+    if (!formData.flyer) errors.flyer = 'Flyer image is required';
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const fetchSpeakers = async () => {
     try {
@@ -240,13 +307,16 @@ const AddConferenceModal = () => {
   };
 
   const handleStepOneSubmit = async () => {
+    if (!validateStep1()) return;
+
     setIsLoading(true);
     const formDataToSend = new FormData();
     
-    // Append all step 1 fields
     formDataToSend.append('title', formData.title);
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('agenda', formData.agenda);
     formDataToSend.append('start', formData.start);
     formDataToSend.append('end', formData.end);
     formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
@@ -266,7 +336,9 @@ const AddConferenceModal = () => {
       const data = await response.json();
       if (data.status === "success" && data.data?.token) {
         setToken(data.data.token);
+        sessionStorage.setItem('createConferenceToken', data.data.token);
         setCurrentStep(2);
+        showToast.success('Basic details saved');
       } else {
         showToast.error(data.message || 'Failed to get token from server');
       }
@@ -279,9 +351,16 @@ const AddConferenceModal = () => {
   };
 
   const handleStepTwoSubmit = async () => {
+    const activeToken = token || sessionStorage.getItem('createConferenceToken') || '';
+    if (!activeToken) {
+      showToast.error('Session expired. Please complete step 1 again.');
+      setCurrentStep(1);
+      return;
+    }
+
     setIsLoading(true);
     const formDataToSend = new FormData();
-    formDataToSend.append('token', token);
+    formDataToSend.append('token', activeToken);
     
     // Append media files
     formData.gallery.forEach(file => formDataToSend.append('gallery[]', file.file));
@@ -314,32 +393,9 @@ const AddConferenceModal = () => {
       const data = await response.json();
       if (data.status === "success") {
         showToast.success('Conference created successfully');
-        // Reset form and close modal
-        setFormData({
-          title: '',
-          theme: '',
-          venue: '',
-          start: '',
-          end: '',
-          subthemes_input: [''],
-          workshops_input: [''],
-          important_date: [''],
-          flyer: null,
-          gallery: [],
-          sponsors: [],
-          videos: [],
-          basic_naira: '',
-          basic_usd: '',
-          basic_package: [],
-          premium_naira: '',
-          premium_usd: '',
-          premium_package: [],
-          standard_naira: '',
-          standard_usd: '',
-          standard_package: [],
-          selectedSpeakers: []
-        });
-        setCurrentStep(1);
+        resetForm();
+        setOpen(false);
+        onSuccess?.();
       } else {
         showToast.error(data.message || 'Failed to create conference');
       }
@@ -352,7 +408,10 @@ const AddConferenceModal = () => {
   };
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <Dialog.Trigger asChild>
         <Button className="bg-[#203a87]  hover:bg-[#1a2f6d] text-white text-sm">
           Add New Conference
@@ -360,8 +419,25 @@ const AddConferenceModal = () => {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content className="fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white p-6 shadow-lg focus:outline-none z-50 overflow-y-auto">
-          <Dialog.Title className="text-2xl font-bold mb-4 text-[#000]">
+        <Dialog.Content className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div>
+                <Dialog.Title className="text-xl font-bold text-gray-900">
+                  Create Conference
+                </Dialog.Title>
+                <p className="text-sm text-gray-500 mt-1">
+                  Step {currentStep} of 2 — {currentStep === 1 ? 'Basic details' : 'Media, pricing & speakers'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-8 rounded-full ${currentStep >= 1 ? 'bg-[#203a87]' : 'bg-gray-200'}`} />
+                <span className={`h-2 w-8 rounded-full ${currentStep >= 2 ? 'bg-[#203a87]' : 'bg-gray-200'}`} />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <Dialog.Title className="sr-only">
             {currentStep === 1 ? 'Create Conference - Basic Details' : 'Create Conference - Additional Details'}
           </Dialog.Title>
           
@@ -381,6 +457,7 @@ const AddConferenceModal = () => {
                       onChange={(e) => handleInputChange('title', e.target.value)}
                       placeholder="Enter conference title"
                     />
+                    {fieldErrors.title && <p className="text-sm text-red-500">{fieldErrors.title}</p>}
                   </div>
                   
                   <div className="space-y-2">
@@ -391,6 +468,7 @@ const AddConferenceModal = () => {
                       onChange={(e) => handleInputChange('theme', e.target.value)}
                       placeholder="Enter conference theme"
                     />
+                    {fieldErrors.theme && <p className="text-sm text-red-500">{fieldErrors.theme}</p>}
                   </div>
                   
                   <div className="space-y-2">
@@ -401,6 +479,7 @@ const AddConferenceModal = () => {
                       onChange={(e) => handleInputChange('venue', e.target.value)}
                       placeholder="Enter venue location"
                     />
+                    {fieldErrors.venue && <p className="text-sm text-red-500">{fieldErrors.venue}</p>}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -412,6 +491,7 @@ const AddConferenceModal = () => {
                         value={formData.start}
                         onChange={(e) => handleInputChange('start', e.target.value)}
                       />
+                      {fieldErrors.start && <p className="text-sm text-red-500">{fieldErrors.start}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="end">End Date & Time</Label>
@@ -421,7 +501,34 @@ const AddConferenceModal = () => {
                         value={formData.end}
                         onChange={(e) => handleInputChange('end', e.target.value)}
                       />
+                      {fieldErrors.end && <p className="text-sm text-red-500">{fieldErrors.end}</p>}
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Brief overview of the conference..."
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="agenda">Agenda</Label>
+                    <Textarea
+                      id="agenda"
+                      value={formData.agenda}
+                      onChange={(e) => handleInputChange('agenda', e.target.value)}
+                      placeholder={AGENDA_PLACEHOLDER}
+                      rows={6}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-xs text-gray-500">
+                      One item per line. Format: <span className="font-mono">9:00–10:00 → Opening Prayer</span>
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -571,29 +678,31 @@ const AddConferenceModal = () => {
                         </div>
                       </div>
                     )}
+                    {fieldErrors.flyer && <p className="text-sm text-red-500">{fieldErrors.flyer}</p>}
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-end gap-3">
-                <Dialog.Close asChild>
-                  <Button variant="outline" className='text-[#000]'>
-                    Cancel
-                  </Button>
-                </Dialog.Close>
-                <Button
-                  onClick={handleStepOneSubmit}
-                  disabled={isLoading}
-                  className="bg-[#203a87] hover:bg-[#1a2f6d]"
-                >
-                  {isLoading ? 'Processing...' : 'Next Step'}
-                </Button>
-              </div>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Media Upload Card */}
+              <div className="flex gap-2 border-b border-gray-200 pb-2">
+                {(['media', 'pricing', 'speakers'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setStep2Tab(tab)}
+                    className={`px-4 py-2 text-sm font-medium rounded-md capitalize transition-colors ${
+                      step2Tab === tab
+                        ? 'bg-[#203a87] text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {step2Tab === 'media' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Media Upload</CardTitle>
@@ -762,8 +871,9 @@ const AddConferenceModal = () => {
                   </div>
                 </CardContent>
               </Card>
+              )}
 
-              {/* Packages Section */}
+              {step2Tab === 'pricing' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Package Details</CardTitle>
@@ -932,8 +1042,9 @@ const AddConferenceModal = () => {
                   </div>
                 </CardContent>
               </Card>
+              )}
 
-              {/* Speakers Section */}
+              {step2Tab === 'speakers' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Speakers</CardTitle>
@@ -996,9 +1107,9 @@ const AddConferenceModal = () => {
                   </div>
                 </CardContent>
               </Card>
+              )}
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between gap-3">
+              <div className="flex justify-between gap-3 pt-2">
                 <Button
                   variant="outline"
                   onClick={() => setCurrentStep(1)}
@@ -1016,15 +1127,34 @@ const AddConferenceModal = () => {
               </div>
             </div>
           )}
+            </div>
 
-          <Dialog.Close asChild>
-            <button
-              className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-              aria-label="Close"
-            >
-              <Cross2Icon className="h-5 w-5" />
-            </button>
-          </Dialog.Close>
+            <div className="border-t border-gray-200 p-4 sm:p-6 flex justify-end gap-3">
+              {currentStep === 1 && (
+                <>
+                  <Button variant="outline" onClick={() => setOpen(false)} className="text-gray-900">
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleStepOneSubmit}
+                    disabled={isLoading}
+                    className="bg-[#203a87] hover:bg-[#1a2f6d]"
+                  >
+                    {isLoading ? 'Processing...' : 'Next Step'}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            <Dialog.Close asChild>
+              <button
+                className="absolute top-4 right-4 rounded-sm opacity-70 hover:opacity-100 focus:outline-none"
+                aria-label="Close"
+              >
+                <Cross2Icon className="h-5 w-5" />
+              </button>
+            </Dialog.Close>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

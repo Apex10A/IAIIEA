@@ -79,44 +79,143 @@ const ROLES = [
   "Guest Speaker"
 ];
 
+const DRAFT_STORAGE_KEY = 'conferenceCreateDraft';
+
+type SerializableFormData = Omit<
+  FormData,
+  'flyer' | 'gallery' | 'sponsors' | 'videos'
+>;
+
+interface ConferenceDraft {
+  form: SerializableFormData;
+  currentStep: number;
+  step2Tab: 'pricing' | 'media' | 'speakers';
+  token: string;
+  step1Completed: boolean;
+  selectedSpeakers: FormData['selectedSpeakers'];
+  savedAt: string;
+}
+
+const getEmptyFormData = (): FormData => ({
+  title: '',
+  theme: '',
+  venue: '',
+  description: '',
+  agenda: '',
+  start: '',
+  end: '',
+  subthemes_input: [''],
+  workshops_input: [''],
+  important_date: [''],
+  flyer: null,
+  gallery: [],
+  sponsors: [],
+  videos: [],
+  basic_naira: '',
+  basic_usd: '',
+  basic_package: [],
+  premium_naira: '',
+  premium_usd: '',
+  premium_package: [],
+  standard_naira: '',
+  standard_usd: '',
+  standard_package: [],
+  selectedSpeakers: [],
+});
+
+const toSerializableForm = (formData: FormData): SerializableFormData => {
+  const { flyer, gallery, sponsors, videos, ...rest } = formData;
+  return rest;
+};
+
+const loadConferenceDraft = (): ConferenceDraft | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as ConferenceDraft;
+  } catch {
+    return null;
+  }
+};
+
+const saveConferenceDraft = (draft: ConferenceDraft) => {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+};
+
+const clearConferenceDraft = () => {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+  sessionStorage.removeItem('createConferenceToken');
+};
+
+const hasDraftContent = (form: SerializableFormData) =>
+  Boolean(
+    form.title.trim() ||
+    form.theme.trim() ||
+    form.venue.trim() ||
+    form.description.trim() ||
+    form.agenda.trim() ||
+    form.start ||
+    form.end ||
+    form.basic_naira ||
+    form.standard_naira ||
+    form.premium_naira
+  );
+
 const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [step2Tab, setStep2Tab] = useState<'media' | 'pricing' | 'speakers'>('media');
+  const [step2Tab, setStep2Tab] = useState<'pricing' | 'media' | 'speakers'>('pricing');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [token, setToken] = useState<string>('');
+  const [step1Completed, setStep1Completed] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   const [availableSpeakers, setAvailableSpeakers] = useState<Speaker[]>([]);
   const [selectedSpeakers, setSelectedSpeakers] = useState<FormData['selectedSpeakers']>([]); 
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [isLoading, setIsLoading] = useState(false);
 
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    theme: '',
-    venue: '',
-    description: '',
-    agenda: '',
-    start: '',
-    end: '',
-    subthemes_input: [''],
-    workshops_input: [''],
-    important_date: [''],
-    flyer: null,
-    gallery: [],
-    sponsors: [],
-    videos: [],
-    basic_naira: '',
-    basic_usd: '',
-    basic_package: [],
-    premium_naira: '',
-    premium_usd: '',
-    premium_package: [],
-    standard_naira: '',
-    standard_usd: '',
-    standard_package: [],
-    selectedSpeakers: []
-  });
+  const [formData, setFormData] = useState<FormData>(getEmptyFormData);
+
+  useEffect(() => {
+    const draft = loadConferenceDraft();
+    if (!draft) return;
+
+    setFormData({
+      ...getEmptyFormData(),
+      ...draft.form,
+      flyer: null,
+      gallery: [],
+      sponsors: [],
+      videos: [],
+    });
+    setCurrentStep(draft.currentStep);
+    setStep2Tab(draft.step2Tab);
+    setToken(draft.token || sessionStorage.getItem('createConferenceToken') || '');
+    setStep1Completed(draft.step1Completed);
+    setSelectedSpeakers(draft.selectedSpeakers);
+    setDraftRestored(hasDraftContent(draft.form));
+  }, []);
+
+  useEffect(() => {
+    const serializable = toSerializableForm(formData);
+    if (!hasDraftContent(serializable) && !step1Completed && !token) {
+      return;
+    }
+
+    saveConferenceDraft({
+      form: serializable,
+      currentStep,
+      step2Tab,
+      token: token || sessionStorage.getItem('createConferenceToken') || '',
+      step1Completed,
+      selectedSpeakers,
+      savedAt: new Date().toISOString(),
+    });
+  }, [formData, currentStep, step2Tab, token, step1Completed, selectedSpeakers]);
 
   useEffect(() => {
     if (open) {
@@ -134,39 +233,24 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     };
   }, [open]);
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      theme: '',
-      venue: '',
-      description: '',
-      agenda: '',
-      start: '',
-      end: '',
-      subthemes_input: [''],
-      workshops_input: [''],
-      important_date: [''],
-      flyer: null,
-      gallery: [],
-      sponsors: [],
-      videos: [],
-      basic_naira: '',
-      basic_usd: '',
-      basic_package: [],
-      premium_naira: '',
-      premium_usd: '',
-      premium_package: [],
-      standard_naira: '',
-      standard_usd: '',
-      standard_package: [],
-      selectedSpeakers: []
-    });
+  const resetForm = (clearDraft = true) => {
+    setFormData(getEmptyFormData());
     setSelectedSpeakers([]);
     setCurrentStep(1);
-    setStep2Tab('media');
+    setStep2Tab('pricing');
     setFieldErrors({});
     setToken('');
-    sessionStorage.removeItem('createConferenceToken');
+    setStep1Completed(false);
+    setDraftRestored(false);
+    if (clearDraft) {
+      clearConferenceDraft();
+    }
+  };
+
+  const discardDraft = () => {
+    resetForm(true);
+    setOpen(false);
+    showToast.success('Draft discarded');
   };
 
   const validateStep1 = () => {
@@ -179,8 +263,36 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     if (formData.start && formData.end && new Date(formData.end) < new Date(formData.start)) {
       errors.end = 'End must be after start';
     }
-    if (!formData.flyer) errors.flyer = 'Flyer image is required';
+    if (!formData.flyer && !(step1Completed && token)) {
+      errors.flyer = 'Flyer image is required';
+    }
     setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const errors: Record<string, string> = {};
+    const requiredFees: Array<{ key: keyof FormData; label: string }> = [
+      { key: 'basic_naira', label: 'Basic Naira price' },
+      { key: 'basic_usd', label: 'Basic USD price' },
+      { key: 'standard_naira', label: 'Standard Naira price' },
+      { key: 'standard_usd', label: 'Standard USD price' },
+      { key: 'premium_naira', label: 'Premium Naira price' },
+      { key: 'premium_usd', label: 'Premium USD price' },
+    ];
+
+    requiredFees.forEach(({ key, label }) => {
+      const value = formData[key];
+      if (typeof value !== 'string' || !value.trim()) {
+        errors[key] = `${label} is required`;
+      }
+    });
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setStep2Tab('pricing');
+      showToast.error('Please fill in all package prices before creating the conference');
+    }
     return Object.keys(errors).length === 0;
   };
 
@@ -309,6 +421,15 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   const handleStepOneSubmit = async () => {
     if (!validateStep1()) return;
 
+    const activeToken = token || sessionStorage.getItem('createConferenceToken') || '';
+    if (step1Completed && activeToken && !formData.flyer) {
+      setCurrentStep(2);
+      setStep2Tab('pricing');
+      setFieldErrors({});
+      showToast.success('Continuing with your saved conference draft');
+      return;
+    }
+
     setIsLoading(true);
     const formDataToSend = new FormData();
     
@@ -336,8 +457,11 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
       const data = await response.json();
       if (data.status === "success" && data.data?.token) {
         setToken(data.data.token);
+        setStep1Completed(true);
         sessionStorage.setItem('createConferenceToken', data.data.token);
         setCurrentStep(2);
+        setStep2Tab('pricing');
+        setFieldErrors({});
         showToast.success('Basic details saved');
       } else {
         showToast.error(data.message || 'Failed to get token from server');
@@ -351,6 +475,8 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   };
 
   const handleStepTwoSubmit = async () => {
+    if (!validateStep2()) return;
+
     const activeToken = token || sessionStorage.getItem('createConferenceToken') || '';
     if (!activeToken) {
       showToast.error('Session expired. Please complete step 1 again.');
@@ -393,7 +519,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
       const data = await response.json();
       if (data.status === "success") {
         showToast.success('Conference created successfully');
-        resetForm();
+        resetForm(true);
         setOpen(false);
         onSuccess?.();
       } else {
@@ -408,10 +534,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <Button className="bg-[#203a87]  hover:bg-[#1a2f6d] text-white text-sm">
           Add New Conference
@@ -427,7 +550,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                   Create Conference
                 </Dialog.Title>
                 <p className="text-sm text-gray-500 mt-1">
-                  Step {currentStep} of 2 — {currentStep === 1 ? 'Basic details' : 'Media, pricing & speakers'}
+                  Step {currentStep} of 2 — {currentStep === 1 ? 'Basic details' : 'Pricing, media & speakers'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -440,6 +563,19 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
           <Dialog.Title className="sr-only">
             {currentStep === 1 ? 'Create Conference - Basic Details' : 'Create Conference - Additional Details'}
           </Dialog.Title>
+
+          {draftRestored && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              Draft restored. Text fields are saved automatically — re-upload images/videos if you refreshed the page.
+              <button
+                type="button"
+                onClick={discardDraft}
+                className="ml-2 font-medium underline hover:no-underline"
+              >
+                Discard draft
+              </button>
+            </div>
+          )}
           
           {currentStep === 1 ? (
             <div className="space-y-6">
@@ -686,26 +822,207 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
           ) : (
             <div className="space-y-6">
               <div className="flex gap-2 border-b border-gray-200 pb-2">
-                {(['media', 'pricing', 'speakers'] as const).map((tab) => (
+                {([
+                  { id: 'pricing' as const, label: 'Pricing' },
+                  { id: 'media' as const, label: 'Media (optional)' },
+                  { id: 'speakers' as const, label: 'Speakers' },
+                ]).map((tab) => (
                   <button
-                    key={tab}
+                    key={tab.id}
                     type="button"
-                    onClick={() => setStep2Tab(tab)}
-                    className={`px-4 py-2 text-sm font-medium rounded-md capitalize transition-colors ${
-                      step2Tab === tab
+                    onClick={() => setStep2Tab(tab.id)}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      step2Tab === tab.id
                         ? 'bg-[#203a87] text-white'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    {tab}
+                    {tab.label}
                   </button>
                 ))}
               </div>
+
+              {step2Tab === 'pricing' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Package Details</CardTitle>
+                  <p className="text-sm text-gray-500 font-normal">
+                    All package prices are required. Media uploads can be added later.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Basic Package */}
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Basic Package</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Price (Naira) *</Label>
+                        <Input
+                          type="number"
+                          value={formData.basic_naira}
+                          onChange={(e) => handlePaymentChange('basic_naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                        {fieldErrors.basic_naira && <p className="text-sm text-red-500">{fieldErrors.basic_naira}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Price (USD) *</Label>
+                        <Input
+                          type="number"
+                          value={formData.basic_usd}
+                          onChange={(e) => handlePaymentChange('basic_usd', e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                        {fieldErrors.basic_usd && <p className="text-sm text-red-500">{fieldErrors.basic_usd}</p>}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Package Inclusions</Label>
+                      {formData.basic_package.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={item}
+                            onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
+                            placeholder="Enter package item"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePackageItem('basic', index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => addPackageItem('basic')}
+                      >
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        Add Package Item
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Standard Package */}
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Standard Package</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Price (Naira) *</Label>
+                        <Input
+                          type="number"
+                          value={formData.standard_naira}
+                          onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                        {fieldErrors.standard_naira && <p className="text-sm text-red-500">{fieldErrors.standard_naira}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Price (USD) *</Label>
+                        <Input
+                          type="number"
+                          value={formData.standard_usd}
+                          onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                        {fieldErrors.standard_usd && <p className="text-sm text-red-500">{fieldErrors.standard_usd}</p>}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Package Inclusions</Label>
+                      {formData.standard_package.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={item}
+                            onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
+                            placeholder="Enter package item"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePackageItem('standard', index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => addPackageItem('standard')}
+                      >
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        Add Package Item
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Premium Package */}
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Premium Package</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Price (Naira) *</Label>
+                        <Input
+                          type="number"
+                          value={formData.premium_naira}
+                          onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
+                          placeholder="Enter Naira price"
+                        />
+                        {fieldErrors.premium_naira && <p className="text-sm text-red-500">{fieldErrors.premium_naira}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Price (USD) *</Label>
+                        <Input
+                          type="number"
+                          value={formData.premium_usd}
+                          onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
+                          placeholder="Enter USD price"
+                        />
+                        {fieldErrors.premium_usd && <p className="text-sm text-red-500">{fieldErrors.premium_usd}</p>}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Package Inclusions</Label>
+                      {formData.premium_package.map((item, index) => (
+                        <div key={index} className="flex gap-2 items-center">
+                          <Input
+                            value={item}
+                            onChange={(e) => handlePackageItemChange('premium', index, e.target.value)}
+                            placeholder="Enter package item"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removePackageItem('premium', index)}
+                          >
+                            <TrashIcon className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => addPackageItem('premium')}
+                      >
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        Add Package Item
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              )}
 
               {step2Tab === 'media' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Media Upload</CardTitle>
+                  <p className="text-sm text-gray-500 font-normal">
+                    Optional — you can skip this and add gallery, sponsors, or videos later.
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Gallery Images Section */}
@@ -873,177 +1190,6 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
               </Card>
               )}
 
-              {step2Tab === 'pricing' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Package Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Basic Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Basic Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.basic_naira}
-                          onChange={(e) => handlePaymentChange('basic_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.basic_usd}
-                          onChange={(e) => handlePaymentChange('basic_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.basic_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('basic', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('basic')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Standard Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Standard Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_naira}
-                          onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_usd}
-                          onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.standard_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('standard', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('standard')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Premium Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Premium Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.premium_naira}
-                          onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.premium_usd}
-                          onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.premium_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('premium', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('premium', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('premium')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              )}
-
               {step2Tab === 'speakers' && (
               <Card>
                 <CardHeader>
@@ -1133,7 +1279,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
               {currentStep === 1 && (
                 <>
                   <Button variant="outline" onClick={() => setOpen(false)} className="text-gray-900">
-                    Cancel
+                    Save & close
                   </Button>
                   <Button
                     onClick={handleStepOneSubmit}

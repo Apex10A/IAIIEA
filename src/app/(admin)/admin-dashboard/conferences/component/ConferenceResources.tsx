@@ -14,14 +14,16 @@ import {
   Calendar,
   MapPin,
   ArrowLeft,
-  ExternalLink,
-  Play,
   FileText,
   Loader2,
   Plus,
   Pencil,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Users,
+  UtensilsCrossed,
+  CalendarDays,
+  FolderOpen,
 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
@@ -137,9 +139,14 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  const description =
+    conferenceDetails?.description || conference.description || "";
+  const agenda = conferenceDetails?.agenda || conference.agenda || "";
+  const registeredCount = conferenceDetails?.registered_count;
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-[50vh]">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -147,27 +154,24 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
   if (!conferenceDetails) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-foreground ">Failed to load conference details</p>
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <p className="text-foreground">Failed to load conference details</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-        <Button
-          onClick={onBack}
-          variant="outline"
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 "
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to conferences
-        </Button>
-        {/* <AddFileModal/> */}
-      </div>
-     
-      <div className="bg-card rounded-lg shadow-md overflow-hidden border ">
+      <Button
+        onClick={onBack}
+        variant="outline"
+        className="flex items-center gap-2 text-sm font-medium text-gray-700"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to conferences
+      </Button>
+
+      <div className="bg-card rounded-lg shadow-md overflow-hidden border">
         <div className="relative h-64 sm:h-[400px] bg-muted">
           {conferenceDetails?.flyer ? (
             <Image
@@ -178,85 +182,102 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               priority
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground ">
+            <div className="flex items-center justify-center h-full text-muted-foreground">
               <FileText className="w-16 h-16" />
             </div>
           )}
-          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium ">
+          <div className="absolute bottom-4 left-4 bg-background/90 px-3 py-1 rounded-full text-sm font-medium">
             {conferenceDetails?.status}
           </div>
         </div>
-      
+
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 ">
-              {conferenceDetails?.title}
-            </h1>
-            <p className="text-gray-700 text-sm ">
-              {conferenceDetails?.registered_count || 0} people have registered for this conference
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                {conferenceDetails?.title}
+              </h1>
+              <p className="text-lg sm:text-xl text-gray-700 uppercase font-bold mt-2">
+                {conference?.theme}
+              </p>
+            </div>
+            {typeof registeredCount === "number" && (
+              <p className="text-gray-600 text-sm shrink-0">
+                {registeredCount} registered
+              </p>
+            )}
           </div>
-          
-          <div className="mb-4">
-            <p className="text-lg sm:text-2xl text-gray-700 uppercase font-bold ">
-              {conference?.theme}
-            </p>
-          </div>
-      
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-500 " />
-              <div>
-                <p className="font-medium text-gray-700  text-sm">
-                  {conference?.date}
-                </p>
-              </div>
+              <Calendar className="w-5 h-5 text-gray-500 mt-0.5" />
+              <p className="font-medium text-gray-700 text-sm">{conference?.date}</p>
             </div>
             <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-gray-500 " />
-              <div>
-                <p className="font-medium text-gray-700  text-sm">{conference?.venue}</p>
-              </div>
+              <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
+              <p className="font-medium text-gray-700 text-sm">{conference?.venue}</p>
             </div>
           </div>
 
-          {/* Edit and Delete Buttons */}
-          <div className="flex flex-col sm:flex-row gap-2 mt-5">
-            <EditConferenceModal 
-              conference={conference} 
+          <div className="flex flex-wrap gap-2 pb-6 mb-6 border-b">
+            <EditConferenceModal
+              conference={conference}
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto text-sm text-gray-700   ">
+                <Button variant="outline" className="text-sm text-gray-700">
                   <Pencil className="w-4 h-4 mr-2" />
-                  Edit Conference
+                  Edit
                 </Button>
               }
             />
-            
+            <Button variant="outline" className="text-sm text-gray-700" asChild>
+              <Link href="/admin-dashboard/conferences/conference-schedule">
+                <CalendarDays className="w-4 h-4 mr-2" />
+                Schedule
+              </Link>
+            </Button>
+            <Button variant="outline" className="text-sm text-gray-700" asChild>
+              <Link href="/admin-dashboard/conferences/participants">
+                <Users className="w-4 h-4 mr-2" />
+                Participants
+              </Link>
+            </Button>
+            <Button variant="outline" className="text-sm text-gray-700" asChild>
+              <Link href="/admin-dashboard/conferences/daily-meals">
+                <UtensilsCrossed className="w-4 h-4 mr-2" />
+                Meals
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="text-sm text-gray-700"
+              onClick={() => onViewResources(conference)}
+            >
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Resources
+            </Button>
             <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
               <AlertDialog.Trigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto text-sm text-gray-700    ">
+                <Button variant="outline" className="text-sm text-red-600 hover:text-red-700">
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Conference
+                  Delete
                 </Button>
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
                 <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
-                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[500px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-background p-6 rounded-lg shadow-lg  ">
-                  <AlertDialog.Title className="text-lg font-semibold ">
+                <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[500px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-background p-6 rounded-lg shadow-lg">
+                  <AlertDialog.Title className="text-lg font-semibold">
                     Delete Conference
                   </AlertDialog.Title>
-                  <AlertDialog.Description className="mt-4 mb-6 text-muted-foreground ">
+                  <AlertDialog.Description className="mt-4 mb-6 text-muted-foreground">
                     Are you sure you want to delete this conference? This action cannot be undone.
                   </AlertDialog.Description>
                   <div className="flex justify-end gap-4">
                     <AlertDialog.Cancel asChild>
-                      <Button variant="outline" className="  ">
-                        Cancel
-                      </Button>
+                      <Button variant="outline">Cancel</Button>
                     </AlertDialog.Cancel>
                     <AlertDialog.Action asChild>
-                      <Button 
+                      <Button
                         variant="destructive"
                         onClick={() => {
                           onDelete();
@@ -270,167 +291,135 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
                 </AlertDialog.Content>
               </AlertDialog.Portal>
             </AlertDialog.Root>
-
-            <Button 
-              variant="outline" 
-              className="w-full sm:w-auto text-sm  text-gray-700  "
-              onClick={() => onViewResources(conference)}
-            >
-              View Resources
-            </Button>
           </div>
-      
-          {!conferenceDetails.is_registered && (
-            <div className="bg-yellow-50  border-l-4 border-yellow-400  p-4 mb-6 rounded">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
+
+          {(description || agenda) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {description && (
+                <div className="bg-muted/30 rounded-lg p-4 border">
+                  <h2 className="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">
+                    Description
+                  </h2>
+                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{description}</p>
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm text-yellow-700 ">
-                    You need to register for this conference to view all details.
-                  </p>
+              )}
+              {agenda && (
+                <div className="bg-muted/30 rounded-lg p-4 border">
+                  <h2 className="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">
+                    Agenda
+                  </h2>
+                  <pre className="text-gray-700 text-sm whitespace-pre-wrap font-sans">{agenda}</pre>
                 </div>
-              </div>
+              )}
             </div>
           )}
-      
-          {conferenceDetails.is_registered && (
-            <>
-              {/* Conference Schedules */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border  mb-6 mt-3 md:mt-10">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-md md:text-xl font-bold text-gray-900 ">Conference Schedules</h2>
-                  <div className='flex flex-col sm:flex-row gap-2'>
-                    <Button variant='outline' className="bg-primary text-gray-900 hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                      Upload Conference Proceedings
-                    </Button>
-                  </div>
-                </div>
-                {conferenceDetails?.schedule?.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {conferenceDetails.schedule.map((item, index) => (
-                      <div key={index} className="bg-muted/50 p-4 rounded-lg border ">
-                        <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
-                          <div>
-                            <h3 className="font-medium text-gray-900  text-sm md:text-md">{item?.activity}</h3>
-                            {item?.facilitator && (
-                              <p className="text-sm text-gray-700 mt-1 ">
-                                Facilitator: {item?.facilitator}
-                              </p>
-                            )}
-                          </div>
-                          <div className="sm:text-right">
-                            <p className="text-sm font-medium text-gray-900 ">
-                              {item?.day}, {item?.start} - {item.end}
-                            </p>
-                            <p className="text-sm text-gray-700 mt-1 ">
-                              {item?.venue}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground  text-center py-8">No schedules available</p>
-                )}
-              </div>
 
-              {/* Speakers Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border  mb-6">
-                <h2 className="text-md md:text-xl font-bold text-gray-900  mb-4">Speakers</h2>
-                {conferenceDetails?.speakers?.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {conferenceDetails.speakers.map((speaker, index) => (
-                      <div key={index} className="bg-muted/50 p-4 rounded-lg border ">
-                        <div className="flex items-center gap-4">
-                          <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 ">
-                            <Image
-                              src={speaker?.picture || '/placeholder.jpg'}
-                              alt={speaker?.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900 ">{speaker?.name}</h3>
-                            {speaker.portfolio && (
-                              <p className="text-sm text-gray-700 ">{speaker?.portfolio}</p>
-                            )}
-                            {speaker.title && (
-                              <p className="text-sm text-gray-700  mt-1">{speaker?.title}</p>
-                            )}
-                          </div>
-                        </div>
+          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <h2 className="text-md md:text-xl font-bold text-gray-900">Conference Schedules</h2>
+              <Button variant="outline" className="text-sm" asChild>
+                <Link href="/admin-dashboard/conferences/conference-schedule">
+                  Manage schedule
+                </Link>
+              </Button>
+            </div>
+            {conferenceDetails?.schedule?.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {conferenceDetails.schedule.map((item, index) => (
+                  <div key={index} className="bg-muted/50 p-4 rounded-lg border">
+                    <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
+                      <div>
+                        <h3 className="font-medium text-gray-900 text-sm md:text-md">
+                          {item?.activity}
+                        </h3>
+                        {item?.facilitator && (
+                          <p className="text-sm text-gray-700 mt-1">
+                            Facilitator: {item?.facilitator}
+                          </p>
+                        )}
                       </div>
-                    ))}
+                      <div className="sm:text-right">
+                        <p className="text-sm font-medium text-gray-900">
+                          {item?.day}, {item?.start} - {item.end}
+                        </p>
+                        <p className="text-sm text-gray-700 mt-1">{item?.venue}</p>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-muted-foreground  text-center py-8">No speakers available</p>
-                )}
+                ))}
               </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">
+                No schedules yet. Add items from the Schedule page.
+              </p>
+            )}
+          </div>
 
-              {/* Meals Ticketing */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border  mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                  <h2 className="text-md md:text-xl font-bold text-gray-900 ">Meals Ticketing</h2>
-                  
-                </div>
-                <p className="text-gray-700  text-sm mb-3">
-                  These are the list of food currently available for the day. Select any food of your choice
-                </p>
-                {conferenceDetails?.meals?.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {conferenceDetails.meals.map((item, index) => (
-                      <div
-                        key={index}
-                        className="h-60 relative rounded-lg overflow-hidden bg-muted"
-                      >
+          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border mb-6">
+            <h2 className="text-md md:text-xl font-bold text-gray-900 mb-4">Speakers</h2>
+            {conferenceDetails?.speakers?.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {conferenceDetails.speakers.map((speaker, index) => (
+                  <div key={index} className="bg-muted/50 p-4 rounded-lg border">
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100">
                         <Image
-                          src={item?.image}
-                          alt={`Meal ${index + 1}`}
+                          src={speaker?.picture || "/placeholder.jpg"}
+                          alt={speaker?.name}
                           fill
-                          className="object-cover hover:scale-105 transition-transform"
+                          className="object-cover"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gray-100/60 p-2 rounded-t-lg ">
-                          <h2 className="text-lg font-bold text-gray-900  mb-2">{item.name}</h2>
-                          <div>
-                            <Button variant="outline" className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors   ">
-                              Select meal
-                            </Button>
-                          </div>
-                        </div>
                       </div>
-                    ))}
+                      <div>
+                        <h3 className="font-medium text-gray-900">{speaker?.name}</h3>
+                        {speaker.portfolio && (
+                          <p className="text-sm text-gray-700">{speaker?.portfolio}</p>
+                        )}
+                        {speaker.title && (
+                          <p className="text-sm text-gray-700 mt-1">{speaker?.title}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-muted-foreground  text-center py-8">No Meals available</p>
-                )}
+                ))}
               </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">No speakers assigned</p>
+            )}
+          </div>
 
-              {/* Certification Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border  mb-6">
-                <h2 className="text-md md:text-xl font-bold text-gray-900  mb-4">Certification</h2>
-                <p className="text-gray-700  text-sm">
-                  You can get your certificate of attendance <Link href="/members-dashboard/conference-evaluation" className="underline font-bold text-primary ">here</Link>
-                </p>
+          <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <h2 className="text-md md:text-xl font-bold text-gray-900">Meals</h2>
+              <Button variant="outline" className="text-sm" asChild>
+                <Link href="/admin-dashboard/conferences/daily-meals">Manage meals</Link>
+              </Button>
+            </div>
+            {conferenceDetails?.meals?.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {conferenceDetails.meals.map((item, index) => (
+                  <div
+                    key={index}
+                    className="h-48 relative rounded-lg overflow-hidden bg-muted"
+                  >
+                    <Image
+                      src={item?.image}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-100/90 p-3">
+                      <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              {/* Virtual Event Section */}
-              <div className="bg-card rounded-lg shadow-md p-4 sm:p-6 border  mb-6">
-                <h2 className="text-md md:text-xl font-bold text-gray-900  mb-4">Join event for virtual attendees</h2>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <p className="text-gray-700  text-sm">You can access the live event from here</p>
-                  <Button variant='outline' className="bg-primary hover:bg-primary/90 px-3 py-2 rounded-md text-primary-foreground text-sm font-medium transition-colors w-full sm:w-auto text-gray-700    ">
-                    Join the live call
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
+            ) : (
+              <p className="text-muted-foreground text-center py-8">
+                No meals yet. Add meals from the Daily Meals page.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

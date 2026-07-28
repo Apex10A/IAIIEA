@@ -7,19 +7,24 @@ interface YearImageProps {
   year: string | number
   imageUrl: string
   title?: string
+  href?: string
 }
 
 const YearImage: React.FC<YearImageProps> = ({
-  year, 
-  imageUrl, 
-  title = `Conference ${year}`
+  year,
+  imageUrl,
+  title,
+  href,
 }) => {
+  const displayTitle = title ?? String(year)
+  const linkHref = href ?? `/gallery/media/years/${year}`
+
   return (
     <div className='group border-2 border-gray-100 rounded-xl shadow-lg overflow-hidden w-full max-w-2xl mx-auto'>
       <div className='relative h-[500px] w-full overflow-hidden'>
         <Image
           src={imageUrl}
-          alt={`${title} image`}
+          alt={`${displayTitle} image`}
           fill
           className='object-cover transform transition-transform duration-500 ease-in-out group-hover:scale-110'
         />
@@ -28,11 +33,11 @@ const YearImage: React.FC<YearImageProps> = ({
       
       <div className='bg-white p-5 flex items-center justify-between'>
         <span className='text-black font-bold text-xl truncate pr-4'>
-          {title}
+          {displayTitle}
         </span>
         
         <Link 
-          href={`/gallery/media/years/${year}`} 
+          href={linkHref}
           className='group/link'
           passHref
         >

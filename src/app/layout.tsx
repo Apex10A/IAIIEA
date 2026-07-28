@@ -45,12 +45,7 @@ export default function RootLayout({
       <body
         className={`${lexend.variable} ${poppins.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           <OnlineStatusProvider>
             <Suspense fallback={<Loading />}>
               <Providers>

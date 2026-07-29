@@ -1,7 +1,8 @@
 "use client"
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -14,6 +15,8 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChevronLeft, Search, Calendar, Users, ChevronRight, ChevronLeftIcon } from "lucide-react";
 import { showToast } from "@/utils/toast";
+import { parseSeminarIdParam, sortSeminars, seminarSubPageHref } from "../utils/seminarNav";
+import { SeminarContextBar } from "../components/SeminarContextBar";
 
 // Types
 interface UserData {
@@ -60,7 +63,7 @@ interface SeminarDetails {
   status: string;
 }
 
-const SeminarParticipantsPage = () => {
+const SeminarParticipantsContent = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
   const [selectedSeminar, setSelectedSeminar] = useState<Seminar | null>(null);
   const [seminarDetails, setSeminarDetails] = useState<SeminarDetails | null>(null);
@@ -76,17 +79,11 @@ const SeminarParticipantsPage = () => {
 
   const membersPerPage = 8;
   const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlSeminarId = parseSeminarIdParam(searchParams.get("id"));
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = (session?.user as SessionUser)?.userData?.token || (session?.user as SessionUser)?.token;
-
-  // Sort seminars by year (newest first)
-  const sortSeminars = (sems: Seminar[]) => {
-    return [...sems].sort((a, b) => {
-      const yearA = parseInt(a.title.match(/\d{4}/)?.[0] || "0");
-      const yearB = parseInt(b.title.match(/\d{4}/)?.[0] || "0");
-      return yearB - yearA;
-    });
-  };
 
   // Fetch seminars
   useEffect(() => {
@@ -110,12 +107,15 @@ const SeminarParticipantsPage = () => {
         const data = await response.json();
         const sortedSeminars = sortSeminars(data.data);
         setSeminars(sortedSeminars);
-        
-        // Automatically select the latest seminar (first in the sorted array)
-        if (sortedSeminars.length > 0) {
-          const latestSeminar = sortedSeminars[0];
-          setSelectedSeminar(latestSeminar);
-          fetchSeminarDetails(latestSeminar.id);
+
+        if (urlSeminarId !== null) {
+          const matchedSeminar = sortedSeminars.find(
+            (seminar: Seminar) => seminar.id === urlSeminarId
+          );
+          if (matchedSeminar) {
+            setSelectedSeminar(matchedSeminar);
+            fetchSeminarDetails(matchedSeminar.id);
+          }
         }
         
         setIsLoading(false);
@@ -127,7 +127,7 @@ const SeminarParticipantsPage = () => {
     };
 
     fetchSeminars();
-  }, [bearerToken, API_URL]);
+  }, [bearerToken, API_URL, urlSeminarId]);
 
   // Fetch seminar details including registration status
   const fetchSeminarDetails = async (seminarId: number) => {
@@ -217,6 +217,7 @@ const SeminarParticipantsPage = () => {
     setFilteredMembers([]);
     setSelectedMembers([]);
     setSearchTerm("");
+    router.replace("/admin-dashboard/training/participants");
   };
 
   const handleMemberSelect = (memberId: number) => {
@@ -285,6 +286,14 @@ const SeminarParticipantsPage = () => {
             )}
           </div>
 
+          {selectedSeminar && (
+            <SeminarContextBar
+              seminarId={selectedSeminar.id}
+              seminarTitle={selectedSeminar.title}
+              seminars={seminars}
+            />
+          )}
+
           {/* Main Content Area */}
           {!selectedSeminar ? (
             // Seminar List View
@@ -298,6 +307,7 @@ const SeminarParticipantsPage = () => {
                     onClick={() => {
                       setSelectedSeminar(seminar);
                       fetchSeminarDetails(seminar.id);
+                      router.replace(seminarSubPageHref("participants", seminar.id));
                     }}
                   >
                     <CardContent className="p-0">
@@ -522,5 +532,17 @@ const SeminarParticipantsPage = () => {
     </div>
   );
 };
+
+const SeminarParticipantsPage = () => (
+  <Suspense
+    fallback={
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    }
+  >
+    <SeminarParticipantsContent />
+  </Suspense>
+);
 
 export default SeminarParticipantsPage;

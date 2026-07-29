@@ -1,3 +1,28 @@
+export type SeminarSubPage = "participants";
+
+export function seminarSubPageHref(
+  page: SeminarSubPage,
+  seminarId?: number | string | null
+): string {
+  const base = `/admin-dashboard/training/${page}`;
+  if (seminarId != null && String(seminarId).trim() !== "") {
+    return `${base}?id=${seminarId}`;
+  }
+  return base;
+}
+
+export function seminarDetailHref(
+  seminarId: number,
+  view: "details" | "resources" = "details"
+): string {
+  const params = new URLSearchParams();
+  params.set("id", String(seminarId));
+  if (view === "resources") {
+    params.set("view", "resources");
+  }
+  return `/admin-dashboard/training?${params.toString()}`;
+}
+
 export interface SortableSeminar {
   id: number;
   title: string;

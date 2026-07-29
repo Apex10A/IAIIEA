@@ -39,7 +39,9 @@ const RegisterSchema = z.object({
   f_name: z.string().min(1, "First name is required"),
   m_name: z.string().optional(),
   l_name: z.string().min(1, "Last name is required"),
-  type: z.enum(registrationTypes).optional(),
+  type: z.enum(registrationTypes, {
+    required_error: "Please select a registration type",
+  }),
   profession: z.enum(professionTypes).optional(),
   phone: z.string()
     .min(1, "Phone number is required")
@@ -57,7 +59,6 @@ type RegisterFormValues = z.infer<typeof RegisterSchema>
 
 const normalizeRegisterPayload = (values: RegisterFormValues) => ({
   ...values,
-  type: values.type ?? "",
   profession: values.profession ?? "",
   postal_addr: values.postal_addr ?? "",
   area_of_specialization: values.area_of_specialization ?? "",
@@ -234,6 +235,32 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
+                      Registration Type<span className="text-brand-primary">*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select registration type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {registrationTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </FormSection>
 
             <FormSection
@@ -382,32 +409,6 @@ export default function RegisterPage() {
 
               {showOptionalFields && (
                 <div className="grid gap-5 border-t border-gray-100 px-5 pb-5 pt-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                          Registration Type
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select registration type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {registrationTypes.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="profession"

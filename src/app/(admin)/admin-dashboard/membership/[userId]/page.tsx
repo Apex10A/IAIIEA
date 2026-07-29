@@ -126,7 +126,15 @@ const UserDetailsPage = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error</h2>
-          <p className="text-gray-700 dark:text-gray-300">{error || "User not found"}</p>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">{error || "User not found"}</p>
+          <button
+            type="button"
+            onClick={() => router.push('/admin-dashboard/membership/directory')}
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Directory
+          </button>
         </div>
       </div>
     );
@@ -136,7 +144,7 @@ const UserDetailsPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
       <div className="mx-auto">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/admin-dashboard/membership/directory')}
           className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

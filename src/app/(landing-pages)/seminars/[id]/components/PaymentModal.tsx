@@ -21,7 +21,7 @@ export const PaymentModal = ({
   seminar,
   attendanceType,
   paymentProcessing,
-  selectedPlan = "basic",
+  selectedPlan = "standard",
 }: PaymentModalProps) => {
   if (!show) return null;
 

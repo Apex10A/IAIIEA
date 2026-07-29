@@ -41,7 +41,9 @@ const RegisterSchema = z.object({
   f_name: z.string().min(1, "First name is required"),
   m_name: z.string().optional(),
   l_name: z.string().min(1, "Last name is required"),
-  type: z.enum(registrationTypes).optional(),
+  type: z.enum(registrationTypes, {
+    required_error: "Please select a registration type",
+  }),
   profession: z.enum(professionTypes).optional(),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   email: z.string().email("Invalid email address"),
@@ -56,7 +58,6 @@ type RegisterFormValues = z.infer<typeof RegisterSchema>
 
 const normalizeRegisterPayload = (values: RegisterFormValues) => ({
   ...values,
-  type: values.type ?? "",
   profession: values.profession ?? "",
   postal_addr: values.postal_addr ?? "",
   area_of_specialization: values.area_of_specialization ?? "",
@@ -250,8 +251,7 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Registration Type
-                      <span className="ml-1 text-xs font-normal text-gray-500">(optional)</span>
+                      Registration Type<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <Select 
                       onValueChange={field.onChange} 

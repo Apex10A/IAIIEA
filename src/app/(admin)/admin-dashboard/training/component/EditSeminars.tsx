@@ -21,6 +21,13 @@ import Image from "next/image";
 import { SeminarDetails } from './index';
 import PackageSection from './PackageSection';
 import { Step2Data } from './types';
+import {
+  feesForSubmission,
+  getSeminarModeLabel,
+  isFreeSeminar,
+  isPaidSeminar,
+  validateSeminarFees,
+} from '../utils/seminarPricing';
 
 interface FileWithPreview {
   file: File;
@@ -329,16 +336,20 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
       return;
     }
 
+    const feeError = validateSeminarFees(formData.is_free, formData.mode, formData);
+    if (feeError) {
+      showToast.error(feeError);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      const normalizedFees = feesForSubmission(formData.is_free, formData);
       const payload = {
         token,
-        physical_fee_naira: Number(formData.physical_fee_naira) || 0,
-        physical_fee_usd: Number(formData.physical_fee_usd) || 0,
-        virtual_fee_naira: Number(formData.virtual_fee_naira) || 0,
-        virtual_fee_usd: Number(formData.virtual_fee_usd) || 0,
-        speakers: selectedSpeakers
+        ...normalizedFees,
+        speakers: selectedSpeakers,
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/edit_seminar/2`, {
@@ -453,6 +464,9 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                       <option value="free">Free</option>
                       <option value="paid">Paid</option>
                     </select>
+                    <p className="text-xs text-gray-500">
+                      Paid seminars require standard fees in step 2. Free seminars skip pricing.
+                    </p>
                   </div>
                   
                   <div className="space-y-2">
@@ -500,34 +514,66 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                   <CardTitle>Seminar Fees</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <p className="text-sm text-gray-600">
-                    Set one standard fee for each attendance type supported by this seminar.
-                  </p>
-                  {(formData.mode === 'Physical' || formData.mode === 'Virtual_Physical') && (
-                    <PackageSection
-                      type="physical"
-                      data={feeData}
-                      onDataChange={handleFeeDataChange}
-                    />
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                    <p className="text-sm font-medium text-blue-900">
+                      Mode: {getSeminarModeLabel(formData.mode)}
+                    </p>
+                    {isFreeSeminar(formData.is_free) ? (
+                      <p className="mt-2 text-sm text-blue-700">
+                        This seminar is free. Attendees will not be charged.
+                      </p>
+                    ) : isPaidSeminar(formData.is_free) ? (
+                      <p className="mt-2 text-sm text-blue-700">
+                        Set one standard fee for each attendance type this seminar
+                        supports. Enter at least one price in Naira or USD per type.
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-sm text-blue-700">
+                        Select paid or free in step 1 to configure pricing.
+                      </p>
+                    )}
+                  </div>
+
+                  {isPaidSeminar(formData.is_free) && (
+                    <>
+                      {(formData.mode === 'Physical' || formData.mode === 'Virtual_Physical') && (
+                        <PackageSection
+                          type="physical"
+                          data={feeData}
+                          onDataChange={handleFeeDataChange}
+                          required
+                        />
+                      )}
+                      {(formData.mode === 'Virtual' || formData.mode === 'Virtual_Physical') && (
+                        <PackageSection
+                          type="virtual"
+                          data={feeData}
+                          onDataChange={handleFeeDataChange}
+                          required
+                        />
+                      )}
+                    </>
                   )}
-                  {(formData.mode === 'Virtual' || formData.mode === 'Virtual_Physical') && (
-                    <PackageSection
-                      type="virtual"
-                      data={feeData}
-                      onDataChange={handleFeeDataChange}
-                    />
+
+                  {isFreeSeminar(formData.is_free) && (
+                    <div className="rounded-lg border border-dashed border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                      No payment fields are needed for free seminars.
+                    </div>
                   )}
-                  {!formData.mode && (
+
+                  {!formData.mode && isPaidSeminar(formData.is_free) && (
                     <div className="space-y-6">
                       <PackageSection
                         type="physical"
                         data={feeData}
                         onDataChange={handleFeeDataChange}
+                        required
                       />
                       <PackageSection
                         type="virtual"
                         data={feeData}
                         onDataChange={handleFeeDataChange}
+                        required
                       />
                     </div>
                   )}

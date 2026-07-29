@@ -91,6 +91,9 @@ const Step1Form: React.FC<Step1FormProps> = ({ data, onDataChange, onSubmit }) =
           <option value="free">Free</option>
           <option value="paid">Paid</option>
         </select>
+        <p className="mt-1 text-xs text-gray-500">
+          Paid seminars require standard fees in step 2. Free seminars skip pricing.
+        </p>
       </div>
 
       <Button

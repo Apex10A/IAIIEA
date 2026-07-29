@@ -39,7 +39,7 @@ export const SeminarCard: React.FC<SeminarCardProps> = ({ seminar, onViewDetails
         onClick={() => onViewDetails(seminar)}
         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-md"
       >
-        View Details
+        Manage
       </button>
     </div>
   </div>

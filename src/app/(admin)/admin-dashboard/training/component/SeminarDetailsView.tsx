@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Seminar, SeminarDetails, SeminarDetailsProps } from './types';
@@ -13,11 +13,15 @@ import {
   ArrowLeft,
   Loader2,
   Pencil,
-  FileText
+  FileText,
+  Users,
+  FolderOpen,
 } from "lucide-react";
 import { showToast } from "@/utils/toast";
 import Image from "next/image";
+import Link from "next/link";
 import { AddResourceModal } from './components';
+import { seminarSubPageHref } from '../utils/seminarNav';
 
 const formatEventDate = (dateStr?: string, timeStr?: string) => {
   if (!dateStr) return '';
@@ -72,6 +76,19 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.location.search.includes("view=resources") &&
+      seminarDetails
+    ) {
+      document.getElementById("seminar-resources")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [seminarDetails]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -87,6 +104,8 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
       </div>
     );
   }
+
+  const participantsHref = seminarSubPageHref("participants", seminar.id);
 
   return (
     <div className="space-y-6">
@@ -132,8 +151,8 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
             </div>
           </div>
 
-          {/* Edit and Delete Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+          {/* Admin action bar */}
+          <div className="flex flex-wrap gap-2 mt-6">
             <EditSeminarModal 
               seminar={{
                 id: seminar.id,
@@ -148,21 +167,43 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
               }}
               onSuccess={onEdit}
               trigger={
-                <Button variant="outline" className="w-full sm:w-auto text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50">
+                <Button variant="outline" className="text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50">
                   <Pencil className="w-4 h-4 mr-2" />
-                  Edit Seminar
+                  Edit
                 </Button>
               }
             />
-            
+            <Button variant="outline" className="text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50" asChild>
+              <Link href={participantsHref}>
+                <Users className="w-4 h-4 mr-2" />
+                Participants
+              </Link>
+            </Button>
+            {onViewResources ? (
+              <Button
+                variant="outline"
+                className="text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50"
+                onClick={() => onViewResources(seminar)}
+              >
+                <FolderOpen className="w-4 h-4 mr-2" />
+                Resources
+              </Button>
+            ) : (
+              <Button variant="outline" className="text-sm text-gray-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50" asChild>
+                <Link href={`/admin-dashboard/training?id=${seminar.id}&view=resources`}>
+                  <FolderOpen className="w-4 h-4 mr-2" />
+                  Resources
+                </Link>
+              </Button>
+            )}
             <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
               <AlertDialog.Trigger asChild>
                 <Button 
                   variant="outline" 
-                  className="w-full sm:w-auto text-sm text-red-600 dark:text-red-400 border-red-200 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="text-sm text-red-600 dark:text-red-400 border-red-200 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Seminar
+                  Delete
                 </Button>
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
@@ -184,7 +225,6 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                       <Button 
                         variant="destructive"
                         onClick={async () => {
-                          console.log("Deleting seminar with ID:", seminar.id);
                           await handleDeleteSeminar(seminar.id);
                           setShowDeleteDialog(false);
                         }}
@@ -236,7 +276,7 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
           )}
 
           {/* Resources Section */}
-          <div className="mb-8">
+          <div id="seminar-resources" className="mb-8 scroll-mt-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>

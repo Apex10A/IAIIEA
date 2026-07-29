@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Plus, Trash2, ChevronDown, Image as ImageIcon, Loader2 } from 'lucide-react';
 import * as Dialog from "@radix-ui/react-dialog";
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import * as AspectRatio from "@radix-ui/react-aspect-ratio";
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { parseConferenceIdParam } from "../utils/conferenceNav";
 
 interface Conference {
   id: number;
@@ -31,9 +33,14 @@ interface Meal {
 interface ConferenceMealsProps {
   onMealAdded: (conferenceId: number) => void;
   conferences: Conference[];
+  defaultConferenceId?: number | null;
 }
 
-const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }) => {
+const MealsModal: React.FC<ConferenceMealsProps> = ({
+  onMealAdded,
+  conferences,
+  defaultConferenceId,
+}) => {
   const [mealDetails, setMealDetails] = useState<{
     name: string;
     image: File | null;
@@ -49,6 +56,15 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
   const [isLoading, setIsLoading] = useState(false);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
+
+  useEffect(() => {
+    if (defaultConferenceId) {
+      setMealDetails((prev) => ({
+        ...prev,
+        conferenceId: defaultConferenceId,
+      }));
+    }
+  }, [defaultConferenceId]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -89,7 +105,7 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
       setMealDetails({ 
         name: '', 
         image: null, 
-        conferenceId: null,
+        conferenceId: defaultConferenceId ?? null,
         previewImage: null 
       });
       showToast.success('Meal added successfully');
@@ -214,7 +230,7 @@ const MealsModal: React.FC<ConferenceMealsProps> = ({ onMealAdded, conferences }
   );
 };
 
-const ConferenceMeals = () => {
+const ConferenceMealsContent = () => {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
@@ -227,6 +243,8 @@ const ConferenceMeals = () => {
   const [editingMeal, setEditingMeal] = useState<Meal & { conferenceId?: number; imageFile?: File | null; previewImage?: string | null } | null>(null);
   
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const urlConferenceId = parseConferenceIdParam(searchParams.get("id"));
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
   const fetchConferences = async () => {
@@ -250,8 +268,12 @@ const ConferenceMeals = () => {
       if (data.status === "success" && Array.isArray(data.data)) {
         setConferences(data.data);
         
-        // Auto-select the first conference if available
-        if (data.data.length > 0) {
+        if (
+          urlConferenceId !== null &&
+          data.data.some((conference: Conference) => conference.id === urlConferenceId)
+        ) {
+          setSelectedConferenceId(urlConferenceId);
+        } else if (data.data.length > 0) {
           setSelectedConferenceId(data.data[0].id);
         }
       } else {
@@ -404,7 +426,7 @@ const ConferenceMeals = () => {
 
   useEffect(() => {
     fetchConferences();
-  }, [bearerToken]);
+  }, [bearerToken, urlConferenceId]);
 
   useEffect(() => {
     if (selectedConferenceId) {
@@ -490,7 +512,8 @@ const ConferenceMeals = () => {
               fetchMeals(id);
               setSelectedConferenceId(id);
             }} 
-            conferences={conferences} 
+            conferences={conferences}
+            defaultConferenceId={selectedConferenceId}
           />
         </div>
       </div>
@@ -527,7 +550,8 @@ const ConferenceMeals = () => {
                     fetchMeals(id);
                     setSelectedConferenceId(id);
                   }} 
-                  conferences={conferences} 
+                  conferences={conferences}
+                  defaultConferenceId={selectedConferenceId}
                 />
               </CardContent>
             </Card>
@@ -729,5 +753,20 @@ const ConferenceMeals = () => {
     </div>
   );
 };
+
+const ConferenceMeals = () => (
+  <Suspense
+    fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 space-y-6 p-6">
+        <div className="flex items-center gap-2 text-gray-600">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          Loading conference meals...
+        </div>
+      </div>
+    }
+  >
+    <ConferenceMealsContent />
+  </Suspense>
+);
 
 export default ConferenceMeals;

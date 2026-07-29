@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import ConferenceScheduleModal from "./components/conferenceScheduleModal";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useForm } from 'react-hook-form';
+import { parseConferenceIdParam } from "../utils/conferenceNav";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -36,12 +38,16 @@ interface Conference {
   flyer?: string;
 }
 
-const ConferenceSchedule = () => {
+const ConferenceScheduleContent = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedConference, setExpandedConference] = useState<number | null>(null);
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const urlConferenceId = parseConferenceIdParam(searchParams.get("id"));
+  const defaultEventId =
+    urlConferenceId !== null ? String(urlConferenceId) : undefined;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [pendingDeleteScheduleId, setPendingDeleteScheduleId] = useState<number | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -50,7 +56,7 @@ const ConferenceSchedule = () => {
 
   useEffect(() => {
     fetchConferences();
-  }, [bearerToken]);
+  }, [bearerToken, urlConferenceId]);
 
   const fetchConferences = async () => {
     setIsLoading(true);
@@ -118,8 +124,12 @@ const ConferenceSchedule = () => {
 
       setConferences(sortedConferences);
       
-      // Expand the first conference (likely the incoming one) by default
-      if (sortedConferences.length > 0) {
+      if (
+        urlConferenceId !== null &&
+        sortedConferences.some((conference) => conference.id === urlConferenceId)
+      ) {
+        setExpandedConference(urlConferenceId);
+      } else if (sortedConferences.length > 0) {
         setExpandedConference(sortedConferences[0].id);
       }
     } catch (err) {
@@ -280,7 +290,10 @@ const ConferenceSchedule = () => {
             View schedules for upcoming and past conference
           </p>
         </div>
-        <ConferenceScheduleModal onScheduleAdded={handleScheduleAdded} />
+        <ConferenceScheduleModal
+          onScheduleAdded={handleScheduleAdded}
+          defaultEventId={defaultEventId}
+        />
       </div>
 
       {conferences.length === 0 ? (
@@ -540,5 +553,17 @@ const ConferenceSchedule = () => {
     </div>
   );
 };
+
+const ConferenceSchedule = () => (
+  <Suspense
+    fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    }
+  >
+    <ConferenceScheduleContent />
+  </Suspense>
+);
 
 export default ConferenceSchedule;

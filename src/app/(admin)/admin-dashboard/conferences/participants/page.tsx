@@ -1,7 +1,8 @@
 "use client"
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChevronLeft, Search, Calendar, Users, ChevronRight, ChevronLeftIcon } from "lucide-react";
 import { showToast } from "@/utils/toast";
+import { parseConferenceIdParam } from "../utils/conferenceNav";
 
 interface Conference {
   date: string;
@@ -46,7 +48,7 @@ interface ConferenceDetails {
   status: string;
 }
 
-const ConferenceParticipantsPage = () => {
+const ConferenceParticipantsContent = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
   const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
@@ -62,6 +64,9 @@ const ConferenceParticipantsPage = () => {
 
   const membersPerPage = 8;
   const { data: session } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlConferenceId = parseConferenceIdParam(searchParams.get("id"));
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
 
@@ -94,11 +99,15 @@ const ConferenceParticipantsPage = () => {
         const data = await response.json();
         const sortedConferences = sortConferences(data.data);
         setConferences(sortedConferences);
-        
-        if (sortedConferences.length > 0) {
-          const latestConference = sortedConferences[0];
-          setSelectedConference(latestConference);
-          fetchConferenceDetails(latestConference.id);
+
+        if (urlConferenceId !== null) {
+          const matchedConference = sortedConferences.find(
+            (conference: Conference) => conference.id === urlConferenceId
+          );
+          if (matchedConference) {
+            setSelectedConference(matchedConference);
+            fetchConferenceDetails(matchedConference.id);
+          }
         }
         
         setIsLoading(false);
@@ -110,7 +119,7 @@ const ConferenceParticipantsPage = () => {
     };
 
     fetchConferences();
-  }, [bearerToken, API_URL]);
+  }, [bearerToken, API_URL, urlConferenceId]);
 
   const fetchConferenceDetails = async (conferenceId: number) => {
     if (!bearerToken) return;
@@ -197,6 +206,7 @@ const ConferenceParticipantsPage = () => {
     setFilteredMembers([]);
     setSelectedMembers([]);
     setSearchTerm("");
+    router.replace("/admin-dashboard/conferences/participants");
   };
 
   const handleMemberSelect = (memberId: number) => {
@@ -277,6 +287,9 @@ const ConferenceParticipantsPage = () => {
                     onClick={() => {
                       setSelectedConference(conference);
                       fetchConferenceDetails(conference?.id);
+                      router.replace(
+                        `/admin-dashboard/conferences/participants?id=${conference.id}`
+                      );
                     }}
                   >
                     <CardContent className="p-0">
@@ -550,5 +563,17 @@ const ConferenceParticipantsPage = () => {
     </div>
   );
 };
+
+const ConferenceParticipantsPage = () => (
+  <Suspense
+    fallback={
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    }
+  >
+    <ConferenceParticipantsContent />
+  </Suspense>
+);
 
 export default ConferenceParticipantsPage;

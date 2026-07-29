@@ -126,7 +126,6 @@ export interface SeminarCardProps {
 export interface SeminarListProps {
   seminars: Seminar[];
   onViewDetails: (seminar: Seminar) => void;
-  selectedSeminar: Seminar | null;
 }
 
 export interface AddResourceModalProps {

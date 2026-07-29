@@ -494,6 +494,8 @@ const ConferenceResources: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [pendingDeleteResourceId, setPendingDeleteResourceId] = useState<number | null>(null);
+  const [isDeletingResource, setIsDeletingResource] = useState(false);
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const router = useRouter();
@@ -601,6 +603,38 @@ const ConferenceResources: React.FC = () => {
     }
   };
 
+  const handleDeleteResource = async (resourceId: number) => {
+    if (!bearerToken || !selectedConference) return;
+
+    setIsDeletingResource(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/delete_resource`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ resource_id: resourceId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete resource");
+      }
+
+      showToast.success("Resource deleted successfully");
+      setPendingDeleteResourceId(null);
+      await fetchConferenceDetails(selectedConference.id);
+    } catch (error) {
+      console.error("Error deleting resource:", error);
+      showToast.error("Failed to delete resource");
+    } finally {
+      setIsDeletingResource(false);
+    }
+  };
+
   const handleViewDetails = (conference: Conference) => {
     setConferenceUrl(conference.id, "details");
   };
@@ -679,7 +713,7 @@ const ConferenceResources: React.FC = () => {
               </button>
               <AddResourceModal
                 conferenceId={selectedConference.id}
-                onSuccess={() => fetchConferences()}
+                onSuccess={() => fetchConferenceDetails(selectedConference.id)}
               />
             </div>
 
@@ -784,9 +818,60 @@ const ConferenceResources: React.FC = () => {
                               <p className="text-sm text-gray-600 ">{resource?.date}</p>
                             </div>
                             <div className="flex flex-col gap-2">
-                              <Button size="sm" variant="destructive" onClick={() => {/* TODO: implement delete */}}>
-                                Delete
-                              </Button>
+                              <AlertDialog.Root
+                                open={pendingDeleteResourceId === resource.resource_id}
+                                onOpenChange={(open) => {
+                                  if (!open) setPendingDeleteResourceId(null);
+                                }}
+                              >
+                                <AlertDialog.Trigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    disabled={isDeletingResource}
+                                    onClick={() =>
+                                      setPendingDeleteResourceId(resource.resource_id)
+                                    }
+                                  >
+                                    Delete
+                                  </Button>
+                                </AlertDialog.Trigger>
+                                <AlertDialog.Portal>
+                                  <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
+                                  <AlertDialog.Content className="fixed top-[50%] left-[50%] max-w-[500px] w-[90vw] translate-x-[-50%] translate-y-[-50%] bg-background p-6 rounded-lg shadow-lg">
+                                    <AlertDialog.Title className="text-lg font-semibold">
+                                      Delete resource
+                                    </AlertDialog.Title>
+                                    <AlertDialog.Description className="mt-4 mb-6 text-muted-foreground">
+                                      Are you sure you want to delete &ldquo;{resource.caption}
+                                      &rdquo;? This action cannot be undone.
+                                    </AlertDialog.Description>
+                                    <div className="flex justify-end gap-4">
+                                      <AlertDialog.Cancel asChild>
+                                        <Button variant="outline">Cancel</Button>
+                                      </AlertDialog.Cancel>
+                                      <AlertDialog.Action asChild>
+                                        <Button
+                                          variant="destructive"
+                                          disabled={isDeletingResource}
+                                          onClick={() =>
+                                            handleDeleteResource(resource.resource_id)
+                                          }
+                                        >
+                                          {isDeletingResource ? (
+                                            <>
+                                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                              Deleting...
+                                            </>
+                                          ) : (
+                                            "Delete"
+                                          )}
+                                        </Button>
+                                      </AlertDialog.Action>
+                                    </div>
+                                  </AlertDialog.Content>
+                                </AlertDialog.Portal>
+                              </AlertDialog.Root>
                             </div>
                           </div>
                           {!resource?.resource_type?.toLowerCase().includes('video') && (

@@ -1,7 +1,7 @@
 "use client";
 import React, { Suspense, useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Plus, Trash2, ChevronDown, Image as ImageIcon, Loader2 } from 'lucide-react';
 import * as Dialog from "@radix-ui/react-dialog";
@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import * as AspectRatio from "@radix-ui/react-aspect-ratio";
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { parseConferenceIdParam } from "../utils/conferenceNav";
+import { parseConferenceIdParam, sortConferences, conferenceSubPageHref } from "../utils/conferenceNav";
+import { ConferenceContextBar } from "../components/ConferenceContextBar";
 
 interface Conference {
   id: number;
@@ -243,6 +244,7 @@ const ConferenceMealsContent = () => {
   const [editingMeal, setEditingMeal] = useState<Meal & { conferenceId?: number; imageFile?: File | null; previewImage?: string | null } | null>(null);
   
   const { data: session } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlConferenceId = parseConferenceIdParam(searchParams.get("id"));
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -266,15 +268,16 @@ const ConferenceMealsContent = () => {
 
       const data = await response.json();
       if (data.status === "success" && Array.isArray(data.data)) {
-        setConferences(data.data);
+        const sortedConferences = sortConferences(data.data);
+        setConferences(sortedConferences);
         
         if (
           urlConferenceId !== null &&
-          data.data.some((conference: Conference) => conference.id === urlConferenceId)
+          sortedConferences.some((conference: Conference) => conference.id === urlConferenceId)
         ) {
           setSelectedConferenceId(urlConferenceId);
-        } else if (data.data.length > 0) {
-          setSelectedConferenceId(data.data[0].id);
+        } else if (sortedConferences.length > 0) {
+          setSelectedConferenceId(sortedConferences[0].id);
         }
       } else {
         setError("Invalid response format");
@@ -352,7 +355,12 @@ const ConferenceMealsContent = () => {
   const handleConferenceChange = (id: string) => {
     const conferenceId = parseInt(id, 10);
     setSelectedConferenceId(conferenceId);
+    router.replace(conferenceSubPageHref("daily-meals", conferenceId));
   };
+
+  const selectedConference = selectedConferenceId
+    ? conferences.find((conference) => conference.id === selectedConferenceId) ?? null
+    : null;
 
   const openEditModal = (meal: Meal) => {
     // Find the conferenceId for this meal (if available)
@@ -517,6 +525,12 @@ const ConferenceMealsContent = () => {
           />
         </div>
       </div>
+
+      <ConferenceContextBar
+        conferenceId={selectedConferenceId}
+        conferenceTitle={selectedConference?.title}
+        conferences={conferences}
+      />
 
       {isFetchingMeals ? (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

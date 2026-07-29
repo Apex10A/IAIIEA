@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useForm } from 'react-hook-form';
-import { parseConferenceIdParam } from "../utils/conferenceNav";
+import { parseConferenceIdParam, sortConferences, conferenceSubPageHref } from "../utils/conferenceNav";
+import { ConferenceContextBar } from "../components/ConferenceContextBar";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -48,6 +49,10 @@ const ConferenceScheduleContent = () => {
   const urlConferenceId = parseConferenceIdParam(searchParams.get("id"));
   const defaultEventId =
     urlConferenceId !== null ? String(urlConferenceId) : undefined;
+  const activeConference =
+    urlConferenceId !== null
+      ? conferences.find((conference) => conference.id === urlConferenceId) ?? null
+      : null;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
   const [pendingDeleteScheduleId, setPendingDeleteScheduleId] = useState<number | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -110,17 +115,8 @@ const ConferenceScheduleContent = () => {
         })
       );
 
-      // Sort conferences with incoming first, then by date (newest to oldest)
-      const sortedConferences = conferencesWithDetails.sort((a, b) => {
-        if (a.status === "Incoming" && b.status !== "Incoming") return -1;
-        if (a.status !== "Incoming" && b.status === "Incoming") return 1;
-        
-        // Extract years from dates for comparison
-        const yearA = parseInt(a.date.match(/\d{4}/)?.[0] || 0);
-        const yearB = parseInt(b.date.match(/\d{4}/)?.[0] || 0);
-        
-        return yearB - yearA;
-      });
+      // Sort conferences with incoming first, then by year (newest to oldest)
+      const sortedConferences = sortConferences(conferencesWithDetails);
 
       setConferences(sortedConferences);
       
@@ -279,7 +275,7 @@ const ConferenceScheduleContent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50   space-y-6 w-full max-w-4xl mx-auto px-2 sm:px-4 md:ml-64">
+    <div className="space-y-6 w-full max-w-4xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800  flex items-center gap-2">
@@ -296,12 +292,18 @@ const ConferenceScheduleContent = () => {
         />
       </div>
 
+      <ConferenceContextBar
+        conferenceId={urlConferenceId}
+        conferenceTitle={activeConference?.title}
+        conferences={conferences}
+      />
+
       {conferences.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center bg-white  shadow-lg">
-          <p className="text-gray-500  mb-4">No conferences available yet.</p>
+        <div className="rounded-lg border border-dashed p-8 text-center bg-white shadow-lg">
+          <p className="text-gray-500 mb-4">No conferences available yet.</p>
           <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Link href="/admin/conferences/create">
-              Create your first conference
+            <Link href="/admin-dashboard/conferences">
+              Go to conferences
             </Link>
           </Button>
         </div>
@@ -359,8 +361,14 @@ const ConferenceScheduleContent = () => {
                     </p>
                   </div>
                   {conference.schedule.length === 0 ? (
-                    <div className="rounded-lg border border-dashed p-6 text-center bg-blue-50 ">
-                      <p className="text-gray-500  mb-4">No schedules available for this conference.</p>
+                    <div className="rounded-lg border border-dashed p-6 text-center bg-blue-50">
+                      <p className="text-gray-500 mb-4">
+                        No schedules available for this conference.
+                      </p>
+                      <ConferenceScheduleModal
+                        onScheduleAdded={handleScheduleAdded}
+                        defaultEventId={String(conference.id)}
+                      />
                     </div>
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

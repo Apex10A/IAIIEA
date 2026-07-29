@@ -15,7 +15,8 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChevronLeft, Search, Calendar, Users, ChevronRight, ChevronLeftIcon } from "lucide-react";
 import { showToast } from "@/utils/toast";
-import { parseConferenceIdParam } from "../utils/conferenceNav";
+import { parseConferenceIdParam, sortConferences } from "../utils/conferenceNav";
+import { ConferenceContextBar } from "../components/ConferenceContextBar";
 
 interface Conference {
   date: string;
@@ -69,14 +70,6 @@ const ConferenceParticipantsContent = () => {
   const urlConferenceId = parseConferenceIdParam(searchParams.get("id"));
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
-
-  const sortConferences = (confs: Conference[]) => {
-    return [...confs].sort((a, b) => {
-      // const yearA = parseInt(a.title.match(/\d{4}/)?.[0] || "0";
-      // const yearB = parseInt(b.title.match(/\d{4}/)?.[0] || "0";
-      // return yearB - yearA;
-    });
-  };
 
   useEffect(() => {
     const fetchConferences = async () => {
@@ -274,6 +267,14 @@ const ConferenceParticipantsContent = () => {
               </button>
             )}
           </div>
+
+          {selectedConference && (
+            <ConferenceContextBar
+              conferenceId={selectedConference.id}
+              conferenceTitle={selectedConference.title}
+              conferences={conferences}
+            />
+          )}
 
           {!selectedConference ? (
 

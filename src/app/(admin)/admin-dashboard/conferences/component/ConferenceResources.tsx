@@ -35,7 +35,7 @@ import {
   ConferenceCardProps
 } from "./interfaces";
 import { ResourceCard, AddResourceModal } from "./components";
-import { conferenceSubPageHref } from "../utils/conferenceNav";
+import { conferenceSubPageHref, sortConferences } from "../utils/conferenceNav";
 
 // Carousel component for galleries, sponsors, and videos
 const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'sponsors' | 'videos' }) => {
@@ -536,14 +536,7 @@ const ConferenceResources: React.FC = () => {
       );
       const data = await response.json();
       if (data.status === "success") {
-        const sortedConferences = data.data.sort(
-          (a: Conference, b: Conference) => {
-            const yearA = a.title.match(/\d{4}/)?.[0] || "0";
-            const yearB = b.title.match(/\d{4}/)?.[0] || "0";
-            return parseInt(yearB) - parseInt(yearA);
-          }
-        );
-        setConferences(sortedConferences);
+        setConferences(sortConferences(data.data));
       }
     } catch (error) {
       console.error("Error fetching conferences:", error);

@@ -57,6 +57,7 @@ const CreateSeminarModal: React.FC<CreateSeminarModalProps> = ({ onSuccess }) =>
                   onSubmit={handleStep2Submit}
                   availableSpeakers={availableSpeakers}
                   mode={step1Data.mode}
+                  isFree={step1Data.is_free}
                 />
               )}
             </div>

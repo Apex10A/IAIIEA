@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import { showToast } from '@/utils/toast';
 import { Step1Data, Step2Data, AvailableSpeaker } from './types';
+import {
+  feesForSubmission,
+  validateSeminarFees,
+} from '../utils/seminarPricing';
 
 export const useSeminarModal = (onSuccess: () => void) => {
   const { data: session } = useSession();
@@ -75,14 +79,22 @@ export const useSeminarModal = (onSuccess: () => void) => {
 
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const feeError = validateSeminarFees(
+      step1Data.is_free,
+      step1Data.mode,
+      step2Data
+    );
+    if (feeError) {
+      showToast.error(feeError);
+      return;
+    }
+
     try {
-      // Convert string values to numbers for API submission
+      const normalizedFees = feesForSubmission(step1Data.is_free, step2Data);
       const submissionData = {
         ...step2Data,
-        physical_fee_naira: step2Data.physical_fee_naira === '' ? 0 : Number(step2Data.physical_fee_naira),
-        physical_fee_usd: step2Data.physical_fee_usd === '' ? 0 : Number(step2Data.physical_fee_usd),
-        virtual_fee_naira: step2Data.virtual_fee_naira === '' ? 0 : Number(step2Data.virtual_fee_naira),
-        virtual_fee_usd: step2Data.virtual_fee_usd === '' ? 0 : Number(step2Data.virtual_fee_usd),
+        ...normalizedFees,
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/create_seminar/2`, {

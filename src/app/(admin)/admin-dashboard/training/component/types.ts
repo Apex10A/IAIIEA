@@ -48,6 +48,7 @@ export interface Step2FormProps {
   onSubmit: (e: React.FormEvent) => void;
   availableSpeakers: AvailableSpeaker[];
   mode: string;
+  isFree: string;
 }
 
 export interface SpeakersSectionProps {
@@ -62,6 +63,7 @@ export interface PackageSectionProps {
   type: 'physical' | 'virtual';
   data: Step2Data;
   onDataChange: (data: Step2Data) => void;
+  required?: boolean;
 }
 
 // Seminar display types

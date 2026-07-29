@@ -71,7 +71,6 @@ const DashboardLayout = memo(({
           onNavigate={handleNavigate}
           onCollapse={handleSidebarCollapse}
         />
-=
         <div className={`flex-1 flex flex-col transition-all duration-300 ${
           isSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-80'
         }`}>

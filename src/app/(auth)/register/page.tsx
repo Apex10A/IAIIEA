@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { countries } from "@/utils/countries";
@@ -8,9 +8,8 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import '@/app/index.css'
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -27,42 +26,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { signIn } from "next-auth/react"
 import { showToast } from '@/utils/toast'
 import { Input } from "@/components/ui/input"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+const registrationTypes = ["Individual", "Institution"] as const
+const professionTypes = ["professor", "postgraduate", "lecturer_i", "lecturer_ii", "undergraduate"] as const
+
 const RegisterSchema = z.object({
   f_name: z.string().min(1, "First name is required"),
   m_name: z.string().optional(),
   l_name: z.string().min(1, "Last name is required"),
-  type: z.enum(["Individual", "Institution"]),
-  profession: z.enum(["professor", "postgraduate", "lecturer_i", "lecturer_ii", "undergraduate"]),
+  type: z.enum(registrationTypes).optional(),
+  profession: z.enum(professionTypes).optional(),
   phone: z.string()
     .min(1, "Phone number is required")
     .regex(/^\+[1-9]\d{1,14}$/, "Phone number must include country code (e.g., +234 810-123-3211)")
     .min(10, "Phone number must be at least 10 digits including country code"),
   email: z.string().email("Invalid email address"),
-  // password: z.string()
-  //   .min(8, "Password must be at least 8 characters")
-  //   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  //   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  //   .regex(/[0-9]/, "Password must contain at least one number")
-  //   .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-  postal_addr: z.string().min(1, "Postal address is required"),
+  postal_addr: z.string().optional(),
   country: z.string().min(1, "Country is required"),
   qualifications: z.string().min(1, "Qualifications are required"),
-  area_of_specialization: z.string().min(1, "Area of specialization is required"),
+  area_of_specialization: z.string().optional(),
   institution_name_addr: z.string().min(1, "Institution name and address are required"),
 })
+
+type RegisterFormValues = z.infer<typeof RegisterSchema>
+
+const normalizeRegisterPayload = (values: RegisterFormValues) => ({
+  ...values,
+  type: values.type ?? "",
+  profession: values.profession ?? "",
+  postal_addr: values.postal_addr ?? "",
+  area_of_specialization: values.area_of_specialization ?? "",
+})
+
+function FormSection({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description?: string
+  children: ReactNode
+}) {
+  return (
+    <section className="rounded-xl border border-gray-100 bg-gray-50/40 p-5 md:p-6">
+      <div className="mb-5">
+        <h2 className="text-base font-semibold text-[#203A87]">{title}</h2>
+        {description && (
+          <p className="mt-1 text-sm text-gray-500">{description}</p>
+        )}
+      </div>
+      <div className="grid gap-5 md:grid-cols-2">{children}</div>
+    </section>
+  )
+}
 
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [agreeToPrivacy, setAgreeToPrivacy] = useState(false)
+  const [showOptionalFields, setShowOptionalFields] = useState(false)
 
   const registrationTypes = [
     { value: "Individual", label: "Individual" },
@@ -77,14 +105,12 @@ export default function RegisterPage() {
     { value: "undergraduate", label: "Undergraduate" },
   ]
 
-  const form = useForm<z.infer<typeof RegisterSchema>>({
+  const form = useForm<RegisterFormValues>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
       f_name: '',
       m_name: '',
       l_name: '',
-      type: "Individual",
-      profession: "professor",
       phone: '',
       email: '',
       postal_addr: '',
@@ -95,7 +121,7 @@ export default function RegisterPage() {
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
+  const onSubmit = async (values: RegisterFormValues) => {
     if (!agreeToPrivacy) {
       showToast.error('Please agree to the privacy policy');
       return;
@@ -110,7 +136,7 @@ export default function RegisterPage() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(normalizeRegisterPayload(values)),
       })
 
       const data = await response.json()
@@ -134,36 +160,38 @@ export default function RegisterPage() {
     }
   }
   return (
-    <div className='min-h-screen background py-28 md:px-auto px-5 w-full flex flex-col items-center'>
-      <div className="md:w-[900px] bg-[#fff] md:px-32 sm:px-20 rounded-md flex flex-col items-center justify-center min-h-[70%] w-full  shadow-none py-5">
-        <CardHeader className="w-full">
-          <div className="flex flex-col gap-8 items-center w-full">
-            <Link href="/" className="cursor-pointer">
-            <Image src='/logo.png' alt="logo" width={130} height={50} />
-            </Link>
-            <div className="flex flex-col text-center gap-[8px]">
-              <h1 className="text-[#203A87] font-bold text-2xl md:text-4xl">
-                Become a member of IAIIEA
-              </h1>
-              <p className="text-[#393938] leading-[24px] max-w-[611px]">
-                Join the IAIIEA organization to access exclusive membership offers
-              </p>
-            </div>
+    <div className="min-h-screen background py-24 md:py-28 px-4 md:px-6 w-full flex flex-col items-center">
+      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg border border-gray-100 px-6 py-8 md:px-10 md:py-10">
+        <div className="flex flex-col items-center text-center gap-6 mb-8">
+          <Link href="/" className="cursor-pointer">
+            <Image src="/logo.png" alt="logo" width={130} height={50} />
+          </Link>
+          <div className="space-y-2">
+            <h1 className="text-[#203A87] font-bold text-2xl md:text-3xl">
+              Become a member of IAIIEA
+            </h1>
+            <p className="text-[#393938] text-sm md:text-base max-w-xl mx-auto">
+              Join the IAIIEA organization to access exclusive membership offers.
+            </p>
           </div>
-        </CardHeader>
-       
-        <CardContent className="gap-5 grid w-full">
-          {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-              {error}
-            </div>
-          )}
+        </div>
 
-          <Form {...form}>
-            <form className="[&_input]:border-neutral-200/50 dark:[&_input]:border-neutral-800/60" onSubmit={form.handleSubmit(onSubmit)}>
-              {/* First Name */}
-             <div className="grid gap-4 md:grid-cols-2 mb-5">
-             <FormField
+        {error && (
+          <div className="mb-6 p-3 text-sm text-red-500 bg-red-50 rounded-md">
+            {error}
+          </div>
+        )}
+
+        <Form {...form}>
+          <form
+            className="space-y-8 [&_input]:border-neutral-200/50 dark:[&_input]:border-neutral-800/60"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <FormSection
+              title="Personal details"
+              description="Tell us who you are."
+            >
+              <FormField
                 control={form.control}
                 name="f_name"
                 render={({ field }) => (
@@ -172,39 +200,25 @@ export default function RegisterPage() {
                       First Name<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your first name"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Input placeholder="Enter your first name" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Middle Name */}
               <FormField
                 control={form.control}
                 name="m_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Middle Name
-                    </FormLabel>
+                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">Middle Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your middle name"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Input placeholder="Enter your middle name" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Last Name */}
               <FormField
                 control={form.control}
                 name="l_name"
@@ -214,105 +228,19 @@ export default function RegisterPage() {
                       Last Name<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your last name"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <Input placeholder="Enter your last name" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </FormSection>
 
-              {/* Password Field */}
-              {/* <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Password<span className="text-brand-primary">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              {/* Registration Type */}
+            <FormSection
+              title="Contact information"
+              description="How we can reach you."
+            >
               <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Registration Type<span className="text-brand-primary">*</span>
-                    </FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                      disabled={isLoading}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select registration type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {registrationTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Rest of the fields remain the same... */}
-              {/* Profession */}
-              <FormField
-                control={form.control}
-                name="profession"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Profession<span className="text-brand-primary">*</span>
-                    </FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                      disabled={isLoading}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your profession" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {professions.map((profession) => (
-                          <SelectItem key={profession.value} value={profession.value}>
-                            {profession.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-<FormField
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
@@ -324,20 +252,19 @@ export default function RegisterPage() {
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder="Include country code e.g +234 810-123-3211"
-                        required
+                        placeholder="+234 810 123 3211"
                         {...field}
                         disabled={isLoading}
                       />
                     </FormControl>
                     <p className="text-xs text-gray-500 mt-1">
-                      Please include your country code (e.g., +234 for Nigeria, +1 for USA)
+                      Include country code (e.g. +234 for Nigeria, +1 for USA)
                     </p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-<FormField
+              <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
@@ -349,8 +276,7 @@ export default function RegisterPage() {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="m@example.com"
-                        required
+                        placeholder="you@example.com"
                         {...field}
                         disabled={isLoading}
                       />
@@ -359,73 +285,50 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-               <FormField
+            </FormSection>
+
+            <FormSection
+              title="Professional & academic"
+              description="Required membership details."
+            >
+              <FormField
                 control={form.control}
-                name="postal_addr"
+                name="country"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Postal address<span className="text-brand-primary">*</span>
+                      Country of domicile<span className="text-brand-primary">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        id="postal"
-                        type="text"
-                        placeholder="1234"
-                        required
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your country" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {countries.map((country) => (
+                          <SelectItem key={country.value} value={country.value}>
+                            {country.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-<FormField
-  control={form.control}
-  name="country"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-        Country of domicile<span className="text-brand-primary">*</span>
-      </FormLabel>
-      <Select 
-        onValueChange={field.onChange} 
-        defaultValue={field.value}
-        disabled={isLoading}
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select your country" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-  {countries.map((country) => (
-    <SelectItem key={country.value} value={country.value}>
-      {country.label}
-    </SelectItem>
-  ))}
-</SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
-<FormField
+              <FormField
                 control={form.control}
                 name="qualifications"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    Qualifications<span className="text-brand-primary">*</span>
+                      Qualifications<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         id="qualifications"
-                        type="text"
                         placeholder="Enter your academic qualifications"
-                        required
                         {...field}
                         disabled={isLoading}
                       />
@@ -434,42 +337,18 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-               <FormField
-                control={form.control}
-                name="area_of_specialization"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    Area Of Specialization<span className="text-brand-primary">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        id="aos"
-                        type="text"
-                        placeholder="Enter your area of specialization"
-                        required
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
+              <FormField
                 control={form.control}
                 name="institution_name_addr"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="md:col-span-2">
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                    Institution Name & Address<span className="text-brand-primary">*</span>
+                      Institution Name & Address<span className="text-brand-primary">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
                         id="ina"
-                        type="text"
                         placeholder="Enter your institution name and address"
-                        required
                         {...field}
                         disabled={isLoading}
                       />
@@ -478,61 +357,157 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              {/* Phone, Email, Postal Address, Country, etc. */}
-             </div>
-            
-              <div className="flex items-start space-x-2 mb-4">
-                <div className="flex items-center h-5">
-                  <input
-                    id="privacy-checkbox"
-                    type="checkbox"
-                    checked={agreeToPrivacy}
-                    onChange={(e) => setAgreeToPrivacy(e.target.checked)}
-                    className="w-4 h-4 text-[#203A87] border-gray-300 rounded focus:ring-[#203A87]"
-                    required
+            </FormSection>
+
+            <section className="rounded-xl border border-dashed border-gray-200 bg-white">
+              <button
+                type="button"
+                onClick={() => setShowOptionalFields((open) => !open)}
+                className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+              >
+                <div>
+                  <h2 className="text-base font-semibold text-[#203A87]">
+                    Additional details
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Optional — complete now or later in your dashboard
+                  </p>
+                </div>
+                <ChevronDown
+                  className={`h-5 w-5 shrink-0 text-gray-500 transition-transform ${
+                    showOptionalFields ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {showOptionalFields && (
+                <div className="grid gap-5 border-t border-gray-100 px-5 pb-5 pt-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium text-[#1A1A1A] text-sm">
+                          Registration Type
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select registration type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {registrationTypes.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="profession"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium text-[#1A1A1A] text-sm">
+                          Profession
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your profession" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {professions.map((profession) => (
+                              <SelectItem key={profession.value} value={profession.value}>
+                                {profession.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="postal_addr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium text-[#1A1A1A] text-sm">
+                          Postal address
+                        </FormLabel>
+                        <FormControl>
+                          <Input id="postal" placeholder="Enter your postal address" {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="area_of_specialization"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-medium text-[#1A1A1A] text-sm">
+                          Area of Specialization
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            id="aos"
+                            placeholder="Enter your area of specialization"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                <label htmlFor="privacy-checkbox" className="text-sm text-gray-700">
-                  I agree to IAIIEA in using my personal data to carry out my request in line with its{' '}
+              )}
+            </section>
+
+            <div className="space-y-5 pt-2">
+              <div className="flex items-start gap-3 rounded-lg bg-gray-50 px-4 py-3">
+                <input
+                  id="privacy-checkbox"
+                  type="checkbox"
+                  checked={agreeToPrivacy}
+                  onChange={(e) => setAgreeToPrivacy(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 text-[#203A87] border-gray-300 rounded focus:ring-[#203A87]"
+                />
+                <label htmlFor="privacy-checkbox" className="text-sm text-gray-700 leading-relaxed">
+                  I agree to IAIIEA using my personal data to carry out my request in line with its{" "}
                   <Link href="/privacy-policy" className="text-[#203A87] hover:underline">
                     Privacy Policy
-                  </Link>.
+                  </Link>
+                  .
                 </label>
               </div>
 
-              <div className="flex flex-col w-full">
               <Button
                 type="submit"
-                className="w-full bg-[#203A87] text-white py-4 hover:bg-[#152a61] disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full bg-[#203A87] text-white py-6 text-base hover:bg-[#152a61] disabled:bg-gray-400 disabled:cursor-not-allowed"
                 disabled={isLoading || !agreeToPrivacy}
               >
-                {isLoading ? (
-                  <LoadingSpinner className="w-4 h-4" />
-                ) : (
-                  "REGISTER"
-                )}
+                {isLoading ? <LoadingSpinner className="w-4 h-4" /> : "Register"}
               </Button>
 
-              <div className="text-center pt-2">
-                <p className="text-sm text-gray-600">
-                  Already have an account?{" "}
-                  <Link href="/login" className="text-[#203A87] hover:underline">
-                    Login here
-                  </Link>
-                </p>
-              </div>
-              </div>
-            </form>
-          </Form>
-
-          {/* <Link 
-            href="/"
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#203A87]"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back to Home
-          </Link> */}
-        </CardContent>
+              <p className="text-center text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link href="/login" className="text-[#203A87] font-medium hover:underline">
+                  Login here
+                </Link>
+              </p>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   )

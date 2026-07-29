@@ -18,12 +18,12 @@ import { FiCalendar, FiClock, FiBook, FiSettings, FiUsers, FiMic, FiBookOpen } f
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
   const [stats, setStats] = useState([
-    { id: 1, name: 'Total Members', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
-    { id: 2, name: 'Total Speakers', value: '0', icon: FiMic, change: '+0%', changeType: 'positive' },
-    { id: 3, name: 'Total Conferences', value: '0', icon: FiCalendar, change: '+0%', changeType: 'positive' },
-    { id: 4, name: 'Total Seminars', value: '0', icon: FiBookOpen, change: '+0%', changeType: 'positive' },
-    { id: 5, name: 'Conference Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
-    { id: 6, name: 'Seminar Participants', value: '0', icon: FiUsers, change: '+0%', changeType: 'positive' },
+    { id: 1, name: 'Total Members', value: '0', icon: FiUsers },
+    { id: 2, name: 'Total Speakers', value: '0', icon: FiMic },
+    { id: 3, name: 'Total Conferences', value: '0', icon: FiCalendar },
+    { id: 4, name: 'Total Seminars', value: '0', icon: FiBookOpen },
+    { id: 5, name: 'Conference Participants', value: '0', icon: FiUsers },
+    { id: 6, name: 'Seminar Participants', value: '0', icon: FiUsers },
   ]);
   const [loading, setLoading] = useState(true);
 
@@ -72,48 +72,36 @@ export default function AdminDashboardPage() {
             name: 'Total Members', 
             value: membersData.data?.length.toString() || '0', 
             icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
           },
           { 
             id: 2, 
             name: 'Total Speakers', 
             value: speakersData.data?.length.toString() || '0', 
             icon: FiMic, 
-            change: '+0%', 
-            changeType: 'positive' 
           },
           { 
             id: 3, 
             name: 'Total Conferences', 
             value: conferencesData.data?.length.toString() || '0', 
             icon: FiCalendar, 
-            change: '+0%', 
-            changeType: 'positive' 
           },
           { 
             id: 4, 
             name: 'Total Seminars', 
             value: seminarsData.data?.length.toString() || '0', 
             icon: FiBookOpen, 
-            change: '+0%', 
-            changeType: 'positive' 
           },
           { 
             id: 5, 
             name: 'Conference Participants', 
             value: confParticipantsData.data?.length.toString() || '0', 
             icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
           },
           { 
             id: 6, 
             name: 'Seminar Participants', 
             value: seminarParticipantsData.data?.length.toString() || '0', 
             icon: FiUsers, 
-            change: '+0%', 
-            changeType: 'positive' 
           },
         ]);
 
@@ -178,13 +166,6 @@ export default function AdminDashboardPage() {
                 <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
               </div>
             </div>
-            <div className="mt-4">
-              <p className={`text-xs font-medium ${
-                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stat.change} from last month
-              </p>
-            </div>
           </motion.div>
         ))}
       </motion.div>
@@ -216,13 +197,6 @@ export default function AdminDashboardPage() {
               <div className="p-3 rounded-lg bg-[#0E1A3D]/10">
                 <stat.icon className="h-6 w-6 text-[#0E1A3D]" />
               </div>
-            </div>
-            <div className="mt-4">
-              <p className={`text-xs font-medium ${
-                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {stat.change} from last month
-              </p>
             </div>
           </motion.div>
         ))}

@@ -20,6 +20,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  conferenceSubPageHref,
+  extractCreatedConferenceId,
+} from "../utils/conferenceNav";
 
 const AGENDA_PLACEHOLDER = `9:00–10:00 → Opening Prayer
 10:00–11:00 → Keynote Speech
@@ -169,6 +173,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
   const [open, setOpen] = useState(false);
   const [modalView, setModalView] = useState<'form' | 'success'>('form');
   const [createdConferenceTitle, setCreatedConferenceTitle] = useState('');
+  const [createdConferenceId, setCreatedConferenceId] = useState<number | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [step2Tab, setStep2Tab] = useState<'pricing' | 'media' | 'speakers'>('pricing');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -254,6 +259,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     resetForm(true);
     setModalView('form');
     setCreatedConferenceTitle('');
+    setCreatedConferenceId(null);
     setOpen(false);
     showToast.success('Draft discarded');
   };
@@ -263,12 +269,14 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     if (!nextOpen) {
       setModalView('form');
       setCreatedConferenceTitle('');
+      setCreatedConferenceId(null);
     }
   };
 
   const closeSuccessView = () => {
     setModalView('form');
     setCreatedConferenceTitle('');
+    setCreatedConferenceId(null);
     setOpen(false);
   };
 
@@ -562,9 +570,11 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
       const data = await response.json();
       if (data.status === "success") {
         const createdTitle = formData.title.trim();
+        const createdId = extractCreatedConferenceId(data);
         showToast.success('Conference created successfully');
         resetForm(true);
         setCreatedConferenceTitle(createdTitle);
+        setCreatedConferenceId(createdId);
         setModalView('success');
         onSuccess?.();
       } else {
@@ -636,7 +646,10 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                 <ul className="space-y-2">
                   <li>
                     <Link
-                      href="/admin-dashboard/conferences/conference-schedule"
+                      href={conferenceSubPageHref(
+                        "conference-schedule",
+                        createdConferenceId
+                      )}
                       onClick={closeSuccessView}
                       className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
                     >
@@ -646,7 +659,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                   </li>
                   <li>
                     <Link
-                      href="/admin-dashboard/conferences/participants"
+                      href={conferenceSubPageHref("participants", createdConferenceId)}
                       onClick={closeSuccessView}
                       className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
                     >
@@ -656,7 +669,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                   </li>
                   <li>
                     <Link
-                      href="/admin-dashboard/conferences/daily-meals"
+                      href={conferenceSubPageHref("daily-meals", createdConferenceId)}
                       onClick={closeSuccessView}
                       className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
                     >
@@ -665,14 +678,18 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                     </Link>
                   </li>
                   <li>
-                    <button
-                      type="button"
+                    <Link
+                      href={
+                        createdConferenceId
+                          ? `/admin-dashboard/conferences?id=${createdConferenceId}`
+                          : "/admin-dashboard/conferences"
+                      }
                       onClick={closeSuccessView}
-                      className="flex w-full items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-left text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
+                      className="flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 transition-colors hover:border-[#203a87] hover:bg-blue-50"
                     >
                       <FolderOpen className="h-4 w-4 shrink-0 text-[#203a87]" />
                       Manage resources from the conferences list
-                    </button>
+                    </Link>
                   </li>
                 </ul>
               </div>

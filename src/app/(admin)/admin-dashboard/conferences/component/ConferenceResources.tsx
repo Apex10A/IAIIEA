@@ -35,6 +35,7 @@ import {
   ConferenceCardProps
 } from "./interfaces";
 import { ResourceCard, AddResourceModal } from "./components";
+import { conferenceSubPageHref } from "../utils/conferenceNav";
 
 // Carousel component for galleries, sponsors, and videos
 const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'sponsors' | 'videos' }) => {
@@ -144,6 +145,10 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
     conferenceDetails?.description || conference.description || "";
   const agenda = conferenceDetails?.agenda || conference.agenda || "";
   const registeredCount = conferenceDetails?.registered_count;
+  const conferenceId = conference.id ?? conferenceDetails?.id;
+  const scheduleHref = conferenceSubPageHref("conference-schedule", conferenceId);
+  const participantsHref = conferenceSubPageHref("participants", conferenceId);
+  const mealsHref = conferenceSubPageHref("daily-meals", conferenceId);
 
   if (loading) {
     return (
@@ -232,19 +237,19 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
               }
             />
             <Button variant="outline" className="text-sm text-gray-700" asChild>
-              <Link href="/admin-dashboard/conferences/conference-schedule">
+              <Link href={scheduleHref}>
                 <CalendarDays className="w-4 h-4 mr-2" />
                 Schedule
               </Link>
             </Button>
             <Button variant="outline" className="text-sm text-gray-700" asChild>
-              <Link href="/admin-dashboard/conferences/participants">
+              <Link href={participantsHref}>
                 <Users className="w-4 h-4 mr-2" />
                 Participants
               </Link>
             </Button>
             <Button variant="outline" className="text-sm text-gray-700" asChild>
-              <Link href="/admin-dashboard/conferences/daily-meals">
+              <Link href={mealsHref}>
                 <UtensilsCrossed className="w-4 h-4 mr-2" />
                 Meals
               </Link>
@@ -319,9 +324,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <h2 className="text-md md:text-xl font-bold text-gray-900">Conference Schedules</h2>
               <Button variant="outline" className="text-sm" asChild>
-                <Link href="/admin-dashboard/conferences/conference-schedule">
-                  Manage schedule
-                </Link>
+                <Link href={scheduleHref}>Manage schedule</Link>
               </Button>
             </div>
             {conferenceDetails?.schedule?.length > 0 ? (
@@ -393,7 +396,7 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <h2 className="text-md md:text-xl font-bold text-gray-900">Meals</h2>
               <Button variant="outline" className="text-sm" asChild>
-                <Link href="/admin-dashboard/conferences/daily-meals">Manage meals</Link>
+                <Link href={mealsHref}>Manage meals</Link>
               </Button>
             </div>
             {conferenceDetails?.meals?.length > 0 ? (

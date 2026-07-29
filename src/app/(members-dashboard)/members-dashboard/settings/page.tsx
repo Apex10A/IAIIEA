@@ -189,6 +189,19 @@ export default function AccountSettings() {
             />
           </div>
           <div>
+            <Label htmlFor="type">Registration Type</Label>
+            <select
+              id="type"
+              value={userDetails?.type || ''}
+              onChange={(e) => setUserDetails(prev => ({ ...prev!, type: e.target.value }))}
+              className="w-full px-3 py-2 border rounded bg-white"
+            >
+              <option value="">Select registration type</option>
+              <option value="Individual">Individual</option>
+              <option value="Institution">Institution</option>
+            </select>
+          </div>
+          <div>
             <Label htmlFor="profession">Profession</Label>
             <Input
               id="profession"

@@ -37,18 +37,13 @@ export const RegisterSchema = z.object({
   }),
 
   email: z.string().email(),
-  // password: passwordSchema,
   phone: z.string(),
-  type: z.enum(registrationTypes, {
-    required_error: "Please select a registration type",
-  }),
-  profession: z.enum(professionTypes, {
-    required_error: "Please select a profession",
-  }),
+  type: z.enum(registrationTypes).optional(),
+  profession: z.enum(professionTypes).optional(),
   country: z.string(),
-  postal_addr: z.string(),
+  postal_addr: z.string().optional(),
   qualifications: z.string(),
-  area_of_specialization: z.string(),
+  area_of_specialization: z.string().optional(),
     institution_name_addr: z.string()
 })
 

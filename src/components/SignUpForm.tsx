@@ -34,25 +34,32 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 // Add the Zod schema definition
+const registrationTypes = ["Individual", "Institution"] as const
+const professionTypes = ["professor", "postgraduate", "lecturer_i", "lecturer_ii", "undergraduate"] as const
+
 const RegisterSchema = z.object({
   f_name: z.string().min(1, "First name is required"),
   m_name: z.string().optional(),
   l_name: z.string().min(1, "Last name is required"),
-  type: z.enum(["Individual", "Institution"]),
-  profession: z.enum(["professor", "postgraduate", "lecturer_i", "lecturer_ii", "undergraduate"]),
+  type: z.enum(registrationTypes).optional(),
+  profession: z.enum(professionTypes).optional(),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   email: z.string().email("Invalid email address"),
-  postal_addr: z.string().min(1, "Postal address is required"),
+  postal_addr: z.string().optional(),
   country: z.string().min(1, "Country is required"),
   qualifications: z.string().min(1, "Qualifications are required"),
-  area_of_specialization: z.string().min(1, "Area of specialization is required"),
+  area_of_specialization: z.string().optional(),
   institution_name_addr: z.string().min(1, "Institution name and address are required"),
-//   password: z.string()
-//     .min(8, "Password must be at least 8 characters")
-//     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-//     .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-//     .regex(/[0-9]/, "Password must contain at least one number")
-//     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+})
+
+type RegisterFormValues = z.infer<typeof RegisterSchema>
+
+const normalizeRegisterPayload = (values: RegisterFormValues) => ({
+  ...values,
+  type: values.type ?? "",
+  profession: values.profession ?? "",
+  postal_addr: values.postal_addr ?? "",
+  area_of_specialization: values.area_of_specialization ?? "",
 })
 
 export const SignUpForm = () => {
@@ -74,14 +81,12 @@ export const SignUpForm = () => {
     { value: "undergraduate", label: "Undergraduate" },
   ]
 
-  const form = useForm<z.infer<typeof RegisterSchema>>({
+  const form = useForm<RegisterFormValues>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
       f_name: '',
       m_name: '',
       l_name: '',
-      type: "Individual",
-      profession: "professor",
       phone: '',
       email: '',
       postal_addr: '',
@@ -89,11 +94,10 @@ export const SignUpForm = () => {
       qualifications: '',
       area_of_specialization: '',
       institution_name_addr: '',
-    //   password: '',
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
+  const onSubmit = async (values: RegisterFormValues) => {
     if (!clerkLoaded) return
     
     setError("")
@@ -107,7 +111,7 @@ export const SignUpForm = () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(normalizeRegisterPayload(values)),
       })
 
       const backendData = await backendResponse.json()
@@ -246,11 +250,12 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Registration Type<span className="text-brand-primary">*</span>
+                      Registration Type
+                      <span className="ml-1 text-xs font-normal text-gray-500">(optional)</span>
                     </FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      value={field.value}
                       disabled={isLoading}
                     >
                       <FormControl>
@@ -278,11 +283,12 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Profession<span className="text-brand-primary">*</span>
+                      Profession
+                      <span className="ml-1 text-xs font-normal text-gray-500">(optional)</span>
                     </FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      value={field.value}
                       disabled={isLoading}
                     >
                       <FormControl>
@@ -375,7 +381,8 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Postal Address<span className="text-brand-primary">*</span>
+                      Postal Address
+                      <span className="ml-1 text-xs font-normal text-gray-500">(optional)</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -435,7 +442,8 @@ export const SignUpForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium text-[#1A1A1A] text-sm">
-                      Area of Specialization<span className="text-brand-primary">*</span>
+                      Area of Specialization
+                      <span className="ml-1 text-xs font-normal text-gray-500">(optional)</span>
                     </FormLabel>
                     <FormControl>
                       <Input

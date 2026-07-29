@@ -217,7 +217,7 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
     <div className={`p-6 relative ${seminar?.is_registered ? 'pt-16' : ''}`}>
       {!seminar?.is_registered && seminar?.mode === 'Virtual_Physical' && (
         <div className="absolute top-0 right-0 bg-[#D5B93C] text-[#0E1A3D] px-3 py-1 text-xs font-bold rounded-bl-lg">
-          PREMIUM
+          IN-PERSON
         </div>
       )}
       <h3 className="text-xl font-bold text-[#0E1A3D] mb-4 flex items-center gap-2">
@@ -294,46 +294,27 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
   </div>
 );
 
-const LegacyPricingCards = ({ seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick }: any) => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {/* Basic Plan */}
-    <PricingCard
-      plan="basic"
-      title={seminar?.is_free === "free" ? "Basic Premium Add-ons" : "Basic Access"}
-      seminar={seminar}
-      attendanceType={attendanceType}
-      selectedPlan={selectedPlan}
-      onPlanSelect={onPlanSelect}
-      onRegisterClick={onRegisterClick}
-      isPopular={false}
-    />
-    
-    {/* Standard Plan */}
-    <PricingCard
-      plan="standard"
-      title="Standard Access"
-      seminar={seminar}
-      attendanceType={attendanceType}
-      selectedPlan={selectedPlan}
-      onPlanSelect={onPlanSelect}
-      onRegisterClick={onRegisterClick}
-      isPopular={true}
-      className="transform md:-translate-y-2"
-    />
-    
-    {/* Premium Plan */}
-    <PricingCard
-      plan="premium"
-      title="Premium Access"
-      seminar={seminar}
-      attendanceType={attendanceType}
-      selectedPlan={selectedPlan}
-      onPlanSelect={onPlanSelect}
-      onRegisterClick={onRegisterClick}
-      isPopular={false}
-    />
-  </div>
-);
+const LegacyPricingCards = ({ seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick }: any) => {
+  const legacyPlan =
+    seminar?.payments?.standard ? 'standard' :
+    seminar?.payments?.basic ? 'basic' :
+    'premium';
+
+  return (
+    <div className="grid grid-cols-1 max-w-md mx-auto">
+      <PricingCard
+        plan={legacyPlan}
+        title="Standard Fee"
+        seminar={seminar}
+        attendanceType={attendanceType}
+        selectedPlan={selectedPlan}
+        onPlanSelect={() => onPlanSelect('standard')}
+        onRegisterClick={onRegisterClick}
+        isPopular={false}
+      />
+    </div>
+  );
+};
 
 const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick, isPopular, className = "" }: any) => {
   const isActive = seminar?.is_registered && seminar?.current_plan === plan;
@@ -452,11 +433,11 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
             <button 
               className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
               onClick={() => {
-                onPlanSelect(plan);
+                onPlanSelect('standard');
                 onRegisterClick();
               }}
             >
-              {seminar?.is_free === "free" ? `Upgrade to ${plan.charAt(0).toUpperCase() + plan.slice(1)}` : `Register ${plan.charAt(0).toUpperCase() + plan.slice(1)}`}
+              {seminar?.is_free === "free" ? "Register" : "Register Now"}
             </button>
           )}
         </div>

@@ -26,7 +26,7 @@ const PackageSection: React.FC<PackageSectionProps> = ({
 
   return (
     <div className="space-y-2">
-      <h3 className="font-medium">{capitalizedType} Fee</h3>
+      <h3 className="font-medium">Standard {capitalizedType} Fee</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Price (Naira)</label>

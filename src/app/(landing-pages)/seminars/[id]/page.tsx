@@ -31,7 +31,7 @@ export default function SeminarPage() {
   const [error, setError] = useState<string | null>(null);
   const [seminarDate, setSeminarDate] = useState<Date | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("basic"); // Keep for legacy support
+  const [selectedPlan, setSelectedPlan] = useState("standard");
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
 

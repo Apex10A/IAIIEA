@@ -1,6 +1,10 @@
 import { SeminarPayments, RegistrationType, PaymentTier } from "./types";
 
 export const getPaymentInfo = (payments: SeminarPayments, plan: string, attendanceType: 'virtual' | 'physical') => {
+  const resolvedPlan = plan === 'standard' || !payments[plan as keyof SeminarPayments]
+    ? (payments.standard ? 'standard' : payments.basic ? 'basic' : plan)
+    : plan;
+
   // New structure - direct fee fields
   if (payments.physical_fee_naira !== undefined || payments.virtual_fee_naira !== undefined) {
     if (attendanceType === 'physical' && payments.physical_fee_naira !== undefined) {
@@ -18,13 +22,13 @@ export const getPaymentInfo = (payments: SeminarPayments, plan: string, attendan
   }
   
   // Legacy structure support
-  if (payments[plan] && typeof payments[plan] === 'object' && 'virtual' in payments[plan]) {
-    const planPayments = payments[plan] as RegistrationType;
+  if (payments[resolvedPlan] && typeof payments[resolvedPlan] === 'object' && 'virtual' in (payments[resolvedPlan] as object)) {
+    const planPayments = payments[resolvedPlan] as RegistrationType;
     return planPayments[attendanceType];
   }
   
   // Check if it's the old structure with direct virtual/physical
-  if (plan === 'basic' && payments.virtual && payments.physical) {
+  if (resolvedPlan === 'basic' && payments.virtual && payments.physical) {
     return payments[attendanceType] as PaymentTier;
   }
   

@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { SeminarDetails } from './index';
+import PackageSection from './PackageSection';
+import { Step2Data } from './types';
 
 interface FileWithPreview {
   file: File;
@@ -43,15 +45,10 @@ interface FormData {
   gallery: FileWithPreview[];
   sponsors: FileWithPreview[];
   videos: FileWithPreview[];
-  basic_naira: string;
-  basic_usd: string;
-  basic_package: string[];
-  premium_naira: string;
-  premium_usd: string;
-  premium_package: string[];
-  standard_naira: string;
-  standard_usd: string;
-  standard_package: string[];
+  physical_fee_naira: string;
+  physical_fee_usd: string;
+  virtual_fee_naira: string;
+  virtual_fee_usd: string;
   selectedSpeakers: Array<{
     speaker_id: number;
     occupation: string;
@@ -75,6 +72,8 @@ interface EditSeminarModalProps {
     start_date?: string;
     start_time?: string;
     status: string;
+    mode?: string;
+    is_free?: string;
     speakers: Array<{
       name: string;
       portfolio?: string;
@@ -82,32 +81,44 @@ interface EditSeminarModalProps {
       title?: string;
     }>;
     payments?: {
-      basic?: {
-        physical?: {
-          naira?: string;
-          usd?: string;
-        };
-        package?: string[];
-      };
-      premium?: {
-        physical?: {
-          naira?: string;
-          usd?: string;
-        };
-        package?: string[];
-      };
+      physical_fee_naira?: string | number;
+      physical_fee_usd?: string | number;
+      virtual_fee_naira?: string | number;
+      virtual_fee_usd?: string | number;
+      physical?: { naira?: string; usd?: string };
+      virtual?: { naira?: string; usd?: string };
       standard?: {
-        physical?: {
-          naira?: string;
-          usd?: string;
-        };
-        package?: string[];
+        physical?: { naira?: string; usd?: string };
+        virtual?: { naira?: string; usd?: string };
       };
     };
   };
   onSuccess: () => void;
   trigger?: React.ReactNode;
 }
+
+const getSeminarFeesFromPayments = (payments?: EditSeminarModalProps['seminar']['payments']) => ({
+  physical_fee_naira:
+    payments?.physical_fee_naira ??
+    payments?.standard?.physical?.naira ??
+    payments?.physical?.naira ??
+    '',
+  physical_fee_usd:
+    payments?.physical_fee_usd ??
+    payments?.standard?.physical?.usd ??
+    payments?.physical?.usd ??
+    '',
+  virtual_fee_naira:
+    payments?.virtual_fee_naira ??
+    payments?.standard?.virtual?.naira ??
+    payments?.virtual?.naira ??
+    '',
+  virtual_fee_usd:
+    payments?.virtual_fee_usd ??
+    payments?.standard?.virtual?.usd ??
+    payments?.virtual?.usd ??
+    '',
+});
 
 interface SessionUser {
   token?: string;
@@ -143,15 +154,10 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
     end: '',
     mode: '',
     is_free: '',
-    basic_naira: '',
-    basic_usd: '',
-    basic_package: [],
-    premium_naira: '',
-    premium_usd: '',
-    premium_package: [],
-    standard_naira: '',
-    standard_usd: '',
-    standard_package: [],
+    physical_fee_naira: '',
+    physical_fee_usd: '',
+    virtual_fee_naira: '',
+    virtual_fee_usd: '',
     selectedSpeakers: [],
     subthemes_input: [],
     workshops_input: [],
@@ -164,23 +170,19 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
 
   // Initialize form data from seminar details
   const initializeFormData = (details: EditSeminarModalProps['seminar']) => {
+    const fees = getSeminarFeesFromPayments(details.payments);
     const newFormData: FormData = {
       title: details.title || '',
       theme: details.theme || '',
       venue: details.venue || '',
       start: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
       end: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
-      mode: '',
-      is_free: '',
-      basic_naira: details.payments?.basic?.physical?.naira || '',
-      basic_usd: details.payments?.basic?.physical?.usd || '',
-      basic_package: details.payments?.basic?.package || [],
-      premium_naira: details.payments?.premium?.physical?.naira || '',
-      premium_usd: details.payments?.premium?.physical?.usd || '',
-      premium_package: details.payments?.premium?.package || [],
-      standard_naira: details.payments?.standard?.physical?.naira || '',
-      standard_usd: details.payments?.standard?.physical?.usd || '',
-      standard_package: details.payments?.standard?.package || [],
+      mode: details.mode || '',
+      is_free: details.is_free || '',
+      physical_fee_naira: String(fees.physical_fee_naira ?? ''),
+      physical_fee_usd: String(fees.physical_fee_usd ?? ''),
+      virtual_fee_naira: String(fees.virtual_fee_naira ?? ''),
+      virtual_fee_usd: String(fees.virtual_fee_usd ?? ''),
       selectedSpeakers: details.speakers?.map(speaker => ({
         speaker_id: availableSpeakers.find(s => s.name === speaker.name)?.speaker_id || 0,
         occupation: speaker.portfolio || 'Workshop Facilitator'
@@ -248,36 +250,22 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePaymentChange = (
-    field: 'basic_naira' | 'basic_usd' | 'premium_naira' | 'premium_usd' | 'standard_naira' | 'standard_usd',
-    value: string
-  ) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-  
-  const handlePackageItemChange = (
-    packageType: 'basic' | 'premium' | 'standard',
-    index: number,
-    value: string
-  ) => {
-    setFormData(prev => {
-      const newPackage = [...prev[`${packageType}_package`]];
-      newPackage[index] = value;
-      return { ...prev, [`${packageType}_package`]: newPackage };
-    });
+  const feeData: Step2Data = {
+    token: stepOneToken || '',
+    physical_fee_naira: formData.physical_fee_naira,
+    physical_fee_usd: formData.physical_fee_usd,
+    virtual_fee_naira: formData.virtual_fee_naira,
+    virtual_fee_usd: formData.virtual_fee_usd,
+    speakers: selectedSpeakers,
   };
 
-  const addPackageItem = (packageType: 'basic' | 'premium' | 'standard') => {
+  const handleFeeDataChange = (data: Step2Data) => {
     setFormData(prev => ({
       ...prev,
-      [`${packageType}_package`]: [...prev[`${packageType}_package`], '']
-    }));
-  };
-  
-  const removePackageItem = (packageType: 'basic' | 'premium' | 'standard', index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [`${packageType}_package`]: prev[`${packageType}_package`].filter((_, i) => i !== index)
+      physical_fee_naira: String(data.physical_fee_naira ?? ''),
+      physical_fee_usd: String(data.physical_fee_usd ?? ''),
+      virtual_fee_naira: String(data.virtual_fee_naira ?? ''),
+      virtual_fee_usd: String(data.virtual_fee_usd ?? ''),
     }));
   };
 
@@ -346,15 +334,10 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
     try {
       const payload = {
         token,
-        basic_naira: Number(formData.basic_naira),
-        basic_usd: Number(formData.basic_usd),
-        basic_package: formData.basic_package,
-        premium_naira: Number(formData.premium_naira),
-        premium_usd: Number(formData.premium_usd),
-        premium_package: formData.premium_package,
-        standard_naira: Number(formData.standard_naira),
-        standard_usd: Number(formData.standard_usd),
-        standard_package: formData.standard_package,
+        physical_fee_naira: Number(formData.physical_fee_naira) || 0,
+        physical_fee_usd: Number(formData.physical_fee_usd) || 0,
+        virtual_fee_naira: Number(formData.virtual_fee_naira) || 0,
+        virtual_fee_usd: Number(formData.virtual_fee_usd) || 0,
         speakers: selectedSpeakers
       };
 
@@ -512,173 +495,42 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Packages Section */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Package Details</CardTitle>
+                  <CardTitle>Seminar Fees</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Basic Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Basic Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.basic_naira}
-                          onChange={(e) => handlePaymentChange('basic_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.basic_usd}
-                          onChange={(e) => handlePaymentChange('basic_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
+                  <p className="text-sm text-gray-600">
+                    Set one standard fee for each attendance type supported by this seminar.
+                  </p>
+                  {(formData.mode === 'Physical' || formData.mode === 'Virtual_Physical') && (
+                    <PackageSection
+                      type="physical"
+                      data={feeData}
+                      onDataChange={handleFeeDataChange}
+                    />
+                  )}
+                  {(formData.mode === 'Virtual' || formData.mode === 'Virtual_Physical') && (
+                    <PackageSection
+                      type="virtual"
+                      data={feeData}
+                      onDataChange={handleFeeDataChange}
+                    />
+                  )}
+                  {!formData.mode && (
+                    <div className="space-y-6">
+                      <PackageSection
+                        type="physical"
+                        data={feeData}
+                        onDataChange={handleFeeDataChange}
+                      />
+                      <PackageSection
+                        type="virtual"
+                        data={feeData}
+                        onDataChange={handleFeeDataChange}
+                      />
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.basic_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('basic', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('basic', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('basic')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Standard Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Standard Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_naira}
-                          onChange={(e) => handlePaymentChange('standard_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.standard_usd}
-                          onChange={(e) => handlePaymentChange('standard_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.standard_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('standard', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('standard', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('standard')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Premium Package */}
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">Premium Package</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Price (Naira)</Label>
-                        <Input
-                          type="number"
-                          value={formData.premium_naira}
-                          onChange={(e) => handlePaymentChange('premium_naira', e.target.value)}
-                          placeholder="Enter Naira price"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Price (USD)</Label>
-                        <Input
-                          type="number"
-                          value={formData.premium_usd}
-                          onChange={(e) => handlePaymentChange('premium_usd', e.target.value)}
-                          placeholder="Enter USD price"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Package Inclusions</Label>
-                      {formData.premium_package.map((item, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <Input
-                            value={item}
-                            onChange={(e) => handlePackageItemChange('premium', index, e.target.value)}
-                            placeholder="Enter package item"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePackageItem('premium', index)}
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => addPackageItem('premium')}
-                      >
-                        <PlusIcon className="w-4 h-4 mr-2" />
-                        Add Package Item
-                      </Button>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 

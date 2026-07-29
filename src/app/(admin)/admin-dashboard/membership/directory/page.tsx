@@ -11,12 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/modules/ui/table';
-import { PencilIcon, TrashIcon, Search, UserPlus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { TrashIcon, Search } from 'lucide-react';
 import AddMemberModal from "./components/AddMemberModal"
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { useTheme } from 'next-themes';
 
 interface Member {
   user_id: string;
@@ -43,45 +41,14 @@ const truncateText = (text: string, maxLength: number = 20) => {
 
 const Page = () => {
   const router = useRouter();
-  const { theme } = useTheme();
-  const isDarkMode = theme === 'dark';
   
-  const dropdownVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: -10,
-      scale: 0.95
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 20
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -10,
-      scale: 0.95,
-      transition: {
-        duration: 0.2
-      }
-    }
-  };
-
   // States
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [isAllSelected, setIsAllSelected] = useState(false);
 
   const membersPerPage = 8;
 
@@ -170,25 +137,6 @@ const Page = () => {
   const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  // Selection handlers
-  const handleMemberSelect = (memberId: string) => {
-    setSelectedMembers(prev => 
-      prev.includes(memberId) 
-        ? prev.filter(id => id !== memberId)
-        : [...prev, memberId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedMembers([]);
-    } else {
-      setSelectedMembers(currentMembers.map(member => member.user_id));
-    }
-    setIsAllSelected(!isAllSelected);
-  };
-
-
   // Loading state
   if (isLoading) {
     return (
@@ -230,7 +178,7 @@ const Page = () => {
                   />
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 </div>
-                <AddMemberModal />
+                <AddMemberModal onSuccess={fetchMembers} />
               </div>
             </div>
           </div>
@@ -239,14 +187,6 @@ const Page = () => {
             <Table className="w-full ">
               <TableHeader>
                 <TableRow className="bg-gray-50 dark:bg-gray-700">
-                  <TableHead className="w-[50px]">
-                    <input 
-                      type="checkbox" 
-                      checked={isAllSelected}
-                      onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                    />
-                  </TableHead>
                   <TableHead className='text-sm md:text-md'>ID</TableHead>
                   <TableHead className='text-sm md:text-md'>Name</TableHead>
                   <TableHead className='text-sm md:text-md'>Email</TableHead>
@@ -267,14 +207,6 @@ const Page = () => {
                       router.push(`/admin-dashboard/membership/${member.user_id}`)
                     }}
                   >
-                    <TableCell className="w-[50px]" onClick={(e) => e.stopPropagation()}>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedMembers.includes(member.user_id)}
-                        onChange={() => handleMemberSelect(member.user_id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 "
-                      />
-                    </TableCell>
                     <TableCell className='text-sm md:text-md'>{truncateText(member.user_id, 15)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">

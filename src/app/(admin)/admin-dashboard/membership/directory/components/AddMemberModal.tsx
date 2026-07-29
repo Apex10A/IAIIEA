@@ -26,7 +26,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-// Updated Zod schema for member registration
 const MemberSchema = z.object({
   f_name: z.string().min(1, "First name is required"),
   m_name: z.string().optional(),
@@ -44,7 +43,11 @@ const MemberSchema = z.object({
   institution_name_addr: z.string().optional()
 })
 
-const AddMembers = () => {
+interface AddMemberModalProps {
+  onSuccess?: () => void;
+}
+
+const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
   const { data: session } = useSession();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -96,12 +99,10 @@ const AddMembers = () => {
         throw new Error(data.message || 'Member registration failed')
       }
 
-      // Reset form on success
       form.reset()
-      
-      console.log('Member registered successfully', data)
       showToast.success('Member registered successfully')
-      setOpen(false);
+      setOpen(false)
+      onSuccess?.()
       
     } catch (err: any) {
       console.error("Registration error:", err)

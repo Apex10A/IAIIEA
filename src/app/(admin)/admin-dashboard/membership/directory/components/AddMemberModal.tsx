@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { RequiredMark, OptionalSectionHint } from '@/app/(admin)/admin-dashboard/utils/formFieldLabels'
 
 const MemberSchema = z.object({
   f_name: z.string().min(1, "First name is required"),
@@ -33,14 +34,14 @@ const MemberSchema = z.object({
   type: z.enum(["Individual", "Corporate", "Student"], { 
     errorMap: () => ({ message: "Registration type is required" }) 
   }),
-  profession: z.string().min(1, "Profession is required"),
+  profession: z.string().optional(),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   email: z.string().email("Invalid email address"),
   postal_addr: z.string().optional(),
   country: z.string().min(1, "Country is required"),
   qualifications: z.string().min(1, "Qualifications are required"),
-  area_of_specialization: z.string().min(1, "Area of specialization is required"),
-  institution_name_addr: z.string().optional()
+  area_of_specialization: z.string().optional(),
+  institution_name_addr: z.string().min(1, "Institution name and address is required"),
 })
 
 interface AddMemberModalProps {
@@ -138,7 +139,10 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="f_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>
+                      First Name
+                      <RequiredMark />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter first name"
@@ -176,7 +180,10 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="l_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name</FormLabel>
+                    <FormLabel>
+                      Last Name
+                      <RequiredMark />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter last name"
@@ -195,7 +202,10 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Registration Type</FormLabel>
+                    <FormLabel>
+                      Registration Type
+                      <RequiredMark />
+                    </FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
@@ -219,32 +229,16 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 )}
               />
 
-              {/* Profession */}
-              <FormField
-                control={form.control}
-                name="profession"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profession</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="What best describes you"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Phone */}
               <FormField
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>
+                      Phone Number
+                      <RequiredMark />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="tel"
@@ -264,30 +258,14 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>
+                      Email Address
+                      <RequiredMark />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="Enter email address"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Postal Address */}
-              <FormField
-                control={form.control}
-                name="postal_addr"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Postal Address (Optional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter postal address"
                         {...field}
                         disabled={isLoading}
                       />
@@ -303,7 +281,10 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="country"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Country</FormLabel>
+                    <FormLabel>
+                      Country
+                      <RequiredMark />
+                    </FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
@@ -333,29 +314,13 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="qualifications"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Academic Qualifications</FormLabel>
+                    <FormLabel>
+                      Academic Qualifications
+                      <RequiredMark />
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter your academic qualification"
-                        {...field}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Area of Specialization */}
-              <FormField
-                control={form.control}
-                name="area_of_specialization"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Area of Specialization</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your area of specialization"
                         {...field}
                         disabled={isLoading}
                       />
@@ -371,10 +336,75 @@ const AddMembers = ({ onSuccess }: AddMemberModalProps) => {
                 name="institution_name_addr"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Institution Name and Address (Optional)</FormLabel>
+                    <FormLabel>
+                      Institution Name and Address
+                      <RequiredMark />
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter your institution name and address"
+                        placeholder="Enter institution name and address"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="md:col-span-2 border-t border-gray-200 pt-4">
+                <p className="text-sm font-medium text-gray-900">Additional details</p>
+                <OptionalSectionHint />
+              </div>
+
+              {/* Profession */}
+              <FormField
+                control={form.control}
+                name="profession"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profession</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="What best describes you"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Postal Address */}
+              <FormField
+                control={form.control}
+                name="postal_addr"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal Address</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter postal address"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Area of Specialization */}
+              <FormField
+                control={form.control}
+                name="area_of_specialization"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Area of Specialization</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter area of specialization"
                         {...field}
                         disabled={isLoading}
                       />

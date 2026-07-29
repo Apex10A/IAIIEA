@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Phone, Mail, Edit, Trash, Plus, X } from 'lucide-react';
 import { countries } from '@/utils/countries'; 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { RequiredMark, OptionalSectionHint } from '@/app/(admin)/admin-dashboard/utils/formFieldLabels';
 
 interface Speaker {
   id: number;
@@ -505,6 +506,7 @@ export default function SpeakersManagement() {
                 <div className="md:col-span-2">
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="title">
                     Title
+                    <RequiredMark />
                   </label>
                   <input
                     type="text"
@@ -521,6 +523,7 @@ export default function SpeakersManagement() {
                 <div>
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="f_name">
                     First Name
+                    <RequiredMark />
                   </label>
                   <input
                     type="text"
@@ -536,7 +539,7 @@ export default function SpeakersManagement() {
                 
                 <div>
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="m_name">
-                    Middle Name
+                    Middle Name (Optional)
                   </label>
                   <input
                     type="text"
@@ -552,6 +555,7 @@ export default function SpeakersManagement() {
                 <div>
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="l_name">
                     Last Name
+                    <RequiredMark />
                   </label>
                   <input
                     type="text"
@@ -568,6 +572,7 @@ export default function SpeakersManagement() {
                 <div>
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
                     Email
+                    <RequiredMark />
                   </label>
                   <input
                     type="email"
@@ -583,6 +588,7 @@ export default function SpeakersManagement() {
                 <div>
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="phone">
                     Phone Number
+                    <RequiredMark />
                   </label>
                   <input
                     type="tel"
@@ -596,22 +602,9 @@ export default function SpeakersManagement() {
                 </div>
                 
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2" htmlFor="whatsapp_no">
-                    WhatsApp Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="whatsapp_no"
-                    name="whatsapp_no"
-                    value={formData.whatsapp_no}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="country">
                     Country
+                    <RequiredMark />
                   </label>
                   <select
                     id="country"
@@ -630,15 +623,36 @@ export default function SpeakersManagement() {
                   </select>
                 </div>
                 
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="institution">
                     Institution
+                    <RequiredMark />
                   </label>
                   <input
                     type="text"
                     id="institution"
                     name="institution"
                     value={formData.institution}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-2 border-t border-gray-200 pt-4">
+                  <p className="text-sm font-medium text-gray-900">Additional details</p>
+                  <OptionalSectionHint />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2" htmlFor="whatsapp_no">
+                    WhatsApp Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="whatsapp_no"
+                    name="whatsapp_no"
+                    value={formData.whatsapp_no}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -702,7 +716,7 @@ export default function SpeakersManagement() {
                 
                 <div className="md:col-span-2">
                   <label className="block text-gray-700 font-medium mb-2" htmlFor="image">
-                    Speaker Image
+                    Speaker Image (Optional)
                   </label>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">

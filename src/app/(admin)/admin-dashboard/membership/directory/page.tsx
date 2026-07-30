@@ -15,6 +15,7 @@ import { TrashIcon, Search } from 'lucide-react';
 import AddMemberModal from "./components/AddMemberModal"
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { PageHeader } from '@/app/(admin)/admin-dashboard/components/PageHeader';
 
 interface Member {
   user_id: string;
@@ -163,24 +164,25 @@ const Page = () => {
       <div className="mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Registered Members
-              </h1>
-              <div className="flex items-center gap-4 w-full lg:w-auto">
-                <div className="relative flex-1 lg:flex-none">
-                  <input 
-                    type="text" 
-                    placeholder="Search members..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 pl-10 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                </div>
-                <AddMemberModal onSuccess={fetchMembers} />
-              </div>
-            </div>
+            <PageHeader
+              title="Registered Members"
+              description="Browse and manage member accounts."
+              actions={
+                <>
+                  <div className="relative w-full min-w-[200px] flex-1 lg:w-64 lg:flex-none">
+                    <input
+                      type="text"
+                      placeholder="Search members..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full px-4 py-2 pl-10 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                  <AddMemberModal onSuccess={fetchMembers} />
+                </>
+              }
+            />
           </div>
 
           <div className="overflow-x-auto bg-gray-50 dark:bg-gray-700">

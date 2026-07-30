@@ -5,13 +5,15 @@ import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import ConferenceScheduleModal from "./components/conferenceScheduleModal";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { CalendarDays, MapPin, User, Trash2, Clock, Plus, Calendar, ChevronDown, ChevronUp, Loader2, CalendarRange } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { showToast } from '@/utils/toast';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useForm } from 'react-hook-form';
 import { parseConferenceIdParam, sortConferences, conferenceSubPageHref } from "../utils/conferenceNav";
 import { ConferenceContextBar } from "../components/ConferenceContextBar";
+import { PageHeader } from "@/app/(admin)/admin-dashboard/components/PageHeader";
+import { EmptyState } from "@/app/(admin)/admin-dashboard/components/EmptyState";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -276,21 +278,16 @@ const ConferenceScheduleContent = () => {
 
   return (
     <div className="space-y-6 w-full max-w-4xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800  flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-            Conference Schedules
-          </h1>
-          <p className="text-sm text-gray-500  mt-1">
-            View schedules for upcoming and past conference
-          </p>
-        </div>
-        <ConferenceScheduleModal
-          onScheduleAdded={handleScheduleAdded}
-          defaultEventId={defaultEventId}
-        />
-      </div>
+      <PageHeader
+        title="Conference Schedules"
+        description="View and manage schedules for upcoming and past conferences."
+        actions={
+          <ConferenceScheduleModal
+            onScheduleAdded={handleScheduleAdded}
+            defaultEventId={defaultEventId}
+          />
+        }
+      />
 
       <ConferenceContextBar
         conferenceId={urlConferenceId}
@@ -299,14 +296,16 @@ const ConferenceScheduleContent = () => {
       />
 
       {conferences.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center bg-white shadow-lg">
-          <p className="text-gray-500 mb-4">No conferences available yet.</p>
-          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Link href="/admin-dashboard/conferences">
-              Go to conferences
-            </Link>
-          </Button>
-        </div>
+        <EmptyState
+          icon={CalendarRange}
+          title="No conferences available yet"
+          description="Create a conference first, then add schedule items for it."
+          action={
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Link href="/admin-dashboard/conferences">Go to conferences</Link>
+            </Button>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {conferences.map((conference) => (

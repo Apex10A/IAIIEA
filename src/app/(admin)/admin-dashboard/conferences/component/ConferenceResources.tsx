@@ -14,7 +14,6 @@ import {
   Trash2,
   Calendar,
   MapPin,
-  ArrowLeft,
   FileText,
   Loader2,
   Plus,
@@ -36,6 +35,7 @@ import {
 } from "./interfaces";
 import { ResourceCard, AddResourceModal } from "./components";
 import { conferenceSubPageHref, sortConferences } from "../utils/conferenceNav";
+import { BackLink } from "@/app/(admin)/admin-dashboard/components/BackLink";
 
 // Carousel component for galleries, sponsors, and videos
 const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'sponsors' | 'videos' }) => {
@@ -168,14 +168,12 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
   return (
     <div className="space-y-6">
-      <Button
+      <BackLink
+        variant="button"
+        label="Back to conferences"
         onClick={onBack}
-        variant="outline"
-        className="flex items-center gap-2 text-sm font-medium text-gray-700"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to conferences
-      </Button>
+        className="w-fit border-gray-300 text-gray-700"
+      />
 
       <div className="bg-card rounded-lg shadow-md overflow-hidden border">
         <div className="relative h-64 sm:h-[400px] bg-muted">
@@ -683,7 +681,11 @@ const ConferenceResources: React.FC = () => {
             <p className="text-gray-600 mb-6">
               No conference matches id {conferenceId}. It may have been removed.
             </p>
-            <Button onClick={handleBackToList}>Back to conferences</Button>
+            <BackLink
+              variant="button"
+              label="Back to conferences"
+              onClick={handleBackToList}
+            />
           </div>
         </div>
       </div>
@@ -704,13 +706,10 @@ const ConferenceResources: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <button
+              <BackLink
+                label="Back to conferences"
                 onClick={handleBackToList}
-                className="flex items-center gap-2 text-gray-700 text-primary hover:text-primary/80 text-sm font-medium  "
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to conferences
-              </button>
+              />
               <AddResourceModal
                 conferenceId={selectedConference.id}
                 onSuccess={() => fetchConferenceDetails(selectedConference.id)}

@@ -27,15 +27,10 @@ const steps = [
     title: "Complete the Membership Form",
     description: (
       <>
-        Fill out our online application form with your details. {" "}
-        <a
-          href="https://iaiiea.vercel.app/register"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#D5B93C] underline hover:text-[#b89d2f]"
-        >
-          https://iaiiea.vercel.app/register
-        </a>
+        Fill out our online application form with your details.{" "}
+        <Link href="/register" className="text-[#D5B93C] underline hover:text-[#b89d2f]">
+          Start registration
+        </Link>
       </>
     ),
     icon: <FaClipboardList className="text-[#D5B93C]" size={22} />,

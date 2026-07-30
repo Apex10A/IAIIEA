@@ -1,8 +1,5 @@
-// sidebar/page.tsx
-import { FC } from 'react';
+import { redirect } from "next/navigation";
 
-const SidebarPage: FC = () => {
-  return null; // This page component doesn't render anything directly
-};
-
-export default SidebarPage;
+export default function LegacySidebarPage() {
+  redirect("/admin-dashboard");
+}

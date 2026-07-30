@@ -66,7 +66,7 @@ const SeminarCards = () => {
   };
 
   const handleReadSeminar = (seminarId: number) => {
-    router.push(`/seminar-landing-page?id=${seminarId}`);
+    router.push(`/seminars/${seminarId}`);
   };
 
   const formatDate = (dateString: string) => {

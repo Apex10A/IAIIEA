@@ -4,8 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion';
 import { FaGraduationCap, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaUsers, FaArrowRight, FaBookOpen, FaCalendar } from 'react-icons/fa';
-import RealConference from "@/modules/ui/RealConference";
-import RealSeminar from "@/modules/ui/RealSeminar";
 import HeroSection from './HeroSection';
 import EventsSection from './EventsSection';
 import Sponsors from './sponsors'

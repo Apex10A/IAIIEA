@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa'
+import { landingEventHref } from './eventLinks'
 
 interface Event {
   id: number;
@@ -37,7 +38,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
   };
 
   return (
-    <section className="py-24 px-4 md:px-8 lg:px-14 bg-[#F9FBFF]">
+    <section id="upcoming-events" className="py-24 px-4 md:px-8 lg:px-14 bg-[#F9FBFF] scroll-mt-24">
       <div className="container mx-auto">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -46,7 +47,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
             <h2 className="text-4xl md:text-5xl font-black text-[#0B142F]">Don't Miss Our Events</h2>
           </div>
           <Link 
-            href="/programmes" 
+            href="/#upcoming-events"
             className="inline-flex items-center px-6 py-3 bg-white border border-gray-200 text-[#0B142F] font-bold rounded-xl hover:bg-gray-50 transition-all shadow-sm group"
           >
             View All Events <FaArrowRight className="ml-3 group-hover:translate-x-1 transition-transform" />
@@ -120,7 +121,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
                       Fees and registration details on the event page.
                     </p>
                     <Link
-                      href={event.type === 'conference' ? `/conference?id=${event.id}` : `/seminars/${event.id}`}
+                      href={landingEventHref(event.id, event.type)}
                       className="inline-flex items-center text-blue-600 font-bold text-sm group/link"
                     >
                       Learn More <FaArrowRight className="ml-2 group-hover/link:translate-x-1 transition-transform" />

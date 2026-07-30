@@ -225,8 +225,9 @@ const LandingPage: React.FC = () => {
               {/* Floating Experience Badge */}
               <div className="absolute -bottom-10 -left-10 z-20 bg-[#D5B93C] p-8 rounded-[2rem] shadow-2xl hidden md:block animate-bounce-slow">
                 <div className="text-center text-[#0B142F]">
-                  <div className="text-5xl font-black mb-1">7+</div>
-                  <div className="text-sm font-bold uppercase tracking-widest">Years of<br/>Excellence</div>
+                  <div className="text-3xl font-black mb-1">Since</div>
+                  <div className="text-5xl font-black mb-1">2018</div>
+                  <div className="text-sm font-bold uppercase tracking-widest">Association<br/>conferences</div>
                 </div>
               </div>
 

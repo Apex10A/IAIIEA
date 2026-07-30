@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa'
+import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa'
 
 interface Event {
   id: number;
@@ -94,15 +94,16 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
 
                 {/* Content */}
                 <div className="p-8">
-                  <div className="flex items-center gap-4 text-gray-400 text-sm mb-4">
+                  <div className="flex flex-wrap items-center gap-3 text-gray-500 text-sm mb-4">
                     <div className="flex items-center gap-2">
                       <FaCalendarAlt className="text-blue-500" />
                       <span>{formatDate(event.date)}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <FaClock className="text-blue-500" />
-                      <span>10:00</span> {/* Mock time if not available */}
-                    </div>
+                    {event.status && (
+                      <span className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-blue-700">
+                        {event.status}
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="text-xl font-bold text-[#0B142F] mb-3 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
@@ -114,14 +115,11 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
                     <span className="line-clamp-1">{event.venue}</span>
                   </div>
 
-                  <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest block mb-1">From</span>
-                      <span className="text-xl font-black text-[#0B142F]">
-                        {event.type === 'conference' ? '₦50,000' : '₦15,000'}
-                      </span>
-                    </div>
-                    <Link 
+                  <div className="pt-6 border-t border-gray-50 flex items-center justify-between gap-4">
+                    <p className="text-sm text-gray-500">
+                      Fees and registration details on the event page.
+                    </p>
+                    <Link
                       href={event.type === 'conference' ? `/conference?id=${event.id}` : `/seminars/${event.id}`}
                       className="inline-flex items-center text-blue-600 font-bold text-sm group/link"
                     >

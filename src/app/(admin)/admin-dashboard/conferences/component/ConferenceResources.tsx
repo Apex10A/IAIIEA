@@ -36,6 +36,7 @@ import {
 import { ResourceCard, AddResourceModal } from "./components";
 import { conferenceSubPageHref, sortConferences } from "../utils/conferenceNav";
 import { BackLink } from "@/app/(admin)/admin-dashboard/components/BackLink";
+import { formatAgendaForDisplay } from "@/app/(admin)/admin-dashboard/utils/eventAgenda";
 
 // Carousel component for galleries, sponsors, and videos
 const MediaCarousel = ({ items, type }: { items: any[], type: 'gallery' | 'sponsors' | 'videos' }) => {
@@ -143,7 +144,8 @@ export const ConferenceDetailsView: React.FC<ConferenceDetailsProps> = ({
 
   const description =
     conferenceDetails?.description || conference.description || "";
-  const agenda = conferenceDetails?.agenda || conference.agenda || "";
+  const agendaRaw = conferenceDetails?.agenda || conference.agenda || "";
+  const agenda = agendaRaw ? formatAgendaForDisplay(agendaRaw) : "";
   const registeredCount = conferenceDetails?.registered_count;
   const conferenceId = conference.id ?? conferenceDetails?.id;
   const scheduleHref = conferenceSubPageHref("conference-schedule", conferenceId);

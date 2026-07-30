@@ -6,6 +6,7 @@ import {
   feesForSubmission,
   validateSeminarFees,
 } from '../utils/seminarPricing';
+import { agendaToApiFormat } from '@/app/(admin)/admin-dashboard/utils/eventAgenda';
 
 export const useSeminarModal = (onSuccess: () => void) => {
   const { data: session } = useSession();
@@ -19,6 +20,8 @@ export const useSeminarModal = (onSuccess: () => void) => {
     title: '',
     theme: '',
     venue: '',
+    description: '',
+    agenda: '',
     start: '',
     end: '',
     mode: '',
@@ -59,7 +62,11 @@ export const useSeminarModal = (onSuccess: () => void) => {
           'Authorization': `Bearer ${bearerToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(step1Data),
+        body: JSON.stringify({
+          ...step1Data,
+          description: step1Data.description.trim(),
+          agenda: agendaToApiFormat(step1Data.agenda),
+        }),
       });
 
       const data = await response.json();
@@ -126,6 +133,8 @@ export const useSeminarModal = (onSuccess: () => void) => {
       title: '',
       theme: '',
       venue: '',
+      description: '',
+      agenda: '',
       start: '',
       end: '',
       mode: '',

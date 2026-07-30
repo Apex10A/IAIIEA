@@ -17,7 +17,13 @@ import { Label } from "@/components/ui/label";
 import { FileText, Pencil } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import {
+  AGENDA_UI_PLACEHOLDER,
+  agendaFromApiFormat,
+  agendaToApiFormat,
+} from "@/app/(admin)/admin-dashboard/utils/eventAgenda";
 import { SeminarDetails } from './index';
 import PackageSection from './PackageSection';
 import { Step2Data } from './types';
@@ -41,6 +47,8 @@ interface FormData {
   title: string;
   theme: string;
   venue: string;
+  description: string;
+  agenda: string;
   start: string;
   end: string;
   mode: string;
@@ -81,6 +89,8 @@ interface EditSeminarModalProps {
     status: string;
     mode?: string;
     is_free?: string;
+    description?: string;
+    agenda?: string;
     speakers: Array<{
       name: string;
       portfolio?: string;
@@ -157,6 +167,8 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
     title: '',
     theme: '',
     venue: '',
+    description: '',
+    agenda: '',
     start: '',
     end: '',
     mode: '',
@@ -182,6 +194,8 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
       title: details.title || '',
       theme: details.theme || '',
       venue: details.venue || '',
+      description: details.description || '',
+      agenda: agendaFromApiFormat(details.agenda || ''),
       start: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
       end: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
       mode: details.mode || '',
@@ -288,6 +302,8 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
         title: formData.title,
         theme: formData.theme,
         venue: formData.venue,
+        description: formData.description.trim(),
+        agenda: agendaToApiFormat(formData.agenda),
         start: startDate.toISOString().slice(0, 19).replace('T', ' '),
         end: endDate.toISOString().slice(0, 19).replace('T', ' '),
         mode: formData.mode,
@@ -433,6 +449,32 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                       onChange={(e) => handleInputChange('venue', e.target.value)}
                       placeholder="Enter venue location"
                     />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Overview of the seminar"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="agenda">Agenda</Label>
+                    <Textarea
+                      id="agenda"
+                      value={formData.agenda}
+                      onChange={(e) => handleInputChange('agenda', e.target.value)}
+                      placeholder={AGENDA_UI_PLACEHOLDER}
+                      rows={5}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-xs text-gray-500">
+                      One line per session. Use → between time and activity.
+                    </p>
                   </div>
                   
                   <div className="space-y-2">

@@ -24,10 +24,10 @@ import {
   conferenceSubPageHref,
   extractCreatedConferenceId,
 } from "../utils/conferenceNav";
-
-const AGENDA_PLACEHOLDER = `9:00–10:00 → Opening Prayer
-10:00–11:00 → Keynote Speech
-11:00–12:00 → Panel Discussion`;
+import {
+  AGENDA_UI_PLACEHOLDER,
+  agendaToApiFormat,
+} from "@/app/(admin)/admin-dashboard/utils/eventAgenda";
 
 interface AddConferenceModalProps {
   onSuccess?: () => void;
@@ -487,8 +487,8 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     formDataToSend.append('title', formData.title);
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('agenda', formData.agenda);
+    formDataToSend.append('description', formData.description.trim());
+    formDataToSend.append('agenda', agendaToApiFormat(formData.agenda));
     formDataToSend.append('start', formData.start);
     formDataToSend.append('end', formData.end);
     formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
@@ -790,7 +790,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                       id="agenda"
                       value={formData.agenda}
                       onChange={(e) => handleInputChange('agenda', e.target.value)}
-                      placeholder={AGENDA_PLACEHOLDER}
+                      placeholder={AGENDA_UI_PLACEHOLDER}
                       rows={6}
                       className="font-mono text-sm"
                     />

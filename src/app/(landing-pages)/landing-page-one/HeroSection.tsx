@@ -1,9 +1,9 @@
 'use client'
-import React from 'react'
+import React, { useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { FaArrowRight, FaUsers, FaCalendarAlt, FaAward } from 'react-icons/fa'
+import { FaArrowRight } from 'react-icons/fa'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, EffectFade } from 'swiper/modules'
 import 'swiper/css'
@@ -24,10 +24,34 @@ interface HeroSectionProps {
   incomingEvents: Event[];
 }
 
+const formatEventDate = (dateString: string) => {
+  try {
+    const [datePart] = dateString.split('To').map((part) => part.trim());
+    const date = new Date(datePart);
+    if (isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return dateString;
+  }
+};
+
 const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
+  const primaryEvent = incomingEvents[0];
+
+  const promoLabel = useMemo(() => {
+    if (!primaryEvent) {
+      return 'Conferences and seminars from IAIIEA';
+    }
+    const kind = primaryEvent.type === 'seminar' ? 'Seminar' : 'Conference';
+    return `${kind}: ${primaryEvent.title}`;
+  }, [primaryEvent]);
+
   return (
     <section className="relative min-h-screen w-full bg-[#0B142F] overflow-hidden flex items-center pt-20">
-      {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/people.jpg"
@@ -41,18 +65,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
 
       <div className="container mx-auto px-4 md:px-8 lg:px-14 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          
-          {/* Left Content - Constant */}
           <div className="lg:w-1/2 space-y-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 max-w-full"
             >
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-              <span className="text-white/80 text-sm font-medium tracking-wide">
-                2024 Annual Conference Coming Soon
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse shrink-0"></div>
+              <span className="text-white/80 text-sm font-medium tracking-wide line-clamp-2">
+                {promoLabel}
               </span>
             </motion.div>
 
@@ -68,8 +90,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
                 <span className="text-blue-400">Professional Practice</span>
               </h1>
               <p className="text-lg md:text-xl text-white/70 max-w-xl leading-relaxed">
-                Join a community of distinguished professionals dedicated to innovation, 
-                collaboration, and continuous growth. Access world-class resources, 
+                Join a community of distinguished professionals dedicated to innovation,
+                collaboration, and continuous growth. Access world-class resources,
                 events, and networking opportunities.
               </p>
             </motion.div>
@@ -94,38 +116,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
               </Link>
             </motion.div>
 
-            {/* Stats */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="grid grid-cols-3 gap-8 pt-8 border-t border-white/10"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-white/10"
             >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-white/50">
-                  <FaUsers />
-                  <span className="text-xs uppercase tracking-wider font-bold">Members</span>
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-white">2,500+</div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-white/50">
-                  <FaCalendarAlt />
-                  <span className="text-xs uppercase tracking-wider font-bold">Annual Events</span>
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-white">50+</div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-white/50">
-                  <FaAward />
-                  <span className="text-xs uppercase tracking-wider font-bold">Years of Excellence</span>
-                </div>
-                <div className="text-2xl md:text-3xl font-bold text-white">15+</div>
-              </div>
+              {[
+                'Professional membership & networking',
+                'Annual conferences & training seminars',
+                'Innovation for Excellence since 2018',
+              ].map((line) => (
+                <p key={line} className="text-sm text-white/70 leading-relaxed">
+                  {line}
+                </p>
+              ))}
             </motion.div>
           </div>
 
-          {/* Right Content - Sliding Events */}
           <div className="lg:w-1/2 w-full">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -133,13 +141,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
               transition={{ duration: 0.8 }}
               className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-white/20 shadow-2xl"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-white font-bold text-xl">Featured Event</h3>
-                <div className="flex gap-2">
-                   <div className="w-2 h-2 rounded-full bg-[#D5B93C]"></div>
-                   <div className="w-2 h-2 rounded-full bg-white/20"></div>
-                   <div className="w-2 h-2 rounded-full bg-white/20"></div>
-                </div>
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <h3 className="text-white font-bold text-xl">Featured programmes</h3>
+                {incomingEvents.length > 0 && (
+                  <span className="text-xs font-semibold uppercase tracking-wider text-white/60 shrink-0">
+                    {incomingEvents.length} upcoming
+                  </span>
+                )}
               </div>
 
               <div className="relative rounded-2xl overflow-hidden aspect-video mb-8">
@@ -166,6 +174,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                           <div className="absolute bottom-0 left-0 p-6 w-full">
+                            <p className="text-[#D5B93C] text-xs font-bold uppercase tracking-widest mb-2">
+                              {event.type === 'seminar' ? 'Seminar' : 'Conference'}
+                              {event.status ? ` · ${event.status}` : ''}
+                            </p>
                             <h4 className="text-white text-xl md:text-2xl font-bold mb-2">{event.title}</h4>
                             <p className="text-white/80 text-sm line-clamp-2">{event.theme}</p>
                           </div>
@@ -175,34 +187,35 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
                   ) : (
                     <SwiperSlide>
                       <div className="relative h-full w-full bg-white/5 flex items-center justify-center">
-                        <p className="text-white/50 italic">No upcoming events scheduled</p>
+                        <p className="text-white/50 italic px-6 text-center">
+                          No upcoming programmes scheduled right now.
+                        </p>
                       </div>
                     </SwiperSlide>
                   )}
                 </Swiper>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0B142F] bg-[#D5B93C] flex items-center justify-center text-white text-xs font-bold">
-                      {i}
-                    </div>
-                  ))}
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0B142F] bg-white/10 backdrop-blur-md flex items-center justify-center text-white text-xs font-bold">
-                    +99
-                  </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="text-sm text-white/70">
+                  {primaryEvent ? (
+                    <>
+                      <span className="block font-medium text-white/90">{formatEventDate(primaryEvent.date)}</span>
+                      <span className="line-clamp-1">{primaryEvent.venue}</span>
+                    </>
+                  ) : (
+                    <span>Programme dates and venues appear here when events are published.</span>
+                  )}
                 </div>
                 <Link
                   href="/conference"
-                  className="px-6 py-2 bg-white text-[#0B142F] font-bold rounded-lg hover:bg-gray-100 transition-all text-sm"
+                  className="px-6 py-2 bg-white text-[#0B142F] font-bold rounded-lg hover:bg-gray-100 transition-all text-sm text-center shrink-0"
                 >
                   Learn More
                 </Link>
               </div>
             </motion.div>
           </div>
-
         </div>
       </div>
     </section>

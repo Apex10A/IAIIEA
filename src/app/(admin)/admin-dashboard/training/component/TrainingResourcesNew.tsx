@@ -10,6 +10,7 @@ import SeminarDetailsView from "./SeminarDetailsView";
 import SeminarList from "./SeminarList";
 import { Seminar, SeminarDetails } from "./types";
 import { parseSeminarIdParam, sortSeminars } from "../utils/seminarNav";
+import { BackLink } from "@/app/(admin)/admin-dashboard/components/BackLink";
 
 const TrainingResourcesNew: React.FC = () => {
   const [seminars, setSeminars] = useState<Seminar[]>([]);
@@ -178,13 +179,11 @@ const TrainingResourcesNew: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-300 mb-6">
               No seminar matches id {seminarId}. It may have been removed.
             </p>
-            <button
-              type="button"
+            <BackLink
+              variant="button"
+              label="Back to seminars"
               onClick={handleBackToList}
-              className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Back to seminars
-            </button>
+            />
           </div>
         </div>
       </div>

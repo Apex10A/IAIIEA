@@ -10,7 +10,6 @@ import {
   Trash2,
   Calendar,
   MapPin,
-  ArrowLeft,
   Loader2,
   Pencil,
   FileText,
@@ -22,6 +21,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AddResourceModal } from './components';
 import { seminarSubPageHref } from '../utils/seminarNav';
+import { BackLink } from '@/app/(admin)/admin-dashboard/components/BackLink';
 
 const formatEventDate = (dateStr?: string, timeStr?: string) => {
   if (!dateStr) return '';
@@ -110,14 +110,12 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
   return (
     <div className="space-y-6">
       <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
-        <Button
+        <BackLink
+          variant="button"
+          label="Back to seminars"
           onClick={onBack}
-          variant="outline"
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 bg-white hover:bg-gray-50"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to seminars
-        </Button>
+          className="dark:border-gray-700 dark:hover:bg-gray-800"
+        />
       </div>
      
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">

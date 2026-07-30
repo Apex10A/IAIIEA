@@ -1,10 +1,11 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react";
-import { useParams, useRouter } from 'next/navigation';
-import { PencilIcon, ArrowLeft } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { PencilIcon } from 'lucide-react';
 import { showToast } from '@/utils/toast';
 import * as Dialog from '@radix-ui/react-dialog';
+import { BackLink } from '@/app/(admin)/admin-dashboard/components/BackLink';
 
 interface UserDetails {
   user_id: string;
@@ -26,7 +27,6 @@ interface UserDetails {
 }
 
 const UserDetailsPage = () => {
-  const router = useRouter();
   const params = useParams();
   const userId = params.userId as string;
   const { data: session } = useSession();
@@ -127,14 +127,11 @@ const UserDetailsPage = () => {
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error</h2>
           <p className="text-gray-700 dark:text-gray-300 mb-6">{error || "User not found"}</p>
-          <button
-            type="button"
-            onClick={() => router.push('/admin-dashboard/membership/directory')}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Directory
-          </button>
+          <BackLink
+            href="/admin-dashboard/membership/directory"
+            label="Back to Directory"
+            className="mb-6"
+          />
         </div>
       </div>
     );
@@ -143,13 +140,11 @@ const UserDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
       <div className="mx-auto">
-        <button
-          onClick={() => router.push('/admin-dashboard/membership/directory')}
-          className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Directory
-        </button>
+        <BackLink
+          href="/admin-dashboard/membership/directory"
+          label="Back to Directory"
+          className="mb-6"
+        />
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           {/* Profile Header */}

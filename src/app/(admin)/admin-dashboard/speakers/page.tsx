@@ -2,10 +2,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from "next-auth/react";
 import Image from 'next/image';
-import { Phone, Mail, Edit, Trash, Plus, X } from 'lucide-react';
+import { Phone, Mail, Edit, Trash, Plus, X, Mic } from 'lucide-react';
 import { countries } from '@/utils/countries'; 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { RequiredMark, OptionalSectionHint } from '@/app/(admin)/admin-dashboard/utils/formFieldLabels';
+import { EmptyState } from '@/app/(admin)/admin-dashboard/components/EmptyState';
 
 interface Speaker {
   id: number;
@@ -479,9 +480,21 @@ export default function SpeakersManagement() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-10">
-            <p className="text-xl text-gray-600">No speakers found. Add some speakers to get started.</p>
-          </div>
+          <EmptyState
+            icon={Mic}
+            title="No speakers yet"
+            description="Add speakers to feature them on conferences and events."
+            action={
+              <button
+                type="button"
+                onClick={openAddModal}
+                className="inline-flex items-center justify-center rounded-lg bg-[#203A87] px-6 py-3 text-sm font-medium text-white shadow-md transition-colors hover:bg-[#003B8E]"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Add New Speaker
+              </button>
+            }
+          />
         )}
       </main>
 

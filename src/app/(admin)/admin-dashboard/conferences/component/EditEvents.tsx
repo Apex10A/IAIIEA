@@ -19,10 +19,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-
-const AGENDA_PLACEHOLDER = `9:00–10:00 → Opening Prayer
-10:00–11:00 → Keynote Speech
-11:00–12:00 → Panel Discussion`;
+import {
+  AGENDA_UI_PLACEHOLDER,
+  agendaFromApiFormat,
+  agendaToApiFormat,
+} from "@/app/(admin)/admin-dashboard/utils/eventAgenda";
 
 interface FileWithPreview {
   file: File;
@@ -225,7 +226,7 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
       theme: details.theme,
       venue: details.venue,
       description: details.description || '',
-      agenda: details.agenda || '',
+      agenda: agendaFromApiFormat(details.agenda || ''),
       start: `${details.start_date}T${details.start_time}`,
       end: `${details.start_date}T${details.start_time}`,
       subthemes_input: details.sub_theme || [],
@@ -443,8 +444,8 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
     formDataToSend.append('title', formData.title);
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('agenda', formData.agenda);
+    formDataToSend.append('description', formData.description.trim());
+    formDataToSend.append('agenda', agendaToApiFormat(formData.agenda));
     
     // Format dates
     const startDateTime = new Date(formData.start);
@@ -686,7 +687,7 @@ const EditConferenceModal: React.FC<EditConferenceModalProps> = ({
                       id="edit-agenda"
                       value={formData.agenda}
                       onChange={(e) => handleInputChange('agenda', e.target.value)}
-                      placeholder={AGENDA_PLACEHOLDER}
+                      placeholder={AGENDA_UI_PLACEHOLDER}
                       rows={6}
                       className="font-mono text-sm"
                     />

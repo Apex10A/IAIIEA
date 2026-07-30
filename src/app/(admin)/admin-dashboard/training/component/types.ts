@@ -17,6 +17,8 @@ export interface Step1Data {
   title: string;
   theme: string;
   venue: string;
+  description: string;
+  agenda: string;
   start: string;
   end: string;
   mode: string;
@@ -74,6 +76,10 @@ export interface Seminar {
   venue: string;
   date: string;
   status: string;
+  description?: string;
+  agenda?: string;
+  mode?: string;
+  is_free?: string;
   flyer?: string;
   start_date?: string;
   start_time?: string;
@@ -84,6 +90,8 @@ export interface Seminar {
 export interface SeminarDetails {
   start_date: string;
   start_time: string;
+  description?: string;
+  agenda?: string;
   speakers: Speaker[];
   resources: Resource[];
   payments: Payment[];

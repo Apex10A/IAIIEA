@@ -22,6 +22,7 @@ import Link from "next/link";
 import { AddResourceModal } from './components';
 import { seminarSubPageHref } from '../utils/seminarNav';
 import { BackLink } from '@/app/(admin)/admin-dashboard/components/BackLink';
+import { formatAgendaForDisplay } from '@/app/(admin)/admin-dashboard/utils/eventAgenda';
 
 const formatEventDate = (dateStr?: string, timeStr?: string) => {
   if (!dateStr) return '';
@@ -106,6 +107,13 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
   }
 
   const participantsHref = seminarSubPageHref("participants", seminar.id);
+  const description =
+    seminarDetails.description?.trim() ||
+    seminar.description?.trim() ||
+    "";
+  const agendaRaw =
+    seminarDetails.agenda?.trim() || seminar.agenda?.trim() || "";
+  const agenda = agendaRaw ? formatAgendaForDisplay(agendaRaw) : "";
 
   return (
     <div className="space-y-6">
@@ -160,6 +168,10 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
                 start_date: seminarDetails.start_date,
                 start_time: seminarDetails.start_time,
                 status: seminar.status,
+                mode: seminar.mode,
+                is_free: seminar.is_free,
+                description: seminarDetails.description ?? seminar.description,
+                agenda: seminarDetails.agenda ?? seminar.agenda,
                 speakers: seminarDetails.speakers || [],
                 payments: seminarDetails.payments
               }}
@@ -238,6 +250,31 @@ const SeminarDetailsView: React.FC<SeminarDetailsProps> = ({
         </div>
 
         <div className="p-6">
+          {(description || agenda) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {description && (
+                <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 p-4">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 uppercase tracking-wide">
+                    Description
+                  </h2>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    {description}
+                  </p>
+                </div>
+              )}
+              {agenda && (
+                <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 p-4">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 uppercase tracking-wide">
+                    Agenda
+                  </h2>
+                  <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-sans">
+                    {agenda}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Speakers Section */}
           {seminarDetails.speakers && seminarDetails.speakers.length > 0 && (
             <div className="mb-8">

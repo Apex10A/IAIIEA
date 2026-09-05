@@ -2,7 +2,8 @@
 import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import "@/app/index.css";
 import { useSession } from "next-auth/react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Calendar,
@@ -32,6 +33,10 @@ import {
   buildEventDateTime,
   formatEventScheduleDisplay,
 } from "../utils/landingEventDates";
+import {
+  getPlanExplainer,
+  getVisibleConferencePlans,
+} from "./conferencePaymentUtils";
 
 interface PaymentTier {
   usd: string;
@@ -364,6 +369,7 @@ const SponsorsSection = memo(({ sponsors }: { sponsors: Sponsor[] }) => {
 const PaymentPlanCard = memo(
   ({
     title,
+    planDescription,
     priceUsd,
     priceNaira,
     features,
@@ -372,9 +378,11 @@ const PaymentPlanCard = memo(
     isRegistered,
     isPopular = false,
     onClick,
-    attendanceType,
+    signInRequired = false,
+    onSignIn,
   }: {
     title: string;
+    planDescription?: string;
     priceUsd: string;
     priceNaira: string;
     features: string[];
@@ -383,7 +391,8 @@ const PaymentPlanCard = memo(
     isRegistered: boolean;
     isPopular?: boolean;
     onClick: () => void;
-    attendanceType: "virtual" | "physical";
+    signInRequired?: boolean;
+    onSignIn?: () => void;
   }) => {
     // const [localLoading, setLocalLoading] = useState(false);
     const isLoading = paymentProcessing;
@@ -408,12 +417,19 @@ const PaymentPlanCard = memo(
             POPULAR
           </div>
         )} */}
-          <h3 className="text-xl font-bold text-[#0E1A3D] mb-4">{title}</h3>
+          <h3 className="text-xl font-bold text-[#0E1A3D] mb-2">{title}</h3>
+          {planDescription && (
+            <p className="text-sm text-gray-600 mb-4">{planDescription}</p>
+          )}
 
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-3xl font-bold text-[#0E1A3D]">${priceUsd}</p>
-              <p className="text-lg text-gray-700">{priceNaira}</p>
+              <p className="text-lg text-gray-700">
+                {String(priceNaira).startsWith('NGN') || String(priceNaira).startsWith('₦')
+                  ? priceNaira
+                  : `NGN ${priceNaira}`}
+              </p>
             </div>
 
             <div className="pt-2">
@@ -442,16 +458,22 @@ const PaymentPlanCard = memo(
                   Already Registered
                 </button>
               )
+            ) : signInRequired ? (
+              <button
+                type="button"
+                className="w-full bg-[#0E1A3D] hover:bg-[#0E1A3D]/90 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors flex items-center justify-center gap-2"
+                onClick={onSignIn}
+              >
+                <LogIn className="w-4 h-4" />
+                Sign in to register
+              </button>
             ) : (
               <button
                 className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={async () => {
-                 
-                 
                   try {
                     await onClick();
                   } finally {
-             
                   }
                 }}
                 disabled={isLoading}
@@ -504,6 +526,7 @@ function ConferenceDetailPage() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const [conference, setConference] = useState<ConferenceDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -516,6 +539,14 @@ function ConferenceDetailPage() {
 
   const conferenceId = useMemo(() => searchParams.get("id"), [searchParams]);
   const authToken = useMemo(() => session?.user?.token, [session?.user?.token]);
+  const loginCallback = useMemo(() => {
+    const query = searchParams.toString();
+    return encodeURIComponent(query ? `${pathname}?${query}` : pathname);
+  }, [pathname, searchParams]);
+
+  const goToLogin = useCallback(() => {
+    router.push(`/login?callbackUrl=${loginCallback}`);
+  }, [router, loginCallback]);
 
   const loadConference = useCallback(async () => {
     try {
@@ -657,161 +688,72 @@ function ConferenceDetailPage() {
 
   const renderPaymentPlans = useMemo(() => {
     if (!conference) return null;
-    if (conference?.payments?.early_bird_registration) {
+
+    const visiblePlans = getVisibleConferencePlans(
+      conference.payments,
+      attendanceType
+    );
+
+    if (!visiblePlans) {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <PaymentPlanCard
-            title="Early Bird"
-            priceUsd={
-              conference?.payments?.early_bird_registration[attendanceType]
-                ?.usd || "0"
-            }
-            priceNaira={
-              conference?.payments?.early_bird_registration[attendanceType]
-                ?.naira || "0"
-            }
-            features={conference?.payments?.early_bird_registration?.package}
-            isCurrentPlan={
-              conference?.is_registered &&
-              conference?.current_plan === "early_bird_registration"
-            }
-            paymentProcessing={paymentProcessing}
-            isRegistered={conference?.is_registered}
-            isPopular
-            onClick={() => {
-              handlePaymentSubmit("early_bird_registration");
-            }}
-            attendanceType={attendanceType}
-          />
-
-          {conference?.payments?.normal_registration && (
-            <PaymentPlanCard
-              title="Normal"
-              priceUsd={
-                conference?.payments?.normal_registration[attendanceType]
-                  ?.usd || "0"
-              }
-              priceNaira={
-                conference?.payments?.normal_registration[attendanceType]
-                  ?.naira || "0"
-              }
-              features={conference?.payments?.normal_registration?.package}
-              isCurrentPlan={
-                conference?.is_registered &&
-                conference?.current_plan === "normal_registration"
-              }
-              paymentProcessing={paymentProcessing}
-              isRegistered={conference?.is_registered}
-              onClick={() => {
-                handlePaymentSubmit("normal_registration");
-              }}
-              attendanceType={attendanceType}
-            />
-          )}
-
-          {conference?.payments?.late_registration && (
-            <PaymentPlanCard
-              title="Late"
-              priceUsd={
-                conference?.payments?.late_registration[attendanceType]?.usd ||
-                "0"
-              }
-              priceNaira={
-                conference?.payments?.late_registration[attendanceType]
-                  ?.naira || "0"
-              }
-              features={conference?.payments?.late_registration?.package}
-              isCurrentPlan={
-                conference?.is_registered &&
-                conference?.current_plan === "late_registration"
-              }
-              paymentProcessing={paymentProcessing}
-              isRegistered={conference?.is_registered}
-              onClick={() => {
-                handlePaymentSubmit("late_registration");
-              }}
-              attendanceType={attendanceType}
-            />
-          )}
-        </div>
-      );
-    } else if (conference?.payments?.basic) {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <PaymentPlanCard
-            title="Basic"
-            priceUsd={conference?.payments?.basic[attendanceType]?.usd || "0"}
-            priceNaira={
-              conference?.payments?.basic[attendanceType]?.naira || "0"
-            }
-            features={conference?.payments?.basic?.package}
-            isCurrentPlan={
-              conference?.is_registered && conference?.current_plan === "basic"
-            }
-            paymentProcessing={paymentProcessing}
-            isRegistered={conference?.is_registered}
-            onClick={() => {
-              handlePaymentSubmit("basic");
-            }}
-            attendanceType={attendanceType}
-          />
-
-          {conference?.payments?.standard && (
-            <PaymentPlanCard
-              title="Standard"
-              priceUsd={
-                conference?.payments?.standard[attendanceType]?.usd || "0"
-              }
-              priceNaira={
-                conference?.payments?.standard[attendanceType]?.naira || "0"
-              }
-              features={conference?.payments?.standard?.package}
-              isCurrentPlan={
-                conference.is_registered &&
-                conference.current_plan === "standard"
-              }
-              paymentProcessing={paymentProcessing}
-              isRegistered={conference.is_registered}
-              isPopular
-              onClick={() => {
-                handlePaymentSubmit("standard");
-              }}
-              attendanceType={attendanceType}
-            />
-          )}
-
-          {conference?.payments?.premium && (
-            <PaymentPlanCard
-              title="Premium"
-              priceUsd={
-                conference?.payments?.premium[attendanceType]?.usd || "0"
-              }
-              priceNaira={
-                conference?.payments?.premium[attendanceType]?.naira || "0"
-              }
-              features={conference?.payments?.premium?.package}
-              isCurrentPlan={
-                conference?.is_registered &&
-                conference?.current_plan === "premium"
-              }
-              paymentProcessing={paymentProcessing}
-              isRegistered={conference?.is_registered}
-              onClick={() => {
-                handlePaymentSubmit("premium");
-              }}
-              attendanceType={attendanceType}
-            />
-          )}
-        </div>
-      );
-    } else {
-      return (
-        <div className="text-white">
-          <p>Registration information will be available soon.</p>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center text-white/80">
+          <p>Registration fees for {attendanceType} attendance are not available yet.</p>
+          <p className="text-sm text-white/60 mt-2">
+            Try switching between virtual and physical, or check back later.
+          </p>
         </div>
       );
     }
-  }, [conference, attendanceType, handlePaymentSubmit]);
+
+    return (
+      <>
+        <p className="text-white/80 text-sm md:text-base mb-6 max-w-3xl">
+          {getPlanExplainer(visiblePlans.mode)}
+        </p>
+        <div
+          className={`grid grid-cols-1 gap-6 ${
+            visiblePlans.plans.length === 1
+              ? 'max-w-md mx-auto'
+              : visiblePlans.plans.length === 2
+              ? 'md:grid-cols-2 max-w-4xl mx-auto'
+              : 'md:grid-cols-3'
+          }`}
+        >
+          {visiblePlans.plans.map((plan) => {
+            const tier = conference.payments[plan.key];
+            return (
+              <PaymentPlanCard
+                key={plan.key}
+                title={plan.title}
+                planDescription={plan.description}
+                priceUsd={tier?.[attendanceType]?.usd || "0"}
+                priceNaira={tier?.[attendanceType]?.naira || "0"}
+                features={tier?.package || []}
+                isCurrentPlan={
+                  conference.is_registered && conference.current_plan === plan.key
+                }
+                paymentProcessing={paymentProcessing}
+                isRegistered={conference.is_registered}
+                isPopular={plan.isPopular}
+                signInRequired={!session}
+                onSignIn={goToLogin}
+                onClick={() => {
+                  handlePaymentSubmit(plan.key);
+                }}
+              />
+            );
+          })}
+        </div>
+      </>
+    );
+  }, [
+    conference,
+    attendanceType,
+    handlePaymentSubmit,
+    paymentProcessing,
+    session,
+    goToLogin,
+  ]);
 
   if (loading) {
     return (
@@ -868,7 +810,7 @@ function ConferenceDetailPage() {
         ) : (
           <Button
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
-            onClick={() => router.push("/login")}
+            onClick={goToLogin}
           >
             Sign in to Register
           </Button>
@@ -1023,9 +965,36 @@ function ConferenceDetailPage() {
         <SponsorsSection sponsors={conference?.sponsors} />
 
         <div id="conference-fees" className="my-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 pb-2 border-b border-[#D5B93C] inline-block">
             Conference Fees
           </h2>
+          <p className="text-white/70 text-sm mb-8 max-w-2xl">
+            Registration in three steps: choose how you will attend, pick a plan, then sign in to initiate payment.
+          </p>
+
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-3 max-w-3xl">
+            {[
+              { step: 1, label: 'Choose attendance', active: true },
+              { step: 2, label: 'Select a plan', active: true },
+              {
+                step: 3,
+                label: conference?.is_registered ? 'Registered' : 'Sign in & pay',
+                active: !!session || !!conference?.is_registered,
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className={`rounded-lg border px-4 py-3 text-sm ${
+                  item.active
+                    ? 'border-[#D5B93C] bg-[#D5B93C]/10 text-white'
+                    : 'border-white/10 bg-white/5 text-white/60'
+                }`}
+              >
+                <span className="font-bold text-[#D5B93C] mr-2">{item.step}.</span>
+                {item.label}
+              </div>
+            ))}
+          </div>
 
           {session && conference?.is_registered && conference?.current_plan && (
             <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
@@ -1043,6 +1012,35 @@ function ConferenceDetailPage() {
                     Access ({attendanceType})
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {!session && (
+            <div className="mb-8 rounded-xl border border-[#D5B93C]/40 bg-[#D5B93C]/10 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <LogIn className="w-6 h-6 text-[#D5B93C] shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-white">Sign in before you pay</p>
+                  <p className="text-sm text-white/70 mt-1">
+                    Compare plans below, then sign in to initiate registration. Complete payment from your dashboard under Pending Payments.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3 shrink-0">
+                <Button
+                  className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
+                  onClick={goToLogin}
+                >
+                  Sign in
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                >
+                  <Link href="/register">Create account</Link>
+                </Button>
               </div>
             </div>
           )}

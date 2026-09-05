@@ -17,6 +17,10 @@ import { PricingSection } from "./components/PricingSection";
 import { FreeSeminarSection } from "./components/FreeSeminarSection";
 import { OverviewSection } from "./components/OverviewSection";
 import { EventDescriptionAgendaSection } from "../../components/EventDescriptionAgendaSection";
+import {
+  buildEventDateTime,
+  formatEventScheduleDisplay,
+} from "../../utils/landingEventDates";
 
 // Import types and utilities
 import { SeminarDetails, RegistrationType } from "./types";
@@ -70,9 +74,9 @@ export default function SeminarPage() {
           
           if (dummyData) {
             setSeminar(dummyData);
-            const { start_date, start_time } = dummyData;
-            const dateTimeString = `${start_date}T${start_time}`;
-            setSeminarDate(new Date(dateTimeString));
+            setSeminarDate(
+              buildEventDateTime(dummyData.start_date, dummyData.start_time)
+            );
           } else {
             throw new Error("Seminar not found (testing error scenario)");
           }
@@ -96,9 +100,9 @@ export default function SeminarPage() {
           const data = await response.json();
           if (data.status === "success") {
             setSeminar(data.data);
-            const { start_date, start_time } = data.data;
-            const dateTimeString = `${start_date}T${start_time}`;
-            setSeminarDate(new Date(dateTimeString));
+            setSeminarDate(
+              buildEventDateTime(data.data.start_date, data.data.start_time)
+            );
           } else {
             throw new Error(data.message || "Failed to load seminar details");
           }
@@ -283,7 +287,13 @@ export default function SeminarPage() {
         <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <Calendar className="w-5 h-5" />
-            <span>{seminar?.date}</span>
+            <span>
+              {formatEventScheduleDisplay({
+                date: seminar?.date,
+                startDate: seminar?.start_date,
+                startTime: seminar?.start_time,
+              })}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <MapPin className="w-5 h-5" />

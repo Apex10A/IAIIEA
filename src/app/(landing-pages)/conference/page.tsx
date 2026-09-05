@@ -28,6 +28,10 @@ import {
 import { showToast } from "@/utils/toast";
 import ConferencePicker from "./ConferencePicker";
 import { EventDescriptionAgendaSection } from "../components/EventDescriptionAgendaSection";
+import {
+  buildEventDateTime,
+  formatEventScheduleDisplay,
+} from "../utils/landingEventDates";
 
 interface PaymentTier {
   usd: string;
@@ -538,9 +542,9 @@ function ConferenceDetailPage() {
       const data = await response.json();
       if (data.status === "success") {
         setConference(data.data);
-        const { start_date, start_time } = data.data;
-        const dateTimeString = `${start_date}T${start_time}`;
-        setConferenceDate(new Date(dateTimeString));
+        setConferenceDate(
+          buildEventDateTime(data.data.start_date, data.data.start_time)
+        );
       } else {
         throw new Error(data.message || "Failed to load conference details");
       }
@@ -881,7 +885,13 @@ function ConferenceDetailPage() {
         <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <Calendar className="w-5 h-5" />
-            <span>{conference?.date}</span>
+            <span>
+              {formatEventScheduleDisplay({
+                date: conference?.date,
+                startDate: conference?.start_date,
+                startTime: conference?.start_time,
+              })}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <MapPin className="w-5 h-5" />

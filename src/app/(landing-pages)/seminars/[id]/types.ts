@@ -49,4 +49,6 @@ export interface SeminarDetails {
   resources: any[];
   is_free?: string;
   mode?: string;
+  description?: string;
+  agenda?: string;
 }

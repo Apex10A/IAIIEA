@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { showToast } from "@/utils/toast";
 import ConferencePicker from "./ConferencePicker";
+import { EventDescriptionAgendaSection } from "../components/EventDescriptionAgendaSection";
 
 interface PaymentTier {
   usd: string;
@@ -89,6 +90,8 @@ interface ConferenceDetails {
   schedule: any[];
   meals: any[];
   speakers: Speaker[];
+  description?: string;
+  agenda?: string;
 }
 
 interface ApiResponse<T> {
@@ -901,6 +904,11 @@ function ConferenceDetailPage() {
       </div>
 
       <div className="space-y-16 max-w-7xl mx-auto">
+        <EventDescriptionAgendaSection
+          description={conference?.description}
+          agenda={conference?.agenda}
+        />
+
         <section>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
             Overview

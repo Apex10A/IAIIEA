@@ -47,7 +47,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
             <h2 className="text-4xl md:text-5xl font-black text-[#0B142F]">Don't Miss Our Events</h2>
           </div>
           <Link 
-            href="/#upcoming-events"
+            href="/programmes"
             className="inline-flex items-center px-6 py-3 bg-white border border-gray-200 text-[#0B142F] font-bold rounded-xl hover:bg-gray-50 transition-all shadow-sm group"
           >
             View All Events <FaArrowRight className="ml-3 group-hover:translate-x-1 transition-transform" />

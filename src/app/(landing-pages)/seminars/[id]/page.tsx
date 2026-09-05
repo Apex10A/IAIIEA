@@ -16,6 +16,7 @@ import { PaymentModal } from "./components/PaymentModal";
 import { PricingSection } from "./components/PricingSection";
 import { FreeSeminarSection } from "./components/FreeSeminarSection";
 import { OverviewSection } from "./components/OverviewSection";
+import { EventDescriptionAgendaSection } from "../../components/EventDescriptionAgendaSection";
 
 // Import types and utilities
 import { SeminarDetails, RegistrationType } from "./types";
@@ -327,6 +328,11 @@ export default function SeminarPage() {
         </div>
       </div>
       <div className="space-y-16 max-w-7xl mx-auto">
+        <EventDescriptionAgendaSection
+          description={seminar?.description}
+          agenda={seminar?.agenda}
+        />
+
         <OverviewSection 
           subThemes={seminar?.sub_theme} 
           workshops={seminar?.work_shop} 

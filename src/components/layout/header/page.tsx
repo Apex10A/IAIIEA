@@ -12,6 +12,36 @@ import { useRouter } from 'next/navigation';
 import { useIncomingConference } from '@/hooks/useIncomingConference';
 import "../../../app/globals.css";
 
+const NAV_LABELS: Record<string, string> = {
+  members: 'Membership',
+  programmes: 'Programmes',
+  media: 'Media',
+};
+
+const isProgrammesActive = (pathname: string) =>
+  pathname.startsWith('/conference') ||
+  pathname.startsWith('/seminars') ||
+  pathname.startsWith('/programmes');
+
+const isMembersActive = (pathname: string) =>
+  pathname.startsWith('/register') || pathname.startsWith('/how-to-join');
+
+const isMediaActive = (pathname: string) => pathname.startsWith('/gallery');
+
+const isDropdownActive = (key: string, pathname: string) => {
+  if (key === 'programmes') return isProgrammesActive(pathname);
+  if (key === 'members') return isMembersActive(pathname);
+  if (key === 'media') return isMediaActive(pathname);
+  return false;
+};
+
+const navLinkClass = (active: boolean) =>
+  `px-4 py-2 text-sm font-medium transition-colors ${
+    active
+      ? 'text-[#D5B93C] border-b-2 border-[#D5B93C]'
+      : 'text-gray-300 hover:text-white'
+  }`;
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -85,13 +115,24 @@ const Header = () => {
       },
       { 
         title: "How to Join", 
-        description: "Access exclusive educational events and resources", 
+        description: "Steps, eligibility, and membership benefits", 
         link: "/how-to-join", 
         image: "/HeadTwo.png",
         icon: <FiSettings className="text-[#D5B93C] mr-2" />
       }
     ],
     programmes: [
+      {
+        title: "All programmes",
+        description: "Browse upcoming conferences and seminars",
+        link: "/programmes",
+        image: "/HeadTwo.png",
+        icon: (
+          <svg className="w-5 h-5 text-[#D5B93C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+        ),
+      },
       { 
         title: "Conference", 
         description: loading 
@@ -110,8 +151,8 @@ const Header = () => {
         )
       },
       { 
-        title: "Seminar/Training", 
-        description: "Join the online trainings and group sessions", 
+        title: "Seminars & training", 
+        description: "Workshops and professional development sessions", 
         link: "/seminars", 
         image: "/HeadTwo.png",
         icon: <svg className="w-5 h-5 text-[#D5B93C] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,11 +224,11 @@ const Header = () => {
           isMobile ? 'left-4 right-4' : 'left-1/2 -translate-x-1/2'
         }`}
         style={{
-          width: isMobile ? 'calc(100vw - 2rem)' : '600px',
+          width: isMobile ? 'calc(100vw - 2rem)' : type === 'programmes' ? '720px' : '600px',
           maxWidth: 'calc(100vw - 2rem)'
         }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-gray-100">
+        <div className={`grid grid-cols-1 ${type === 'programmes' ? 'md:grid-cols-3' : 'md:grid-cols-2'} divide-x divide-gray-100`}>
           {dropdownContent[type].map((item, index) => (
             <Link 
               key={index} 
@@ -320,10 +361,12 @@ const Header = () => {
                   <button
                     onClick={() => handleDropdownClick(key)}
                     className={`flex items-center justify-between w-full px-4 py-3 rounded-lg ${
-                      activeDropdown === key ? "bg-[#1a2a5a] text-[#D5B93C]" : "text-gray-300 hover:bg-[#1a2a5a]"
+                      activeDropdown === key || isDropdownActive(key, pathname)
+                        ? "bg-[#1a2a5a] text-[#D5B93C]"
+                        : "text-gray-300 hover:bg-[#1a2a5a]"
                     }`}
                   >
-                    <span className="capitalize">{key}</span>
+                    <span>{NAV_LABELS[key] ?? key}</span>
                     {activeDropdown === key ? <FiChevronUp /> : <FiChevronDown />}
                   </button>
                   
@@ -359,7 +402,7 @@ const Header = () => {
 
               <Link
                 href="/about"
-                className={`px-4 py-3 rounded-lg ${pathname === "/blog" ? "bg-[#1a2a5a] text-[#D5B93C]" : "text-gray-300 hover:bg-[#1a2a5a]"}`}
+                className={`px-4 py-3 rounded-lg ${pathname.startsWith("/about") ? "bg-[#1a2a5a] text-[#D5B93C]" : "text-gray-300 hover:bg-[#1a2a5a]"}`}
                 onClick={toggleMobileMenu}
               >
                 About
@@ -435,28 +478,19 @@ const Header = () => {
           </div>
 
           <div className="hidden lg:flex items-center space-x-1">
-            <Link
-              href="/"
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                pathname === "/" 
-                  ? "text-[#D5B93C] border-b-2 border-[#D5B93C]" 
-                  : "text-gray-300 hover:text-white"
-              }`}
-            >
+            <Link href="/" className={navLinkClass(pathname === '/')}>
               Home
             </Link>
 
             {Object.entries(dropdownContent).map(([key, _]) => (
               <div key={key} className="relative">
                 <button
-                  className={`flex items-center px-4 py-2 text-sm font-medium transition-colors ${
-                    activeDropdown === key || pathname.includes(`/${key}`)
-                      ? "text-[#D5B93C] border-b-2 border-[#D5B93C]" 
-                      : "text-gray-300 hover:text-white"
-                  }`}
+                  className={`flex items-center ${navLinkClass(
+                    activeDropdown === key || isDropdownActive(key, pathname)
+                  )}`}
                   onClick={() => handleDropdownClick(key)}
                 >
-                  <span className="capitalize">{key}</span>
+                  <span>{NAV_LABELS[key] ?? key}</span>
                   <FiChevronDown className={`ml-1 transition-transform ${
                     activeDropdown === key ? "transform rotate-180 text-[#D5B93C]" : ""
                   }`} />
@@ -467,14 +501,7 @@ const Header = () => {
               </div>
             ))}
 
-            <Link
-              href="/about"
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                pathname === "/blog" 
-                  ? "text-[#D5B93C] border-b-2 border-[#D5B93C]" 
-                  : "text-gray-300 hover:text-white"
-              }`}
-            >
+            <Link href="/about" className={navLinkClass(pathname.startsWith('/about'))}>
               About
             </Link>
           </div>

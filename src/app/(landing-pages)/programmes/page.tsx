@@ -7,6 +7,10 @@ import { useSearchParams } from 'next/navigation';
 import { FaArrowRight, FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { Loader2 } from 'lucide-react';
 import { landingEventHref } from '../landing-page-one/eventLinks';
+import {
+  formatLandingEventDate,
+  parseEventDateForSort,
+} from '../utils/landingEventDates';
 
 type ProgrammeType = 'conference' | 'seminar';
 type TypeFilter = 'all' | ProgrammeType;
@@ -22,27 +26,6 @@ interface ProgrammeEvent {
   flyer: string;
   type: ProgrammeType;
 }
-
-const parseEventDate = (dateString: string): number => {
-  const [datePart] = dateString.split('To').map((part) => part.trim());
-  const parsed = new Date(datePart).getTime();
-  return Number.isNaN(parsed) ? 0 : parsed;
-};
-
-const formatDate = (dateString: string) => {
-  try {
-    const [datePart] = dateString.split('To').map((part) => part.trim());
-    const date = new Date(datePart);
-    if (Number.isNaN(date.getTime())) return dateString;
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateString;
-  }
-};
 
 const isUpcoming = (status: string) =>
   status === 'Incoming' || status === 'Ongoing';
@@ -116,8 +99,8 @@ export default function ProgrammesPage() {
     }
 
     return [...list].sort((a, b) => {
-      const dateA = parseEventDate(a.date);
-      const dateB = parseEventDate(b.date);
+      const dateA = parseEventDateForSort(a.date);
+      const dateB = parseEventDateForSort(b.date);
       return statusFilter === 'completed' ? dateB - dateA : dateA - dateB;
     });
   }, [programmes, typeFilter, statusFilter]);
@@ -243,7 +226,7 @@ export default function ProgrammesPage() {
                   <div className="flex flex-wrap items-center gap-3 text-gray-500 text-sm mb-4">
                     <div className="flex items-center gap-2">
                       <FaCalendarAlt className="text-blue-500" />
-                      <span>{formatDate(event.date)}</span>
+                      <span>{formatLandingEventDate(event.date)}</span>
                     </div>
                     {event.status && (
                       <span className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-blue-700">

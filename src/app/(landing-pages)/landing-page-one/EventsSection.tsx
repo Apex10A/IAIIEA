@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa'
 import { landingEventHref } from './eventLinks'
+import { formatLandingEventDate } from '../utils/landingEventDates'
 
 interface Event {
   id: number;
@@ -22,21 +23,6 @@ interface EventsSectionProps {
 }
 
 const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
-  const formatDate = (dateString: string) => {
-    try {
-      const [datePart] = dateString.split('To').map(part => part.trim());
-      const date = new Date(datePart);
-      if (isNaN(date.getTime())) return dateString;
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
   return (
     <section id="upcoming-events" className="py-24 px-4 md:px-8 lg:px-14 bg-[#F9FBFF] scroll-mt-24">
       <div className="container mx-auto">
@@ -98,7 +84,7 @@ const EventsSection: React.FC<EventsSectionProps> = ({ events }) => {
                   <div className="flex flex-wrap items-center gap-3 text-gray-500 text-sm mb-4">
                     <div className="flex items-center gap-2">
                       <FaCalendarAlt className="text-blue-500" />
-                      <span>{formatDate(event.date)}</span>
+                      <span>{formatLandingEventDate(event.date)}</span>
                     </div>
                     {event.status && (
                       <span className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-blue-700">

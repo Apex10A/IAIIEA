@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FiCalendar, FiMapPin, FiBookOpen } from 'react-icons/fi';
 import { Skeleton } from '@radix-ui/themes';
+import { formatLandingEventDate } from '@/app/(landing-pages)/utils/landingEventDates';
 
 interface Seminar {
   id: number;
@@ -69,15 +70,7 @@ const SeminarCards = () => {
     router.push(`/seminars/${seminarId}`);
   };
 
-  const formatDate = (dateString: string) => {
-    const [datePart] = dateString.split('To').map(part => part.trim());
-    const date = new Date(datePart);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const formatDate = (dateString: string) => formatLandingEventDate(dateString);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {

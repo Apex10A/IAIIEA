@@ -1,24 +1,29 @@
-"use client"
-import React, { useState, useEffect } from 'react';
+"use client";
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@/modules/ui/badge';
-import '@/app/index.css'
-import { CalendarIcon, MapPinIcon, ArrowRightIcon, Loader2 } from 'lucide-react';
+import { FaArrowRight, FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { Loader2 } from 'lucide-react';
+import {
+  formatLandingEventDate,
+  parseEventDateForSort,
+} from '../utils/landingEventDates';
 
 interface Seminar {
-    id: number;
-    title: string;
-    theme: string;
-    venue: string;
-    date: string;
-    status: 'Ongoing' | 'Incoming' | 'Completed';  
-    resources: any[];   
+  id: number;
+  title: string;
+  theme: string;
+  venue: string;
+  date: string;
+  status: 'Ongoing' | 'Incoming' | 'Completed';
+  resources: any[];
 }
 
 interface ApiResponse {
-    status: string;
-    message: string;
-    data: Seminar[];
+  status: string;
+  message: string;
+  data: Seminar[];
 }
 
 const SeminarListPage = () => {
@@ -32,26 +37,22 @@ const SeminarListPage = () => {
       try {
         setIsLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/landing/seminars`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch seminars');
         }
 
         const { status, message, data }: ApiResponse = await response.json();
-        
-        if (status === "success") {
-  
-          const activeSeminars = data.filter(seminar => 
-            seminar?.status === 'Incoming' || 
-            seminar?.status === 'Ongoing'
+
+        if (status === 'success') {
+          const activeSeminars = data.filter(
+            (seminar) => seminar?.status === 'Incoming' || seminar?.status === 'Ongoing'
           );
 
-          const sortedSeminars = activeSeminars.sort((a, b) => {
-            const dateA = new Date(a.date.split(' To ')[0]);
-            const dateB = new Date(b.date.split(' To ')[0]);
-            return dateB.getTime() - dateA.getTime();
-          });
-          
+          const sortedSeminars = activeSeminars.sort(
+            (a, b) => parseEventDateForSort(a.date) - parseEventDateForSort(b.date)
+          );
+
           setSeminars(sortedSeminars);
         } else {
           throw new Error(message || 'Failed to fetch seminars');
@@ -70,32 +71,12 @@ const SeminarListPage = () => {
     router.push(`/seminars/${id}`);
   };
 
-  const formatDate = (dateString: string) => {
-    const [startDate, endDate] = dateString.split(' To ');
-    return (
-      <span>
-        {startDate} <span className="text-gray-400">to</span> {endDate}
-      </span>
-    );
-  };
-
-  const getStatusVariant = (status: Seminar['status']) => {
-    switch (status) {
-      case 'Ongoing':
-        return 'success';
-      case 'Incoming':
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="conference-bg min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-[#e0ce7e] mx-auto mb-4" />
-          <p className="text-lg text-white">Loading seminars...</p>
+      <div className="min-h-screen bg-[#F9FBFF] flex items-center justify-center pt-24">
+        <div className="text-center text-[#0B142F]/60">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
+          <p>Loading seminars…</p>
         </div>
       </div>
     );
@@ -103,116 +84,85 @@ const SeminarListPage = () => {
 
   if (error) {
     return (
-      <div className="conference-bg min-h-screen flex items-center justify-center">
-        <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-8">
-          <p className="text-lg text-red-400 mb-2">Error loading seminars</p>
-          <p className="text-white/80">{error}</p>
+      <div className="min-h-screen bg-[#F9FBFF] flex items-center justify-center pt-24 px-4">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-8 text-center text-red-700 max-w-md">
+          <p className="font-semibold mb-2">Error loading seminars</p>
+          <p>{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="conference-bg min-h-screen pt-16 md:pt-24 px-4 md:px-8 lg:px-16 w-full pb-16">
-      <div className="container mx-auto pt-32">
-        {/* Header Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white leading-tight">
-            Active Seminars
-          </h1>
-          <p className="text-white/90 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            Discover our upcoming and ongoing seminars designed to enhance your knowledge and skills in educational assessment
+    <div className="min-h-screen bg-[#F9FBFF] pt-24 pb-16 px-4 md:px-8 lg:px-14">
+      <div className="container mx-auto">
+        <div className="max-w-3xl mb-10">
+          <p className="text-blue-600 font-bold uppercase tracking-[0.2em] text-sm mb-3">
+            Seminars
           </p>
-          <div className="w-24 h-1 bg-[#D5B93C] mx-auto mt-8"></div>
+          <h1 className="text-4xl md:text-5xl font-black text-[#0B142F] mb-4">
+            Training &amp; Workshops
+          </h1>
+          <p className="text-lg text-gray-600">
+            Upcoming and ongoing IAIIEA seminars. Open a programme for details and registration.
+          </p>
         </div>
-        
-        <div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {seminars?.map((seminar, index) => (
-            <div 
-              key={seminar.id}
-              className="group relative"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div 
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 
-                         transform hover:-translate-y-1 cursor-pointer overflow-hidden
-                         border border-gray-100 hover:border-[#D5B93C]/30"
-                onClick={() => handleSeminarClick(seminar?.id)}
-              >
-                {/* Status Badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <Badge 
-                    className={`px-3 py-1 text-xs font-semibold ${
-                      seminar?.status === 'Ongoing' 
-                        ? 'bg-green-100 text-green-800 border-green-200' 
-                        : 'bg-[#D5B93C]/10 text-[#0B142F] border-[#D5B93C]/30'
-                    }`}
-                  >
-                    {seminar?.status}
-                  </Badge>
-                </div>
 
-                {/* Accent Line */}
-                <div className="h-1 bg-gradient-to-r from-[#D5B93C] to-[#C4A93C] group-hover:h-2 transition-all duration-300"></div>
-                
-                <div className="p-6">
-                  {/* Title */}
-                  <h2 className="text-xl md:text-2xl font-bold text-[#0B142F] mb-3 leading-tight group-hover:text-[#D5B93C] transition-colors">
-                    {seminar?.title}
+        {seminars.length === 0 ? (
+          <div className="rounded-3xl border-2 border-dashed border-gray-200 bg-white py-20 text-center">
+            <p className="text-gray-500 italic mb-4">No active seminars right now.</p>
+            <Link
+              href="/programmes?type=seminar"
+              className="inline-flex items-center text-blue-600 font-bold text-sm"
+            >
+              Browse all programmes <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {seminars.map((seminar) => (
+              <article
+                key={seminar.id}
+                className="bg-white rounded-[2rem] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] transition-all duration-500 group border border-gray-100 cursor-pointer"
+                onClick={() => handleSeminarClick(seminar.id)}
+              >
+                <div className="h-2 bg-gradient-to-r from-emerald-500 to-emerald-600" />
+
+                <div className="p-8">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <span className="rounded-full bg-emerald-50 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                      {seminar.status}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                      Seminar
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl font-bold text-[#0B142F] mb-3 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3.5rem]">
+                    {seminar.title}
                   </h2>
-                  
-                  {/* Theme */}
-                  <p className="text-[#0B142F]/70 mb-6 leading-relaxed line-clamp-3">
-                    {seminar?.theme}
-                  </p>
-                  
-                  {/* Details */}
-                  <div className="space-y-4 mb-6">
-                    <div className="flex items-center text-[#0B142F]/60">
-                      <div className="w-10 h-10 rounded-full bg-[#D5B93C]/10 flex items-center justify-center mr-3 group-hover:bg-[#D5B93C]/20 transition-colors">
-                        <CalendarIcon className="w-5 h-5 text-[#D5B93C]" />
-                      </div>
-                      <span className="text-sm font-medium">{formatDate(seminar?.date)}</span>
+
+                  <p className="text-gray-500 text-sm mb-6 line-clamp-3">{seminar.theme}</p>
+
+                  <div className="space-y-3 text-sm text-gray-500 mb-6">
+                    <div className="flex items-center gap-2">
+                      <FaCalendarAlt className="text-blue-500 shrink-0" />
+                      <span>{formatLandingEventDate(seminar.date)}</span>
                     </div>
-                    
-                    <div className="flex items-center text-[#0B142F]/60">
-                      <div className="w-10 h-10 rounded-full bg-[#D5B93C]/10 flex items-center justify-center mr-3 group-hover:bg-[#D5B93C]/20 transition-colors">
-                        <MapPinIcon className="w-5 h-5 text-[#D5B93C]" />
-                      </div>
-                      <span className="text-sm font-medium">{seminar?.venue || 'Venue TBA'}</span>
+                    <div className="flex items-start gap-2">
+                      <FaMapMarkerAlt className="mt-0.5 text-blue-500 shrink-0" />
+                      <span className="line-clamp-2">{seminar.venue || 'Venue TBA'}</span>
                     </div>
                   </div>
-                  
-                  {/* Action Button */}
-                  <button 
-                    className="w-full bg-[#D5B93C] text-white font-semibold py-3 px-6 rounded-lg
-                             hover:bg-[#C4A93C] transition-all duration-200
-                             flex items-center justify-center gap-2 group/btn
-                             shadow-md hover:shadow-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSeminarClick(seminar?.id);
-                    }}
-                  >
-                    View Details
-                    <ArrowRightIcon className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Empty State */}
-        {seminars?.length === 0 && (
-          <div className="text-center py-20">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-12 max-w-lg mx-auto border border-white/20">
-              <div className="w-20 h-20 bg-[#D5B93C]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CalendarIcon className="w-10 h-10 text-[#D5B93C]" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">No Active Seminars</h3>
-              <p className="text-white/80 text-lg">Check back soon for upcoming seminars and educational events</p>
-            </div>
+                  <div className="pt-6 border-t border-gray-50 flex items-center justify-end">
+                    <span className="inline-flex items-center text-blue-600 font-bold text-sm group-hover:translate-x-0.5 transition-transform">
+                      View details <FaArrowRight className="ml-2" />
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </div>

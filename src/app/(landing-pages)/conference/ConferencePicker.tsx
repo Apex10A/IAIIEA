@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, MapPin, Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { formatLandingEventDate } from '../utils/landingEventDates';
 import { Button } from '@/components/ui/button';
 
 interface ConferenceListItem {
@@ -120,7 +121,7 @@ export default function ConferencePicker() {
                   <div className="flex flex-wrap gap-4 mt-3 text-sm text-white/70">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4 shrink-0" />
-                      {conf.date}
+                      {formatLandingEventDate(conf.date)}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="w-4 h-4 shrink-0" />

@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { showToast } from "@/utils/toast";
+import ConferencePicker from "./ConferencePicker";
 
 interface PaymentTier {
   usd: string;
@@ -482,6 +483,17 @@ const PaymentPlanCard = memo(
 );
 
 export default function ConferencePage() {
+  const searchParams = useSearchParams();
+  const conferenceId = searchParams.get("id");
+
+  if (!conferenceId) {
+    return <ConferencePicker />;
+  }
+
+  return <ConferenceDetailPage />;
+}
+
+function ConferenceDetailPage() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession, signOut } from "next-auth/react";
 import axios from 'axios';
 import { ThemeProvider } from '@/components/theme-provider';
-import { redirect } from 'next/navigation';
+import { redirect, useSearchParams } from 'next/navigation';
 import "@/app/index.css"
 import { motion, AnimatePresence } from 'framer-motion';
 // Pages
@@ -42,11 +42,24 @@ type ComponentKey =
   | 'Seminars / Webinars' | 'Directory' 
   | 'IAIIEA Resources' | 'Forum' | 'Settings';
 
+const TAB_QUERY_TO_COMPONENT: Record<string, ComponentKey> = {
+  dashboard: 'Dashboard',
+  payment: 'Payment',
+  payments: 'Payment',
+  announcement: 'Announcement',
+  forum: 'Forum',
+  settings: 'Settings',
+  directory: 'Directory',
+  resources: 'IAIIEA Resources',
+  seminars: 'Seminars / Webinars',
+};
+
 interface ComponentMap {
   [key: string]: JSX.Element;
 }
 
 export default function DashboardClient() {
+  const searchParams = useSearchParams();
   const [activeComponent, setActiveComponent] = useState<ComponentKey>('Dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -56,6 +69,13 @@ export default function DashboardClient() {
       redirect('/login');
     },
   });
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')?.toLowerCase();
+    if (tab && TAB_QUERY_TO_COMPONENT[tab]) {
+      setActiveComponent(TAB_QUERY_TO_COMPONENT[tab]);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const checkMobile = () => {

@@ -17,6 +17,7 @@ import { PricingSection } from "./components/PricingSection";
 import { FreeSeminarSection } from "./components/FreeSeminarSection";
 import { OverviewSection } from "./components/OverviewSection";
 import { EventDescriptionAgendaSection } from "../../components/EventDescriptionAgendaSection";
+import { RegistrationPendingModal } from "../../components/RegistrationPendingModal";
 import {
   buildEventDateTime,
   formatEventScheduleDisplay,
@@ -36,6 +37,7 @@ export default function SeminarPage() {
   const [error, setError] = useState<string | null>(null);
   const [seminarDate, setSeminarDate] = useState<Date | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPendingPaymentModal, setShowPendingPaymentModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("standard");
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
@@ -172,11 +174,10 @@ export default function SeminarPage() {
         if (seminar.is_free === 'free') {
           showToast.success("Registration completed. You're in!");
         } else {
-          showToast.info("Registration initiated. Go to Dashboard → Payments to complete your payment under Pending Payments.");
+          setShowPendingPaymentModal(true);
         }
 
         if (link) {
-          // If backend returns a link (rare case), still redirect
           window.location.href = link;
           return;
         }
@@ -373,6 +374,13 @@ export default function SeminarPage() {
         attendanceType={attendanceType}
         paymentProcessing={paymentProcessing}
         selectedPlan={selectedPlan}
+      />
+
+      <RegistrationPendingModal
+        show={showPendingPaymentModal}
+        onClose={() => setShowPendingPaymentModal(false)}
+        eventTitle={seminar?.title || "this seminar"}
+        attendanceType={attendanceType}
       />
     </div>
   );

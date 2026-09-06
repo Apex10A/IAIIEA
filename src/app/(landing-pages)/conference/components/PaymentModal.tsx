@@ -53,7 +53,7 @@ export const PaymentModal = ({
         <h3 className="text-xl font-bold mb-2">Confirm Registration</h3>
         <div className="mb-4 text-sm">
           <div className="p-3 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
-            This is a paid conference. Confirming will <strong>initiate</strong> your registration only. To complete payment, go to your Dashboard → Payments and pay under <em>Pending Payments</em>.
+            This is a paid conference. Confirming will <strong>start your registration</strong> and add the fee to Pending Payments. Complete payment from your Dashboard → Payment tab — not on this page.
           </div>
         </div>
 

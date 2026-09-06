@@ -19,13 +19,6 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { showToast } from "@/utils/toast";
 import ConferencePicker from "./ConferencePicker";
 import { EventDescriptionAgendaSection } from "../components/EventDescriptionAgendaSection";
@@ -37,6 +30,9 @@ import {
   getPlanExplainer,
   getVisibleConferencePlans,
 } from "./conferencePaymentUtils";
+import { PaymentModal } from "./components/PaymentModal";
+import { RegistrationPendingModal } from "../components/RegistrationPendingModal";
+import { MEMBERS_DASHBOARD_URL } from "../utils/dashboardLinks";
 
 interface PaymentTier {
   usd: string;
@@ -478,7 +474,7 @@ const PaymentPlanCard = memo(
                 }}
                 disabled={isLoading}
               >
-                 {isLoading ? "Processing..." : `Initiate ${title}`}
+                 {isLoading ? "Processing..." : `Register — ${title}`}
                 {/* {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -500,7 +496,7 @@ const PaymentPlanCard = memo(
                     Processing...
                   </span>
                 ) : (
-                  {isLoading ? "Processing..." : `Initiate ${title}`}
+                  {isLoading ? "Processing..." : `Register — ${title}`}
                 )} */}
               </button>
             )}
@@ -533,6 +529,9 @@ function ConferenceDetailPage() {
   const [conferenceDate, setConferenceDate] = useState<Date | null>(null);
 
   const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPendingPaymentModal, setShowPendingPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("");
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">(
     "virtual"
   );
@@ -608,7 +607,7 @@ function ConferenceDetailPage() {
 
       if (conference?.is_registered) {
         showToast.info("You are already registered for this conference");
-        router.push("/dashboard");
+        router.push(MEMBERS_DASHBOARD_URL);
         return;
       }
 
@@ -659,9 +658,9 @@ function ConferenceDetailPage() {
           window.location.href = paymentData?.data?.link;
         } else {
           console.log("Payment initiated without redirect");
-          // Add a small delay to show loading state even for non-redirect success
           await new Promise((resolve) => setTimeout(resolve, 300));
-          showToast.success("Payment initiated successfully");
+          setShowPaymentModal(false);
+          setShowPendingPaymentModal(true);
         }
       } catch (err) {
         console.error("Payment error:", err);
@@ -738,7 +737,8 @@ function ConferenceDetailPage() {
                 signInRequired={!session}
                 onSignIn={goToLogin}
                 onClick={() => {
-                  handlePaymentSubmit(plan.key);
+                  setSelectedPlan(plan.key);
+                  setShowPaymentModal(true);
                 }}
               />
             );
@@ -795,7 +795,7 @@ function ConferenceDetailPage() {
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
             onClick={() => {
               if (conference.is_registered) {
-                router.push("/dashboard");
+                router.push(MEMBERS_DASHBOARD_URL);
               } else {
                 // Scroll to the Conference Fees section
                 const feesSection = document.querySelector("#conference-fees");
@@ -969,7 +969,7 @@ function ConferenceDetailPage() {
             Conference Fees
           </h2>
           <p className="text-white/70 text-sm mb-8 max-w-2xl">
-            Registration in three steps: choose how you will attend, pick a plan, then sign in to initiate payment.
+            Registration in three steps: choose how you will attend, pick a plan, then register. Payment is completed from your dashboard.
           </p>
 
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-3 max-w-3xl">
@@ -978,7 +978,11 @@ function ConferenceDetailPage() {
               { step: 2, label: 'Select a plan', active: true },
               {
                 step: 3,
-                label: conference?.is_registered ? 'Registered' : 'Sign in & pay',
+                label: conference?.is_registered
+                  ? 'Registered'
+                  : session
+                  ? 'Register & pay in dashboard'
+                  : 'Sign in & register',
                 active: !!session || !!conference?.is_registered,
               },
             ].map((item) => (
@@ -1021,9 +1025,9 @@ function ConferenceDetailPage() {
               <div className="flex items-start gap-3">
                 <LogIn className="w-6 h-6 text-[#D5B93C] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-white">Sign in before you pay</p>
+                  <p className="font-semibold text-white">Sign in before you register</p>
                   <p className="text-sm text-white/70 mt-1">
-                    Compare plans below, then sign in to initiate registration. Complete payment from your dashboard under Pending Payments.
+                    Compare plans below, then sign in to register. You will complete payment from your dashboard under Pending Payments.
                   </p>
                 </div>
               </div>
@@ -1042,6 +1046,13 @@ function ConferenceDetailPage() {
                   <Link href="/register">Create account</Link>
                 </Button>
               </div>
+            </div>
+          )}
+
+          {session && !conference?.is_registered && (
+            <div className="mb-8 rounded-xl border border-white/20 bg-white/5 p-4 text-sm text-white/80">
+              <strong className="text-white">How payment works:</strong> choosing a plan adds it to{" "}
+              <strong>Pending Payments</strong> in your dashboard. You pay there to finish registration — not on this page.
             </div>
           )}
 
@@ -1074,77 +1085,30 @@ function ConferenceDetailPage() {
         </div>
       </div>
 
-      {/* {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Select which type you want to initiate</h3>
+      <PaymentModal
+        show={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onConfirm={() => handlePaymentSubmit(selectedPlan)}
+        conference={conference}
+        attendanceType={attendanceType}
+        paymentProcessing={paymentProcessing}
+        selectedPlan={selectedPlan}
+      />
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Plan</label>
-                <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {conference?.payments?.early_bird_registration && (
-                      <SelectItem value="early_bird_registration">Early Bird</SelectItem>
-                    )}
-                    {conference?.payments?.normal_registration && (
-                      <SelectItem value="normal_registration">Normal</SelectItem>
-                    )}
-                    {conference?.payments?.late_registration && (
-                      <SelectItem value="late_registration">Late</SelectItem>
-                    )}
-                    {conference?.payments?.basic && (
-                      <SelectItem value="basic">Basic</SelectItem>
-                    )}
-                    {conference?.payments?.standard && (
-                      <SelectItem value="standard">Standard</SelectItem>
-                    )}
-                    {conference?.payments?.premium && (
-                      <SelectItem value="premium">Premium</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Attendance Type</label>
-                <Select 
-                  value={attendanceType} 
-                  onValueChange={(value: "virtual" | "physical") => setAttendanceType(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select attendance type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="virtual">Virtual</SelectItem>
-                    <SelectItem value="physical">Physical</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowPaymentModal(false)}
-                  disabled={paymentProcessing}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D]"
-                  onClick={handlePaymentSubmit}
-                  disabled={paymentProcessing}
-                >
-                  {paymentProcessing ? "Processing..." : "Initiate payment"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
+      <RegistrationPendingModal
+        show={showPendingPaymentModal}
+        onClose={() => setShowPendingPaymentModal(false)}
+        eventTitle={conference?.title || "this conference"}
+        planLabel={
+          selectedPlan
+            ? selectedPlan
+                .split("_")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")
+            : undefined
+        }
+        attendanceType={attendanceType}
+      />
     </div>
   );
 }

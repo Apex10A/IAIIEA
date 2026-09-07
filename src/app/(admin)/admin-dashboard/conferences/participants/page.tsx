@@ -1,5 +1,5 @@
 "use client"
-import React, { Suspense, useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +20,7 @@ import { ConferenceContextBar } from "../components/ConferenceContextBar";
 import { PageHeader } from "@/app/(admin)/admin-dashboard/components/PageHeader";
 import { BackLink } from "@/app/(admin)/admin-dashboard/components/BackLink";
 import { EmptyState } from "@/app/(admin)/admin-dashboard/components/EmptyState";
+import { AddConferenceMemberModal } from "../components/AddConferenceMemberModal";
 
 interface Conference {
   date: string;
@@ -42,24 +43,12 @@ interface Member {
   institution: string;
 }
 
-interface ConferenceDetails {
-  id: number;
-  is_registered: boolean;
-  title: string;
-  theme: string;
-  venue: string;
-  date: string;
-  status: string;
-}
-
 const ConferenceParticipantsContent = () => {
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
-  const [conferenceDetails, setConferenceDetails] = useState<ConferenceDetails | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -102,7 +91,6 @@ const ConferenceParticipantsContent = () => {
           );
           if (matchedConference) {
             setSelectedConference(matchedConference);
-            fetchConferenceDetails(matchedConference.id);
           }
         }
         
@@ -117,13 +105,13 @@ const ConferenceParticipantsContent = () => {
     fetchConferences();
   }, [bearerToken, API_URL, urlConferenceId]);
 
-  const fetchConferenceDetails = async (conferenceId: number) => {
-    if (!bearerToken) return;
-    
-    setDetailsLoading(true);
+  const fetchConferenceParticipants = useCallback(async () => {
+    if (!selectedConference || !bearerToken) return;
+
+    setIsLoading(true);
     try {
-      const response = await fetch(
-        `${API_URL}/landing/event_details/${conferenceId}`,
+      const participantsResponse = await fetch(
+        `${API_URL}/admin/user_list/conference_member/${selectedConference.id}`,
         {
           headers: {
             Authorization: `Bearer ${bearerToken}`,
@@ -132,50 +120,23 @@ const ConferenceParticipantsContent = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to fetch conference details");
+      if (!participantsResponse.ok) throw new Error("Failed to fetch participants");
 
-      const data = await response.json();
-      setConferenceDetails(data.data);
+      const participantsData = await participantsResponse.json();
+      setMembers(participantsData.data);
+      setFilteredMembers(participantsData.data);
+      setCurrentPage(1);
     } catch (err) {
-      console.error("Error fetching conference details:", err);
+      console.error("Error fetching conference data:", err);
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
-      setDetailsLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [selectedConference, bearerToken, API_URL]);
 
   useEffect(() => {
-    const fetchConferenceParticipants = async () => {
-      if (!selectedConference || !bearerToken) return;
-
-      setIsLoading(true);
-      try {
-        const participantsResponse = await fetch(
-          `${API_URL}/admin/user_list/conference_member/${selectedConference.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${bearerToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!participantsResponse.ok) throw new Error("Failed to fetch participants");
-
-        const participantsData = await participantsResponse.json();
-        setMembers(participantsData.data);
-        setFilteredMembers(participantsData.data);
-        setCurrentPage(1);
-      } catch (err) {
-        console.error("Error fetching conference data:", err);
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchConferenceParticipants();
-  }, [selectedConference, bearerToken, API_URL]);
+  }, [fetchConferenceParticipants]);
 
   useEffect(() => {
     const filtered = members.filter(
@@ -294,7 +255,6 @@ const ConferenceParticipantsContent = () => {
                     className="hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => {
                       setSelectedConference(conference);
-                      fetchConferenceDetails(conference?.id);
                       router.replace(
                         `/admin-dashboard/conferences/participants?id=${conference.id}`
                       );
@@ -373,45 +333,34 @@ const ConferenceParticipantsContent = () => {
                     </div>
                   </div>
 
-                  {/* Registration Status Message */}
-                  {conferenceDetails && !conferenceDetails?.is_registered && (
-                    <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                      <div className="flex">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-sm text-yellow-700">
-                            You need to register for this conference to view all participant details.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
-              {/* Participants Table - Only show if registered */}
-              {conferenceDetails?.is_registered ? (
+                  {/* Participants */}
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                       <h3 className="text-lg font-semibold text-gray-900">
                         Participant List
                       </h3>
-                      <div className="relative w-full sm:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Search className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Search participants..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <AddConferenceMemberModal
+                          conferenceId={selectedConference.id}
+                          conferenceTitle={selectedConference.title}
+                          onMemberAdded={fetchConferenceParticipants}
                         />
+                        <div className="relative w-full sm:w-64">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Search participants..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -544,22 +493,6 @@ const ConferenceParticipantsContent = () => {
                     )}
                   </CardContent>
                 </Card>
-              ) : (
-
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
-                      <Users className="h-6 w-6 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Participant List Restricted
-                    </h3>
-                    <p className="text-gray-500">
-                      Please register for this conference to view the participant list.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           )}
         </div>

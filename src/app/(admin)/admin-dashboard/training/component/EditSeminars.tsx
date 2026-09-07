@@ -19,11 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
-import {
-  AGENDA_UI_PLACEHOLDER,
-  agendaFromApiFormat,
-  agendaToApiFormat,
-} from "@/app/(admin)/admin-dashboard/utils/eventAgenda";
+import { AgendaScheduleEditor } from "@/app/(admin)/admin-dashboard/components/AgendaScheduleEditor";
 import { SeminarDetails } from './index';
 import PackageSection from './PackageSection';
 import { Step2Data } from './types';
@@ -195,7 +191,7 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
       theme: details.theme || '',
       venue: details.venue || '',
       description: details.description || '',
-      agenda: agendaFromApiFormat(details.agenda || ''),
+      agenda: details.agenda || '',
       start: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
       end: details.start_date ? `${details.start_date}T${details.start_time || '00:00'}` : '',
       mode: details.mode || '',
@@ -303,7 +299,7 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
         theme: formData.theme,
         venue: formData.venue,
         description: formData.description.trim(),
-        agenda: agendaToApiFormat(formData.agenda),
+        agenda: formData.agenda,
         start: startDate.toISOString().slice(0, 19).replace('T', ' '),
         end: endDate.toISOString().slice(0, 19).replace('T', ' '),
         mode: formData.mode,
@@ -463,18 +459,12 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="agenda">Agenda</Label>
-                    <Textarea
+                    <Label htmlFor="agenda">Event Schedule</Label>
+                    <AgendaScheduleEditor
                       id="agenda"
                       value={formData.agenda}
-                      onChange={(e) => handleInputChange('agenda', e.target.value)}
-                      placeholder={AGENDA_UI_PLACEHOLDER}
-                      rows={5}
-                      className="font-mono text-sm"
+                      onChange={(agenda) => handleInputChange('agenda', agenda)}
                     />
-                    <p className="text-xs text-gray-500">
-                      One line per session. Use → between time and activity.
-                    </p>
                   </div>
                   
                   <div className="space-y-2">

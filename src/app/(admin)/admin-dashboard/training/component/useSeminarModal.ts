@@ -6,8 +6,6 @@ import {
   feesForSubmission,
   validateSeminarFees,
 } from '../utils/seminarPricing';
-import { agendaToApiFormat } from '@/app/(admin)/admin-dashboard/utils/eventAgenda';
-
 export const useSeminarModal = (onSuccess: () => void) => {
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
@@ -65,7 +63,7 @@ export const useSeminarModal = (onSuccess: () => void) => {
         body: JSON.stringify({
           ...step1Data,
           description: step1Data.description.trim(),
-          agenda: agendaToApiFormat(step1Data.agenda),
+          agenda: step1Data.agenda,
         }),
       });
 

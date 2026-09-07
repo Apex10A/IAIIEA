@@ -24,10 +24,7 @@ import {
   conferenceSubPageHref,
   extractCreatedConferenceId,
 } from "../utils/conferenceNav";
-import {
-  AGENDA_UI_PLACEHOLDER,
-  agendaToApiFormat,
-} from "@/app/(admin)/admin-dashboard/utils/eventAgenda";
+import { AgendaScheduleEditor } from "@/app/(admin)/admin-dashboard/components/AgendaScheduleEditor";
 
 interface AddConferenceModalProps {
   onSuccess?: () => void;
@@ -488,7 +485,7 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
     formDataToSend.append('theme', formData.theme);
     formDataToSend.append('venue', formData.venue);
     formDataToSend.append('description', formData.description.trim());
-    formDataToSend.append('agenda', agendaToApiFormat(formData.agenda));
+    formDataToSend.append('agenda', formData.agenda);
     formDataToSend.append('start', formData.start);
     formDataToSend.append('end', formData.end);
     formDataToSend.append('subthemes_input', JSON.stringify(formData.subthemes_input));
@@ -785,18 +782,12 @@ const AddConferenceModal = ({ onSuccess }: AddConferenceModalProps) => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="agenda">Agenda</Label>
-                    <Textarea
+                    <Label htmlFor="agenda">Event Schedule</Label>
+                    <AgendaScheduleEditor
                       id="agenda"
                       value={formData.agenda}
-                      onChange={(e) => handleInputChange('agenda', e.target.value)}
-                      placeholder={AGENDA_UI_PLACEHOLDER}
-                      rows={6}
-                      className="font-mono text-sm"
+                      onChange={(agenda) => handleInputChange('agenda', agenda)}
                     />
-                    <p className="text-xs text-gray-500">
-                      One item per line. Format: <span className="font-mono">9:00–10:00 → Opening Prayer</span>
-                    </p>
                   </div>
                 </CardContent>
               </Card>

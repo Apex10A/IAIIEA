@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Step1FormProps } from './types';
-import { AGENDA_UI_PLACEHOLDER } from '@/app/(admin)/admin-dashboard/utils/eventAgenda';
+import { AgendaScheduleEditor } from '@/app/(admin)/admin-dashboard/components/AgendaScheduleEditor';
 
 const Step1Form: React.FC<Step1FormProps> = ({ data, onDataChange, onSubmit }) => {
   const handleInputChange = (field: keyof typeof data, value: string) => {
@@ -56,17 +56,12 @@ const Step1Form: React.FC<Step1FormProps> = ({ data, onDataChange, onSubmit }) =
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Agenda</label>
-        <Textarea
+        <label className="block text-sm font-medium mb-1">Event Schedule</label>
+        <AgendaScheduleEditor
+          id="seminar-agenda"
           value={data.agenda}
-          onChange={(e) => handleInputChange('agenda', e.target.value)}
-          placeholder={AGENDA_UI_PLACEHOLDER}
-          rows={5}
-          className="resize-y font-mono text-sm"
+          onChange={(agenda) => handleInputChange('agenda', agenda)}
         />
-        <p className="mt-1 text-xs text-gray-500">
-          One line per session. Use → between time and activity (e.g. 9:00–10:00 → Opening Prayer).
-        </p>
       </div>
 
       <div>

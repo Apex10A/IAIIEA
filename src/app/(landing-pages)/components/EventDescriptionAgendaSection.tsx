@@ -7,19 +7,29 @@ import { parseAgendaItems } from '@/app/(admin)/admin-dashboard/utils/eventAgend
 interface EventDescriptionAgendaSectionProps {
   description?: string | null;
   agenda?: string | null;
+  showDescription?: boolean;
+  showAgenda?: boolean;
 }
 
-function EventSchedule({ agenda }: { agenda: string }) {
+function EventSchedule({
+  agenda,
+  hideTitle = false,
+}: {
+  agenda: string;
+  hideTitle?: boolean;
+}) {
   const items = parseAgendaItems(agenda);
 
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-8">
-      <h3 className="text-xl md:text-2xl font-bold text-[#D5B93C] mb-5 flex items-center gap-2">
-        <Clock className="w-5 h-5 shrink-0" />
-        Event Schedule
-      </h3>
+    <div className={hideTitle ? undefined : "mt-8"}>
+      {!hideTitle && (
+        <h3 className="text-xl md:text-2xl font-bold text-[#D5B93C] mb-5 flex items-center gap-2">
+          <Clock className="w-5 h-5 shrink-0" />
+          Event Schedule
+        </h3>
+      )}
 
       <div className="rounded-xl border border-white/10 bg-[#0E1A3D]/40 overflow-hidden">
         <ul className="relative">
@@ -64,10 +74,46 @@ function EventSchedule({ agenda }: { agenda: string }) {
 export function EventDescriptionAgendaSection({
   description,
   agenda,
+  showDescription = true,
+  showAgenda = true,
 }: EventDescriptionAgendaSectionProps) {
   const desc = description?.trim() || '';
   const agendaRaw = agenda?.trim() || '';
   const hasAgenda = agendaRaw.length > 0 && parseAgendaItems(agendaRaw).length > 0;
+
+  if (showDescription && !showAgenda) {
+    if (!desc) return null;
+
+    return (
+      <section>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block">
+          About this event
+        </h2>
+        <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
+          <CardHeader>
+            <CardTitle className="text-[#D5B93C]">Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="leading-relaxed whitespace-pre-wrap text-white/90">{desc}</p>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
+
+  if (!showDescription && showAgenda) {
+    if (!hasAgenda) return null;
+
+    return (
+      <section>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 pb-2 border-b border-[#D5B93C] inline-block flex items-center gap-2">
+          <Clock className="w-6 h-6 shrink-0 text-[#D5B93C]" />
+          Event Schedule
+        </h2>
+        <EventSchedule agenda={agendaRaw} hideTitle />
+      </section>
+    );
+  }
 
   if (!desc && !hasAgenda) {
     return null;
@@ -79,7 +125,7 @@ export function EventDescriptionAgendaSection({
         About this event
       </h2>
 
-      {desc && (
+      {desc && showDescription && (
         <Card className="bg-white/5 backdrop-blur-sm border-none text-white hover:bg-white/10 transition-colors">
           <CardHeader>
             <CardTitle className="text-[#D5B93C]">Description</CardTitle>
@@ -90,7 +136,7 @@ export function EventDescriptionAgendaSection({
         </Card>
       )}
 
-      {hasAgenda && <EventSchedule agenda={agendaRaw} />}
+      {hasAgenda && showAgenda && <EventSchedule agenda={agendaRaw} />}
     </section>
   );
 }

@@ -27,7 +27,9 @@ import {
   feesForSubmission,
   getSeminarModeLabel,
   isFreeSeminar,
+  isMemberFreeSeminar,
   isPaidSeminar,
+  SEMINAR_TYPE_OPTIONS,
   validateSeminarFees,
 } from '../utils/seminarPricing';
 
@@ -493,11 +495,17 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                       required
                     >
                       <option value="">Select type</option>
-                      <option value="free">Free</option>
-                      <option value="paid">Paid</option>
+                      {SEMINAR_TYPE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                     <p className="text-xs text-gray-500">
-                      Paid seminars require standard fees in step 2. Free seminars skip pricing.
+                      {SEMINAR_TYPE_OPTIONS.find(
+                        (option) => option.value === formData.is_free
+                      )?.description ??
+                        "Choose whether everyone attends free, only members attend free, or all attendees pay."}
                     </p>
                   </div>
                   
@@ -552,7 +560,12 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                     </p>
                     {isFreeSeminar(formData.is_free) ? (
                       <p className="mt-2 text-sm text-blue-700">
-                        This seminar is free. Attendees will not be charged.
+                        This seminar is free for everyone. Attendees will not be charged.
+                      </p>
+                    ) : isMemberFreeSeminar(formData.is_free) ? (
+                      <p className="mt-2 text-sm text-blue-700">
+                        Members register free. Set the non-member fee for each
+                        attendance type this seminar supports.
                       </p>
                     ) : isPaidSeminar(formData.is_free) ? (
                       <p className="mt-2 text-sm text-blue-700">
@@ -561,12 +574,13 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                       </p>
                     ) : (
                       <p className="mt-2 text-sm text-blue-700">
-                        Select paid or free in step 1 to configure pricing.
+                        Select a seminar type in step 1 to configure pricing.
                       </p>
                     )}
                   </div>
 
-                  {isPaidSeminar(formData.is_free) && (
+                  {(isPaidSeminar(formData.is_free) ||
+                    isMemberFreeSeminar(formData.is_free)) && (
                     <>
                       {(formData.mode === 'Physical' || formData.mode === 'Virtual_Physical') && (
                         <PackageSection
@@ -593,7 +607,9 @@ const EditSeminarModal: React.FC<EditSeminarModalProps> = ({
                     </div>
                   )}
 
-                  {!formData.mode && isPaidSeminar(formData.is_free) && (
+                  {!formData.mode &&
+                    (isPaidSeminar(formData.is_free) ||
+                      isMemberFreeSeminar(formData.is_free)) && (
                     <div className="space-y-6">
                       <PackageSection
                         type="physical"

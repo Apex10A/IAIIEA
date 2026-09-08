@@ -1,7 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { SeminarDetails } from "../types";
-import { getPaymentInfo, hasPaidPlans } from "../utils";
+import { getPaymentInfo } from "../utils";
+import { formatEventPrice, type EventCurrency } from "@/utils/eventCurrency";
+import {
+  isFreeSeminar,
+  isMemberFreeSeminar,
+} from "@/app/(admin)/admin-dashboard/training/utils/seminarPricing";
 
 interface PaymentModalProps {
   show: boolean;
@@ -10,8 +15,8 @@ interface PaymentModalProps {
   seminar: SeminarDetails | null;
   attendanceType: "virtual" | "physical";
   paymentProcessing: boolean;
-  // Optional: selected plan for legacy tiers
   selectedPlan?: string;
+  displayCurrency: EventCurrency;
 }
 
 export const PaymentModal = ({
@@ -22,6 +27,7 @@ export const PaymentModal = ({
   attendanceType,
   paymentProcessing,
   selectedPlan = "standard",
+  displayCurrency,
 }: PaymentModalProps) => {
   if (!show) return null;
 
@@ -31,9 +37,15 @@ export const PaymentModal = ({
         <h3 className="text-xl font-bold mb-2">Confirm Registration</h3>
         {seminar && (
           <div className="mb-4 text-sm">
-            {seminar.is_free === 'free' ? (
+            {isFreeSeminar(seminar.is_free || "") ? (
               <div className="p-3 rounded-md bg-green-50 text-green-700 border border-green-200">
                 This seminar is free. On confirming, you will be registered immediately.
+              </div>
+            ) : isMemberFreeSeminar(seminar.is_free || "") ? (
+              <div className="p-3 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
+                This seminar is <strong>free for members</strong>. If you are a member,
+                confirming will register you immediately. Non-members will be charged
+                the listed fee and must complete payment from Dashboard → Payment.
               </div>
             ) : (
               <div className="p-3 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
@@ -59,7 +71,7 @@ export const PaymentModal = ({
                 return (
                   <p><strong>Fee:</strong> {
                     usd > 0 || naira > 0
-                      ? `$${usd} / ₦${naira.toLocaleString()}`
+                      ? formatEventPrice(displayCurrency, usd, naira)
                       : 'Free'
                   }</p>
                 );

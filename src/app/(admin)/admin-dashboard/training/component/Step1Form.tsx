@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Step1FormProps } from './types';
 import { AgendaScheduleEditor } from '@/app/(admin)/admin-dashboard/components/AgendaScheduleEditor';
+import { SEMINAR_TYPE_OPTIONS } from '../utils/seminarPricing';
 
 const Step1Form: React.FC<Step1FormProps> = ({ data, onDataChange, onSubmit }) => {
   const handleInputChange = (field: keyof typeof data, value: string) => {
@@ -110,11 +111,16 @@ const Step1Form: React.FC<Step1FormProps> = ({ data, onDataChange, onSubmit }) =
           required
         >
           <option value="">Select type</option>
-          <option value="free">Free</option>
-          <option value="paid">Paid</option>
+          {SEMINAR_TYPE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
         <p className="mt-1 text-xs text-gray-500">
-          Paid seminars require standard fees in step 2. Free seminars skip pricing.
+          {SEMINAR_TYPE_OPTIONS.find((option) => option.value === data?.is_free)
+            ?.description ??
+            "Choose whether everyone attends free, only members attend free, or all attendees pay."}
         </p>
       </div>
 

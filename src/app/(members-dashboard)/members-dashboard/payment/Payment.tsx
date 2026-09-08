@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useFlutterwave } from 'flutterwave-react-v3';
 import { showToast } from '@/utils/toast';
@@ -11,6 +11,7 @@ import LoadingSkeleton from './LoadingSkeleton';
 import CancelPaymentDialog from './CancelPaymentDialog';
 import SuccessPaymentDialog from './SuccessPaymentDialog';
 import type { PendingPayment } from './types';
+import { inferPaymentAccessType } from '@/utils/eventCurrency';
 
 interface ApiResponse<T> {
   status: string;
@@ -33,7 +34,11 @@ const PaymentPage: React.FC = () => {
   const [canceledPaymentId, setCanceledPaymentId] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [successInfo, setSuccessInfo] = useState<{ title: string; formattedAmount: string } | null>(null);
+  const [successInfo, setSuccessInfo] = useState<{
+    title: string;
+    formattedAmount: string;
+    accessType: ReturnType<typeof inferPaymentAccessType>;
+  } | null>(null);
   
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -49,7 +54,8 @@ const PaymentPage: React.FC = () => {
       });
 
       if (response.status === 401 || response.status === 403) {
-        await signOut({ callbackUrl: '/login' });
+        showToast.error('Your session expired. Sign in again to confirm your payment status.');
+        setLoading(false);
         return;
       }
 
@@ -188,19 +194,23 @@ const PaymentPage: React.FC = () => {
       });
 
       if (response.status === 401 || response.status === 403) {
-        await signOut({ callbackUrl: '/login' });
+        showToast.error('Session expired. If payment went through, sign in again to verify.');
         return;
       }
       
       const result = await response.json();
       
       if (result.status === 'success') {
-        // Prepare success modal details
         const paidAmount = amountPaid ?? payment.amount;
         const currency = payment.currency;
         const formattedAmount = formatAmount(paidAmount, currency);
-        setSuccessInfo({ title: payment.title, formattedAmount });
+        setSuccessInfo({
+          title: payment.title,
+          formattedAmount,
+          accessType: inferPaymentAccessType(payment.title),
+        });
         setShowSuccessDialog(true);
+        await fetchPendingPayments();
       } else {
         showToast.error(result.message || 'Payment confirmation failed');
       }
@@ -225,7 +235,7 @@ const PaymentPage: React.FC = () => {
       });
 
       if (response.status === 401 || response.status === 403) {
-        await signOut({ callbackUrl: '/login' });
+        showToast.error('Session expired. Sign in again to manage payments.');
         return;
       }
 
@@ -337,14 +347,12 @@ const PaymentPage: React.FC = () => {
         onOpenChange={(open) => {
           setShowSuccessDialog(open);
           if (!open) {
-            // On close: refresh pending payments and page
-            fetchPendingPayments();
-            try { router.refresh(); } catch {}
             setSuccessInfo(null);
           }
         }}
         title={successInfo?.title || ''}
         formattedAmount={successInfo?.formattedAmount || ''}
+        accessType={successInfo?.accessType}
       />
     </div>
   );

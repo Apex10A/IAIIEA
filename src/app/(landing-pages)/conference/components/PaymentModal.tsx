@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ConferenceDetails } from "../page";
+import { formatEventPrice, type EventCurrency } from "@/utils/eventCurrency";
 
 interface PaymentModalProps {
   show: boolean;
@@ -10,6 +11,7 @@ interface PaymentModalProps {
   attendanceType: "virtual" | "physical";
   paymentProcessing: boolean;
   selectedPlan: string;
+  displayCurrency: EventCurrency;
 }
 
 export const PaymentModal = ({
@@ -20,6 +22,7 @@ export const PaymentModal = ({
   attendanceType,
   paymentProcessing,
   selectedPlan,
+  displayCurrency,
 }: PaymentModalProps) => {
   if (!show) return null;
 
@@ -64,7 +67,7 @@ export const PaymentModal = ({
               <p><strong>Conference:</strong> {conference?.title}</p>
               <p><strong>Plan:</strong> {formatPlanName(selectedPlan)}</p>
               <p><strong>Attendance:</strong> {attendanceType === 'virtual' ? 'Virtual' : 'Physical'}</p>
-              <p><strong>Fee:</strong> ${paymentInfo.usd} / ₦{Number(paymentInfo.naira).toLocaleString()}</p>
+              <p><strong>Fee:</strong> {formatEventPrice(displayCurrency, paymentInfo.usd, paymentInfo.naira)}</p>
             </div>
           </div>
 

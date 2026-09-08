@@ -1,7 +1,14 @@
 "use client";
 import { Check } from "lucide-react";
 import { SeminarDetails, RegistrationType } from "../types";
-import { getPaymentInfo, hasPaidPlans } from "../utils";
+import { getPaymentInfo } from "../utils";
+import { EventPriceAmount } from "@/components/EventPriceAmount";
+import { hasPaidEventPrice } from "@/utils/eventCurrency";
+import type { EventCurrency } from "@/utils/eventCurrency";
+import {
+  isFreeSeminar,
+  isMemberFreeSeminar,
+} from "@/app/(admin)/admin-dashboard/training/utils/seminarPricing";
 
 interface PricingSectionProps {
   seminar: SeminarDetails;
@@ -10,6 +17,7 @@ interface PricingSectionProps {
   onRegisterClick: () => void;
   onPlanSelect: (plan: string) => void;
   onAttendanceTypeChange: (type: "virtual" | "physical") => void;
+  displayCurrency: EventCurrency;
 }
 
 export const PricingSection = ({
@@ -19,22 +27,34 @@ export const PricingSection = ({
   onRegisterClick,
   onPlanSelect,
   onAttendanceTypeChange,
+  displayCurrency,
 }: PricingSectionProps) => {
   // Don't show pricing section for free seminars
   if (!seminar) {
     return null;
   }
 
-  // Hide entire pricing section if seminar is free
-  if (seminar?.is_free === "free") {
+  // Hide entire pricing section if seminar is free for everyone
+  if (isFreeSeminar(seminar?.is_free || "")) {
     return null;
   }
+
+  const memberFreeSeminar = isMemberFreeSeminar(seminar?.is_free || "");
 
   return (
     <div className="my-12">
       <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 pb-2 border-b border-[#D5B93C] inline-block">
         Seminar Fees
       </h2>
+
+      {memberFreeSeminar && (
+        <div className="mb-6 p-4 bg-blue-500/20 rounded-lg border border-blue-400/40">
+          <p className="font-bold text-white">Free for members</p>
+          <p className="text-white/80 text-sm mt-1">
+            IAIIEA members can register at no cost. Non-members pay the fees below.
+          </p>
+        </div>
+      )}
       
       {seminar?.is_registered && (
         <div className="mb-6 p-4 bg-[#D5B93C]/20 rounded-lg border border-[#D5B93C]">
@@ -88,6 +108,7 @@ export const PricingSection = ({
                 <VirtualAttendanceCard
                   seminar={seminar}
                   virtualFee={virtualFee}
+                  displayCurrency={displayCurrency}
                   onRegisterClick={() => {
                     onAttendanceTypeChange('virtual');
                     onRegisterClick();
@@ -100,6 +121,7 @@ export const PricingSection = ({
                 <PhysicalAttendanceCard
                   seminar={seminar}
                   physicalFee={physicalFee}
+                  displayCurrency={displayCurrency}
                   onRegisterClick={() => {
                     onAttendanceTypeChange('physical');
                     onRegisterClick();
@@ -118,6 +140,7 @@ export const PricingSection = ({
             selectedPlan={selectedPlan}
             onPlanSelect={onPlanSelect}
             onRegisterClick={onRegisterClick}
+            displayCurrency={displayCurrency}
           />
         );
       })()}
@@ -125,7 +148,7 @@ export const PricingSection = ({
   );
 };
 
-const VirtualAttendanceCard = ({ seminar, virtualFee, onRegisterClick }: any) => (
+const VirtualAttendanceCard = ({ seminar, virtualFee, displayCurrency, onRegisterClick }: any) => (
   <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
     seminar?.is_registered ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]/30'
   } relative`}>
@@ -144,15 +167,12 @@ const VirtualAttendanceCard = ({ seminar, virtualFee, onRegisterClick }: any) =>
       
       <div className="space-y-4">
         <div className="text-center">
-          {Number(virtualFee.usd) > 0 || Number(virtualFee.naira) > 0 ? (
-            <>
-              <p className="text-3xl font-bold text-[#0E1A3D]">
-                ${virtualFee.usd}
-              </p>
-              <p className="text-lg text-gray-700">
-                ₦{Number(virtualFee.naira).toLocaleString()}
-              </p>
-            </>
+          {hasPaidEventPrice(virtualFee.usd, virtualFee.naira) ? (
+            <EventPriceAmount
+              usd={virtualFee.usd}
+              naira={virtualFee.naira}
+              currency={displayCurrency}
+            />
           ) : (
             <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
           )}
@@ -194,8 +214,8 @@ const VirtualAttendanceCard = ({ seminar, virtualFee, onRegisterClick }: any) =>
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md mt-4 transition-colors"
             onClick={onRegisterClick}
           >
-            {Number(virtualFee.usd) > 0 || Number(virtualFee.naira) > 0 
-              ? "Register Virtual" 
+            {hasPaidEventPrice(virtualFee.usd, virtualFee.naira)
+              ? "Register Virtual"
               : "Join Virtual (Free)"
             }
           </button>
@@ -205,7 +225,7 @@ const VirtualAttendanceCard = ({ seminar, virtualFee, onRegisterClick }: any) =>
   </div>
 );
 
-const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) => (
+const PhysicalAttendanceCard = ({ seminar, physicalFee, displayCurrency, onRegisterClick }: any) => (
   <div className={`bg-[#F9F5E2] rounded-lg overflow-hidden shadow-lg border-2 ${
     seminar?.is_registered ? 'border-[#D5B93C] ring-4 ring-[#D5B93C]/30' : 'border-[#D5B93C]'
   } relative ${seminar?.mode === 'Virtual_Physical' ? '' : 'md:transform md:-translate-y-2'}`}>
@@ -229,15 +249,12 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
       
       <div className="space-y-4">
         <div className="text-center">
-          {Number(physicalFee.usd) > 0 || Number(physicalFee.naira) > 0 ? (
-            <>
-              <p className="text-3xl font-bold text-[#0E1A3D]">
-                ${physicalFee.usd}
-              </p>
-              <p className="text-lg text-gray-700">
-                ₦{Number(physicalFee.naira).toLocaleString()}
-              </p>
-            </>
+          {hasPaidEventPrice(physicalFee.usd, physicalFee.naira) ? (
+            <EventPriceAmount
+              usd={physicalFee.usd}
+              naira={physicalFee.naira}
+              currency={displayCurrency}
+            />
           ) : (
             <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
           )}
@@ -283,8 +300,8 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
             className="w-full bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 transition-colors"
             onClick={onRegisterClick}
           >
-            {Number(physicalFee.usd) > 0 || Number(physicalFee.naira) > 0 
-              ? "Register Physical" 
+            {hasPaidEventPrice(physicalFee.usd, physicalFee.naira)
+              ? "Register Physical"
               : "Join Physical (Free)"
             }
           </button>
@@ -294,7 +311,7 @@ const PhysicalAttendanceCard = ({ seminar, physicalFee, onRegisterClick }: any) 
   </div>
 );
 
-const LegacyPricingCards = ({ seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick }: any) => {
+const LegacyPricingCards = ({ seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick, displayCurrency }: any) => {
   const legacyPlan =
     seminar?.payments?.standard ? 'standard' :
     seminar?.payments?.basic ? 'basic' :
@@ -311,12 +328,13 @@ const LegacyPricingCards = ({ seminar, attendanceType, selectedPlan, onPlanSelec
         onPlanSelect={() => onPlanSelect('standard')}
         onRegisterClick={onRegisterClick}
         isPopular={false}
+        displayCurrency={displayCurrency}
       />
     </div>
   );
 };
 
-const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick, isPopular, className = "" }: any) => {
+const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPlanSelect, onRegisterClick, isPopular, className = "", displayCurrency }: any) => {
   const isActive = seminar?.is_registered && seminar?.current_plan === plan;
   const paymentInfo = getPaymentInfo(seminar?.payments, plan, attendanceType);
   const planData = seminar?.payments?.[plan] as RegistrationType;
@@ -342,14 +360,11 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
         <div className="space-y-4">
           <div className="text-center">
             {paymentInfo ? (
-              <>
-                <p className="text-3xl font-bold text-[#0E1A3D]">
-                  ${paymentInfo.usd}
-                </p>
-                <p className="text-lg text-gray-700">
-                  ₦{paymentInfo.naira}
-                </p>
-              </>
+              <EventPriceAmount
+                usd={paymentInfo.usd}
+                naira={paymentInfo.naira}
+                currency={displayCurrency}
+              />
             ) : (
               <p className="text-2xl font-bold text-[#0E1A3D]">Free</p>
             )}
@@ -437,7 +452,7 @@ const PricingCard = ({ plan, title, seminar, attendanceType, selectedPlan, onPla
                 onRegisterClick();
               }}
             >
-              {seminar?.is_free === "free" ? "Register" : "Register Now"}
+              Register Now
             </button>
           )}
         </div>

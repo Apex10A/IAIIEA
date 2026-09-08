@@ -53,6 +53,7 @@ export interface Resource {
       portfolio?: string;
       picture?: string;
     }[];
+    agenda?: string;
     schedule: {
       schedule_id: number;
       day: string;

@@ -8,7 +8,7 @@ import { AuthContextProvider } from '@/context/AuthContext'
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
       <AuthContextProvider>
         {children}
         <Toaster />

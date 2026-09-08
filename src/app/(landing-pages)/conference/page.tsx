@@ -33,6 +33,9 @@ import {
 import { PaymentModal } from "./components/PaymentModal";
 import { RegistrationPendingModal } from "../components/RegistrationPendingModal";
 import { MEMBERS_DASHBOARD_URL } from "../utils/dashboardLinks";
+import { EventPriceAmount } from "@/components/EventPriceAmount";
+import { usePreferredEventCurrency, getCurrencyLabel } from "@/hooks/usePreferredEventCurrency";
+import type { EventCurrency } from "@/utils/eventCurrency";
 
 interface PaymentTier {
   usd: string;
@@ -376,6 +379,7 @@ const PaymentPlanCard = memo(
     onClick,
     signInRequired = false,
     onSignIn,
+    displayCurrency,
   }: {
     title: string;
     planDescription?: string;
@@ -389,6 +393,7 @@ const PaymentPlanCard = memo(
     onClick: () => void;
     signInRequired?: boolean;
     onSignIn?: () => void;
+    displayCurrency: EventCurrency;
   }) => {
     // const [localLoading, setLocalLoading] = useState(false);
     const isLoading = paymentProcessing;
@@ -420,12 +425,11 @@ const PaymentPlanCard = memo(
 
           <div className="space-y-4">
             <div className="text-center">
-              <p className="text-3xl font-bold text-[#0E1A3D]">${priceUsd}</p>
-              <p className="text-lg text-gray-700">
-                {String(priceNaira).startsWith('NGN') || String(priceNaira).startsWith('₦')
-                  ? priceNaira
-                  : `NGN ${priceNaira}`}
-              </p>
+              <EventPriceAmount
+                usd={priceUsd}
+                naira={priceNaira}
+                currency={displayCurrency}
+              />
             </div>
 
             <div className="pt-2">
@@ -535,6 +539,7 @@ function ConferenceDetailPage() {
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">(
     "virtual"
   );
+  const displayCurrency = usePreferredEventCurrency();
 
   const conferenceId = useMemo(() => searchParams.get("id"), [searchParams]);
   const authToken = useMemo(() => session?.user?.token, [session?.user?.token]);
@@ -736,6 +741,7 @@ function ConferenceDetailPage() {
                 isPopular={plan.isPopular}
                 signInRequired={!session}
                 onSignIn={goToLogin}
+                displayCurrency={displayCurrency}
                 onClick={() => {
                   setSelectedPlan(plan.key);
                   setShowPaymentModal(true);
@@ -753,6 +759,7 @@ function ConferenceDetailPage() {
     paymentProcessing,
     session,
     goToLogin,
+    displayCurrency,
   ]);
 
   if (loading) {
@@ -969,7 +976,7 @@ function ConferenceDetailPage() {
             Conference Fees
           </h2>
           <p className="text-white/70 text-sm mb-8 max-w-2xl">
-            Registration in three steps: choose how you will attend, pick a plan, then register. Payment is completed from your dashboard.
+            Registration in three steps: choose how you will attend, pick a plan, then register. Payment is completed from your dashboard. Fees shown in {getCurrencyLabel(displayCurrency).toLowerCase()}.
           </p>
 
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-3 max-w-3xl">
@@ -1093,6 +1100,7 @@ function ConferenceDetailPage() {
         attendanceType={attendanceType}
         paymentProcessing={paymentProcessing}
         selectedPlan={selectedPlan}
+        displayCurrency={displayCurrency}
       />
 
       <RegistrationPendingModal

@@ -6,6 +6,7 @@ import SpeakersSection from './SpeakersSection';
 import {
   getSeminarModeLabel,
   isFreeSeminar,
+  isMemberFreeSeminar,
   isPaidSeminar,
 } from '../utils/seminarPricing';
 
@@ -19,6 +20,8 @@ const Step2Form: React.FC<Step2FormProps> = ({
 }) => {
   const paidSeminar = isPaidSeminar(isFree);
   const freeSeminar = isFreeSeminar(isFree);
+  const memberFreeSeminar = isMemberFreeSeminar(isFree);
+  const feeRequiredSeminar = paidSeminar || memberFreeSeminar;
 
   const addSpeaker = () => {
     onDataChange({
@@ -55,8 +58,14 @@ const Step2Form: React.FC<Step2FormProps> = ({
         </h3>
         {freeSeminar ? (
           <p className="text-sm text-blue-700 dark:text-blue-300">
-            This seminar is free. Attendees will not be charged. Assign speakers
-            below to finish setup.
+            This seminar is free for everyone. Attendees will not be charged.
+            Assign speakers below to finish setup.
+          </p>
+        ) : memberFreeSeminar ? (
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            Members register free. Set the non-member fee for each attendance
+            type this seminar supports. Enter at least one price in Naira or USD
+            per type.
           </p>
         ) : paidSeminar ? (
           <p className="text-sm text-blue-700 dark:text-blue-300">
@@ -65,12 +74,12 @@ const Step2Form: React.FC<Step2FormProps> = ({
           </p>
         ) : (
           <p className="text-sm text-blue-700 dark:text-blue-300">
-            Select paid or free in step 1 to configure pricing.
+            Select a seminar type in step 1 to configure pricing.
           </p>
         )}
       </div>
 
-      {paidSeminar && (
+      {feeRequiredSeminar && (
         <>
           {(mode === 'Physical' || mode === 'Virtual_Physical') && (
             <PackageSection

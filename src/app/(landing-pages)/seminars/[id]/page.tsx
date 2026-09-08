@@ -18,6 +18,7 @@ import { FreeSeminarSection } from "./components/FreeSeminarSection";
 import { OverviewSection } from "./components/OverviewSection";
 import { EventDescriptionAgendaSection } from "../../components/EventDescriptionAgendaSection";
 import { RegistrationPendingModal } from "../../components/RegistrationPendingModal";
+import { usePreferredEventCurrency } from "@/hooks/usePreferredEventCurrency";
 import {
   buildEventDateTime,
   formatEventScheduleDisplay,
@@ -27,6 +28,11 @@ import {
 import { SeminarDetails, RegistrationType } from "./types";
 import { getPaymentInfo, hasPaidPlans } from "./utils";
 import { getDummyData } from "./dummyData";
+import {
+  getSeminarTypeLabel,
+  isFreeSeminar,
+  isMemberFreeSeminar,
+} from "@/app/(admin)/admin-dashboard/training/utils/seminarPricing";
 
 export default function SeminarPage() {
   const { data: session, status } = useSession();
@@ -41,6 +47,7 @@ export default function SeminarPage() {
   const [selectedPlan, setSelectedPlan] = useState("standard");
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [attendanceType, setAttendanceType] = useState<"virtual" | "physical">("virtual");
+  const displayCurrency = usePreferredEventCurrency();
 
   useEffect(() => {
     const loadSeminar = async () => {
@@ -170,11 +177,13 @@ export default function SeminarPage() {
       if (paymentData?.status === "success") {
         const link = paymentData?.data?.link;
 
-        // Show guidance based on type
-        if (seminar.is_free === 'free') {
+        // Show guidance based on whether payment is required
+        if (isFreeSeminar(seminar.is_free || "")) {
           showToast.success("Registration completed. You're in!");
-        } else {
+        } else if (link) {
           setShowPendingPaymentModal(true);
+        } else {
+          showToast.success("Registration completed. You're in!");
         }
 
         if (link) {
@@ -183,8 +192,7 @@ export default function SeminarPage() {
         }
 
         setShowPaymentModal(false);
-        // Optionally refresh to reflect is_registered for free seminars
-        if (seminar.is_free === 'free') {
+        if (isFreeSeminar(seminar.is_free || "") || !link) {
           window.location.reload();
         }
       } else {
@@ -235,7 +243,7 @@ export default function SeminarPage() {
           {seminarDate && <CountdownTimer targetDate={seminarDate} />}
         </div>
         {/* Show register button based on seminar type */}
-        {seminar?.is_free !== "free" && (
+        {seminar && !isFreeSeminar(seminar.is_free || "") && (
           <Button
             className="w-full md:w-auto bg-[#D5B93C] hover:bg-[#D5B93C]/90 text-[#0E1A3D] font-bold"
             onClick={handleRegisterClick}
@@ -247,7 +255,7 @@ export default function SeminarPage() {
             )}
           </Button>
         )}
-        {seminar?.is_free === "free" && (
+        {seminar && isFreeSeminar(seminar.is_free || "") && (
           <div className="w-full md:w-auto text-center">
             <div className="bg-green-500/20 border border-green-500/30 rounded-lg px-6 py-3 mb-3">
               <div className="text-green-400 font-bold text-lg">
@@ -325,7 +333,7 @@ export default function SeminarPage() {
           {/* Type (Free or Paid) */}
           <div className="flex items-center gap-2 text-white bg-white/10 px-4 py-2 rounded-full">
             <span className="text-xs px-2 py-1 rounded-full bg-white/20">Type</span>
-            <span>{seminar?.is_free === 'free' ? 'Free' : 'Paid'}</span>
+            <span>{getSeminarTypeLabel(seminar?.is_free || "")}</span>
           </div>
 
           {/* Registration status */}
@@ -360,6 +368,7 @@ export default function SeminarPage() {
             onRegisterClick={handleRegisterClick}
             onPlanSelect={setSelectedPlan}
             onAttendanceTypeChange={setAttendanceType}
+            displayCurrency={displayCurrency}
           />
         )}
 
@@ -374,6 +383,7 @@ export default function SeminarPage() {
         attendanceType={attendanceType}
         paymentProcessing={paymentProcessing}
         selectedPlan={selectedPlan}
+        displayCurrency={displayCurrency}
       />
 
       <RegistrationPendingModal

@@ -565,9 +565,15 @@ const ConferenceDetails: React.FC<ConferenceDetailsProps> = ({
                 <span className={`backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium ${
                   (conferenceDetails.is_free === true || conferenceDetails.is_free === 'free')
                     ? 'bg-emerald-400/20'
+                    : conferenceDetails.is_free === 'memberfree'
+                    ? 'bg-blue-400/20'
                     : 'bg-white/20'
                 }`}>
-                  {(conferenceDetails.is_free === true || conferenceDetails.is_free === 'free') ? 'Free' : 'Paid'}
+                  {conferenceDetails.is_free === true || conferenceDetails.is_free === 'free'
+                    ? 'Free (Everyone)'
+                    : conferenceDetails.is_free === 'memberfree'
+                    ? 'Free for Members'
+                    : 'Paid'}
                 </span>
               )}
             </div>

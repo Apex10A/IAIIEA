@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import axios from 'axios';
 import { ThemeProvider } from '@/components/theme-provider';
 import { redirect, useSearchParams } from 'next/navigation';
@@ -29,7 +29,7 @@ import SeminarAnnouncements from "@/app/(members-dashboard)/members-dashboard/tr
 import Sidebar from '@/components/layout/sidebar/page';
 import DashboardHeader from '@/components/layout/header/DashboardHeader';
 import LoadingDashboard from '@/app/(admin)/admin-dashboard/LoadingDashboard'
-import MembersCertificate from "@/app/(members-dashboard)/members-dashboard/certificates/Coming-soon"
+import MembersCertificate from "@/app/(members-dashboard)/members-dashboard/certificates/page";
 
 
 type ComponentKey = 
@@ -88,32 +88,21 @@ export default function DashboardClient() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    // Global axios interceptor for 401/403 → sign out
+    // Global axios interceptor for 401/403 on API calls made via axios
     const interceptorId = axios.interceptors.response.use(
       (response) => response,
       async (error) => {
         const status = error?.response?.status;
         if (status === 401 || status === 403) {
-          try { await signOut({ callbackUrl: '/login' }); } catch {}
+          console.warn('API request unauthorized', error?.config?.url);
         }
         return Promise.reject(error);
       }
     );
 
-    // Global fetch wrapper: patch window.fetch to sign out on 401/403
-    const originalFetch = window.fetch;
-    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const res = await originalFetch(input, init);
-      if (res.status === 401 || res.status === 403) {
-        try { await signOut({ callbackUrl: '/login' }); } catch {}
-      }
-      return res;
-    };
-
     return () => {
       window.removeEventListener('resize', checkMobile);
       axios.interceptors.response.eject(interceptorId);
-      window.fetch = originalFetch;
     };
   }, []);
 

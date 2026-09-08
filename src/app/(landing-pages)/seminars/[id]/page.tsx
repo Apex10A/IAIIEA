@@ -350,6 +350,7 @@ export default function SeminarPage() {
         <EventDescriptionAgendaSection
           description={seminar?.description}
           agenda={seminar?.agenda}
+          showAgenda={false}
         />
 
         <OverviewSection 
@@ -371,6 +372,12 @@ export default function SeminarPage() {
             displayCurrency={displayCurrency}
           />
         )}
+
+        <EventDescriptionAgendaSection
+          description={seminar?.description}
+          agenda={seminar?.agenda}
+          showDescription={false}
+        />
 
         <ResourcesSection resources={seminar?.resources || []} />
       </div>

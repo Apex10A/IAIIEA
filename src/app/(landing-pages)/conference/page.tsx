@@ -866,6 +866,7 @@ function ConferenceDetailPage() {
         <EventDescriptionAgendaSection
           description={conference?.description}
           agenda={conference?.agenda}
+          showAgenda={false}
         />
 
         <section>
@@ -1090,6 +1091,12 @@ function ConferenceDetailPage() {
 
           {renderPaymentPlans}
         </div>
+
+        <EventDescriptionAgendaSection
+          description={conference?.description}
+          agenda={conference?.agenda}
+          showDescription={false}
+        />
       </div>
 
       <PaymentModal

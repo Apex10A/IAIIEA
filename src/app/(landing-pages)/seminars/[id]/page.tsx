@@ -33,6 +33,11 @@ import {
   isFreeSeminar,
   isMemberFreeSeminar,
 } from "@/app/(admin)/admin-dashboard/training/utils/seminarPricing";
+import {
+  getPaymentCallbackUrl,
+  getPaymentLinkFromInitiateResponse,
+  savePendingPaymentContext,
+} from "@/utils/paymentFlow";
 
 export default function SeminarPage() {
   const { data: session, status } = useSession();
@@ -96,7 +101,7 @@ export default function SeminarPage() {
             {
               headers: session?.user?.token
                 ? {
-                    Authorization: `Bearer ${session.user.token}`,
+                    Authorization: `Bearer ${session.user.token || session.user.userData?.token}`,
                   }
                 : {},
             }
@@ -158,11 +163,12 @@ export default function SeminarPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.user.token}`,
+            Authorization: `Bearer ${session.user.token || session.user.userData?.token}`,
           },
           body: JSON.stringify({
             id: seminar.id,
-            mode: attendanceType, // "physical" | "virtual"
+            mode: attendanceType,
+            callback_url: getPaymentCallbackUrl(),
           }),
         }
       );
@@ -175,26 +181,29 @@ export default function SeminarPage() {
 
       // For paid seminars, backend returns a payment link; for free, it completes immediately
       if (paymentData?.status === "success") {
-        const link = paymentData?.data?.link;
-
-        // Show guidance based on whether payment is required
-        if (isFreeSeminar(seminar.is_free || "")) {
-          showToast.success("Registration completed. You're in!");
-        } else if (link) {
-          setShowPendingPaymentModal(true);
-        } else {
-          showToast.success("Registration completed. You're in!");
+        const pendingPaymentId =
+          paymentData?.data?.payment_id ??
+          paymentData?.data?.payment?.payment_id;
+        const contextPayload = {
+          kind: "seminar" as const,
+          id: seminar.id,
+          mode: attendanceType,
+        };
+        if (pendingPaymentId) {
+          savePendingPaymentContext(String(pendingPaymentId), contextPayload);
         }
+        savePendingPaymentContext(`seminar-${seminar.id}`, contextPayload);
 
-        if (link) {
-          window.location.href = link;
+        const paymentLink = getPaymentLinkFromInitiateResponse(paymentData);
+
+        if (paymentLink) {
+          window.location.href = paymentLink;
           return;
         }
 
         setShowPaymentModal(false);
-        if (isFreeSeminar(seminar.is_free || "") || !link) {
-          window.location.reload();
-        }
+        showToast.success("Registration completed. You're in!");
+        window.location.reload();
       } else {
         throw new Error(paymentData?.message || "Unable to initiate payment");
       }

@@ -1,87 +1,84 @@
 "use client";
 
-import Image from "next/image";
 import {
   MEMBERSHIP_CERTIFICATE_BG,
+  MEMBERSHIP_CERTIFICATE_FONT,
   MEMBERSHIP_CERTIFICATE_HEIGHT,
+  MEMBERSHIP_CERTIFICATE_LAYOUT,
   MEMBERSHIP_CERTIFICATE_WIDTH,
   MembershipCertificateFields,
 } from "./membershipCertificateLayout";
 
 interface MembershipCertificateProps {
   fields: MembershipCertificateFields;
-  /** When true, fills the parent container (for responsive preview). */
-  responsive?: boolean;
 }
 
-export function MembershipCertificate({
-  fields,
-  responsive = false,
-}: MembershipCertificateProps) {
+export function MembershipCertificate({ fields }: MembershipCertificateProps) {
+  const { name, membershipId, awardDate } = MEMBERSHIP_CERTIFICATE_LAYOUT;
+
   return (
     <div
-      className="relative bg-white"
-      style={
-        responsive
-          ? { width: "100%", height: "100%" }
-          : {
-              width: MEMBERSHIP_CERTIFICATE_WIDTH,
-              height: MEMBERSHIP_CERTIFICATE_HEIGHT,
-            }
-      }
+      className="relative shrink-0 bg-white"
+      style={{
+        width: MEMBERSHIP_CERTIFICATE_WIDTH,
+        height: MEMBERSHIP_CERTIFICATE_HEIGHT,
+        fontFamily: MEMBERSHIP_CERTIFICATE_FONT,
+      }}
     >
-      <Image
+      {/* Native resolution background — avoids Next/Image resize blur */}
+      <img
         src={MEMBERSHIP_CERTIFICATE_BG}
         alt=""
-        fill
-        className="object-fill pointer-events-none select-none"
-        priority
-        unoptimized
-        sizes={responsive ? "960px" : `${MEMBERSHIP_CERTIFICATE_WIDTH}px`}
+        width={MEMBERSHIP_CERTIFICATE_WIDTH}
+        height={MEMBERSHIP_CERTIFICATE_HEIGHT}
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
+        draggable={false}
+        decoding="sync"
       />
 
       <p
-        className={`absolute left-1/2 -translate-x-1/2 text-center font-bold uppercase tracking-wide text-[#1a3272] ${
-          responsive ? "text-[clamp(18px,3.8vw,46px)]" : ""
-        }`}
+        className="absolute left-1/2 -translate-x-1/2 text-center uppercase"
         style={{
-          top: "44.5%",
-          width: "72%",
-          ...(responsive ? {} : { fontSize: 46 }),
-          lineHeight: 1.2,
-          fontFamily: "Georgia, 'Times New Roman', serif",
+          top: name.top,
+          width: name.width,
+          fontSize: name.fontSize,
+          fontWeight: name.fontWeight,
+          letterSpacing: name.letterSpacing,
+          color: name.color,
+          lineHeight: 1.15,
+          fontFamily: MEMBERSHIP_CERTIFICATE_FONT,
         }}
       >
         {fields.name}
       </p>
 
       <p
-        className={`absolute text-center font-semibold text-[#333333] ${
-          responsive ? "text-[clamp(11px,1.15vw,22px)]" : ""
-        }`}
+        className="absolute text-center"
         style={{
-          top: "57.2%",
-          left: "18%",
-          width: "28%",
-          ...(responsive ? {} : { fontSize: 22 }),
-          lineHeight: 1.3,
-          fontFamily: "Arial, Helvetica, sans-serif",
+          top: membershipId.top,
+          left: membershipId.left,
+          width: membershipId.width,
+          fontSize: membershipId.fontSize,
+          fontWeight: membershipId.fontWeight,
+          color: membershipId.color,
+          lineHeight: 1.2,
+          fontFamily: MEMBERSHIP_CERTIFICATE_FONT,
         }}
       >
         {fields.membershipId}
       </p>
 
       <p
-        className={`absolute text-center font-semibold text-[#333333] ${
-          responsive ? "text-[clamp(11px,1.15vw,22px)]" : ""
-        }`}
+        className="absolute text-center"
         style={{
-          top: "57.2%",
-          left: "54%",
-          width: "28%",
-          ...(responsive ? {} : { fontSize: 22 }),
-          lineHeight: 1.3,
-          fontFamily: "Arial, Helvetica, sans-serif",
+          top: awardDate.top,
+          left: awardDate.left,
+          width: awardDate.width,
+          fontSize: awardDate.fontSize,
+          fontWeight: awardDate.fontWeight,
+          color: awardDate.color,
+          lineHeight: 1.2,
+          fontFamily: MEMBERSHIP_CERTIFICATE_FONT,
         }}
       >
         {fields.awardDate}

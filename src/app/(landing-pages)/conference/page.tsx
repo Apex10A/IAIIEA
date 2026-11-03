@@ -36,6 +36,11 @@ import { MEMBERS_DASHBOARD_URL } from "../utils/dashboardLinks";
 import { EventPriceAmount } from "@/components/EventPriceAmount";
 import { usePreferredEventCurrency, getCurrencyLabel } from "@/hooks/usePreferredEventCurrency";
 import type { EventCurrency } from "@/utils/eventCurrency";
+import {
+  getPaymentCallbackUrl,
+  getPaymentLinkFromInitiateResponse,
+  savePendingPaymentContext,
+} from "@/utils/paymentFlow";
 
 interface PaymentTier {
   usd: string;
@@ -641,6 +646,7 @@ function ConferenceDetailPage() {
               id: conference?.id,
               plan: planType,
               type: attendanceType,
+              callback_url: getPaymentCallbackUrl(),
             }),
           }
         );
@@ -655,17 +661,32 @@ function ConferenceDetailPage() {
         const paymentData = await response.json();
         console.log("Payment data received:", paymentData);
 
-        if (paymentData?.status === "success" && paymentData?.data?.link) {
-          console.log("Redirecting to payment gateway...");
-          // Add a delay before redirect to show loading state
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          // Redirect to payment gateway
-          window.location.href = paymentData?.data?.link;
-        } else {
-          console.log("Payment initiated without redirect");
-          await new Promise((resolve) => setTimeout(resolve, 300));
+        const pendingPaymentId =
+          paymentData?.data?.payment_id ??
+          paymentData?.data?.payment?.payment_id;
+        const contextPayload = {
+          kind: "conference" as const,
+          id: conference.id,
+          plan: planType,
+          type: attendanceType,
+        };
+        if (pendingPaymentId) {
+          savePendingPaymentContext(String(pendingPaymentId), contextPayload);
+        }
+        savePendingPaymentContext(`conference-${conference.id}`, contextPayload);
+
+        const paymentLink = getPaymentLinkFromInitiateResponse(paymentData);
+
+        if (paymentData?.status === "success" && paymentLink) {
+          window.location.href = paymentLink;
+          return;
+        }
+
+        if (paymentData?.status === "success") {
           setShowPaymentModal(false);
           setShowPendingPaymentModal(true);
+        } else {
+          throw new Error(paymentData?.message || "Failed to initiate payment");
         }
       } catch (err) {
         console.error("Payment error:", err);

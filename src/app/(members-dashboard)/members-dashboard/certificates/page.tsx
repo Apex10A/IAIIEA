@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useLayoutEffect } from "react";
 import html2canvas from "html2canvas";
 import { useSession } from "next-auth/react";
 import { showToast } from "@/utils/toast";
@@ -34,15 +34,33 @@ function formatAwardDate(dateString: string): string {
 
 export default function CertificatesPage() {
   const certRef = useRef<HTMLDivElement>(null);
+  const previewWrapRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(0.5);
   const [certificateData, setCertificateData] = useState<CertificateData | null>(
     null
   );
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
 
+  useLayoutEffect(() => {
+    const el = previewWrapRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      const width = el.clientWidth;
+      if (width > 0) {
+        setPreviewScale(width / MEMBERSHIP_CERTIFICATE_WIDTH);
+      }
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [certificateData]);
+
   const { data: session } = useSession();
   const bearerToken = session?.user?.token || session?.user?.userData?.token;
-  const registrationId = session?.user?.userData?.registration;
 
   const loadCertificate = useCallback(async () => {
     if (!bearerToken) {
@@ -52,29 +70,27 @@ export default function CertificatesPage() {
 
     setLoading(true);
     try {
-      let membershipKey = registrationId;
-
-      if (!membershipKey) {
-        const profileRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/view_profile_details`,
-          {
-            headers: { Authorization: `Bearer ${bearerToken}` },
-          }
-        );
-        if (profileRes.ok) {
-          const profileJson = await profileRes.json();
-          membershipKey =
-            profileJson?.data?.user_id || profileJson?.data?.registration;
+      const profileRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/view_profile_details`,
+        {
+          headers: { Authorization: `Bearer ${bearerToken}` },
         }
+      );
+
+      if (!profileRes.ok) {
+        throw new Error("Failed to fetch profile");
       }
 
-      if (!membershipKey) {
+      const profileJson = await profileRes.json();
+      const userId = profileJson?.data?.user_id;
+
+      if (!userId) {
         setCertificateData(null);
         return;
       }
 
       const certRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/certificate/membership/${membershipKey}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/certificate/membership/${userId}`,
         {
           headers: { Authorization: `Bearer ${bearerToken}` },
         }
@@ -97,7 +113,7 @@ export default function CertificatesPage() {
     } finally {
       setLoading(false);
     }
-  }, [bearerToken, registrationId]);
+  }, [bearerToken]);
 
   useEffect(() => {
     loadCertificate();
@@ -109,10 +125,11 @@ export default function CertificatesPage() {
     setDownloading(true);
     try {
       const element = certRef.current;
-      const exportScale = MEMBERSHIP_CERTIFICATE_WIDTH / element.offsetWidth;
 
       const canvas = await html2canvas(element, {
-        scale: Math.max(exportScale, 2),
+        scale: 1,
+        width: MEMBERSHIP_CERTIFICATE_WIDTH,
+        height: MEMBERSHIP_CERTIFICATE_HEIGHT,
         useCORS: true,
         backgroundColor: "#ffffff",
       });
@@ -186,13 +203,23 @@ export default function CertificatesPage() {
       ) : (
         <div className="flex justify-center">
           <div
-            ref={certRef}
-            className="w-full max-w-[960px] shadow-lg"
+            ref={previewWrapRef}
+            className="w-full max-w-[960px] overflow-hidden rounded-lg shadow-lg"
             style={{
-              aspectRatio: `${MEMBERSHIP_CERTIFICATE_WIDTH} / ${MEMBERSHIP_CERTIFICATE_HEIGHT}`,
+              height: MEMBERSHIP_CERTIFICATE_HEIGHT * previewScale,
             }}
           >
-            <MembershipCertificate fields={fields} responsive />
+            <div
+              ref={certRef}
+              style={{
+                width: MEMBERSHIP_CERTIFICATE_WIDTH,
+                height: MEMBERSHIP_CERTIFICATE_HEIGHT,
+                transform: `scale(${previewScale})`,
+                transformOrigin: "top left",
+              }}
+            >
+              <MembershipCertificate fields={fields} />
+            </div>
           </div>
         </div>
       )}

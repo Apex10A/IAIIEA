@@ -1,7 +1,8 @@
 "use client"
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import PaymentPage from './Payment';
 import PaymentHistory from './PaymentHistory';
+import LoadingSkeleton from './LoadingSkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 
@@ -33,7 +34,9 @@ export default function PaymentDashboard() {
 
         <TabsContent value="pending">
           <Card className="p-6">
-            <PaymentPage />
+            <Suspense fallback={<LoadingSkeleton />}>
+              <PaymentPage />
+            </Suspense>
           </Card>
         </TabsContent>
 

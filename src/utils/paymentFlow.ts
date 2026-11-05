@@ -58,6 +58,8 @@ export interface PendingPaymentContext {
 export interface PendingPaymentInitiateInput {
   payment_id: string;
   title: string;
+  amount?: number;
+  currency?: string;
   sub_payments?: Record<string, number> | [];
   id?: number;
   event_id?: number;
@@ -143,6 +145,15 @@ function inferPendingPaymentKind(
     idUpper.includes("-SEM")
   ) {
     return "seminar";
+  }
+  if (
+    titleLower.includes("membership") ||
+    titleLower.includes("dues") ||
+    titleLower.includes("subscription") ||
+    idUpper.includes("-MEM") ||
+    idUpper.includes("-MBR")
+  ) {
+    return "membership";
   }
   return "membership";
 }
@@ -273,14 +284,97 @@ export function buildPendingPaymentInitiateRequest(
     };
   }
 
+  const membershipPlan =
+    plan ||
+    normalizePlanForApi(payment.plan ?? "") ||
+    normalizePlanForApi(context?.plan ?? "") ||
+    defaultPlanFromSubPayments(payment);
+
   return {
     path: "membership/initiate_pay/",
     body: {
       payment_id: payment.payment_id,
       callback_url: callbackUrl,
-      ...(plan ? { plan } : {}),
+      plan: membershipPlan || "basic",
     },
   };
+}
+
+/** Backend route(s) for membership checkout — sandbox may only expose these once deployed. */
+export const MEMBERSHIP_INITIATE_PAY_PATHS = [
+  "membership/initiate_pay/",
+  "member/initiate_pay/",
+] as const;
+
+export function resolvePendingPaymentAmount(
+  payment: PendingPaymentInitiateInput,
+  selectedPlan: string
+): number {
+  if (
+    payment.sub_payments &&
+    typeof payment.sub_payments === "object" &&
+    !Array.isArray(payment.sub_payments) &&
+    selectedPlan &&
+    payment.sub_payments[selectedPlan] != null
+  ) {
+    return Number(payment.sub_payments[selectedPlan]);
+  }
+  return Number(payment.amount ?? 0);
+}
+
+export async function postInitiatePay(
+  path: string,
+  body: Record<string, unknown>,
+  bearerToken: string
+): Promise<{ response: Response; result: Record<string, unknown> }> {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  let result: Record<string, unknown> = {};
+  try {
+    result = (await response.json()) as Record<string, unknown>;
+  } catch {
+    result = { status: "error", message: "Invalid server response" };
+  }
+
+  return { response, result };
+}
+
+/** Try membership initiate routes; returns null if every path is 404. */
+export async function tryMembershipInitiatePay(
+  body: Record<string, unknown>,
+  bearerToken: string
+): Promise<{
+  response: Response;
+  result: Record<string, unknown>;
+  path: string;
+} | null> {
+  for (const path of MEMBERSHIP_INITIATE_PAY_PATHS) {
+    const { response, result } = await postInitiatePay(path, body, bearerToken);
+    if (response.status === 404) continue;
+    return { response, result, path };
+  }
+  return null;
+}
+
+function defaultPlanFromSubPayments(
+  payment: PendingPaymentInitiateInput
+): string {
+  if (
+    payment.sub_payments &&
+    typeof payment.sub_payments === "object" &&
+    !Array.isArray(payment.sub_payments)
+  ) {
+    const first = Object.keys(payment.sub_payments)[0];
+    if (first) return normalizePlanForApi(first) || first;
+  }
+  return "";
 }
 
 function normalizePlanForApi(plan: string): string {

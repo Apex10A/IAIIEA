@@ -8,6 +8,7 @@ export const AGENDA_UI_PLACEHOLDER = `9am - 10am Opening Prayer
 export interface AgendaItem {
   time: string;
   title: string;
+  isDayHeader?: boolean;
 }
 
 /** One editable row in the admin schedule builder. */
@@ -21,9 +22,9 @@ const ARROW_TO_API = /\s*(?:→|➔|->)\s*/g;
 const ARROW_SPLIT = /\s*(?:→|➔|->)\s*/;
 const RANGE_DASH = /\s[-–—]\s/;
 
-/** Comma before the next schedule item (starts with a time-like token). */
+/** Comma before the next schedule item (starts with a time-like token or a Day header). */
 const COMMA_BEFORE_NEXT_ITEM =
-  /,(?=\s*\d{1,2}(?:\s*(?:am|pm|AM|PM)|(?::\d{2})|\s*[-–—]))/;
+  /,(?=\s*(?:day\s*\d+|\d{1,2}(?:\s*(?:am|pm|AM|PM)|(?::\d{2})|\s*[-–—])))/i;
 
 function hasLetters(text: string): boolean {
   return /[A-Za-z]/.test(text);
@@ -172,7 +173,14 @@ export function parseAgendaItems(apiAgenda: string): AgendaItem[] {
 
   return splitAgendaLines(raw)
     .map(parseAgendaLine)
-    .filter((item) => item.time || item.title);
+    .filter((item) => item.time || item.title)
+    .map((item) => {
+      // Detect day header: no time, title matches "Day 1", "Day2", "DAY 2 - Nov 12", etc.
+      if (!item.time && /^day\s*\d+/i.test(item.title.trim())) {
+        return { ...item, isDayHeader: true };
+      }
+      return item;
+    });
 }
 
 export function splitAgendaTimeRange(time: string): {
@@ -193,6 +201,10 @@ export function parseAgendaToRows(apiAgenda: string): AgendaScheduleRow[] {
   if (items.length === 0) return [emptyAgendaRow()];
 
   return items.map((item) => {
+    // Day headers should have no times in the editor so they round-trip cleanly
+    if (item.isDayHeader) {
+      return { startTime: '', endTime: '', title: item.title };
+    }
     const { startTime, endTime } = splitAgendaTimeRange(item.time);
     return { startTime, endTime, title: item.title };
   });

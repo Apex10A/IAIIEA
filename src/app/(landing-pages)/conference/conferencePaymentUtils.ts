@@ -76,6 +76,16 @@ export function getVisibleConferencePlans(
     return { mode: 'timing', plans: timingPlans };
   }
 
+  // Virtual attendance: only Standard package is available
+  if (attendanceType === 'virtual') {
+    const standardPlan = PACKAGE_PLANS.find((p) => p.key === 'standard');
+    if (standardPlan && hasPlanPricing(payments.standard, 'virtual')) {
+      return { mode: 'package', plans: [standardPlan] };
+    }
+    return null;
+  }
+
+  // Physical attendance: show all packages that have pricing
   const packagePlans = PACKAGE_PLANS.filter((plan) =>
     hasPlanPricing(payments[plan.key] as RegistrationType | undefined, attendanceType)
   );

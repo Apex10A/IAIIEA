@@ -456,12 +456,9 @@ const PaymentPlanCard = memo(
                   <span>Your Active Plan</span>
                 </div>
               ) : (
-                <button
-                  className="w-full bg-gray-400 text-[#0E1A3D] font-bold py-3 px-4 rounded-md mt-4 cursor-not-allowed"
-                  disabled
-                >
-                  Already Registered
-                </button>
+                <div className="w-full bg-gray-100 text-gray-400 font-medium py-3 px-4 rounded-md mt-4 text-center text-sm">
+                  You&apos;re registered on a different plan
+                </div>
               )
             ) : signInRequired ? (
               <button
@@ -581,7 +578,25 @@ function ConferenceDetailPage() {
 
       const data = await response.json();
       if (data.status === "success") {
-        setConference(data.data);
+        const raw = data.data;
+        // API returns `registered_plan` as an object e.g. { "Premium plan": 120 }
+        // Extract and normalize to match plan keys: "basic" | "standard" | "premium"
+        let registeredPlan: string | undefined = undefined;
+        if (raw.registered_plan && typeof raw.registered_plan === "object") {
+          const planLabel = Object.keys(raw.registered_plan)[0]; // e.g. "Premium plan"
+          if (planLabel) {
+            const normalized = planLabel.toLowerCase(); // "premium plan"
+            if (normalized.includes("basic")) registeredPlan = "basic";
+            else if (normalized.includes("standard")) registeredPlan = "standard";
+            else if (normalized.includes("premium")) registeredPlan = "premium";
+          }
+        } else if (typeof raw.registered_plan === "string" && raw.registered_plan !== "N/A") {
+          registeredPlan = raw.registered_plan.toLowerCase();
+        }
+        setConference({
+          ...raw,
+          current_plan: raw.current_plan || registeredPlan,
+        });
         setConferenceDate(
           buildEventDateTime(data.data.start_date, data.data.start_time)
         );

@@ -49,7 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
   };
 
   return (
-    <section className="relative min-h-screen w-full bg-[#0B142F] overflow-hidden flex items-center pt-20">
+    <section className="relative min-h-screen w-full bg-[#0B142F] overflow-hidden flex items-center pt-20 pb-12">
       <div className="absolute inset-0 z-0">
         <Image
           src="/people.jpg"
@@ -68,10 +68,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 max-w-full"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 max-w-full mt-4"
             >
               <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse shrink-0"></div>
-              <span className="text-white/80 text-sm font-medium tracking-wide line-clamp-2">
+              <span className="text-white/80 text-sm font-medium tracking-wide">
                 {promoLabel}
               </span>
             </motion.div>
@@ -118,7 +118,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ incomingEvents }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-white/10"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 pb-4 border-t border-white/10"
             >
               {[
                 'Professional membership & networking',

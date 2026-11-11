@@ -161,6 +161,7 @@ export function AgendaScheduleEditor({
 
       <p className="text-xs text-gray-500">
         Build the event schedule row by row. Times accept flexible formats (e.g. 9am, 10:00, 2pm).
+        To group activities by day, add a row with no time and a title like <strong>Day 1</strong> or <strong>Day 1 - Nov 12</strong>.
       </p>
     </div>
   );

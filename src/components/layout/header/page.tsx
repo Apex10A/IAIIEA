@@ -215,18 +215,23 @@ const Header = () => {
     const isMobile = viewportWidth < 768;
     
     return (
+      <div
+        style={{
+          position: 'fixed',
+          top: '80px',
+          left: isMobile ? '1rem' : '50%',
+          width: isMobile ? 'calc(100vw - 2rem)' : type === 'programmes' ? '720px' : '600px',
+          maxWidth: 'calc(100vw - 2rem)',
+          transform: isMobile ? 'none' : 'translateX(-50%)',
+          zIndex: 50,
+        }}
+      >
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
         transition={{ duration: 0.2 }}
-        className={`absolute mt-3 bg-white shadow-xl rounded-xl overflow-hidden z-50 border border-gray-100 ${
-          isMobile ? 'left-4 right-4' : 'left-1/2 -translate-x-1/2'
-        }`}
-        style={{
-          width: isMobile ? 'calc(100vw - 2rem)' : type === 'programmes' ? '720px' : '600px',
-          maxWidth: 'calc(100vw - 2rem)'
-        }}
+        className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100"
       >
         <div className={`grid grid-cols-1 ${type === 'programmes' ? 'md:grid-cols-3' : 'md:grid-cols-2'} divide-x divide-gray-100`}>
           {dropdownContent[type].map((item, index) => (
@@ -260,6 +265,7 @@ const Header = () => {
           ))}
         </div>
       </motion.div>
+      </div>
     );
   };
 
@@ -468,7 +474,7 @@ const Header = () => {
   );
 
   return (
-    <nav ref={dropdownRef} className="fixed w-full z-50 bg-[#0E1A3D] shadow-md">
+    <nav ref={dropdownRef} className="fixed w-full z-50 bg-[#0E1A3D] shadow-md overflow-visible">
       <div className="container mx-auto px-4 md:px-8 lg:px-12">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center">

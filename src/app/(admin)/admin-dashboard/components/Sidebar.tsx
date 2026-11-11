@@ -193,7 +193,7 @@ const SidebarNav = memo(
   }) => {
     if (collapsed) {
       return (
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 space-y-1">
           {navigationGroups.flatMap((group) =>
             group.items.map((item) => (
               <NavItemComponent
@@ -210,7 +210,7 @@ const SidebarNav = memo(
     }
 
     return (
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4">
         {navigationGroups.map((group) => (
           <div key={group.title} className="mb-6">
             <button
@@ -291,9 +291,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-2xl lg:hidden transform transition-transform duration-200 ease-in-out">
-          <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="fixed inset-y-0 left-0 z-40 flex h-full max-h-screen w-80 flex-col bg-white shadow-2xl lg:hidden transform transition-transform duration-200 ease-in-out">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 p-6">
               <h2 className="text-xl font-bold text-[#0E1A3D]">Admin Panel</h2>
               <button
                 type="button"
@@ -315,12 +315,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <div
-        className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 transition-all duration-300 ${
+        className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:h-screen lg:max-h-screen lg:flex-col transition-all duration-300 ${
           isCollapsed ? 'lg:w-16' : 'lg:w-80'
         }`}
       >
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex min-h-0 flex-1 flex-col bg-white border-r border-gray-200 shadow-sm">
+          <div className="flex shrink-0 items-center justify-between border-b border-gray-200 p-4">
             <h2
               className={`text-xl font-bold text-[#0E1A3D] whitespace-nowrap transition-opacity duration-200 ${
                 isCollapsed ? 'sr-only' : 'opacity-100'

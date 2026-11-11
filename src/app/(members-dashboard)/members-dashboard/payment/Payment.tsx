@@ -10,6 +10,7 @@ import CancelPaymentDialog from './CancelPaymentDialog';
 import SuccessPaymentDialog from './SuccessPaymentDialog';
 import type { PendingPayment } from './types';
 import { inferPaymentAccessType } from '@/utils/eventCurrency';
+import type { FlutterwaveConfig } from 'flutterwave-react-v3/dist/types';
 import {
   buildPendingPaymentInitiateRequest,
   confirmPaymentWithId,
@@ -17,7 +18,13 @@ import {
   getPaymentCallbackUrl,
   getPaymentIdFromReturnSearchParams,
   getPaymentLinkFromInitiateResponse,
+  inferPendingPaymentKindFromItem,
+  postInitiatePay,
+  resolvePendingPaymentAmount,
+  tryMembershipInitiatePay,
 } from '@/utils/paymentFlow';
+import MembershipFlutterwaveLauncher from './MembershipFlutterwaveLauncher';
+import { buildMembershipFlutterwaveConfig } from './membershipFlutterwave';
 
 const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -35,6 +42,8 @@ const PaymentPage: React.FC = () => {
   } | null>(null);
 
   const confirmedReturnRef = useRef<string | null>(null);
+  const [flutterwaveConfig, setFlutterwaveConfig] = useState<FlutterwaveConfig | null>(null);
+  const [flutterwavePaymentId, setFlutterwavePaymentId] = useState<string | null>(null);
 
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -163,28 +172,56 @@ const PaymentPage: React.FC = () => {
         ? await enrichPendingPaymentForInitiate(payment, bearerToken)
         : payment;
 
+      const callbackUrl = getPaymentCallbackUrl();
       const { path, body } = buildPendingPaymentInitiateRequest(
         enrichedPayment,
         selectedPlan,
-        getPaymentCallbackUrl()
+        callbackUrl
       );
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/${path}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${bearerToken}`,
-          },
-          body: JSON.stringify(body),
+      const kind = inferPendingPaymentKindFromItem(enrichedPayment);
+      let response: Response;
+      let result: Record<string, unknown>;
+
+      if (kind === 'membership') {
+        const membershipAttempt = await tryMembershipInitiatePay(
+          body,
+          bearerToken
+        );
+
+        if (!membershipAttempt) {
+          const amount = resolvePendingPaymentAmount(enrichedPayment, selectedPlan);
+          const fwConfig = buildMembershipFlutterwaveConfig(
+            enrichedPayment,
+            amount,
+            session
+          );
+
+          if (!fwConfig) {
+            throw new Error(
+              'Membership checkout is not available on the API yet. Ask your backend team to enable membership/initiate_pay/, or configure NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY for the legacy membership gateway.'
+            );
+          }
+
+          setFlutterwavePaymentId(enrichedPayment.payment_id);
+          setFlutterwaveConfig(fwConfig);
+          return;
         }
-      );
 
-      const result = await response.json();
+        response = membershipAttempt.response;
+        result = membershipAttempt.result;
+      } else {
+        const posted = await postInitiatePay(path, body, bearerToken);
+        response = posted.response;
+        result = posted.result;
+      }
 
       if (!response.ok || result.status !== 'success') {
-        throw new Error(result?.message || 'Payment initiation failed');
+        const message =
+          typeof result.message === 'string'
+            ? result.message
+            : 'Payment initiation failed';
+        throw new Error(message);
       }
 
       const paymentLink = getPaymentLinkFromInitiateResponse(result);
@@ -199,6 +236,43 @@ const PaymentPage: React.FC = () => {
         error instanceof Error ? error.message : 'Payment initiation failed'
       );
       setProcessingStates(prev => ({ ...prev, [payment.payment_id]: false }));
+    }
+  };
+
+  const clearFlutterwaveCheckout = () => {
+    setFlutterwaveConfig(null);
+    setFlutterwavePaymentId(null);
+  };
+
+  const handleFlutterwaveSuccess = async () => {
+    const paymentId = flutterwavePaymentId;
+    clearFlutterwaveCheckout();
+
+    if (!paymentId || !bearerToken) return;
+
+    try {
+      const result = await confirmPaymentWithId(paymentId, bearerToken);
+      if (result.status === 'success') {
+        showToast.success('Payment confirmed successfully');
+        await fetchPendingPayments();
+      } else {
+        showToast.error(result.message || 'Payment confirmation failed');
+      }
+    } catch (error) {
+      console.error('Membership Flutterwave confirm error:', error);
+      showToast.error('Payment confirmation failed');
+    } finally {
+      if (paymentId) {
+        setProcessingStates((prev) => ({ ...prev, [paymentId]: false }));
+      }
+    }
+  };
+
+  const handleFlutterwaveClose = () => {
+    const paymentId = flutterwavePaymentId;
+    clearFlutterwaveCheckout();
+    if (paymentId) {
+      setProcessingStates((prev) => ({ ...prev, [paymentId]: false }));
     }
   };
 
@@ -330,6 +404,12 @@ const PaymentPage: React.FC = () => {
         title={successInfo?.title || ''}
         formattedAmount={successInfo?.formattedAmount || ''}
         accessType={successInfo?.accessType}
+      />
+
+      <MembershipFlutterwaveLauncher
+        config={flutterwaveConfig}
+        onSuccess={handleFlutterwaveSuccess}
+        onClose={handleFlutterwaveClose}
       />
     </div>
   );

@@ -31,7 +31,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # env files (can opt-in for commiting if needed)
-.env*
+.env
 ADMIN_DASHBOARD_IMPROVEMENT_PLAN
 PERFORMANCE_OPTIMIZATION
 .txt
@@ -43,3 +43,4 @@ PERFORMANCE_OPTIMIZATION
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+branch_structure.json
